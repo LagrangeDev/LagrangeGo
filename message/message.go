@@ -153,6 +153,19 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			}
 		}
 
+		if elem.VideoFile != nil {
+			return []IMessageElement{
+				&ShortVideoElement{
+					Name:      elem.VideoFile.FileName,
+					Uuid:      []byte(elem.VideoFile.FileUuid),
+					Size:      elem.VideoFile.FileSize,
+					ThumbSize: elem.VideoFile.ThumbFileSize,
+					Md5:       elem.VideoFile.FileMd5,
+					ThumbMd5:  elem.VideoFile.ThumbFileMd5,
+				},
+			}
+		}
+
 		if elem.CustomFace != nil {
 			if len(elem.CustomFace.Md5) == 0 {
 				continue
@@ -220,6 +233,20 @@ func (msg *GroupMessage) ToString() (res string) {
 	}
 	res = strBuilder.String()
 	return
+}
+func ToReadableString(m []IMessageElement) string {
+	sb := new(strings.Builder)
+	for _, elem := range m {
+		switch e := elem.(type) {
+		case *TextElement:
+			sb.WriteString(e.Content)
+		case *GroupImageElement, *FriendImageElement:
+			sb.WriteString("[图片]")
+		case *AtElement:
+			sb.WriteString(e.Display)
+		}
+	}
+	return sb.String()
 }
 
 func BuildMessageElements() {

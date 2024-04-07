@@ -21,6 +21,25 @@ type (
 		Elements []IMessageElement
 	}
 
+	VoiceElement struct {
+		Name string
+		Md5  []byte
+		Size int32
+		Url  string
+
+		// --- sending ---
+		Data []byte
+	}
+	ShortVideoElement struct {
+		Name      string
+		Uuid      []byte
+		Size      int32
+		ThumbSize int32
+		Md5       []byte
+		ThumbMd5  []byte
+		Url       string
+	}
+
 	AtType int
 )
 
@@ -64,4 +83,12 @@ func (e *FriendImageElement) Type() ElementType {
 
 func (e *ReplyElement) Type() ElementType {
 	return Reply
+}
+
+func (e *VoiceElement) Type() ElementType {
+	return Voice
+}
+
+func (e *ShortVideoElement) Type() ElementType {
+	return Video
 }
