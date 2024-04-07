@@ -108,11 +108,46 @@ func ParseMessageElements(msg *message.PushMsg) []IMessageElement {
 		}
 
 		if elem.CustomFace != nil {
+			if len(elem.CustomFace.Md5) == 0 {
+				continue
+			}
 
+			var url string
+			if strings.Contains(elem.CustomFace.OrigUrl, "rkey") {
+				url = "https://multimedia.nt.qq.com.cn" + elem.CustomFace.OrigUrl
+			} else {
+				url = "http://gchat.qpic.cn" + elem.CustomFace.OrigUrl
+			}
+
+			res = append(res, &GroupImageElement{
+				FileId:  int64(elem.CustomFace.FileId),
+				ImageId: elem.CustomFace.FilePath,
+				Size:    elem.CustomFace.Size,
+				Width:   elem.CustomFace.Width,
+				Height:  elem.CustomFace.Height,
+				Url:     url,
+				Md5:     elem.CustomFace.Md5,
+			})
 		}
 
 		if elem.NotOnlineImage != nil {
+			if len(elem.NotOnlineImage.PicMd5) == 0 {
+				continue
+			}
 
+			var url string
+			if strings.Contains(elem.NotOnlineImage.OrigUrl, "rkey") {
+				url = "https://multimedia.nt.qq.com.cn" + elem.NotOnlineImage.OrigUrl
+			} else {
+				url = "http://gchat.qpic.cn" + elem.NotOnlineImage.OrigUrl
+			}
+
+			res = append(res, &FriendImageElement{
+				ImageId: elem.NotOnlineImage.FilePath,
+				Size:    elem.NotOnlineImage.FileLen,
+				Url:     url,
+				Md5:     elem.NotOnlineImage.PicMd5,
+			})
 		}
 	}
 

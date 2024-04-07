@@ -45,3 +45,11 @@ func (e *TextElement) Type() ElementType {
 func (e *AtElement) Type() ElementType {
 	return At
 }
+
+func (e *GroupImageElement) Type() ElementType {
+	return Image
+}
+
+func (e *FriendImageElement) Type() ElementType {
+	return Image
+}
