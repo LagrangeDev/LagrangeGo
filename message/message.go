@@ -56,8 +56,7 @@ type (
 		Sender         *Sender
 		Time           int32
 		Elements       []IMessageElement
-		OriginalObject *message.Message
-		// OriginalElements []*msg.Elem
+		OriginalObject *message.PushMsgBody
 	}
 
 	SendingMessage struct {
@@ -84,7 +83,36 @@ type (
 	ElementType int
 )
 
-func ParseMessageElements(msg *message.PushMsg) []IMessageElement {
+func ParsePrivateMessage(msg *message.PushMsg) PrivateMessage {
+	return PrivateMessage{
+
+		Elements: parseMessageElements(msg),
+	}
+}
+
+func ParseGroupMessage(msg *message.PushMsg) GroupMessage {
+	return GroupMessage{
+		GroupCode: int64(msg.Message.ResponseHead.Grp.GroupUin),
+		GroupName: msg.Message.ResponseHead.Grp.GroupName,
+		Sender: &Sender{
+			Uin:      int64(msg.Message.ResponseHead.FromUin),
+			Nickname: msg.Message.ResponseHead.Grp.MemberName,
+			CardName: msg.Message.ResponseHead.Grp.MemberName,
+			IsFriend: false,
+		},
+		Time:           int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
+		Elements:       parseMessageElements(msg),
+		OriginalObject: msg.Message,
+	}
+}
+
+func ParseTempMessage(msg *message.PushMsg) TempMessage {
+	return TempMessage{
+		Elements: parseMessageElements(msg),
+	}
+}
+
+func parseMessageElements(msg *message.PushMsg) []IMessageElement {
 	var res []IMessageElement
 
 	for _, elem := range msg.Message.Body.RichText.Elems {

@@ -21,11 +21,11 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 
 	switch msg.Message.ContentHead.Type {
 	case 166: // private msg
-		return msgConverter.ParseMessageElements(&msg), nil
+		return msgConverter.ParsePrivateMessage(&msg), nil
 	case 82: // group msg
-		return msgConverter.ParseMessageElements(&msg), nil
+		return msgConverter.ParseGroupMessage(&msg), nil
 	case 141: // temp msg
-		return msgConverter.ParseMessageElements(&msg), nil
+		return msgConverter.ParseTempMessage(&msg), nil
 	}
 
 	return nil, nil
