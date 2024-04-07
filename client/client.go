@@ -388,12 +388,15 @@ func (c *QQClient) OnMessage(msgLen int) {
 			resultStore.AddResult(packet.Seq, packet)
 		}
 	} else { // server pushed
-		networkLogger.Debugf("Server Push(%d) <- %s,extra %s", packet.RetCode, packet.Cmd, packet.Extra)
-		_, err := listeners[packet.Cmd](c, packet)
-		if err != nil {
-			return
+		if _, ok := listeners[packet.Cmd]; ok {
+			networkLogger.Debugf("Server Push(%d) <- %s, extra: %s", packet.RetCode, packet.Cmd, packet.Extra)
+			_, err := listeners[packet.Cmd](c, packet)
+			if err != nil {
+				return
+			}
+		} else {
+			networkLogger.Warningf("unsupported command: %s", packet.Cmd)
 		}
-
 	}
 }
 
