@@ -50,16 +50,17 @@ func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo,
 		},
 	}
 
-	if sig.Cookies == "" {
+	if sig.Cookies != "" {
 		body[1].(proto.DynamicMessage)[5] = proto.DynamicMessage{1: sig.Cookies}
 	}
 	if all(sig.CaptchaInfo[:3]) {
 		loginLogger.Debugln("login with captcha info")
 		body[2].(proto.DynamicMessage)[2] = buildNtloginCaptchaSubmit(sig.CaptchaInfo[0], sig.CaptchaInfo[1], sig.CaptchaInfo[2])
 	}
+
 	return proto.DynamicMessage{
 		1: sig.KeySig,
-		2: crypto.AesGCMEncrypt(body.Encode(), sig.ExchangeKey),
+		3: crypto.AesGCMEncrypt(body.Encode(), sig.ExchangeKey),
 		4: 1,
 	}.Encode()
 }
