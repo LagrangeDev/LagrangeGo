@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"math"
 
-	"github.com/Redmomn/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 type Builder struct {

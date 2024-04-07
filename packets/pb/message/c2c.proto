@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/message";
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/message";
 
 message C2C {
   optional uint32 Uin = 1;

@@ -6,15 +6,15 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
 
-	"github.com/Redmomn/LagrangeGo/packets/pb/login"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
 
-	"github.com/Redmomn/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
-	"github.com/Redmomn/LagrangeGo/info"
-	"github.com/Redmomn/LagrangeGo/utils"
-	"github.com/Redmomn/LagrangeGo/utils/proto"
+	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 var loginLogger = utils.GetLogger("login")

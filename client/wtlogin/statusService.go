@@ -3,10 +3,10 @@ package wtlogin
 import (
 	"strings"
 
-	"github.com/Redmomn/LagrangeGo/packets/pb/system"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/system"
 
-	"github.com/Redmomn/LagrangeGo/info"
-	"github.com/Redmomn/LagrangeGo/utils/proto"
+	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 // BuildRegisterRequest trpc.qq_new_tech.status_svc.StatusService.Register

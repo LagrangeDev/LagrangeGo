@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/action";
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/action";
 
 import "pb/message/message.proto";
 

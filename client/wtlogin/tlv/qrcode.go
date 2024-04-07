@@ -1,8 +1,8 @@
 package tlv
 
 import (
-	"github.com/Redmomn/LagrangeGo/utils"
-	"github.com/Redmomn/LagrangeGo/utils/proto"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 func T11(unusualSign []byte) []byte {

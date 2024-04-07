@@ -7,18 +7,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin/qrcodeState"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/qrcodeState"
 
-	binary2 "github.com/Redmomn/LagrangeGo/utils/binary"
+	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin/tlv"
-	"github.com/Redmomn/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/tlv"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
 
-	"github.com/Redmomn/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/info"
 )
 
 const Server = "msfwifi.3g.qq.com:8080"

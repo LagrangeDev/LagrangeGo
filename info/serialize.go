@@ -5,9 +5,9 @@ import (
 	"encoding/gob"
 	"encoding/json"
 
-	"github.com/Redmomn/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 
-	"github.com/Redmomn/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 func JsonLoad(data []byte, v interface{}) {

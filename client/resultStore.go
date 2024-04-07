@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Redmomn/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
 )
 
 var resultLogger = utils.GetLogger("resultstore")

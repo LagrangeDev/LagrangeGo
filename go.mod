@@ -1,4 +1,4 @@
-module github.com/Redmomn/LagrangeGo
+module github.com/LagrangeDev/LagrangeGo
 
 go 1.22
 

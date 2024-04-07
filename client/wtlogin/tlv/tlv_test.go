@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Redmomn/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/info"
 )
 
 func TestTlv(t *testing.T) {
 	data := []byte{0x01, 0x02, 0x03, 0x04}
 	appinfo := info.AppList["linux"]
-	deviceinfo := info.DeviceInfo{
+	deviceinfo := &info.DeviceInfo{
 		Guid:          "cfcd208495d565ef66e7dff9f98764da",
 		DeviceName:    "Lagrange-DCFCD07E",
 		SystemKernel:  "Windows 10.0.22631",

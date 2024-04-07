@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/Redmomn/LagrangeGo/packets/pb";
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb";
 
 message Tlv543 {
   Tlv543Layer1 Layer1 = 9;

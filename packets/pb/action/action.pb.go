@@ -4,7 +4,7 @@
 package action
 
 import (
-	message "github.com/Redmomn/LagrangeGo/packets/pb/message"
+	message "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	proto "github.com/RomiChan/protobuf/proto"
 )
 

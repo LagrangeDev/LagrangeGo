@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/Redmomn/LagrangeGo/client/wtlogin"
-	"github.com/Redmomn/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 func TestSig(t *testing.T) {

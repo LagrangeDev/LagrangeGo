@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Redmomn/LagrangeGo/utils"
-	"github.com/Redmomn/LagrangeGo/utils/crypto/ecdh"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
 
-	binary2 "github.com/Redmomn/LagrangeGo/utils/binary"
+	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
-	qqtea "github.com/Redmomn/LagrangeGo/utils/crypto"
+	qqtea "github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 type SSOPacket struct {

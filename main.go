@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/Redmomn/LagrangeGo/client"
-	"github.com/Redmomn/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/client"
+	"github.com/LagrangeDev/LagrangeGo/info"
 )
 
 func main() {

@@ -3,10 +3,10 @@ package tlv
 import (
 	"strconv"
 
-	"github.com/Redmomn/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 
-	"github.com/Redmomn/LagrangeGo/info"
-	qqtea "github.com/Redmomn/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/info"
+	qqtea "github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5

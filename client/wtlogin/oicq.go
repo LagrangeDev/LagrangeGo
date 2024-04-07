@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Redmomn/LagrangeGo/utils/crypto/ecdh"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
 
-	"github.com/Redmomn/LagrangeGo/packets/pb"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb"
 
-	"github.com/Redmomn/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 
-	"github.com/Redmomn/LagrangeGo/utils/proto"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 
-	"github.com/Redmomn/LagrangeGo/info"
-	"github.com/Redmomn/LagrangeGo/utils"
-	qqtea "github.com/Redmomn/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	qqtea "github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 var loginLogger = utils.GetLogger("login")

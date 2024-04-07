@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/system";
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/system";
 
 message NTDeviceSign {
   string Trace = 15;

@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/Redmomn/LagrangeGo/utils/platform"
+	"github.com/LagrangeDev/LagrangeGo/utils/platform"
 
-	"github.com/Redmomn/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 type DeviceInfo struct {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Redmomn/LagrangeGo/utils"
-	binary2 "github.com/Redmomn/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 func TestQQClient_FecthQrcode(t *testing.T) {

@@ -3,14 +3,14 @@ package wtlogin
 import (
 	"encoding/hex"
 
-	"github.com/Redmomn/LagrangeGo/packets/pb/login"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
 
-	"github.com/Redmomn/LagrangeGo/info"
-	"github.com/Redmomn/LagrangeGo/utils"
-	"github.com/Redmomn/LagrangeGo/utils/binary"
-	"github.com/Redmomn/LagrangeGo/utils/crypto"
-	"github.com/Redmomn/LagrangeGo/utils/crypto/ecdh"
-	"github.com/Redmomn/LagrangeGo/utils/proto"
+	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 var encKey, _ = hex.DecodeString("e2733bf403149913cbf80c7a95168bd4ca6935ee53cd39764beebe2e007e3aee")
