@@ -62,6 +62,11 @@ type QQClient struct {
 }
 
 func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
+	if len(c.sig.D2) != 0 { // prefer session login
+		loginLogger.Infoln("Session found, try to login with session")
+		return c.Register()
+	}
+
 	if len(c.sig.TempPwd) != 0 {
 		c.KeyExchange()
 
