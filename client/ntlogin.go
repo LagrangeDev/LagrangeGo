@@ -78,7 +78,7 @@ func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State,
 		return -1, errors.New(fmt.Sprintf("proto decode failed: %s", err))
 	}
 	var body login.SsoNTLoginResponse
-	err = proto.Unmarshal(base.Body.GetValue(), &body)
+	err = proto.Unmarshal(base.Body, &body)
 	if err != nil {
 		return -1, errors.New(fmt.Sprintf("proto decode failed: %s", err))
 	}

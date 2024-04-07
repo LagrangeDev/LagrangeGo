@@ -12,7 +12,7 @@ message SsoNTLoginEncryptedData {
 
 message SsoNTLoginBase {
   optional SsoNTLoginHeader Header = 1;
-  optional google.protobuf.Any Body = 2;
+  optional bytes Body = 2;
 }
 
 message SsoNTLoginHeader {

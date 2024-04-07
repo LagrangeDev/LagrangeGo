@@ -5,7 +5,6 @@ package login
 
 import (
 	proto "github.com/RomiChan/protobuf/proto"
-	anypb "google.golang.org/protobuf/types/known/anypb"
 )
 
 type SsoNTLoginEncryptedData struct {
@@ -16,7 +15,7 @@ type SsoNTLoginEncryptedData struct {
 
 type SsoNTLoginBase struct {
 	Header *SsoNTLoginHeader `protobuf:"bytes,1,opt"`
-	Body   *anypb.Any        `protobuf:"bytes,2,opt"`
+	Body   []byte            `protobuf:"bytes,2,opt"`
 	_      [0]func()
 }
 
