@@ -13,6 +13,14 @@ type (
 		SubType AtType
 	}
 
+	ReplyElement struct {
+		ReplySeq int32
+		Sender   int64
+		GroupID  int64 // 私聊回复群聊时
+		Time     int32
+		Elements []IMessageElement
+	}
+
 	AtType int
 )
 
@@ -52,4 +60,8 @@ func (e *GroupImageElement) Type() ElementType {
 
 func (e *FriendImageElement) Type() ElementType {
 	return Image
+}
+
+func (e *ReplyElement) Type() ElementType {
+	return Reply
 }

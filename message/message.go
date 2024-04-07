@@ -3,6 +3,7 @@ package message
 import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"strconv"
 	"strings"
 )
 
@@ -85,8 +86,14 @@ type (
 
 func ParsePrivateMessage(msg *message.PushMsg) PrivateMessage {
 	return PrivateMessage{
-
-		Elements: parseMessageElements(msg),
+		Self:   int64(msg.Message.ResponseHead.ToUin),
+		Target: int64(msg.Message.ResponseHead.FromUin),
+		Sender: &Sender{
+			Uin:      int64(msg.Message.ResponseHead.FromUin),
+			IsFriend: true,
+		},
+		Time:     int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
+		Elements: parseMessageElements(msg.Message.Body.RichText.Elems),
 	}
 }
 
@@ -101,21 +108,32 @@ func ParseGroupMessage(msg *message.PushMsg) GroupMessage {
 			IsFriend: false,
 		},
 		Time:           int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
-		Elements:       parseMessageElements(msg),
+		Elements:       parseMessageElements(msg.Message.Body.RichText.Elems),
 		OriginalObject: msg.Message,
 	}
 }
 
 func ParseTempMessage(msg *message.PushMsg) TempMessage {
 	return TempMessage{
-		Elements: parseMessageElements(msg),
+		Elements: parseMessageElements(msg.Message.Body.RichText.Elems),
 	}
 }
 
-func parseMessageElements(msg *message.PushMsg) []IMessageElement {
+func parseMessageElements(msg []*message.Elem) []IMessageElement {
 	var res []IMessageElement
 
-	for _, elem := range msg.Message.Body.RichText.Elems {
+	for _, elem := range msg {
+		if elem.SrcMsg != nil && len(elem.SrcMsg.OrigSeqs) != 0 {
+			r := &ReplyElement{
+				ReplySeq: int32(elem.SrcMsg.OrigSeqs[0]),
+				Time:     elem.SrcMsg.Time.Unwrap(),
+				Sender:   int64(elem.SrcMsg.SenderUin),
+				GroupID:  int64(elem.SrcMsg.ToUin.Unwrap()),
+				Elements: parseMessageElements(elem.SrcMsg.Elems),
+			}
+			res = append(res, r)
+		}
+
 		if elem.Text != nil {
 			switch {
 			case len(elem.Text.Attr6Buf) > 0:
@@ -180,6 +198,28 @@ func parseMessageElements(msg *message.PushMsg) []IMessageElement {
 	}
 
 	return res
+}
+
+func (msg *GroupMessage) ToString() (res string) {
+	var strBuilder strings.Builder
+	for _, elem := range msg.Elements {
+		switch e := elem.(type) {
+		case *TextElement:
+			strBuilder.WriteString(e.Content)
+		case *GroupImageElement:
+			strBuilder.WriteString("[Image: ")
+			strBuilder.WriteString(e.ImageId)
+			strBuilder.WriteString("]")
+		case *AtElement:
+			strBuilder.WriteString(e.Display)
+		case *ReplyElement:
+			strBuilder.WriteString("[Reply: ")
+			strBuilder.WriteString(strconv.FormatInt(int64(e.ReplySeq), 10))
+			strBuilder.WriteString("]")
+		}
+	}
+	res = strBuilder.String()
+	return
 }
 
 func BuildMessageElements() {
