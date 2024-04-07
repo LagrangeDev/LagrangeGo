@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/login";
+
+import "google/protobuf/any.proto";
+
+message SsoNTLoginEncryptedData {
+  optional bytes Sign = 1;
+  optional bytes GcmCalc = 3;
+  int32 Type = 4;
+}
+
+message SsoNTLoginBase {
+  optional SsoNTLoginHeader Header = 1;
+  optional google.protobuf.Any Body = 2;
+}
+
+message SsoNTLoginHeader {
+  optional SsoNTLoginUin Uin = 1;
+  optional SsoNTLoginSystem System = 2;
+  optional SsoNTLoginVersion Version = 3;
+  optional SsoNTLoginError Error = 4;
+  optional SsoNTLoginCookie Cookie = 5;
+}
+
+message SsoNTLoginResponse {
+    optional SsoNTLoginCredentials Credentials = 1;
+    optional SsoNTLoginCaptchaUrl Captcha = 2;
+    optional SsoNTLoginUnusual Unusual = 3;
+    optional SsoNTLoginUid Uid = 4;
+}
+
+message SsoNTLoginEasyLogin {
+  optional bytes TempPassword = 1;
+  optional SsoNTLoginCaptchaSubmit Captcha = 2;
+}
+
+message SsoNTLoginCaptchaSubmit {
+  string Ticket = 1;
+  string RandStr = 2;
+  string Aid = 3;
+}
+
+message SsoNTLoginCaptchaUrl {
+  string Url = 3;
+}
+
+message SsoNTLoginCookie {
+  optional string Cookie = 1;
+}
+
+message SsoNTLoginCredentials {
+  bytes TempPassword = 3;
+  bytes Tgt = 4;
+  bytes D2 = 5;
+  bytes D2Key = 6;
+}
+
+message SsoNTLoginError {
+  uint32 ErrorCode = 1;
+  string Tag = 2;
+  string Message = 3;
+  optional string NewDeviceVerifyUrl = 5;
+}
+
+message SsoNTLoginSystem {
+  optional string OS = 1;
+  optional string DeviceName = 2;
+  int32 Type = 3;
+  optional bytes Guid = 4;
+}
+
+message SsoNTLoginUid {
+  string Uid = 2;
+}
+
+message SsoNTLoginUin {
+  optional string Uin = 1;
+}
+
+message SsoNTLoginUnusual {
+  optional bytes Sig = 2;
+}
+
+message SsoNTLoginVersion {
+  optional string KernelVersion = 1;
+  int32 AppId = 2;
+  optional string PackageName = 3;
+}

@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/message";
+
+import "pb/message/message.proto";
+
+message LongMsgResult {
+  LongMsgAction Action = 2;
+}
+
+message LongMsgAction {
+  string ActionCommand = 1;
+  LongMsgContent ActionData = 2;
+}
+
+message LongMsgContent {
+  repeated PushMsgBody MsgBody = 1;
+}
+
+// trpc.group.long_msg_interface.MsgService.SsoRecvLongMsg Request
+message RecvLongMsgReq {
+    optional RecvLongMsgInfo Info = 1;
+    optional LongMsgSettings Settings = 15;
+}
+
+message RecvLongMsgInfo {
+  optional LongMsgUid Uid = 1;
+  optional string ResId = 2;
+  bool Acquire = 3;
+}
+
+message LongMsgUid {
+  optional string Uid = 2;
+}
+
+message LongMsgSettings {
+  uint32 Field1 = 1; // 4
+  uint32 Field2 = 2; // 1
+  uint32 Field3 = 3; // 7
+  uint32 Field4 = 4; // 0
+}
+
+message RecvLongMsgResp {
+  RecvLongMsgResult Result = 1;
+  LongMsgSettings Settings = 15;
+}
+
+message RecvLongMsgResult {
+  string ResId = 3;
+  bytes Payload = 4;
+}
+
+message SendLongMsgReq {
+  SendLongMsgInfo Info = 2;
+  LongMsgSettings Settings = 15;
+}
+
+message SendLongMsgInfo {
+  uint32 Type = 1; // Group: 3, Friend: 1
+  optional LongMsgUid Uid = 2;
+  optional uint32 GroupUin = 3;
+  optional bytes Payload = 4;
+}
+
+message SendLongMsgResp {
+  SendLongMsgResult Result = 2;
+  LongMsgSettings Settings = 15;
+}
+
+message SendLongMsgResult {
+  string ResId = 3;
+}
+
+message SsoGetGroupMsg {
+  SsoGetGroupMsgInfo Info = 1;
+  bool Direction = 2;
+}
+
+message SsoGetGroupMsgInfo {
+  uint32 GroupUin = 1;
+  uint32 StartSequence = 2;
+  uint32 EndSequence = 3;
+}
+
+message SsoGetGroupMsgResponse {
+  SsoGetGroupMsgResponseBody Body = 3;
+}
+
+message SsoGetGroupMsgResponseBody {
+  uint32 GroupUin = 3;
+  uint32 StartSequence = 4;
+  uint32 EndSequence = 5;
+  repeated PushMsgBody Messages = 6;
+}
+
+message SsoGetRoamMsg {
+  optional string FriendUid = 1;
+  uint32 Time = 2;
+  uint32 Random = 3; // 0
+  uint32 Count = 4;
+  bool Direction = 5; // true
+}
+
+message SsoGetRoamMsgResponse {
+  string FriendUid = 3;
+  uint32 Timestamp = 5;
+  uint32 Random = 6;
+  repeated PushMsgBody Messages = 7;
+}

@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/message";
+
+message FriendRecall {
+  FriendRecallInfo Info = 1;
+  uint32 InstId = 2;
+  uint32 AppId = 3;
+  uint32 LongMessageFlag = 4;
+  bytes Reserved = 5;
+}
+
+message FriendRecallInfo {
+  string FromUid = 1;
+  string ToUid = 2;
+  uint32 Sequence = 3;
+  uint64 NewId = 4;
+  uint32 Time = 5;
+  uint32 Random = 6;
+  uint32 PkgNum = 7;
+  uint32 PkgIndex = 8;
+  uint32 DivSeq = 9;
+}
+
+message FriendRequest {
+  optional FriendRequestInfo Info = 1;
+}
+
+message FriendRequestInfo {
+  string TargetUid = 1;
+  string SourceUid = 2;
+  string Message = 10;
+  string Source = 11;
+}
+
+message GroupAdmin {
+  uint32 GroupUin = 1;
+  uint32 Flag = 2;
+  bool IsPromote = 3;
+  GroupAdminBody Body = 4;
+}
+
+message GroupAdminBody {
+  optional GroupAdminExtra ExtraDisable = 1;
+  optional GroupAdminExtra ExtraEnable = 2;
+}
+
+message GroupAdminExtra {
+  string AdminUid = 1;
+  bool IsPromote = 2;
+}
+
+message GroupChange {
+  uint32 GroupUin = 1;
+  uint32 Flag = 2;
+  string MemberUid = 3;
+  uint32 DecreaseType = 4;
+  optional string OperatorUid = 5;
+  uint32 IncreaseType = 6;
+  optional bytes Field7 = 7;
+}
+
+message GroupInvitation {
+  int32 Cmd = 1;
+  InvitationInfo Info = 2;
+}
+
+message InvitationInfo {
+  InvitationInner Inner = 1;
+}
+
+message InvitationInner {
+  uint32 GroupUin = 1;
+  uint32 Field2 = 2;
+  uint32 Field3 = 3;
+  uint32 Field4 = 4;
+  string TargetUid = 5;
+  string InvitorUid = 6;
+  uint32 Field7 = 7;
+  uint32 Field9 = 9;
+  bytes Field10 = 10;
+  uint32 Field11 = 11;
+  string Field12 = 12;
+}
+
+message GroupInvite {
+  uint32 GroupInvite = 1;
+  uint32 Field2 = 2; // 1
+  uint32 Field3 = 3; // 4
+  uint32 Field4 = 4; // 0
+  string InvitorUid = 5;
+  bytes Hashes = 6;
+}
+
+message GroupJoin {
+  uint32 GroupUin = 1;
+  uint32 Field2 = 2;
+  string TargetUid = 3;
+  uint32 Field4 = 4;
+  uint32 Field6 = 6;
+  string Field7 = 7;
+  uint32 Field8 = 8;
+  bytes Field9 = 9;
+}
+
+message GroupMute {
+  uint32 GroupUin = 1;
+  uint32 SubType = 2;
+  uint32 Field3 = 3;
+  optional string OperatorUid = 4;
+  GroupMuteData Data = 5;
+}
+
+message GroupMuteData {
+  uint32 Timestamp = 1;
+  uint32 Type = 2;
+  GroupMuteState State = 3;
+}
+
+message GroupMuteState {
+  optional string TargetUid = 1;
+  uint32 Duration = 2; // uint.MaxValue = Mute else Lift
+}
+
+message GroupRecall {
+  optional string OperatorUid = 1;
+  repeated RecallMessage RecallMessages = 3;
+  bytes UserDef = 5;
+  int32 GroupType = 6;
+  int32 OpType = 7;
+}
+
+message RecallMessage {
+  uint64 Sequence = 1;
+  uint32 Time = 2;
+  uint32 Random = 3;
+  uint32 Type = 4;
+  uint32 Flag = 5;
+  string AuthorUid = 6;
+}
+
+message NotifyMessageBody {
+  uint32 Type = 1;
+  uint32 GroupUin = 4;
+  GroupRecall Recall = 11;
+}

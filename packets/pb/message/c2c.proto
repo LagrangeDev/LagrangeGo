@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "github.com/Redmomn/LagrangeGo/packets/pb/message";
+
+message C2C {
+  optional uint32 Uin = 1;
+  optional string Uid = 2;
+  optional uint32 Field3 = 3;
+  optional uint32 Sig = 4;
+  optional uint32 ReceiverUin = 5;
+  optional string ReceiverUid = 6;
+}

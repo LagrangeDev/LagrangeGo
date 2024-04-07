@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "github.com/Redmomn/LagrangeGo/packets/pb";
+
+message Tlv543 {
+  Tlv543Layer1 Layer1 = 9;
+}
+
+message Tlv543Layer1 {
+  Tlv543Layer2 Layer2 = 11;
+}
+
+message Tlv543Layer2 {
+  string Uid = 1;
+}
