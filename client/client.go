@@ -388,9 +388,12 @@ func (c *QQClient) OnMessage(msgLen int) {
 			resultStore.AddResult(packet.Seq, packet)
 		}
 	} else { // server pushed
-		networkLogger.Debugf("%d(%d) <- %s,extra %s", packet.Seq, packet.RetCode, packet.Cmd, packet.Extra)
-		// 扔到chan里面算了。还是丢掉吧
-		// c.pushStore <- packet
+		networkLogger.Debugf("Server Push(%d) <- %s,extra %s", packet.RetCode, packet.Cmd, packet.Extra)
+		_, err := listeners[packet.Cmd](c, packet)
+		if err != nil {
+			return
+		}
+
 	}
 }
 
