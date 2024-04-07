@@ -2,7 +2,6 @@ package wtlogin
 
 import (
 	"encoding/hex"
-
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
@@ -47,7 +46,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 func ParseKeyExchangeResponse(response []byte, sig *info.SigInfo) {
 	keyExangeLogger.Debugf("keyexchange proto data: %x", response)
 	var p login.SsoKeyExchangeResponse
-	err := proto.Unmarshal(response, p)
+	err := proto.Unmarshal(response, &p)
 	if err != nil {
 		keyExangeLogger.Error(err)
 	}
