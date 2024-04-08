@@ -26,6 +26,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 		return msgConverter.ParseGroupMessage(&msg), nil
 	case 141: // temp msg
 		return msgConverter.ParseTempMessage(&msg), nil
+	default:
+		networkLogger.Warningf("Unsupported message type: %v", msg.Message.ContentHead.Type)
 	}
 
 	return nil, nil
