@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/message"
+
 	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
 
 	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/qrcodeState"
@@ -63,6 +65,10 @@ type QQClient struct {
 	t16a []byte
 
 	tcp *TCPClient
+
+	GroupMessageEvent   EventHandle[*message.GroupMessage]
+	PrivateMessageEvent EventHandle[*message.PrivateMessage]
+	TempMessageEvent    EventHandle[*message.TempMessage]
 }
 
 func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
@@ -394,10 +400,11 @@ func (c *QQClient) OnMessage(msgLen int) {
 	} else { // server pushed
 		if _, ok := listeners[packet.Cmd]; ok {
 			networkLogger.Debugf("Server Push(%d) <- %s, extra: %s", packet.RetCode, packet.Cmd, packet.Extra)
-			_, err := listeners[packet.Cmd](c, packet)
+			msg, err := listeners[packet.Cmd](c, packet)
 			if err != nil {
 				return
 			}
+			OnEvent(c, msg)
 		} else {
 			networkLogger.Warningf("unsupported command: %s", packet.Cmd)
 		}
