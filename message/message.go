@@ -1,10 +1,11 @@
 package message
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"strconv"
 	"strings"
+
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 type IMessage interface {
@@ -84,8 +85,8 @@ type (
 	ElementType int
 )
 
-func ParsePrivateMessage(msg *message.PushMsg) PrivateMessage {
-	return PrivateMessage{
+func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
+	return &PrivateMessage{
 		Self:   int64(msg.Message.ResponseHead.ToUin),
 		Target: int64(msg.Message.ResponseHead.FromUin),
 		Sender: &Sender{
@@ -97,8 +98,8 @@ func ParsePrivateMessage(msg *message.PushMsg) PrivateMessage {
 	}
 }
 
-func ParseGroupMessage(msg *message.PushMsg) GroupMessage {
-	return GroupMessage{
+func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
+	return &GroupMessage{
 		GroupCode: int64(msg.Message.ResponseHead.Grp.GroupUin),
 		GroupName: msg.Message.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
@@ -113,8 +114,8 @@ func ParseGroupMessage(msg *message.PushMsg) GroupMessage {
 	}
 }
 
-func ParseTempMessage(msg *message.PushMsg) TempMessage {
-	return TempMessage{
+func ParseTempMessage(msg *message.PushMsg) *TempMessage {
+	return &TempMessage{
 		Elements: parseMessageElements(msg.Message.Body.RichText.Elems),
 	}
 }
