@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
@@ -30,7 +31,7 @@ var (
 
 // NewQQclient 创建一个新的QQClient
 func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
-	return &QQClient{
+	client := &QQClient{
 		uin:          uin,
 		appInfo:      appInfo,
 		deviceInfo:   deviceInfo,
@@ -38,9 +39,11 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		signProvider: utils.SignProvider(signUrl),
 		// 128应该够用了吧
 		pushStore: make(chan *wtlogin.SSOPacket, 128),
-		online:    false,
+		stopChan:  make(chan struct{}),
 		tcp:       NewTCPClient(Server, 5),
 	}
+	client.online.Store(false)
+	return client
 }
 
 type QQClient struct {
@@ -53,7 +56,8 @@ type QQClient struct {
 
 	pushStore chan *wtlogin.SSOPacket
 
-	online bool
+	online   atomic.Bool
+	stopChan chan struct{}
 
 	t106 []byte
 	t16a []byte
@@ -406,6 +410,30 @@ func (c *QQClient) Loop() {
 
 	}
 	go c.ReadLoop()
+	go c.ssoHeartBeatLoop()
+}
+
+func (c *QQClient) ssoHeartBeatLoop() {
+heartBeatLoop:
+	for {
+		select {
+		case <-c.stopChan:
+			break heartBeatLoop
+		case <-time.After(120 * time.Second):
+			if !c.online.Load() {
+				continue heartBeatLoop
+			}
+			startTime := time.Now().UnixMilli()
+			_, err := c.SendUniPacketAndAwait(
+				"trpc.qq_new_tech.status_svc.StatusService.SsoHeartBeat",
+				wtlogin.BuildSSOHeartbeatRequest())
+			if err != nil {
+				networkLogger.Error("heartbeat err %s", err)
+			}
+			networkLogger.Debugf("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
+		}
+	}
+	networkLogger.Debug("heartbeat task stoped")
 }
 
 func (c *QQClient) ReadLoop() {
@@ -422,7 +450,7 @@ func (c *QQClient) ReadLoop() {
 			c.tcp.Close()
 		}
 	}
-	c.OnDissconneted()
+	c.OnDissconnected()
 }
 
 func (c *QQClient) Connect() error {
@@ -436,24 +464,26 @@ func (c *QQClient) Connect() error {
 
 func (c *QQClient) DisConnect() {
 	c.tcp.Close()
-	c.OnDissconneted()
+	c.OnDissconnected()
+}
+
+// Stop 停止整个client，一旦停止不能重新连接
+func (c *QQClient) Stop() {
+	c.DisConnect()
+	close(c.stopChan)
 }
 
 // setOnline 设置qq已经上线
 func (c *QQClient) setOnline() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.online = true
+	c.online.Store(true)
 }
 
 func (c *QQClient) OnConnected() {
 
 }
 
-func (c *QQClient) OnDissconneted() {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.online = false
+func (c *QQClient) OnDissconnected() {
+	c.online.Store(false)
 }
 
 func (c *QQClient) getSeq() int {
