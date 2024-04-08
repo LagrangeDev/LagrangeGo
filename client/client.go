@@ -426,7 +426,7 @@ heartBeatLoop:
 		select {
 		case <-c.stopChan:
 			break heartBeatLoop
-		case <-time.After(120 * time.Second):
+		case <-time.After(270 * time.Second):
 			if !c.online.Load() {
 				continue heartBeatLoop
 			}
