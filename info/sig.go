@@ -1,6 +1,7 @@
 package info
 
 type SigInfo struct {
+	Uin         uint32
 	Sequence    int
 	Tgtgt       []byte
 	Tgt         []byte

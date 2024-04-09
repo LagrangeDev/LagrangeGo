@@ -4,25 +4,16 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"os"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
 
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-func JsonLoad(data []byte, v interface{}) {
-	err := json.Unmarshal(data, v)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func JsonDump(v interface{}) []byte {
-	data, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-	return data
+func init() {
+	// 这里不注册好像也可以
+	gob.Register(SigInfo{})
 }
 
 func Encode(sig *SigInfo) []byte {
@@ -56,7 +47,44 @@ func Decode(buf []byte, verify bool) *SigInfo {
 	return &siginfo
 }
 
-func init() {
-	// 这里不注册好像也可以
-	gob.Register(SigInfo{})
+func LoadDevice(path string) *DeviceInfo {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		deviceinfo := NewDeviceInfo(int(utils.RandU32()))
+		_ = SaveDevice(deviceinfo, path)
+		return deviceinfo
+	}
+	var dinfo DeviceInfo
+	err = json.Unmarshal(data, &dinfo)
+	if err != nil {
+		deviceinfo := NewDeviceInfo(int(utils.RandU32()))
+		_ = SaveDevice(deviceinfo, path)
+		return deviceinfo
+	}
+	return &dinfo
+}
+
+func SaveDevice(deviceInfo *DeviceInfo, path string) error {
+	data, err := json.Marshal(deviceInfo)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(path, data, 0666)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func LoadSig(path string) *SigInfo {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return NewSigInfo(8848)
+	}
+	return Decode(data, true)
+}
+
+func SaveSig(sig *SigInfo, path string) error {
+	data := Encode(sig)
+	return os.WriteFile(path, data, 0666)
 }

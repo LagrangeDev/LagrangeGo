@@ -72,8 +72,9 @@ type QQClient struct {
 }
 
 func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
-	if len(c.sig.D2) != 0 { // prefer session login
+	if len(c.sig.D2) != 0 && c.sig.Uin != 0 { // prefer session login
 		loginLogger.Infoln("Session found, try to login with session")
+		c.uin = c.sig.Uin
 		return c.Register()
 	}
 
@@ -330,6 +331,7 @@ func (c *QQClient) Register() (bool, error) {
 	}
 
 	if wtlogin.ParseRegisterResponse(response.Data) {
+		c.sig.Uin = c.uin
 		c.setOnline()
 		networkLogger.Info("Register successful")
 		return true, nil
@@ -448,7 +450,7 @@ func (c *QQClient) ReadLoop() {
 		lengthData, err := c.tcp.ReadBytes(4)
 		if err != nil {
 			networkLogger.Errorf("tcp read length error: %s", err)
-			return
+			break
 		}
 		length := int(binary2.NewReader(lengthData).ReadU32() - 4)
 		if length > 0 {
