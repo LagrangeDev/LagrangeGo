@@ -75,7 +75,11 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 	if len(c.sig.D2) != 0 && c.sig.Uin != 0 { // prefer session login
 		loginLogger.Infoln("Session found, try to login with session")
 		c.uin = c.sig.Uin
-		return c.Register()
+		if ok, err := c.Register(); ok {
+			return true, nil
+		} else {
+			loginLogger.Errorf("Failed to register session: %v", err)
+		}
 	}
 
 	if len(c.sig.TempPwd) != 0 {
@@ -91,6 +95,7 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 	}
 
 	if password != "" {
+		loginLogger.Infoln("login with password")
 		c.KeyExchange()
 
 		for {
@@ -109,6 +114,7 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 			}
 		}
 	} else {
+		loginLogger.Infoln("login with qrcode")
 		png, _, err := c.FecthQrcode()
 		if err != nil {
 			return false, err
