@@ -1,4 +1,4 @@
-# MiraiGo
+# LagrangeGo
 ntqq 协议的golang实现 移植于 [Lagrange.Core](https://github.com/KonataDev/Lagrange.Core)/
 [lagrange-python](https://github.com/LagrangeDev/lagrange-python)
 
