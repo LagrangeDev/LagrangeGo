@@ -98,7 +98,7 @@ func (r *Reader) ReadTlv() (result map[int][]byte) {
 	result = map[int][]byte{}
 	count := r.ReadU16()
 
-	for _ = range count {
+	for i := 0; i < int(count); i++ {
 		tag := r.ReadU16()
 		result[int(tag)] = r.ReadBytes(int(r.ReadU16()))
 	}

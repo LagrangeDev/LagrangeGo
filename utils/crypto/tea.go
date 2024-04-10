@@ -85,7 +85,7 @@ func teaCode(v, k []byte) []byte {
 	v1 = uint64(val1)
 
 	sum := uint64(0)
-	for _ = range ROUND {
+	for i := 0; i < ROUND; i++ {
 		sum += DELTA
 		v0 += ((OP & (v1 << 4)) + k0) ^ (v1 + sum) ^ ((OP & (v1 >> 5)) + k1)
 		v0 &= OP
@@ -133,7 +133,7 @@ func teaDecipher(v, k []byte) []byte {
 	v1 = uint64(val1)
 
 	sum := DELTA << 4 & OP
-	for _ = range ROUND {
+	for i := 0; i < ROUND; i++ {
 		v1 -= ((v0 << 4) + k2) ^ (v0 + sum) ^ ((v0 >> 5) + k3)
 		v1 &= OP
 		v0 -= ((v1 << 4) + k0) ^ (v1 + sum) ^ ((v1 >> 5) + k1)
@@ -154,7 +154,7 @@ func preprocess(data []byte) []byte {
 	// 保证取余出来是正数
 	filln := ((8-(dataLen+2))%8+8)%8 + 2
 	fills := make([]byte, 0)
-	for _ = range filln {
+	for i := 0; i < filln; i++ {
 		fills = append(fills, 220)
 	}
 	return append(append(append([]byte{byte((filln - 2) | 0xf8)}, fills...), data...), make([]byte, 7)...)
