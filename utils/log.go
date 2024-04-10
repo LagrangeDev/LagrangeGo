@@ -51,12 +51,30 @@ func (f *ColoredFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		levelColor = colorWhite
 	}
 
+	var message string
+
 	// 构建日志格式
-	message := fmt.Sprintf("[%s] [%s%s%s] %-*s[%s]: %s\n",
-		timestamp, levelColor, strings.ToUpper(entry.Level.String()), colorReset, 7-len(entry.Level.String()), "", entry.Data["prefix"], entry.Message)
+	if entry.Data["prefix"] == "" {
+		message = fmt.Sprintf("[%s] [%s%s%s]: %s\n",
+			timestamp, levelColor, strings.ToUpper(entry.Level.String()), colorReset, entry.Message)
+	} else {
+		message = fmt.Sprintf("[%s] [%s%s%s] %-*s[%s]: %s\n",
+			timestamp, levelColor, strings.ToUpper(entry.Level.String()), colorReset, 7-len(entry.Level.String()), "", entry.Data["prefix"], entry.Message)
+	}
+
 	return []byte(message), nil
 }
 
 func GetLogger(prefix string) *logrus.Entry {
 	return logger.WithField("prefix", prefix)
+}
+
+func DisableLogOutput() {
+	logger.SetOutput(nil)
+}
+
+func EnableLogOutput() {
+	if logger.Out == nil {
+		logger.SetOutput(colorable.NewColorableStdout())
+	}
 }

@@ -46,7 +46,7 @@ func (c *TCPClient) Write(b []byte) error {
 		if err != nil {
 			return ErrConnectionClosed
 		}
-		networkLogger.Debugf("tcp wirte %d bytes", n)
+		networkLogger.Tracef("tcp write %d bytes", n)
 		return nil
 	}
 	return ErrConnectionClosed
@@ -73,10 +73,10 @@ func (c *TCPClient) Close() {
 	defer c.lock.Unlock()
 	if c.conn != nil {
 		_ = c.conn.Close()
+		networkLogger.Error("tcp closed")
 		c.conn = nil
 		c.connected = false
 	}
-	networkLogger.Error("tcp closed")
 }
 
 func (c *TCPClient) getConn() net.Conn {

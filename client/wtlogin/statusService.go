@@ -46,7 +46,6 @@ func ParseRegisterResponse(response []byte) bool {
 		loginLogger.Errorf("Unmarshal register response failed: %s", err)
 		return false
 	}
-	loginLogger.Tracef("register resp message: %v", resp.Message.Unwrap())
 	if resp.Message.Unwrap() == "register success" {
 		return true
 	}
