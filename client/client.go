@@ -412,7 +412,7 @@ func (c *QQClient) OnMessage(msgLen int) {
 			if err != nil {
 				return
 			}
-			OnEvent(c, msg)
+			go OnEvent(c, msg)
 		} else {
 			networkLogger.Warningf("unsupported command: %s", packet.Cmd)
 		}

@@ -44,6 +44,7 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 	}
 }
 
+// OnEvent 事件响应，耗时操作，需提交协程处理
 func OnEvent(client *QQClient, msg any) {
 	switch msg.(type) {
 	case *message.PrivateMessage:
