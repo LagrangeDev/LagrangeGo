@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/RomiChan/protobuf/proto"
+
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
@@ -250,6 +252,30 @@ func ToReadableString(m []IMessageElement) string {
 	return sb.String()
 }
 
-func BuildMessageElements() {
-
+func BuildMessageElements(msgElems []IMessageElement) (msgBody *message.MessageBody) {
+	if len(msgElems) == 0 {
+		return
+	}
+	elems := make([]*message.Elem, 0, len(msgElems))
+	for _, elem := range msgElems {
+		switch elem.Type() {
+		case At:
+		case Text:
+			elems = append(elems, &message.Elem{Text: &message.Text{Str: proto.Some(elem.(*TextElement).Content)}})
+		case Image:
+		case Reply:
+		case Face:
+		case Video:
+		case Voice:
+		case File:
+		case Forward:
+		case Service:
+		case RedBag:
+		case LightApp:
+		}
+	}
+	msgBody = &message.MessageBody{
+		RichText: &message.RichText{Elems: elems},
+	}
+	return
 }
