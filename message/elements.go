@@ -1,6 +1,11 @@
 package message
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
+)
 
 type (
 	TextElement struct {
@@ -9,6 +14,7 @@ type (
 
 	AtElement struct {
 		Target  int64
+		UID     string
 		Display string
 		SubType AtType
 	}
@@ -91,4 +97,46 @@ func (e *VoiceElement) Type() ElementType {
 
 func (e *ShortVideoElement) Type() ElementType {
 	return Video
+}
+
+func (e *TextElement) BuildElement() *message.Elem {
+	return &message.Elem{Text: &message.Text{Str: proto.Some(e.Content)}}
+}
+
+func (e *AtElement) BuildElement() *message.Elem {
+	var atAll int32 = 2
+	if e.Target == 0 {
+		atAll = 1
+	}
+	reserve := message.MentionExtra{
+		Type:   proto.Some(atAll),
+		Uin:    proto.Some(uint32(0)),
+		Field5: proto.Some(int32(0)),
+		Uid:    proto.Some(e.UID),
+	}
+	reserveData, _ := proto.Marshal(&reserve)
+	return &message.Elem{Text: &message.Text{
+		Str:       proto.Some(e.Display),
+		PbReserve: reserveData,
+	}}
+}
+
+func (e *GroupImageElement) BuildElement() *message.Elem {
+	return nil
+}
+
+func (e *FriendImageElement) BuildElement() *message.Elem {
+	return nil
+}
+
+func (e *ReplyElement) BuildElement() *message.Elem {
+	return nil
+}
+
+func (e *VoiceElement) BuildElement() *message.Elem {
+	return nil
+}
+
+func (e *ShortVideoElement) BuildElement() *message.Elem {
+	return nil
 }
