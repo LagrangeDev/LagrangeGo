@@ -57,7 +57,7 @@ func NewText(s string) *TextElement {
 	return &TextElement{Content: s}
 }
 
-func NewAt(target int64, display ...string) *AtElement {
+func NewAt(target int64, uid string, display ...string) *AtElement {
 	dis := "@" + strconv.FormatInt(target, 10)
 	if target == 0 {
 		dis = "@全体成员"
@@ -67,6 +67,7 @@ func NewAt(target int64, display ...string) *AtElement {
 	}
 	return &AtElement{
 		Target:  target,
+		UID:     uid,
 		Display: dis,
 	}
 }
