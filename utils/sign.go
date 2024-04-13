@@ -70,6 +70,9 @@ func containSignPKG(cmd string) bool {
 }
 
 func SignProvider(rawUrl string) func(string, int, []byte) map[string]string {
+	if rawUrl == "" {
+		return nil
+	}
 	return func(cmd string, seq int, buf []byte) map[string]string {
 		if !containSignPKG(cmd) {
 			return nil
