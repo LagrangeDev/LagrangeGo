@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// Group Remark
+message OidbSvcTrpcTcp0xF16_1 {
+  OidbSvcTrpcTcp0xF16_1Body Body = 1;
+}
+
+message OidbSvcTrpcTcp0xF16_1Body {
+  uint32 GroupUin = 1;
+  string TargetRemark = 3;
+}

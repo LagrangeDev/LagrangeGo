@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// RequestFriendSetting
+message OidbSvcTrpcTcp0x7C1_1 {
+  uint32 Field1 = 1; // 1
+  uint32 SelfUin = 2;
+  uint32 TargetUin = 3;
+  uint32 Field4 = 4; // 3999
+  uint32 Field5 = 5; // 0
+}

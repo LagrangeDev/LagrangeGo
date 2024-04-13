@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// Accept group request
+message OidbSvcTrpcTcp0x10C8_1 {
+  uint32 Accept = 1; // 2 for reject, 1 for accept, 3 for ignore
+  optional OidbSvcTrpcTcp0x10C8_1Body Body = 2;
+}
+
+message OidbSvcTrpcTcp0x10C8_1Body {
+  uint64 Sequence = 1; // 1
+  uint32 EventType = 2; // 2
+  uint32 GroupUin = 3; // 3
+  optional string Message = 4; // ""
+}

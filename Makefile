@@ -11,6 +11,9 @@ PROTO_FILES := \
 	$(PROTO_DIR)/login/*.proto \
 	$(PROTO_DIR)/message/*.proto \
 	$(PROTO_DIR)/system/*.proto \
+	$(PROTO_DIR)/service/*.proto \
+	$(PROTO_DIR)/service/highway/*.proto \
+	$(PROTO_DIR)/service/oidb/*.proto \
 	$(PROTO_DIR)/*.proto
 
 

@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+import "pb/service/oidb/NTV2RichMediaReq.proto";
+
+message NTV2RichMediaResp {
+  MultiMediaRespHead RespHead = 1;
+  UploadResp Upload = 2;
+  DownloadResp Download = 3;
+  DownloadRKeyResp DownloadRKey = 4;
+  DeleteResp Delete = 5;
+  UploadCompletedResp UploadCompleted = 6;
+  MsgInfoAuthResp MsgInfoAuth = 7;
+  UploadKeyRenewalResp UploadKeyRenewal = 8;
+  DownloadSafeResp DownloadSafe = 9;
+  optional bytes Extension = 99;
+}
+
+message MultiMediaRespHead {
+  CommonHead Common = 1;
+  uint32 RetCode = 2;
+  string Message = 3;
+}
+
+message DownloadResp {
+  string RKeyParam = 1;
+  uint32 RKeyTtlSecond = 2;
+  DownloadInfo Info = 3;
+  uint32 RKeyCreateTime = 4;
+}
+
+message DownloadInfo {
+  string Domain = 1;
+  string UrlPath = 2;
+  uint32 HttpsPort = 3;
+  repeated IPv4 IPv4s = 4;
+  repeated IPv6 IPv6s = 5;
+  PicUrlExtInfo PicUrlExtInfo = 6;
+  VideoExtInfo VideoExtInfo = 7;
+}
+
+message IPv4 {
+  uint32 OutIP = 1;
+  uint32 OutPort = 2;
+  uint32 InIP = 3;
+  uint32 InPort = 4;
+  uint32 IPType = 5;
+}
+
+message IPv6 {
+  bytes OutIP = 1;
+  uint32 OutPort = 2;
+  bytes InIP = 3;
+  uint32 InPort = 4;
+  uint32 IPType = 5;
+}
+
+message UploadResp {
+  optional string UKey = 1;
+  uint32 UKeyTtlSecond = 2;
+  repeated IPv4 IPv4s = 3;
+  repeated IPv6 IPv6s = 4;
+  uint64 MsgSeq = 5;
+  MsgInfo MsgInfo = 6;
+  repeated RichMediaStorageTransInfo Ext = 7;
+  bytes CompatQMsg = 8;
+  repeated SubFileInfo SubFileInfos = 10;
+}
+
+message RichMediaStorageTransInfo {
+  uint32 SubType = 1;
+  uint32 ExtType = 2;
+  bytes ExtValue = 3;
+}
+
+message SubFileInfo {
+  uint32 SubType = 1;
+  string UKey = 2;
+  uint32 UKeyTtlSecond = 3;
+  repeated IPv4 IPv4s = 4;
+  repeated IPv6 IPv6s = 5;
+}
+
+message DownloadSafeResp {
+
+}
+
+message UploadKeyRenewalResp {
+  string Ukey = 1;
+  uint64 UkeyTtlSec = 2;
+}
+
+message MsgInfoAuthResp {
+  uint32 AuthCode = 1;
+  bytes Msg = 2;
+  uint64 ResultTime = 3;
+}
+
+message UploadCompletedResp {
+  uint64 MsgSeq = 1;
+}
+
+message DeleteResp {
+
+}
+
+message DownloadRKeyResp {
+  repeated RKeyInfo RKeys = 1;
+}
+
+message RKeyInfo {
+  string Rkey = 1;
+  uint64 RkeyTtlSec = 2;
+  uint32 StoreId = 3;
+  optional uint32 RkeyCreateTime = 4;
+  optional uint32 Type = 5;
+}

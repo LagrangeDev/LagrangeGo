@@ -16,7 +16,6 @@ type SsoNTLoginEncryptedData struct {
 type SsoNTLoginBase struct {
 	Header *SsoNTLoginHeader `protobuf:"bytes,1,opt"`
 	Body   []byte            `protobuf:"bytes,2,opt"`
-	_      [0]func()
 }
 
 type SsoNTLoginHeader struct {

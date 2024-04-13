@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// Group Member Mute
+message OidbSvcTrpcTcp0x1253_1 {
+  uint32 GroupUin = 1;
+  uint32 Type = 2;
+  OidbSvcTrpcTcp0x1253_1Body Body = 3;
+}
+
+message OidbSvcTrpcTcp0x1253_1Body {
+  string TargetUid = 1;
+  uint32 Duration = 2;
+}
+
+message OidbSvcTrpcTcp0x1253_1Response {
+  optional string Success = 2;
+}

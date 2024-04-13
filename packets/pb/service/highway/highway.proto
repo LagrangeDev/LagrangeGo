@@ -1,0 +1,148 @@
+// 2024/4/13 md5图床貌似炸了?
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway";
+
+import "pb/service/oidb/NTV2RichMediaReq.proto";
+
+message DataHighwayHead {
+  uint32 Version = 1;
+  optional string Uin = 2;
+  optional string Command = 3;
+  uint32 Seq = 4;
+  uint32 RetryTimes = 5;
+  uint32 AppId = 6;
+  uint32 DataFlag = 7;
+  uint32 CommandId = 8;
+  optional bytes BuildVer = 9;
+  // uint32 LocaleId = 10;
+  // uint32 EnvId = 11;
+}
+
+message FileUploadExt {
+  int32 Unknown1 = 1;
+  int32 Unknown2 = 2;
+  int32 Unknown3 = 3;
+  FileUploadEntry Entry = 100;
+  int32 Unknown200 = 200;
+}
+
+message FileUploadEntry {
+  ExcitingBusiInfo BusiBuff = 100;
+  ExcitingFileEntry FileEntry = 200;
+  ExcitingClientInfo ClientInfo = 300;
+  ExcitingFileNameInfo FileNameInfo = 400;
+  ExcitingHostConfig Host = 500;
+}
+
+message ExcitingBusiInfo {
+  int32 BusId = 1;
+  uint64 SenderUin = 100;
+  uint64 ReceiverUin = 200;
+  uint64 GroupCode = 400;
+}
+
+message ExcitingFileEntry {
+  uint64 FileSize = 100;
+  bytes Md5 = 200;
+  bytes CheckKey = 300;
+  bytes Md5S2 = 400;
+  string FileId = 600;
+  bytes UploadKey = 700;
+}
+
+message ExcitingClientInfo {
+  int32 ClientType = 100;
+  string AppId = 200;
+  int32 TerminalType = 300;
+  string ClientVer = 400;
+  int32 Unknown = 600;
+}
+
+message ExcitingFileNameInfo {
+  string FileName = 100;
+}
+
+message ExcitingHostConfig {
+  repeated ExcitingHostInfo Hosts = 200;
+}
+
+message ExcitingHostInfo {
+  ExcitingUrlInfo Url = 1;
+  uint32 Port = 2;
+}
+
+message ExcitingUrlInfo {
+  int32 Unknown = 1;
+  string Host = 2;
+}
+
+message LoginSigHead {
+  uint32 Uint32LoginSigType = 1;
+  bytes BytesLoginSig = 2;
+  uint32 AppId = 3;
+}
+
+message NTV2RichMediaHighwayExt {
+  string FileUuid = 1;
+  string UKey = 2;
+  NTHighwayNetwork Network = 5;
+  repeated MsgInfoBody MsgInfoBody = 6;
+  uint32 BlockSize = 10;
+  NTHighwayHash Hash = 11;
+}
+
+message NTHighwayHash {
+  repeated bytes FileSha1 = 1;
+}
+
+message NTHighwayNetwork {
+  repeated NTHighwayIPv4 IPv4s = 1;
+}
+
+message NTHighwayIPv4 {
+  NTHighwayDomain Domain = 1;
+  uint32 Port = 2;
+}
+
+message NTHighwayDomain {
+  bool IsEnable = 1;
+  string IP = 2;
+}
+
+message ReqDataHighwayHead {
+  optional DataHighwayHead MsgBaseHead = 1;
+  optional SegHead MsgSegHead = 2;
+  optional bytes BytesReqExtendInfo = 3;
+  uint64 Timestamp = 4;
+  optional LoginSigHead MsgLoginSigHead = 5;
+}
+
+message RespDataHighwayHead {
+  optional DataHighwayHead MsgBaseHead = 1;
+  optional SegHead MsgSegHead = 2;
+  uint32 ErrorCode = 3;
+  uint32 AllowRetry = 4;
+  uint32 CacheCost = 5;
+  uint32 HtCost = 6;
+  optional bytes BytesRspExtendInfo = 7;
+  uint64 Timestamp = 8;
+  uint64 Range = 9;
+  uint32 IsReset = 10;
+}
+
+message SegHead {
+  uint32 ServiceId = 1;
+  uint64 Filesize = 2;
+  uint64 DataOffset = 3;
+  uint32 DataLength = 4;
+  uint32 RetCode = 5;
+  bytes  ServiceTicket = 6;
+  // uint32 Flag = 7;
+  bytes Md5 = 8;
+  bytes FileMd5 = 9;
+  uint32 CacheAddr = 10;
+  uint32 QueryTimes = 11;
+  uint32 UpdateCacheIp = 12;
+  uint32 CachePort = 13;
+}

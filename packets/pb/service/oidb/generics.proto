@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+message OidbFriend {
+  string Uid = 1;
+  uint32 Uin = 3;
+  repeated OidbFriendAdditional Additional = 10001;
+}
+
+message OidbFriendAdditional {
+  uint32 Type = 1;
+  OidbFriendLayer1 Layer1 = 2;
+}
+
+message OidbFriendLayer1 {
+  repeated OidbFriendProperty Properties = 2;
+}
+
+message OidbFriendProperty {
+  uint32 Code = 1;
+  string Value = 2;
+}
+
+message OidbLafter {
+  int32 Type = 1;
+  bytes D2 = 2;
+  uint32 SubAppid = 3;
+}
+
+message OidbNumber {
+  repeated uint32 Numbers = 1;
+}
+
+message OidbProperty {
+  string Key = 1;
+  bytes Value = 2;
+}
+
+message OidbTwoNumber {
+  uint32 Number1 = 1;
+  uint32 Number2 = 2;
+}

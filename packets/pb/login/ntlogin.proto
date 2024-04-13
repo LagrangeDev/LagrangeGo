@@ -2,8 +2,6 @@ syntax = "proto3";
 
 option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/login";
 
-import "google/protobuf/any.proto";
-
 message SsoNTLoginEncryptedData {
   optional bytes Sign = 1;
   optional bytes GcmCalc = 3;

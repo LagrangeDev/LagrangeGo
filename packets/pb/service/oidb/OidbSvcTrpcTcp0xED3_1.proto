@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// Poke
+message OidbSvcTrpcTcp0xED3_1 {
+  uint32 Uin = 1;
+  uint32 GroupUin = 2; // same when poke type is friend
+  uint32 FriendUin = 5;
+  optional uint32 Ext = 6;
+}

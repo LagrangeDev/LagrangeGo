@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// Quit Group
+message OidbSvcTrpcTcp0x1097_1 {
+  uint32 GroupUin = 1;
+}

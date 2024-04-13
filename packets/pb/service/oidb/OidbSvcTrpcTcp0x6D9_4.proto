@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
+
+// Group Send File
+message OidbSvcTrpcTcp0x6D9_4 {
+  OidbSvcTrpcTcp0x6D9_4Body Body = 5;
+}
+
+message OidbSvcTrpcTcp0x6D9_4Body {
+  uint32 GroupUin = 1;
+  uint32 Type = 2; // 2
+  OidbSvcTrpcTcp0x6D9_4Info Info = 3;
+}
+
+message OidbSvcTrpcTcp0x6D9_4Info {
+  uint32 BusiType = 1; // 102
+  string FileId = 2;
+  uint32 Field3 = 3; // random
+  optional string Field4 = 4;
+  bool Field5 = 5;
+}
