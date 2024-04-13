@@ -3,15 +3,11 @@
 
 package oidb
 
-import (
-	anypb "google.golang.org/protobuf/types/known/anypb"
-)
-
 type OidbSvcTrpcTcpBase struct {
 	Command    uint32          `protobuf:"varint,1,opt"`
 	SubCommand uint32          `protobuf:"varint,2,opt"`
 	ErrorCode  uint32          `protobuf:"varint,3,opt"`
-	Body       *anypb.Any      `protobuf:"bytes,4,opt"`
+	Body       []byte          `protobuf:"bytes,4,opt"`
 	ErrorMsg   string          `protobuf:"bytes,5,opt"`
 	Lafter     *OidbLafter     `protobuf:"bytes,7,opt"`
 	Properties []*OidbProperty `protobuf:"bytes,11,rep"`

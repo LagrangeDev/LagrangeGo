@@ -8,7 +8,7 @@ type OidbSvcTrpcTcp0XFD4_1 struct {
 	Field2     uint32                       `protobuf:"varint,2,opt"` // 300
 	Field4     uint32                       `protobuf:"varint,4,opt"` // 0
 	Field6     uint32                       `protobuf:"varint,6,opt"` // 1
-	Body       []*OidbSvcTrpcTcp0XFD4_1Body `protobuf:"bytes,1001,rep"`
+	Body       []*OidbSvcTrpcTcp0XFD4_1Body `protobuf:"bytes,10001,rep"`
 	Field10002 []uint32                     `protobuf:"varint,10002,rep"` // [13578, 13579, 13573, 13572, 13568]
 	Field10003 uint32                       `protobuf:"varint,10003,opt"`
 }

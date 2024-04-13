@@ -24,3 +24,10 @@ func ReadLine(s string) string {
 	rs, _ := inputReader.ReadString('\n')
 	return strings.TrimSpace(rs)
 }
+
+func Bool2Int(v bool) int {
+	if v {
+		return 1
+	}
+	return 0
+}

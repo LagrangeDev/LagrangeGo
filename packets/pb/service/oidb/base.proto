@@ -2,7 +2,6 @@ syntax = "proto3";
 
 option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb";
 
-import "google/protobuf/any.proto";
 import "pb/service/oidb/generics.proto";
 
 // Protobuf版Tlv sbtx
@@ -11,7 +10,7 @@ message OidbSvcTrpcTcpBase {
   uint32 Command = 1;
   uint32 SubCommand = 2;
   uint32 ErrorCode = 3;
-  google.protobuf.Any Body = 4;
+  bytes Body = 4;
   string ErrorMsg = 5;
   optional OidbLafter Lafter = 7;
   repeated OidbProperty Properties = 11;

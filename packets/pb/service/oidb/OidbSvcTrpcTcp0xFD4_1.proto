@@ -9,7 +9,7 @@ message OidbSvcTrpcTcp0xFD4_1 {
   uint32 Field2 = 2; // 300
   uint32 Field4 = 4; // 0
   uint32 Field6 = 6; // 1
-  repeated OidbSvcTrpcTcp0xFD4_1Body Body = 1001;
+  repeated OidbSvcTrpcTcp0xFD4_1Body Body = 10001;
   repeated uint32 Field10002 = 10002; // [13578, 13579, 13573, 13572, 13568]
   uint32 Field10003 = 10003;
 }
