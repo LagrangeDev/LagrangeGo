@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
+
 	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
 
 	"github.com/LagrangeDev/LagrangeGo/message"
@@ -67,12 +69,27 @@ type QQClient struct {
 
 	tcp *TCPClient
 
+	// map[uint32]string
+	uidCache sync.Map
+
 	GroupMessageEvent   EventHandle[*message.GroupMessage]
 	PrivateMessageEvent EventHandle[*message.PrivateMessage]
 	TempMessageEvent    EventHandle[*message.TempMessage]
 }
 
+func (c *QQClient) GetUid(uin uint32) string {
+	uid, _ := c.uidCache.Load(uin)
+	return uid.(string)
+}
+
 func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
+	defer func(sigInfo *info.SigInfo) {
+		if len(sigInfo.D2) != 0 && c.sig.Uin != 0 {
+			for uin, uid := range c.FetchFriendUid() {
+				c.uidCache.Store(uin, uid)
+			}
+		}
+	}(c.sig)
 	if len(c.sig.D2) != 0 && c.sig.Uin != 0 { // prefer session login
 		loginLogger.Infoln("Session found, try to login with session")
 		c.uin = c.sig.Uin
@@ -127,6 +144,31 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (c *QQClient) FetchFriendUid() map[uint32]string {
+	pkt, err := oidb.BuildFetchFriendsReq()
+	if err != nil {
+		loginLogger.Errorln(err)
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		loginLogger.Errorln(err)
+	}
+	friends, err := oidb.ParseFetchFriendsResp(resp.Data)
+	if err != nil {
+		loginLogger.Errorln(err)
+	}
+	dict := make(map[uint32]string, len(friends))
+	for _, friend := range friends {
+		dict[friend.Uin] = friend.Uid
+	}
+	loginLogger.Infof("获取%v个好友", len(dict))
+	return dict
+}
+
+func (c *QQClient) SendOidbPacketAndWait(pkt *oidb.OidbPacket) (*wtlogin.SSOPacket, error) {
+	return c.SendUniPacketAndAwait(pkt.Cmd, pkt.Data)
 }
 
 func (c *QQClient) SendUniPacket(cmd string, buf []byte) error {
