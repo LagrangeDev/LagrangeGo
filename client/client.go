@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
+
 	"github.com/LagrangeDev/LagrangeGo/message"
 
 	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
@@ -16,7 +18,6 @@ import (
 
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
-	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/tlv"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 
 	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
@@ -380,43 +381,45 @@ func (c *QQClient) OnMessage(msgLen int) {
 		networkLogger.Errorf("read message error: %s", err)
 		return
 	}
-	ssoHeader, err := wtlogin.ParseSSOHeader(raw, c.sig.D2Key)
-	if err != nil {
-		networkLogger.Errorf("ParseSSOHeader error %s", err)
-		return
-	}
-	packet, err := wtlogin.ParseSSOFrame(ssoHeader.Dec, ssoHeader.Flag == 2)
-	if err != nil {
-		networkLogger.Errorf("ParseSSOFrame error %s", err)
-		return
-	}
+	go func(c *QQClient, raw []byte) {
+		ssoHeader, err := wtlogin.ParseSSOHeader(raw, c.sig.D2Key)
+		if err != nil {
+			networkLogger.Errorf("ParseSSOHeader error %s", err)
+			return
+		}
+		packet, err := wtlogin.ParseSSOFrame(ssoHeader.Dec, ssoHeader.Flag == 2)
+		if err != nil {
+			networkLogger.Errorf("ParseSSOFrame error %s", err)
+			return
+		}
 
-	if packet.Seq > 0 { // uni rsp
-		networkLogger.Debugf("%d(%d) -> %s, extra: %s", packet.Seq, packet.RetCode, packet.Cmd, packet.Extra)
-		if packet.RetCode != 0 && resultStore.ContainSeq(packet.Seq) {
-			networkLogger.Errorf("error ssopacket retcode: %d, extra: %s", packet.RetCode, packet.Extra)
-			return
-		} else if packet.RetCode != 0 {
-			networkLogger.Errorf("Unexpected error on sso layer: %d: %s", packet.RetCode, packet.Extra)
-			return
-		}
-		if !resultStore.ContainSeq(packet.Seq) {
-			networkLogger.Warningf("Unknown packet: %s(%d), ignore", packet.Cmd, packet.Seq)
-		} else {
-			resultStore.AddResult(packet.Seq, packet)
-		}
-	} else { // server pushed
-		if _, ok := listeners[packet.Cmd]; ok {
-			networkLogger.Debugf("Server Push(%d) <- %s, extra: %s", packet.RetCode, packet.Cmd, packet.Extra)
-			msg, err := listeners[packet.Cmd](c, packet)
-			if err != nil {
+		if packet.Seq > 0 { // uni rsp
+			networkLogger.Debugf("%d(%d) -> %s, extra: %s", packet.Seq, packet.RetCode, packet.Cmd, packet.Extra)
+			if packet.RetCode != 0 && resultStore.ContainSeq(packet.Seq) {
+				networkLogger.Errorf("error ssopacket retcode: %d, extra: %s", packet.RetCode, packet.Extra)
+				return
+			} else if packet.RetCode != 0 {
+				networkLogger.Errorf("Unexpected error on sso layer: %d: %s", packet.RetCode, packet.Extra)
 				return
 			}
-			go OnEvent(c, msg)
-		} else {
-			networkLogger.Warningf("unsupported command: %s", packet.Cmd)
+			if !resultStore.ContainSeq(packet.Seq) {
+				networkLogger.Warningf("Unknown packet: %s(%d), ignore", packet.Cmd, packet.Seq)
+			} else {
+				resultStore.AddResult(packet.Seq, packet)
+			}
+		} else { // server pushed
+			if _, ok := listeners[packet.Cmd]; ok {
+				networkLogger.Debugf("Server Push(%d) <- %s, extra: %s", packet.RetCode, packet.Cmd, packet.Extra)
+				msg, err := listeners[packet.Cmd](c, packet)
+				if err != nil {
+					return
+				}
+				go OnEvent(c, msg)
+			} else {
+				networkLogger.Warningf("unsupported command: %s", packet.Cmd)
+			}
 		}
-	}
+	}(c, raw)
 }
 
 func (c *QQClient) Loop() {
