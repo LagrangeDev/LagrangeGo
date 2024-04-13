@@ -1,6 +1,8 @@
 package client
 
 import (
+	"runtime/debug"
+
 	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
 	msgConverter "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
@@ -18,6 +20,13 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 	if err != nil {
 		return nil, err
 	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			networkLogger.Errorf("Recovered from panic: %v\n%v", r, debug.Stack())
+			networkLogger.Errorf("protobuf data: %x", pkt.Data)
+		}
+	}()
 
 	switch msg.Message.ContentHead.Type {
 	case 166: // private msg
