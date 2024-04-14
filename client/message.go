@@ -1,6 +1,7 @@
 package client
 
 import (
+	message2 "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -41,24 +42,26 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 	return
 }
 
-func (c *QQClient) SendGroupMessage(groupID uint32, body *message.MessageBody) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendGroupMessage(groupID uint32, msg []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	body := message2.BuildMessageElements(msg)
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupID)},
 	}
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) SendPrivateMessage(uin uint32, uid string, body *message.MessageBody) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendPrivateMessage(uin uint32, msg []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	body := message2.BuildMessageElements(msg)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
-			Uin: proto.Some(uin),
-			Uid: proto.Some(uid),
+			Uid: proto.Some(c.GetUid(uin)),
 		},
 	}
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, body *message.MessageBody) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, msg []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	body := message2.BuildMessageElements(msg)
 	route := &message.RoutingHead{
 		GrpTmp: &message.GrpTmp{
 			GroupUin: proto.Some(groupID),
