@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
 

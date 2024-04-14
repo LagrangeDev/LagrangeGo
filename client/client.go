@@ -8,21 +8,19 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/qrcodeState"
+
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
 
 	"github.com/LagrangeDev/LagrangeGo/message"
 
-	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/loginState"
-
-	"github.com/LagrangeDev/LagrangeGo/client/wtlogin/qrcodeState"
-
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
-
-	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
 )

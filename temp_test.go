@@ -3,7 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/LagrangeDev/LagrangeGo/client/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
+
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
