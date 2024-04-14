@@ -10,15 +10,11 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/qrcodeState"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
-
 	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
 
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
-
-	"github.com/LagrangeDev/LagrangeGo/info"
 )
 
 var (
@@ -26,19 +22,7 @@ var (
 	networkLogger = utils.GetLogger("network")
 )
 
-func (c *QQClient) GetUid(uin uint32) string {
-	uid, _ := c.uidCache.Load(uin)
-	return uid.(string)
-}
-
 func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
-	defer func(sigInfo *info.SigInfo) {
-		if len(sigInfo.D2) != 0 && c.sig.Uin != 0 {
-			for uin, uid := range c.FetchFriendUid() {
-				c.uidCache.Store(uin, uid)
-			}
-		}
-	}(c.sig)
 	if len(c.sig.D2) != 0 && c.sig.Uin != 0 { // prefer session login
 		loginLogger.Infoln("Session found, try to login with session")
 		c.uin = c.sig.Uin
@@ -93,27 +77,6 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 		}
 	}
 	return false, nil
-}
-
-func (c *QQClient) FetchFriendUid() map[uint32]string {
-	pkt, err := oidb.BuildFetchFriendsReq()
-	if err != nil {
-		loginLogger.Errorln(err)
-	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
-	if err != nil {
-		loginLogger.Errorln(err)
-	}
-	friends, err := oidb.ParseFetchFriendsResp(resp.Data)
-	if err != nil {
-		loginLogger.Errorln(err)
-	}
-	dict := make(map[uint32]string, len(friends))
-	for _, friend := range friends {
-		dict[friend.Uin] = friend.Uid
-	}
-	loginLogger.Infof("获取%v个好友", len(dict))
-	return dict
 }
 
 func (c *QQClient) FecthQrcode() ([]byte, string, error) {
@@ -305,6 +268,10 @@ func (c *QQClient) Register() (bool, error) {
 	}
 
 	if wtlogin.ParseRegisterResponse(response.Data) {
+		defer func(client *QQClient) {
+			c.RefreshFriendCache()
+			c.RefreshAllGroupCache()
+		}(c)
 		c.sig.Uin = c.uin
 		c.setOnline()
 		networkLogger.Info("Register successful")

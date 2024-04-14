@@ -5,6 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/entity"
+
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
@@ -34,6 +36,7 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 
 type QQClient struct {
 	lock         sync.RWMutex
+	refreshLock  sync.RWMutex
 	uin          uint32
 	appInfo      *info.AppInfo
 	deviceInfo   *info.DeviceInfo
@@ -50,8 +53,8 @@ type QQClient struct {
 
 	tcp *TCPClient
 
-	// map[uint32]string
-	uidCache sync.Map
+	friendCache map[uint32]*entity.Friend
+	groupCache  map[uint32]map[uint32]*entity.GroupMember
 
 	GroupMessageEvent   EventHandle[*message.GroupMessage]
 	PrivateMessageEvent EventHandle[*message.PrivateMessage]

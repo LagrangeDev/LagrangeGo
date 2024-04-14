@@ -42,26 +42,27 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 	return
 }
 
-func (c *QQClient) SendGroupMessage(groupID uint32, msg []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	body := message2.BuildMessageElements(msg)
+func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	elements = preprocessMessage(c, groupUin, elements)
+	body := message2.BuildMessageElements(elements)
 	route := &message.RoutingHead{
-		Grp: &message.Grp{GroupCode: proto.Some(groupID)},
+		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
 	}
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) SendPrivateMessage(uin uint32, msg []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	body := message2.BuildMessageElements(msg)
+func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	body := message2.BuildMessageElements(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
-			Uid: proto.Some(c.GetUid(uin)),
+			Uid: proto.Some(c.GetUidFromFriends(uin)),
 		},
 	}
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, msg []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	body := message2.BuildMessageElements(msg)
+func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	body := message2.BuildMessageElements(elements)
 	route := &message.RoutingHead{
 		GrpTmp: &message.GrpTmp{
 			GroupUin: proto.Some(groupID),
@@ -69,4 +70,24 @@ func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, msg []message2.IM
 		},
 	}
 	return c.SendRawMessage(route, body)
+}
+
+func preprocessMessage(client *QQClient, groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
+	for _, element := range elements {
+		switch element.(type) {
+		case *message2.AtElement:
+			elem := element.(*message2.AtElement)
+			member := client.GetMemberInfo(elem.Target, groupUin)
+			if member != nil {
+				elem.UID = member.Uid
+				if member.MemberCard != "" {
+					elem.Display = "@" + member.MemberCard
+				} else {
+					elem.Display = "@" + member.MemberName
+				}
+			}
+		default:
+		}
+	}
+	return elements
 }
