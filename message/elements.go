@@ -13,7 +13,7 @@ type (
 	}
 
 	AtElement struct {
-		Target  int64
+		Target  uint32
 		UID     string
 		Display string
 		SubType AtType
@@ -21,8 +21,8 @@ type (
 
 	ReplyElement struct {
 		ReplySeq int32
-		Sender   int64
-		GroupID  int64 // 私聊回复群聊时
+		Sender   uint64
+		GroupID  uint64 // 私聊回复群聊时
 		Time     int32
 		Elements []IMessageElement
 	}
@@ -30,7 +30,7 @@ type (
 	VoiceElement struct {
 		Name string
 		Md5  []byte
-		Size int32
+		Size uint32
 		Url  string
 
 		// --- sending ---
@@ -57,8 +57,8 @@ func NewText(s string) *TextElement {
 	return &TextElement{Content: s}
 }
 
-func NewAt(target int64, uid string, display ...string) *AtElement {
-	dis := "@" + strconv.FormatInt(target, 10)
+func NewAt(target uint32, uid string, display ...string) *AtElement {
+	dis := "@" + strconv.FormatInt(int64(target), 10)
 	if target == 0 {
 		dis = "@全体成员"
 	}

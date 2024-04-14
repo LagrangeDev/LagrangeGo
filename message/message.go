@@ -44,9 +44,9 @@ type (
 
 	TempMessage struct {
 		Id        int32
-		GroupCode int64
+		GroupCode uint32
 		GroupName string
-		Self      int64
+		Self      uint32
 		Sender    *Sender
 		Elements  []IMessageElement
 	}
@@ -54,10 +54,10 @@ type (
 	GroupMessage struct {
 		Id             int32
 		InternalId     int32
-		GroupCode      int64
+		GroupCode      uint32
 		GroupName      string
 		Sender         *Sender
-		Time           int32
+		Time           uint64
 		Elements       []IMessageElement
 		OriginalObject *message.PushMsgBody
 	}
@@ -67,7 +67,8 @@ type (
 	}
 
 	Sender struct {
-		Uin           int64
+		Uin           uint32
+		Uid           string
 		Nickname      string
 		CardName      string
 		AnonymousInfo *AnonymousInfo
@@ -92,7 +93,8 @@ func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 		Self:   int64(msg.Message.ResponseHead.ToUin),
 		Target: int64(msg.Message.ResponseHead.FromUin),
 		Sender: &Sender{
-			Uin:      int64(msg.Message.ResponseHead.FromUin),
+			Uin:      msg.Message.ResponseHead.FromUin,
+			Uid:      msg.Message.ResponseHead.FromUid.Unwrap(),
 			IsFriend: true,
 		},
 		Time:     int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
@@ -102,15 +104,16 @@ func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 
 func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
 	return &GroupMessage{
-		GroupCode: int64(msg.Message.ResponseHead.Grp.GroupUin),
+		GroupCode: msg.Message.ResponseHead.Grp.GroupUin,
 		GroupName: msg.Message.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
-			Uin:      int64(msg.Message.ResponseHead.FromUin),
+			Uin:      msg.Message.ResponseHead.FromUin,
+			Uid:      msg.Message.ResponseHead.FromUid.Unwrap(),
 			Nickname: msg.Message.ResponseHead.Grp.MemberName,
 			CardName: msg.Message.ResponseHead.Grp.MemberName,
 			IsFriend: false,
 		},
-		Time:           int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
+		Time:           msg.Message.ContentHead.TimeStamp.Unwrap(),
 		Elements:       parseMessageElements(msg.Message.Body.RichText.Elems),
 		OriginalObject: msg.Message,
 	}
@@ -130,8 +133,8 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			r := &ReplyElement{
 				ReplySeq: int32(elem.SrcMsg.OrigSeqs[0]),
 				Time:     elem.SrcMsg.Time.Unwrap(),
-				Sender:   int64(elem.SrcMsg.SenderUin),
-				GroupID:  int64(elem.SrcMsg.ToUin.Unwrap()),
+				Sender:   elem.SrcMsg.SenderUin,
+				GroupID:  elem.SrcMsg.ToUin.Unwrap(),
 				Elements: parseMessageElements(elem.SrcMsg.Elems),
 			}
 			res = append(res, r)
@@ -142,7 +145,7 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			case len(elem.Text.Attr6Buf) > 0:
 				att6 := binary.NewReader(elem.Text.Attr6Buf)
 				att6.ReadBytes(7)
-				target := int64(uint32(att6.ReadI32()))
+				target := att6.ReadU32()
 				at := NewAt(target, elem.Text.Str.Unwrap())
 				at.SubType = AtTypeGroupMember
 				res = append(res, at)
