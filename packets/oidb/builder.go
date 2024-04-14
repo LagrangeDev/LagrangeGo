@@ -11,8 +11,9 @@ import (
 var oidbLogger = utils.GetLogger("oidb")
 
 type OidbPacket struct {
-	Cmd  string
-	Data []byte
+	Cmd       string
+	Data      []byte
+	ExtraData []byte
 }
 
 func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUid bool) (*OidbPacket, error) {
