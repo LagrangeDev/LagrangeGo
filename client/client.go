@@ -268,10 +268,6 @@ func (c *QQClient) Register() (bool, error) {
 	}
 
 	if wtlogin.ParseRegisterResponse(response.Data) {
-		defer func(client *QQClient) {
-			c.RefreshFriendCache()
-			c.RefreshAllGroupCache()
-		}(c)
 		c.sig.Uin = c.uin
 		c.setOnline()
 		networkLogger.Info("Register successful")
