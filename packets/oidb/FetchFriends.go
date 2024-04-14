@@ -35,11 +35,11 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
 	if err := ParseOidbPacket(data, &resp); err != nil {
 		return nil, err
 	}
-	var friends []*entity.Friend
-	for _, raw := range resp.Friends {
+	friends := make([]*entity.Friend, len(resp.Friends))
+	for i, raw := range resp.Friends {
 		additional := GetFristType1(raw.Additional)
 		properties := ParseFriendProperty(additional.Layer1.Properties)
-		friends = append(friends, entity.NewFriend(raw.Uin, raw.Uid, properties[20002], properties[103], properties[102]))
+		friends[i] = entity.NewFriend(raw.Uin, raw.Uid, properties[20002], properties[103], properties[102])
 	}
 	return friends, nil
 }
