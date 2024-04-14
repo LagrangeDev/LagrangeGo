@@ -2,7 +2,6 @@ package entity
 
 import (
 	"fmt"
-	"time"
 )
 
 type GroupMemberPermission uint
@@ -20,13 +19,13 @@ type GroupMember struct {
 	GroupLevel  uint32
 	MemberCard  string
 	MemberName  string
-	JoinTime    time.Time
-	LastMsgTime time.Time
+	JoinTime    uint32
+	LastMsgTime uint32
 	Avatar      string
 }
 
 func NewGroupMember(uin uint32, uid string, permission GroupMemberPermission, GroupLevel uint32, MemberCard,
-	MemberName string, JoinTime, LastMsgTime time.Time) *GroupMember {
+	MemberName string, JoinTime, LastMsgTime uint32) *GroupMember {
 	return &GroupMember{
 		Uin:         uin,
 		Uid:         uid,
