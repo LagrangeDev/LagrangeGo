@@ -32,6 +32,13 @@ func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 	}
 	members := make([]*entity.GroupMember, len(resp.Members))
 	for i, member := range resp.Members {
+		// 由于protobuf的优化策略，默认值不会被编码进实际的二进制流中
+		if member.Level == nil {
+			members[i] = entity.NewGroupMember(member.Uin.Uin, member.Uin.Uid, entity.GroupMemberPermission(member.Permission),
+				0, member.MemberCard.MemberCard.Unwrap(), member.MemberName,
+				member.JoinTimestamp, member.LastMsgTimestamp)
+			continue
+		}
 		members[i] = entity.NewGroupMember(member.Uin.Uin, member.Uin.Uid, entity.GroupMemberPermission(member.Permission),
 			member.Level.Level, member.MemberCard.MemberCard.Unwrap(), member.MemberName,
 			member.JoinTimestamp, member.LastMsgTimestamp)
