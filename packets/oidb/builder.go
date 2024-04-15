@@ -51,5 +51,8 @@ func ParseOidbPacket(b []byte, pkt any) (*oidb.OidbSvcTrpcTcpBase, error) {
 	if err != nil {
 		return nil, err
 	}
+	if pkt == nil {
+		return &oidbBaseResp, nil
+	}
 	return &oidbBaseResp, proto.Unmarshal(oidbBaseResp.Body, pkt)
 }
