@@ -53,6 +53,9 @@ func (c *QQClient) RefreshGroupCache(groupUin uint32) {
 	}
 	c.refreshLock.Lock()
 	defer c.refreshLock.Unlock()
+	if c.groupCache == nil {
+		c.groupCache = make(map[uint32]map[uint32]*entity.GroupMember)
+	}
 	c.groupCache[groupUin] = groupData
 }
 
