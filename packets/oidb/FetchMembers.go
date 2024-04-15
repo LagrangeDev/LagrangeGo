@@ -26,7 +26,7 @@ func BuildFetchMembersReq(groupUin uint32, token string) (*OidbPacket, error) {
 
 func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 	var resp oidb.OidbSvcTrpcTcp0XFE7_2Response
-	err := ParseOidbPacket(data, &resp)
+	_, err := ParseOidbPacket(data, &resp)
 	if err != nil {
 		return nil, "", err
 	}

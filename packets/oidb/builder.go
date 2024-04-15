@@ -45,11 +45,11 @@ func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUid bool) (*OidbP
 	}, nil
 }
 
-func ParseOidbPacket(b []byte, pkt any) error {
+func ParseOidbPacket(b []byte, pkt any) (*oidb.OidbSvcTrpcTcpBase, error) {
 	var oidbBaseResp oidb.OidbSvcTrpcTcpBase
 	err := proto.Unmarshal(b, &oidbBaseResp)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return proto.Unmarshal(oidbBaseResp.Body, pkt)
+	return &oidbBaseResp, proto.Unmarshal(oidbBaseResp.Body, pkt)
 }

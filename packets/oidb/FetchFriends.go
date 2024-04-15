@@ -32,7 +32,7 @@ func BuildFetchFriendsReq() (*OidbPacket, error) {
 
 func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
 	var resp oidb.OidbSvcTrpcTcp0XFD4_1Response
-	if err := ParseOidbPacket(data, &resp); err != nil {
+	if _, err := ParseOidbPacket(data, &resp); err != nil {
 		return nil, err
 	}
 	friends := make([]*entity.Friend, len(resp.Friends))

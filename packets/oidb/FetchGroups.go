@@ -29,7 +29,7 @@ func BuildFetchGroupsReq() (*OidbPacket, error) {
 
 func ParseFetchGroupsResp(data []byte) ([]*entity.Group, error) {
 	var resp oidb.OidbSvcTrpcTcp0XFE5_2Response
-	if err := ParseOidbPacket(data, &resp); err != nil {
+	if _, err := ParseOidbPacket(data, &resp); err != nil {
 		return nil, err
 	}
 	groups := make([]*entity.Group, len(resp.Groups))
