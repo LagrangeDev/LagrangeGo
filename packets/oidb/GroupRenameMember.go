@@ -7,7 +7,7 @@ import (
 )
 
 func BuildGroupRenameMemberReq(groupUin uint32, uid, name string) (*OidbPacket, error) {
-	body := oidb.OidbSvcTrpcTcp0X8FC{
+	body := &oidb.OidbSvcTrpcTcp0X8FC{
 		GroupUin: groupUin,
 		Body: &oidb.OidbSvcTrpcTcp0X8FCBody{
 			TargetUid:  uid,
