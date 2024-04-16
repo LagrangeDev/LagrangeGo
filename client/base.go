@@ -66,6 +66,8 @@ type QQClient struct {
 	GroupMemberLeaveEvent       EventHandle[*event.GroupMemberDecrease]    // 成员退群
 	GroupMuteEvent              EventHandle[*event.GroupMute]
 	GroupRecallEvent            EventHandle[*event.GroupRecall]
+	FriendRequestEvent          EventHandle[*event.FriendRequest] // 好友申请
+	FriendRecallEvent           EventHandle[*event.FriendRecall]
 }
 
 func (c *QQClient) SendOidbPacket(pkt *oidb.OidbPacket) error {

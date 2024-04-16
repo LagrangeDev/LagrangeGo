@@ -78,7 +78,25 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 			return nil, err
 		}
 		return eventConverter.ParseInviteNotice(&pb), nil
-	case 0x2DC: //  grp event, 732
+	case 0x210: // friend event, 528
+		subType := pkg.ContentHead.SubType.Unwrap()
+		switch subType {
+		case 35: // friend request notice
+			pb := message.FriendRequest{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			return eventConverter.ParseFriendRequestNotice(&msg, &pb), nil
+		case 138: // friend recall
+			pb := message.FriendRecall{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			return eventConverter.ParseFriendRecallEvent(&pb), nil
+		}
+	case 0x2DC: // grp event, 732
 		subType := pkg.ContentHead.SubType.Unwrap()
 		switch subType {
 		case 20: // nudget(grp_id only)

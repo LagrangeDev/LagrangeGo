@@ -66,6 +66,10 @@ func OnEvent(client *QQClient, msg any) {
 		client.GroupMuteEvent.dispatch(client, msg)
 	case *event.GroupRecall:
 		client.GroupRecallEvent.dispatch(client, msg)
+	case *event.FriendRequest:
+		client.FriendRequestEvent.dispatch(client, msg)
+	case *event.FriendRecall:
+		client.FriendRecallEvent.dispatch(client, msg)
 	case nil:
 		networkLogger.Errorf("nil event msg, ignore")
 	default:
