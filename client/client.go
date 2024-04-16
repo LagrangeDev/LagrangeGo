@@ -254,7 +254,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 		return false, err
 	}
 
-	return wtlogin.DecodeLoginResponse(response.Data, c.sig), nil
+	return wtlogin.DecodeLoginResponse(response.Data, c.sig)
 }
 
 func (c *QQClient) Register() (bool, error) {
