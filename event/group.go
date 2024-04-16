@@ -53,7 +53,7 @@ type GroupInvite struct {
 }
 
 func (gmd *GroupMemberDecrease) IsKicked() bool {
-	return gmd.ExitType == 131
+	return gmd.ExitType == 131 || gmd.ExitType == 3
 }
 
 // ParseRequestJoinNotice 主动加群
