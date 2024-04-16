@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/packets/pb/status";
+
+message MemberChanged {
+  uint32 Uin = 1;
+  string Uid = 3;
+  optional int32 ExitType = 4; // 131 kick 130 exit
+  optional string OperatorUid = 5;
+  optional int32 JoinType = 6; // 6 scan qr
+}
+
+message MemberJoinRequest {
+  // JoinType: Direct(scan qrcode or search GroupID)
+
+  uint32 GroupID = 1;
+  string Uid = 3;
+  int32 Src = 4;
+  optional string RequestField = 5;
+  optional bytes Field9 = 9;
+}
+
+message InviteInner {
+  uint32 GroupID = 1;
+  string Uid = 5;
+  string InvitorUid = 6;
+}
+
+message InviteInfo {
+  InviteInner Inner = 1;
+}
+
+message MemberInviteRequest {
+  // JoinType: Direct(scan qrcode or search GroupID)
+
+  int32 Cmd = 1;
+  InviteInfo Info = 2;
+}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/entity"
+	"github.com/LagrangeDev/LagrangeGo/event"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
@@ -56,9 +57,15 @@ type QQClient struct {
 	friendCache map[uint32]*entity.Friend
 	groupCache  map[uint32]map[uint32]*entity.GroupMember
 
-	GroupMessageEvent   EventHandle[*message.GroupMessage]
-	PrivateMessageEvent EventHandle[*message.PrivateMessage]
-	TempMessageEvent    EventHandle[*message.TempMessage]
+	GroupMessageEvent     EventHandle[*message.GroupMessage]
+	PrivateMessageEvent   EventHandle[*message.PrivateMessage]
+	TempMessageEvent      EventHandle[*message.TempMessage]
+	GroupInvitedEvent     EventHandle[*event.GroupMemberJoinRequest]
+	GroupJoinEvent        EventHandle[*event.GroupMemberJoined]
+	GroupLeaveEvent       EventHandle[*event.GroupMemberQuit]
+	GroupMemberJoinEvent  EventHandle[*event.GroupMemberJoined]
+	GroupMemberLeaveEvent EventHandle[*event.GroupMemberQuit]
+	// GroupMuteEvent        EventHandle[*event.GroupMuteMember] TODO: empty implementation now
 }
 
 func (c *QQClient) SendOidbPacket(pkt *oidb.OidbPacket) error {
