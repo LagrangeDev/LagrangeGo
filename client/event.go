@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"sync"
 
+	"github.com/LagrangeDev/LagrangeGo/event"
 	"github.com/LagrangeDev/LagrangeGo/message"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -46,13 +47,27 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 
 // OnEvent 事件响应，耗时操作，需提交协程处理
 func OnEvent(client *QQClient, msg any) {
-	switch msg.(type) {
+	switch msg := msg.(type) {
 	case *message.PrivateMessage:
-		client.PrivateMessageEvent.dispatch(client, msg.(*message.PrivateMessage))
+		client.PrivateMessageEvent.dispatch(client, msg)
 	case *message.GroupMessage:
-		client.GroupMessageEvent.dispatch(client, msg.(*message.GroupMessage))
+		client.GroupMessageEvent.dispatch(client, msg)
 	case *message.TempMessage:
-		client.TempMessageEvent.dispatch(client, msg.(*message.TempMessage))
+		client.TempMessageEvent.dispatch(client, msg)
+	case *event.GroupMemberJoinRequest:
+		client.GroupInvitedEvent.dispatch(client, msg)
+	case *event.GroupMemberJoined:
+		if client.uin == msg.Uin {
+			client.GroupJoinEvent.dispatch(client, msg)
+		} else {
+			client.GroupMemberJoinEvent.dispatch(client, msg)
+		}
+	case *event.GroupMemberQuit:
+		if client.uin == msg.Uin {
+			client.GroupLeaveEvent.dispatch(client, msg)
+		} else {
+			client.GroupMemberLeaveEvent.dispatch(client, msg)
+		}
 	case nil:
 		networkLogger.Errorf("nil event msg, ignore")
 	default:
