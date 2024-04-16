@@ -205,7 +205,7 @@ func (c *QQClient) TokenLogin(token []byte) (loginState.State, error) {
 
 func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 	if c.sig.Qrsig == nil {
-		loginLogger.Fatal("No QrSig found, fetch qrcode first")
+		return false, errors.New("no QrSig found, fetch qrcode first")
 	}
 
 	for !c.tcp.IsClosed() {
@@ -217,7 +217,6 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 		}
 		if !retCode.Waitable() {
 			if !retCode.Success() {
-				loginLogger.Fatal(retCode.Name())
 				return false, errors.New(retCode.Name())
 			} else {
 				break
@@ -252,7 +251,6 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 		wtlogin.BuildLoginPacket(c.uin, "wtlogin.login", app, body))
 
 	if err != nil {
-		loginLogger.Fatal(err)
 		return false, err
 	}
 
