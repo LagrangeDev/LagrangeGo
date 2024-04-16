@@ -398,3 +398,10 @@ type QFaceExtra struct {
 	Field9  proto.Option[int32]  `protobuf:"varint,9,opt"`
 	_       [0]func()
 }
+
+type QSmallFaceExtra struct {
+	FaceId   uint32 `protobuf:"varint,1,opt"`
+	Preview  string `protobuf:"bytes,2,opt"`
+	Preview2 string `protobuf:"bytes,3,opt"`
+	_        [0]func()
+}
