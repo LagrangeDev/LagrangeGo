@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -69,18 +68,18 @@ func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State,
 	var frame login.SsoNTLoginEncryptedData
 	err := proto.Unmarshal(response, &frame)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf("proto decode failed: %s", err))
+		return -1, fmt.Errorf("proto decode failed: %s", err)
 	}
 
 	var base login.SsoNTLoginBase
 	err = proto.Unmarshal(crypto.AesGCMDecrypt(frame.GcmCalc, sig.ExchangeKey), &base)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf("proto decode failed: %s", err))
+		return -1, fmt.Errorf("proto decode failed: %s", err)
 	}
 	var body login.SsoNTLoginResponse
 	err = proto.Unmarshal(base.Body, &body)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf("proto decode failed: %s", err))
+		return -1, fmt.Errorf("proto decode failed: %s", err)
 	}
 
 	if body.Credentials != nil {
@@ -103,10 +102,10 @@ func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State,
 			title := stat.Tag
 			content := stat.Message
 			loginLogger.Errorf("Login fail on ntlogin(%s): [%s]>%s", ret.Name(), title, content)
-			return -999, errors.New(fmt.Sprintf("Login fail on ntlogin(%s): [%s]>%s", ret.Name(), title, content))
+			return -999, fmt.Errorf("login fail on ntlogin(%s): [%s]>%s", ret.Name(), title, content)
 		} else {
 			loginLogger.Errorf("Login fail: %s", ret.Name())
-			return -999, errors.New(fmt.Sprintf("Login fail: %s", ret.Name()))
+			return -999, fmt.Errorf("login fail: %s", ret.Name())
 		}
 	}
 	return loginState.State(base.Header.Error.ErrorCode), nil

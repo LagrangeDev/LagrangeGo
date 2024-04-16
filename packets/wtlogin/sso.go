@@ -3,7 +3,6 @@ package wtlogin
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -73,7 +72,7 @@ func ParseSSOHeader(raw, d2Key []byte) (*SSOHeader, error) {
 		_ = binary.Read(buf, binary.BigEndian, temp)
 		dec = qqtea.QQTeaDecrypt(temp, make([]byte, 16))
 	} else {
-		return nil, errors.New(fmt.Sprintf("invalid encrypt flag: %d", flag))
+		return nil, fmt.Errorf("invalid encrypt flag: %d", flag)
 	}
 	return &SSOHeader{
 		Flag: flag,
@@ -109,7 +108,7 @@ func ParseSSOFrame(buffer []byte, IsOicqBody bool) (*SSOPacket, error) {
 	} else if compressType == 8 {
 		data = data[4:]
 	} else {
-		return nil, errors.New(fmt.Sprintf("Unsupported compress type %d", compressType))
+		return nil, fmt.Errorf("unsupported compress type %d", compressType)
 	}
 
 	var err error
@@ -133,13 +132,13 @@ func ParseOicqBody(buf []byte) ([]byte, error) {
 	// 还有1字节没读，不要了
 
 	if flag != 2 {
-		return nil, errors.New(fmt.Sprintf("Invalid OICQ response flag. Expected 2, got %d", flag))
+		return nil, fmt.Errorf("invalid OICQ response flag. Expected 2, got %d", flag)
 	}
 
 	body := buf[16 : len(buf)-1]
 	if encType == 0 {
 		return qqtea.QQTeaDecrypt(body, ecdh.ECDH["secp192k1"].GetShareKey()), nil
 	} else {
-		return nil, errors.New(fmt.Sprintf("Unknown encrypt type: %d", encType))
+		return nil, fmt.Errorf("unknown encrypt type: %d", encType)
 	}
 }

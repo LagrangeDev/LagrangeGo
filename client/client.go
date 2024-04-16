@@ -38,7 +38,7 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 
 		ret, err := c.TokenLogin(c.sig.TempPwd)
 		if err != nil {
-			return false, errors.New(fmt.Sprintf("EasyLogin fail %s", err))
+			return false, fmt.Errorf("EasyLogin fail: %s", err)
 		}
 		if ret.Successful() {
 			return c.Register()
@@ -117,7 +117,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 		return tlvs[0x17], string(urlreader.ReadBytesWithLength("u8", false)), nil
 	}
 
-	return nil, "", errors.New(fmt.Sprintf("err qr retcode %d", retCode))
+	return nil, "", fmt.Errorf("err qr retcode %d", retCode)
 }
 
 func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {

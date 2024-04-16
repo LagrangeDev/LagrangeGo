@@ -8,6 +8,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
+//nolint:unused
 var oidbLogger = utils.GetLogger("oidb")
 
 type OidbPacket struct {

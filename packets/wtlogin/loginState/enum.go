@@ -4,16 +4,16 @@ type State int
 
 const (
 	TokenExpired     State = 140022015
-	UnusualVerify          = 140022011
-	LoginFailure           = 140022013
-	UserTokenExpired       = 140022016
-	ServerFailure          = 140022002 //unknown reason
-	WrongCaptcha           = 140022007
-	WrongArgument          = 140022001
-	NewDeviceVerify        = 140022010
-	CaptchaVerify          = 140022008
-	UnknownError           = -1
-	Success                = 0
+	UnusualVerify    State = 140022011
+	LoginFailure     State = 140022013
+	UserTokenExpired State = 140022016
+	ServerFailure    State = 140022002 //unknown reason
+	WrongCaptcha     State = 140022007
+	WrongArgument    State = 140022001
+	NewDeviceVerify  State = 140022010
+	CaptchaVerify    State = 140022008
+	UnknownError     State = -1
+	Success          State = 0
 )
 
 func (r State) Name() string {

@@ -74,9 +74,8 @@ func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []messag
 
 func preprocessMessage(client *QQClient, groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
 	for _, element := range elements {
-		switch element.(type) {
+		switch elem := element.(type) {
 		case *message2.AtElement:
-			elem := element.(*message2.AtElement)
 			member := client.GetMemberInfo(elem.Target, groupUin)
 			if member != nil {
 				elem.UID = member.Uid

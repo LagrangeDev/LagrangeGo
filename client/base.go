@@ -36,7 +36,6 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 }
 
 type QQClient struct {
-	lock         sync.RWMutex
 	refreshLock  sync.RWMutex
 	uin          uint32
 	appInfo      *info.AppInfo
@@ -213,13 +212,14 @@ func (c *QQClient) ReadLoop() {
 	c.OnDissconnected()
 }
 
-func (c *QQClient) Loop() {
+func (c *QQClient) Loop() error {
 	err := c.Connect()
 	if err != nil {
-
+		return err
 	}
 	go c.ReadLoop()
 	go c.ssoHeartBeatLoop()
+	return nil
 }
 
 func (c *QQClient) Connect() error {

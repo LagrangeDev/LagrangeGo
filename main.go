@@ -18,9 +18,13 @@ func main() {
 	sig := info.NewSigInfo(8848)
 
 	qqclient := client.NewQQclient(0, "", appInfo, deviceInfo, sig)
-	qqclient.Loop()
+	err := qqclient.Loop()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	_, err := qqclient.Login("", "./qrcode.png")
+	_, err = qqclient.Login("", "./qrcode.png")
 	if err != nil {
 		fmt.Println(err)
 	}

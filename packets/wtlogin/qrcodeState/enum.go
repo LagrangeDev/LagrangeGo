@@ -4,10 +4,10 @@ type State int
 
 const (
 	Confirmed         State = 0
-	Expired                 = 17
-	WaitingForScan          = 48
-	WaitingForConfirm       = 53
-	Canceled                = 54
+	Expired           State = 17
+	WaitingForScan    State = 48
+	WaitingForConfirm State = 53
+	Canceled          State = 54
 )
 
 func (r State) Name() string {
