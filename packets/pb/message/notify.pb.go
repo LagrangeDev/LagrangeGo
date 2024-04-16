@@ -97,23 +97,24 @@ type InvitationInner struct {
 }
 
 type GroupInvite struct {
-	GroupInvite uint32 `protobuf:"varint,1,opt"`
-	Field2      uint32 `protobuf:"varint,2,opt"` // 1
-	Field3      uint32 `protobuf:"varint,3,opt"` // 4
-	Field4      uint32 `protobuf:"varint,4,opt"` // 0
-	InvitorUid  string `protobuf:"bytes,5,opt"`
-	Hashes      []byte `protobuf:"bytes,6,opt"`
+	GroupUin   uint32 `protobuf:"varint,1,opt"`
+	Field2     uint32 `protobuf:"varint,2,opt"` // 1
+	Field3     uint32 `protobuf:"varint,3,opt"` // 4
+	Field4     uint32 `protobuf:"varint,4,opt"` // 0
+	InvitorUid string `protobuf:"bytes,5,opt"`
+	Hashes     []byte `protobuf:"bytes,6,opt"`
 }
 
 type GroupJoin struct {
-	GroupUin  uint32 `protobuf:"varint,1,opt"`
-	Field2    uint32 `protobuf:"varint,2,opt"`
-	TargetUid string `protobuf:"bytes,3,opt"`
-	Field4    uint32 `protobuf:"varint,4,opt"`
-	Field6    uint32 `protobuf:"varint,6,opt"`
-	Field7    string `protobuf:"bytes,7,opt"`
-	Field8    uint32 `protobuf:"varint,8,opt"`
-	Field9    []byte `protobuf:"bytes,9,opt"`
+	GroupUin     uint32               `protobuf:"varint,1,opt"`
+	Field2       uint32               `protobuf:"varint,2,opt"`
+	TargetUid    string               `protobuf:"bytes,3,opt"`
+	Field4       uint32               `protobuf:"varint,4,opt"`
+	RequestField proto.Option[string] `protobuf:"bytes,5,opt"`
+	Field6       uint32               `protobuf:"varint,6,opt"`
+	Field7       string               `protobuf:"bytes,7,opt"`
+	Field8       uint32               `protobuf:"varint,8,opt"`
+	Field9       []byte               `protobuf:"bytes,9,opt"`
 }
 
 type GroupMute struct {

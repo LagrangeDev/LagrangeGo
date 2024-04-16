@@ -57,15 +57,15 @@ type QQClient struct {
 	friendCache map[uint32]*entity.Friend
 	groupCache  map[uint32]map[uint32]*entity.GroupMember
 
-	GroupMessageEvent     EventHandle[*message.GroupMessage]
-	PrivateMessageEvent   EventHandle[*message.PrivateMessage]
-	TempMessageEvent      EventHandle[*message.TempMessage]
-	GroupInvitedEvent     EventHandle[*event.GroupMemberJoinRequest]
-	GroupJoinEvent        EventHandle[*event.GroupMemberJoined]
-	GroupLeaveEvent       EventHandle[*event.GroupMemberQuit]
-	GroupMemberJoinEvent  EventHandle[*event.GroupMemberJoined]
-	GroupMemberLeaveEvent EventHandle[*event.GroupMemberQuit]
-	// GroupMuteEvent        EventHandle[*event.GroupMuteMember] TODO: empty implementation now
+	GroupMessageEvent           EventHandle[*message.GroupMessage]
+	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
+	TempMessageEvent            EventHandle[*message.TempMessage]
+	GroupInvitedEvent           EventHandle[*event.GroupInvite]            // 邀请入群
+	GroupMemberJoinRequestEvent EventHandle[*event.GroupMemberJoinRequest] // 加群申请
+	GroupMemberJoinEvent        EventHandle[*event.GroupMemberIncrease]    // 成员入群
+	GroupMemberLeaveEvent       EventHandle[*event.GroupMemberDecrease]    // 成员退群
+	GroupMuteEvent              EventHandle[*event.GroupMute]
+	GroupRecallEvent            EventHandle[*event.GroupRecall]
 }
 
 func (c *QQClient) SendOidbPacket(pkt *oidb.OidbPacket) error {
