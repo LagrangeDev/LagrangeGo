@@ -350,7 +350,7 @@ message VideoFile {
   repeated bytes BytesThumbFileUrls = 20;
   repeated bytes BytesVideoFileUrls = 21;
   int32 ThumbDownloadFlag = 22;
-  int32 VideoDownloadFlag =23;
+  int32 VideoDownloadFlag = 23;
   bytes PbReserve = 24;
 }
 
@@ -386,3 +386,8 @@ message QFaceExtra {
   optional int32 Field9 = 9;
 }
 
+message QSmallFaceExtra {
+  uint32 FaceId = 1;
+  string Preview = 2;
+  string Preview2 = 3;
+}
