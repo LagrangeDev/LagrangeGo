@@ -72,11 +72,12 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 		}
 		_ = os.WriteFile(qrcodePath, png, 0666)
 		loginLogger.Infof("qrcode saved to %s", qrcodePath)
-		if c.QrcodeLogin(3) {
+		ok, err := c.QrcodeLogin(3)
+		if ok {
 			return c.Register()
 		}
+		return false, err
 	}
-	return false, nil
 }
 
 func (c *QQClient) FecthQrcode() ([]byte, string, error) {
@@ -202,7 +203,7 @@ func (c *QQClient) TokenLogin(token []byte) (loginState.State, error) {
 	return ParseNtloginResponse(packet.Data, c.sig)
 }
 
-func (c *QQClient) QrcodeLogin(refreshInterval int) bool {
+func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 	if c.sig.Qrsig == nil {
 		loginLogger.Fatal("No QrSig found, fetch qrcode first")
 	}
@@ -212,11 +213,12 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) bool {
 		retCode, err := c.GetQrcodeResult()
 		if err != nil {
 			loginLogger.Error(err)
-			return false
+			return false, err
 		}
 		if !retCode.Waitable() {
 			if !retCode.Success() {
 				loginLogger.Fatal(retCode.Name())
+				return false, errors.New(retCode.Name())
 			} else {
 				break
 			}
@@ -251,10 +253,10 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) bool {
 
 	if err != nil {
 		loginLogger.Fatal(err)
-		return false
+		return false, err
 	}
 
-	return wtlogin.DecodeLoginResponse(response.Data, c.sig)
+	return wtlogin.DecodeLoginResponse(response.Data, c.sig), nil
 }
 
 func (c *QQClient) Register() (bool, error) {

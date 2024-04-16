@@ -66,7 +66,9 @@ func (f *ColoredFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 }
 
 func GetLogger(prefix string) *logrus.Entry {
-	return logger.WithField("prefix", prefix)
+	log := logger.WithField("prefix", prefix)
+	log.Logger.ExitFunc = func(code int) {}
+	return log
 }
 
 func DisableLogOutput() {
