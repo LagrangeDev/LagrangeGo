@@ -2,95 +2,138 @@ package event
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/status"
 )
 
 type (
 	GroupEvent struct {
-		GroupID uint32
+		GroupUin uint32
 	}
 
-	GroupMuteMember struct {
+	GroupMute struct {
 		GroupEvent
 		OperatorUid string
 		TargetUid   string // when TargetUid is empty, mute all members
-		Duration    uint32
+		Duration    uint32 // Duration == math.MaxUint32 when means mute all
+	}
+
+	GroupRecall struct {
+		GroupEvent
+		AuthorUid   string
+		OperatorUid string
+		Sequence    uint64
+		Time        uint32
+		Random      uint32
 	}
 
 	GroupMemberJoinRequest struct {
 		GroupEvent
-		Uid        string
+		TargetUid  string
 		InvitorUid string
 		Answer     string // 问题：(.*)答案：(.*)
 	}
 
-	GroupMemberJoined struct {
+	GroupMemberIncrease struct {
 		GroupEvent
-		Uin      uint32
-		Uid      string
-		JoinType int32
+		MemberUid  string
+		InvitorUid string
+		JoinType   uint32
 	}
 
-	GroupMemberQuit struct {
+	GroupMemberDecrease struct {
 		GroupEvent
-		Uin         uint32
-		Uid         string
-		ExitType    int32
+		MemberUid   string
 		OperatorUid string
+		ExitType    uint32
 	}
 )
 
-func (gmq *GroupMemberQuit) IsKicked() bool {
-	return gmq.ExitType == 131
+type GroupInvite struct {
+	GroupUin   uint32
+	InvitorUid string
 }
 
-func ParseMemberJoinRequest(event *status.MemberJoinRequest) *GroupMemberJoinRequest {
+func (gmd *GroupMemberDecrease) IsKicked() bool {
+	return gmd.ExitType == 131
+}
+
+// ParseRequestJoinNotice 主动加群
+func ParseRequestJoinNotice(event *message.GroupJoin) *GroupMemberJoinRequest {
 	return &GroupMemberJoinRequest{
 		GroupEvent: GroupEvent{
-			GroupID: event.GroupID,
+			GroupUin: event.GroupUin,
 		},
-		Uid:    event.Uid,
-		Answer: event.RequestField.Unwrap(),
+		TargetUid: event.TargetUid,
+		Answer:    event.RequestField.Unwrap(),
 	}
 }
-func ParseMemberJoinRequestFromInvite(event *status.MemberInviteRequest) *GroupMemberJoinRequest {
+
+// ParseRequestInvitationNotice 邀请加群
+func ParseRequestInvitationNotice(event *message.GroupInvitation) *GroupMemberJoinRequest {
 	if event.Cmd == 87 {
 		inn := event.Info.Inner
 		return &GroupMemberJoinRequest{
 			GroupEvent: GroupEvent{
-				GroupID: inn.GroupID,
+				GroupUin: inn.GroupUin,
 			},
-			Uid:        inn.Uid,
+			TargetUid:  inn.TargetUid,
 			InvitorUid: inn.InvitorUid,
 		}
 	}
 	return nil
 }
 
-func ParseMemberJoined(msg *message.PushMsg, event *status.MemberChanged) *GroupMemberJoined {
-	return &GroupMemberJoined{
-		GroupEvent: GroupEvent{
-			GroupID: msg.Message.ResponseHead.FromUin,
-		},
-		Uin:      event.Uin,
-		Uid:      event.Uid,
-		JoinType: event.JoinType.Unwrap(),
+// ParseInviteNotice 被邀请加群
+func ParseInviteNotice(event *message.GroupInvite) *GroupInvite {
+	return &GroupInvite{
+		GroupUin:   event.GroupUin,
+		InvitorUid: event.InvitorUid,
 	}
 }
 
-func ParseMemberQuit(msg *message.PushMsg, event *status.MemberChanged) *GroupMemberQuit {
-	return &GroupMemberQuit{
+func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
+	return &GroupMemberIncrease{
 		GroupEvent: GroupEvent{
-			GroupID: msg.Message.ResponseHead.FromUin,
+			GroupUin: event.GroupUin,
 		},
-		Uin:         event.Uin,
-		Uid:         event.Uid,
+		MemberUid:  event.MemberUid,
+		InvitorUid: event.OperatorUid.Unwrap(),
+		JoinType:   event.IncreaseType,
+	}
+}
+
+func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
+	return &GroupMemberDecrease{
+		GroupEvent: GroupEvent{
+			GroupUin: event.GroupUin,
+		},
+		MemberUid:   event.MemberUid,
 		OperatorUid: event.OperatorUid.Unwrap(),
-		ExitType:    event.ExitType.Unwrap(),
+		ExitType:    event.DecreaseType,
 	}
 }
 
-func ParseGroupMuteEvent(event *map[int]any) *GroupMuteMember {
-	// TODO Parse GroupMuteEvent
-	return nil
+func ParseGroupRecallEvent(event *message.NotifyMessageBody) *GroupRecall {
+	info := event.Recall.RecallMessages[0]
+	result := GroupRecall{
+		GroupEvent: GroupEvent{
+			GroupUin: event.GroupUin,
+		},
+		AuthorUid:   info.AuthorUid,
+		OperatorUid: event.Recall.OperatorUid.Unwrap(),
+		Sequence:    info.Sequence,
+		Time:        info.Time,
+		Random:      info.Random,
+	}
+	return &result
+}
+
+func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {
+	return &GroupMute{
+		GroupEvent: GroupEvent{
+			GroupUin: event.GroupUin,
+		},
+		OperatorUid: event.OperatorUid.Unwrap(),
+		TargetUid:   event.Data.State.TargetUid.Unwrap(),
+		Duration:    event.Data.State.Duration,
+	}
 }
