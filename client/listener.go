@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"runtime/debug"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
@@ -28,6 +29,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 			networkLogger.Errorf("protobuf data: %x", pkt.Data)
 		}
 	}()
+	if msg.Message.Body == nil {
+		return nil, errors.New("message body is empty")
+	}
 
 	switch msg.Message.ContentHead.Type {
 	case 166: // private msg
