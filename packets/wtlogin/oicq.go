@@ -144,7 +144,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 	return utils.NewPacketBuilder(nil).WriteBytes(service, "u32", true).Pack(-1)
 }
 
-func DecodeLoginResponse(buf []byte, sig *info.SigInfo) bool {
+func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 	reader := binary.NewReader(buf)
 	reader.ReadBytes(2)
 	typ := reader.ReadU8()
@@ -171,12 +171,13 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) bool {
 		err := proto.Unmarshal(tlv[0x543], &resp)
 		if err != nil {
 			loginLogger.Errorf("parsing login response error: %s", err)
+			return false, err
 		}
 		sig.Uid = resp.Layer1.Layer2.Uid
 
 		loginLogger.Debugln("SigInfo got")
 
-		return true
+		return true, nil
 	} else if errData, ok := tlv[0x146]; ok {
 		errBuf := binary.NewReader(errData)
 		errBuf.ReadBytes(4)
@@ -193,7 +194,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) bool {
 	}
 
 	loginLogger.Errorf("Login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
-	return false
+	return false, fmt.Errorf("login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
 }
 
 func generateTrace() string {
