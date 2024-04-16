@@ -67,10 +67,10 @@ func (b *Builder) WriteBool(v bool) *Builder {
 	return b
 }
 
-func (b *Builder) WriteByte(v byte) *Builder {
-	b.buffer = append(b.buffer, v)
-	return b.pack(v)
-}
+//func (b *Builder) WriteByte(v byte) *Builder {
+//	b.buffer = append(b.buffer, v)
+//	return b.pack(v)
+//}
 
 func (b *Builder) WriteBytes(v []byte, withLength bool) *Builder {
 	if withLength {
