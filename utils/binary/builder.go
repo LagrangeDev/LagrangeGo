@@ -46,13 +46,13 @@ func (b *Builder) pack(v any) *Builder {
 	return b
 }
 
-func (b *Builder) Pack(typ int) []byte {
+func (b *Builder) Pack(typ int64) []byte {
 	if typ != -1 {
 		// 或许这里是tlv
 		buf := new(bytes.Buffer)
-		_ = binary.Write(buf, binary.BigEndian, typ)           // type
-		_ = binary.Write(buf, binary.BigEndian, len(b.Data())) // length
-		return append(buf.Bytes(), b.Data()...)                // type + length + value
+		_ = binary.Write(buf, binary.BigEndian, typ)                  // type
+		_ = binary.Write(buf, binary.BigEndian, int64(len(b.Data()))) // length
+		return append(buf.Bytes(), b.Data()...)                       // type + length + value
 	}
 	return b.Data()
 }
