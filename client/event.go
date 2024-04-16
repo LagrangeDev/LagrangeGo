@@ -51,7 +51,7 @@ func OnEvent(client *QQClient, msg any) {
 		client.PrivateMessageEvent.dispatch(client, msg.(*message.PrivateMessage))
 	case *message.GroupMessage:
 		client.GroupMessageEvent.dispatch(client, msg.(*message.GroupMessage))
-	case message.TempMessage:
+	case *message.TempMessage:
 		client.TempMessageEvent.dispatch(client, msg.(*message.TempMessage))
 	case nil:
 		networkLogger.Errorf("nil event msg, ignore")
