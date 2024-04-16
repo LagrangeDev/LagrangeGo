@@ -11,7 +11,7 @@ import (
 var buffer, _ = hex.DecodeString("08000f0000000000000058ffffffc5")
 
 func Read(n int) {
-	for _ = range n {
+	for i := 0; i < n; i++ {
 		buf := make([]byte, len(buffer))
 		copy(buf, buffer)
 		reader := bytes.NewReader(buf)
@@ -32,7 +32,7 @@ func TestName(t *testing.T) {
 }
 
 func NoRead(n int) {
-	for _ = range n {
+	for i := 0; i < n; i++ {
 		buf := make([]byte, len(buffer))
 		copy(buf, buffer)
 		_ = buf[0]
