@@ -17,7 +17,7 @@ func main() {
 	}
 	sig := info.NewSigInfo(8848)
 
-	qqclient := client.NewQQclient(0, "", appInfo, deviceInfo, sig)
+	qqclient := client.NewQQclient(0, "https://lwxmagic.rpgame.net/api/sign", appInfo, deviceInfo, sig)
 	qqclient.Loop()
 
 	_, err := qqclient.Login("", "./qrcode.png")
