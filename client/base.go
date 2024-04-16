@@ -132,7 +132,7 @@ heartBeatLoop:
 				"trpc.qq_new_tech.status_svc.StatusService.SsoHeartBeat",
 				wtlogin.BuildSSOHeartbeatRequest())
 			if err != nil {
-				networkLogger.Error("heartbeat err %s", err)
+				networkLogger.Errorf("heartbeat err %s", err)
 			}
 			networkLogger.Debugf("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
 		}
