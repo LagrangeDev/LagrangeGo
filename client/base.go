@@ -1,13 +1,11 @@
 package client
 
 import (
-	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/cache"
 
-	"github.com/LagrangeDev/LagrangeGo/entity"
 	"github.com/LagrangeDev/LagrangeGo/event"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
@@ -39,7 +37,6 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 }
 
 type QQClient struct {
-	refreshLock  sync.RWMutex
 	Uin          uint32
 	appInfo      *info.AppInfo
 	deviceInfo   *info.DeviceInfo
@@ -56,9 +53,7 @@ type QQClient struct {
 
 	tcp *TCPClient
 
-	cache       *cache.Cache
-	friendCache map[uint32]*entity.Friend
-	groupCache  map[uint32]map[uint32]*entity.GroupMember
+	cache *cache.Cache
 
 	GroupMessageEvent           EventHandle[*message.GroupMessage]
 	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
