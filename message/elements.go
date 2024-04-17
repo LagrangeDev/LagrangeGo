@@ -19,6 +19,11 @@ type (
 		SubType AtType
 	}
 
+	FaceElement struct {
+		FaceID      uint16
+		isLargeFace bool
+	}
+
 	ReplyElement struct {
 		ReplySeq int32
 		Sender   uint64
@@ -79,6 +84,10 @@ func (e *AtElement) Type() ElementType {
 	return At
 }
 
+func (e *FaceElement) Type() ElementType {
+	return Face
+}
+
 func (e *GroupImageElement) Type() ElementType {
 	return Image
 }
@@ -119,6 +128,34 @@ func (e *AtElement) BuildElement() *message.Elem {
 		Str:       proto.Some(e.Display),
 		PbReserve: reserveData,
 	}}
+}
+
+func (e *FaceElement) BuildElement() *message.Elem {
+	faceId := int32(e.FaceID)
+	if e.isLargeFace {
+		qFace := message.QFaceExtra{
+			Field1:  proto.Some("1"),
+			Field2:  proto.Some("8"),
+			FaceId:  proto.Some(faceId),
+			Field4:  proto.Some(int32(1)),
+			Field5:  proto.Some(int32(1)),
+			Field6:  proto.Some(""),
+			Preview: proto.Some(""),
+			Field9:  proto.Some(int32(1)),
+		}
+		qFaceData, _ := proto.Marshal(&qFace)
+		return &message.Elem{
+			CommonElem: &message.CommonElem{
+				ServiceType:  37,
+				PbElem:       qFaceData,
+				BusinessType: 1,
+			},
+		}
+	} else {
+		return &message.Elem{
+			Face: &message.Face{Index: proto.Some(faceId)},
+		}
+	}
 }
 
 func (e *GroupImageElement) BuildElement() *message.Elem {

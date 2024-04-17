@@ -7,6 +7,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 type IMessage interface {
@@ -159,6 +160,30 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			}
 		}
 
+		if elem.Face != nil {
+			if len(elem.Face.Old) > 0 {
+				faceId := elem.Face.Index
+				if faceId.IsSome() {
+					res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap())})
+				}
+			} else if elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil {
+				qFace := message.QFaceExtra{}
+				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
+				if err == nil {
+					faceId := qFace.FaceId
+					if faceId.IsSome() {
+						res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap()), isLargeFace: true})
+					}
+				}
+			} else if elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil {
+				qFace := message.QSmallFaceExtra{}
+				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
+				if err == nil {
+					res = append(res, &FaceElement{FaceID: uint16(qFace.FaceId), isLargeFace: false})
+				}
+			}
+		}
+
 		if elem.VideoFile != nil {
 			return []IMessageElement{
 				&ShortVideoElement{
@@ -235,6 +260,13 @@ func (msg *GroupMessage) ToString() (res string) {
 			strBuilder.WriteString("[Reply: ")
 			strBuilder.WriteString(strconv.FormatInt(int64(e.ReplySeq), 10))
 			strBuilder.WriteString("]")
+		case *FaceElement:
+			strBuilder.WriteString("[Face: ")
+			strBuilder.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
+			if e.isLargeFace {
+				strBuilder.WriteString(", isLargeFace: true]")
+			}
+			strBuilder.WriteString("]")
 		}
 	}
 	res = strBuilder.String()
@@ -250,6 +282,12 @@ func ToReadableString(m []IMessageElement) string {
 			sb.WriteString("[图片]")
 		case *AtElement:
 			sb.WriteString(e.Display)
+		case *ReplyElement:
+			sb.WriteString("[回复]")
+		case *FaceElement:
+			sb.WriteString("[表情:")
+			sb.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
+			sb.WriteString("]")
 		}
 	}
 	return sb.String()

@@ -54,20 +54,22 @@ func OnEvent(client *QQClient, msg any) {
 		client.GroupMessageEvent.dispatch(client, msg)
 	case *message.TempMessage:
 		client.TempMessageEvent.dispatch(client, msg)
-	case *event.GroupMemberJoinRequest:
+	case *event.GroupInvite:
 		client.GroupInvitedEvent.dispatch(client, msg)
-	case *event.GroupMemberJoined:
-		if client.uin == msg.Uin {
-			client.GroupJoinEvent.dispatch(client, msg)
-		} else {
-			client.GroupMemberJoinEvent.dispatch(client, msg)
-		}
-	case *event.GroupMemberQuit:
-		if client.uin == msg.Uin {
-			client.GroupLeaveEvent.dispatch(client, msg)
-		} else {
-			client.GroupMemberLeaveEvent.dispatch(client, msg)
-		}
+	case *event.GroupMemberJoinRequest:
+		client.GroupMemberJoinRequestEvent.dispatch(client, msg)
+	case *event.GroupMemberIncrease:
+		client.GroupMemberJoinEvent.dispatch(client, msg)
+	case *event.GroupMemberDecrease:
+		client.GroupMemberLeaveEvent.dispatch(client, msg)
+	case *event.GroupMute:
+		client.GroupMuteEvent.dispatch(client, msg)
+	case *event.GroupRecall:
+		client.GroupRecallEvent.dispatch(client, msg)
+	case *event.FriendRequest:
+		client.FriendRequestEvent.dispatch(client, msg)
+	case *event.FriendRecall:
+		client.FriendRecallEvent.dispatch(client, msg)
 	case nil:
 		networkLogger.Errorf("nil event msg, ignore")
 	default:

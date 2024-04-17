@@ -84,7 +84,7 @@ message InvitationInner {
 }
 
 message GroupInvite {
-  uint32 GroupInvite = 1;
+  uint32 GroupUin = 1;
   uint32 Field2 = 2; // 1
   uint32 Field3 = 3; // 4
   uint32 Field4 = 4; // 0
@@ -97,6 +97,7 @@ message GroupJoin {
   uint32 Field2 = 2;
   string TargetUid = 3;
   uint32 Field4 = 4;
+  optional string RequestField = 5;
   uint32 Field6 = 6;
   string Field7 = 7;
   uint32 Field8 = 8;

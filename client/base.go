@@ -36,7 +36,6 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 }
 
 type QQClient struct {
-	lock         sync.RWMutex
 	refreshLock  sync.RWMutex
 	uin          uint32
 	appInfo      *info.AppInfo
@@ -57,15 +56,17 @@ type QQClient struct {
 	friendCache map[uint32]*entity.Friend
 	groupCache  map[uint32]map[uint32]*entity.GroupMember
 
-	GroupMessageEvent     EventHandle[*message.GroupMessage]
-	PrivateMessageEvent   EventHandle[*message.PrivateMessage]
-	TempMessageEvent      EventHandle[*message.TempMessage]
-	GroupInvitedEvent     EventHandle[*event.GroupMemberJoinRequest]
-	GroupJoinEvent        EventHandle[*event.GroupMemberJoined]
-	GroupLeaveEvent       EventHandle[*event.GroupMemberQuit]
-	GroupMemberJoinEvent  EventHandle[*event.GroupMemberJoined]
-	GroupMemberLeaveEvent EventHandle[*event.GroupMemberQuit]
-	// GroupMuteEvent        EventHandle[*event.GroupMuteMember] TODO: empty implementation now
+	GroupMessageEvent           EventHandle[*message.GroupMessage]
+	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
+	TempMessageEvent            EventHandle[*message.TempMessage]
+	GroupInvitedEvent           EventHandle[*event.GroupInvite]            // 邀请入群
+	GroupMemberJoinRequestEvent EventHandle[*event.GroupMemberJoinRequest] // 加群申请
+	GroupMemberJoinEvent        EventHandle[*event.GroupMemberIncrease]    // 成员入群
+	GroupMemberLeaveEvent       EventHandle[*event.GroupMemberDecrease]    // 成员退群
+	GroupMuteEvent              EventHandle[*event.GroupMute]
+	GroupRecallEvent            EventHandle[*event.GroupRecall]
+	FriendRequestEvent          EventHandle[*event.FriendRequest] // 好友申请
+	FriendRecallEvent           EventHandle[*event.FriendRecall]
 }
 
 func (c *QQClient) SendOidbPacket(pkt *oidb.OidbPacket) error {
@@ -211,13 +212,14 @@ func (c *QQClient) ReadLoop() {
 	c.OnDissconnected()
 }
 
-func (c *QQClient) Loop() {
+func (c *QQClient) Loop() error {
 	err := c.Connect()
 	if err != nil {
-
+		return err
 	}
 	go c.ReadLoop()
 	go c.ssoHeartBeatLoop()
+	return nil
 }
 
 func (c *QQClient) Connect() error {

@@ -14,7 +14,6 @@ PROTO_FILES := \
 	$(PROTO_DIR)/service/*.proto \
 	$(PROTO_DIR)/service/highway/*.proto \
 	$(PROTO_DIR)/service/oidb/*.proto \
-	$(PROTO_DIR)/status/*.proto \
 	$(PROTO_DIR)/*.proto
 
 

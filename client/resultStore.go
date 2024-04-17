@@ -10,6 +10,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
+//nolint:unused
 var resultLogger = utils.GetLogger("resultstore")
 
 // ResultStore 灵感来源于ddl的onebot适配器
