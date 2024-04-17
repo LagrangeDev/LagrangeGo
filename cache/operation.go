@@ -12,27 +12,6 @@ func (c *Cache) RefreshAll(friendCache map[uint32]*entity.Friend, groupCache map
 	c.GroupCache = groupCache
 }
 
-// RefreshAllFriend 刷新所有好友缓存
-func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.Friend) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.FriendCache = friendCache
-}
-
-// RefreshAllGroup 刷新所有群的群消息缓存
-func (c *Cache) RefreshAllGroup(groupCache map[uint32]*entity.Group) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupCache = groupCache
-}
-
-// RefreshAllGroupMember 刷新所有群的群员缓存
-func (c *Cache) RefreshAllGroupMember(groupMemberCache map[uint32]map[uint32]*entity.GroupMember) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupMemberCache = groupMemberCache
-}
-
 // RefreshFriend 刷新一个好友的缓存
 func (c *Cache) RefreshFriend(friend *entity.Friend) {
 	c.refreshLock.Lock()
@@ -40,11 +19,11 @@ func (c *Cache) RefreshFriend(friend *entity.Friend) {
 	c.FriendCache[friend.Uin] = friend
 }
 
-// RefreshGroup 刷新一个群的群信息缓存
-func (c *Cache) RefreshGroup(group *entity.Group) {
+// RefreshAllFriend 刷新所有好友缓存
+func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.Friend) {
 	c.refreshLock.Lock()
 	defer c.refreshLock.Unlock()
-	c.GroupCache[group.GroupUin] = group
+	c.FriendCache = friendCache
 }
 
 // RefreshGroupMember 刷新指定群的一个群成员缓存
@@ -59,4 +38,25 @@ func (c *Cache) RefreshGroupMembers(groupUin uint32, groupMembers map[uint32]*en
 	c.refreshLock.Lock()
 	defer c.refreshLock.Unlock()
 	c.GroupMemberCache[groupUin] = groupMembers
+}
+
+// RefreshAllGroupMembers 刷新所有群的群员缓存
+func (c *Cache) RefreshAllGroupMembers(groupMemberCache map[uint32]map[uint32]*entity.GroupMember) {
+	c.refreshLock.Lock()
+	defer c.refreshLock.Unlock()
+	c.GroupMemberCache = groupMemberCache
+}
+
+// RefreshGroup 刷新一个群的群信息缓存
+func (c *Cache) RefreshGroup(group *entity.Group) {
+	c.refreshLock.Lock()
+	defer c.refreshLock.Unlock()
+	c.GroupCache[group.GroupUin] = group
+}
+
+// RefreshAllGroup 刷新所有群的群信息缓存
+func (c *Cache) RefreshAllGroup(groupCache map[uint32]*entity.Group) {
+	c.refreshLock.Lock()
+	defer c.refreshLock.Unlock()
+	c.GroupCache = groupCache
 }

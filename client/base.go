@@ -5,6 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/cache"
+
 	"github.com/LagrangeDev/LagrangeGo/entity"
 	"github.com/LagrangeDev/LagrangeGo/event"
 
@@ -30,6 +32,7 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		pushStore: make(chan *wtlogin.SSOPacket, 128),
 		stopChan:  make(chan struct{}),
 		tcp:       NewTCPClient(Server, 5),
+		cache:     cache.NewCache(),
 	}
 	client.Online.Store(false)
 	return client
@@ -53,6 +56,7 @@ type QQClient struct {
 
 	tcp *TCPClient
 
+	cache       *cache.Cache
 	friendCache map[uint32]*entity.Friend
 	groupCache  map[uint32]map[uint32]*entity.GroupMember
 
