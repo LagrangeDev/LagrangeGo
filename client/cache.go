@@ -4,12 +4,23 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/entity"
 )
 
-// GetUid 获取缓存中对应qq的uid，仅限好友
+// GetUid 获取缓存中对应uin的uid
 func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
 	if c.cache.FriendCacheIsEmpty() {
 		c.RefreshFriendCache()
 	}
 	return c.cache.GetUid(uin, groupUin...)
+}
+
+// GetUin 获取缓存中对应的uin
+func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
+	if c.cache.FriendCacheIsEmpty() {
+		c.RefreshFriendCache()
+	}
+	if len(groupUin) != 0 && c.cache.GroupMemberCacheIsEmpty(groupUin[0]) {
+		c.RefreshGroupMembersCache(groupUin[0])
+	}
+	return c.cache.GetUin(uid, groupUin...)
 }
 
 // GetFriendInfo 获取好友信息
