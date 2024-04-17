@@ -21,7 +21,7 @@ const Server = "msfwifi.3g.qq.com:8080"
 // NewQQclient 创建一个新的QQClient
 func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
 	client := &QQClient{
-		uin:          uin,
+		Uin:          uin,
 		appInfo:      appInfo,
 		deviceInfo:   deviceInfo,
 		sig:          sig,
@@ -31,13 +31,13 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		stopChan:  make(chan struct{}),
 		tcp:       NewTCPClient(Server, 5),
 	}
-	client.online.Store(false)
+	client.Online.Store(false)
 	return client
 }
 
 type QQClient struct {
 	refreshLock  sync.RWMutex
-	uin          uint32
+	Uin          uint32
 	appInfo      *info.AppInfo
 	deviceInfo   *info.DeviceInfo
 	sig          *info.SigInfo
@@ -45,7 +45,7 @@ type QQClient struct {
 
 	pushStore chan *wtlogin.SSOPacket
 
-	online   atomic.Bool
+	Online   atomic.Bool
 	stopChan chan struct{}
 
 	t106 []byte
@@ -83,7 +83,7 @@ func (c *QQClient) SendUniPacket(cmd string, buf []byte) error {
 	if c.signProvider != nil {
 		sign = c.signProvider(cmd, seq, buf)
 	}
-	packet := wtlogin.BuildUniPacket(int(c.uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
+	packet := wtlogin.BuildUniPacket(int(c.Uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
 	return c.Send(packet)
 }
 
@@ -93,7 +93,7 @@ func (c *QQClient) SendUniPacketAndAwait(cmd string, buf []byte) (*wtlogin.SSOPa
 	if c.signProvider != nil {
 		sign = c.signProvider(cmd, seq, buf)
 	}
-	packet := wtlogin.BuildUniPacket(int(c.uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
+	packet := wtlogin.BuildUniPacket(int(c.Uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
 	return c.SendAndWait(packet, seq, 5)
 }
 
@@ -132,7 +132,7 @@ heartBeatLoop:
 		case <-c.stopChan:
 			break heartBeatLoop
 		case <-time.After(270 * time.Second):
-			if !c.online.Load() {
+			if !c.Online.Load() {
 				continue heartBeatLoop
 			}
 			startTime := time.Now().UnixMilli()
@@ -209,7 +209,7 @@ func (c *QQClient) ReadLoop() {
 			c.tcp.Close()
 		}
 	}
-	c.OnDissconnected()
+	c.OnDisconnected()
 }
 
 func (c *QQClient) Loop() error {
@@ -233,7 +233,7 @@ func (c *QQClient) Connect() error {
 
 func (c *QQClient) DisConnect() {
 	c.tcp.Close()
-	c.OnDissconnected()
+	c.OnDisconnected()
 }
 
 // Stop 停止整个client，一旦停止不能重新连接
@@ -244,15 +244,15 @@ func (c *QQClient) Stop() {
 
 // setOnline 设置qq已经上线
 func (c *QQClient) setOnline() {
-	c.online.Store(true)
+	c.Online.Store(true)
 }
 
 func (c *QQClient) OnConnected() {
 
 }
 
-func (c *QQClient) OnDissconnected() {
-	c.online.Store(false)
+func (c *QQClient) OnDisconnected() {
+	c.Online.Store(false)
 }
 
 func (c *QQClient) getSeq() int {
