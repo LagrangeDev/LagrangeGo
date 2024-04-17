@@ -55,7 +55,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 	body := message2.BuildMessageElements(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
-			Uid: proto.Some(c.GetUidFromFriends(uin)),
+			Uid: proto.Some(c.GetUid(uin)),
 		},
 	}
 	return c.SendRawMessage(route, body)
