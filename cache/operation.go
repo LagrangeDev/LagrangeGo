@@ -9,7 +9,7 @@ func (c *Cache) RefreshAll(friendCache map[uint32]*entity.Friend, groupCache map
 	defer c.refreshLock.Unlock()
 	c.FriendCache = friendCache
 	c.GroupMemberCache = groupMemberCache
-	c.GroupCache = groupCache
+	c.GroupInfoCache = groupCache
 }
 
 // RefreshFriend 刷新一个好友的缓存
@@ -51,12 +51,12 @@ func (c *Cache) RefreshAllGroupMembers(groupMemberCache map[uint32]map[uint32]*e
 func (c *Cache) RefreshGroup(group *entity.Group) {
 	c.refreshLock.Lock()
 	defer c.refreshLock.Unlock()
-	c.GroupCache[group.GroupUin] = group
+	c.GroupInfoCache[group.GroupUin] = group
 }
 
 // RefreshAllGroup 刷新所有群的群信息缓存
 func (c *Cache) RefreshAllGroup(groupCache map[uint32]*entity.Group) {
 	c.refreshLock.Lock()
 	defer c.refreshLock.Unlock()
-	c.GroupCache = groupCache
+	c.GroupInfoCache = groupCache
 }

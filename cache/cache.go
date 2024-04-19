@@ -49,19 +49,19 @@ func (c *Cache) GetFriend(uin uint32) *entity.Friend {
 	return c.FriendCache[uin]
 }
 
-// GetGroup 获取群聊信息
-func (c *Cache) GetGroup(groupUin uint32) *entity.Group {
+// GetGroupInfo 获取群信息
+func (c *Cache) GetGroupInfo(groupUin uint32) *entity.Group {
 	c.refreshLock.RLock()
 	defer c.refreshLock.RUnlock()
-	return c.GroupCache[groupUin]
+	return c.GroupInfoCache[groupUin]
 }
 
-// GetAllGroups 获取所有群聊信息
-func (c *Cache) GetAllGroups() map[uint32]*entity.Group {
+// GetAllGroupsInfo 获取所有群信息
+func (c *Cache) GetAllGroupsInfo() map[uint32]*entity.Group {
 	c.refreshLock.RLock()
 	defer c.refreshLock.RUnlock()
-	groups := make(map[uint32]*entity.Group, len(c.GroupCache))
-	for group, grpInfo := range c.GroupCache {
+	groups := make(map[uint32]*entity.Group, len(c.GroupInfoCache))
+	for group, grpInfo := range c.GroupInfoCache {
 		groups[group] = grpInfo
 	}
 	return groups
@@ -88,20 +88,30 @@ func (c *Cache) GetGroupMembers(groupUin uint32) map[uint32]*entity.GroupMember 
 	return members
 }
 
+// FriendCacheIsEmpty 好友信息缓存是否为空
 func (c *Cache) FriendCacheIsEmpty() bool {
 	c.refreshLock.RLock()
 	defer c.refreshLock.RUnlock()
 	return len(c.FriendCache) == 0
 }
 
-func (c *Cache) GroupCacheIsEmpty() bool {
+// GroupMembersCacheIsEmpty 群成员缓存是否为空
+func (c *Cache) GroupMembersCacheIsEmpty() bool {
 	c.refreshLock.RLock()
 	defer c.refreshLock.RUnlock()
 	return len(c.GroupMemberCache) == 0
 }
 
+// GroupMemberCacheIsEmpty 指定群的群成员缓存是否为空
 func (c *Cache) GroupMemberCacheIsEmpty(groupUin uint32) bool {
 	c.refreshLock.RLock()
 	defer c.refreshLock.RUnlock()
 	return len(c.GroupMemberCache[groupUin]) == 0
+}
+
+// GroupInfoCacheIsEmpty 群信息缓存是否为空
+func (c *Cache) GroupInfoCacheIsEmpty() bool {
+	c.refreshLock.RLock()
+	defer c.refreshLock.RUnlock()
+	return len(c.GroupInfoCache) == 0
 }
