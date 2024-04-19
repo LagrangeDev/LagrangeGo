@@ -49,7 +49,7 @@ func ImageResolve(image []byte) (ImageFormat, Vector2, error) {
 	}
 
 	size := Vector2{}
-	format := Unknown
+	var format ImageFormat
 
 	switch {
 	case bytes.Equal(image[:6], []byte{0x47, 0x49, 0x46, 0x38, 0x39, 0x61}) || bytes.Equal(image[:6], []byte{0x47, 0x49, 0x46, 0x38, 0x37, 0x61}): // GIF
