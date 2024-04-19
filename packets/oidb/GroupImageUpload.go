@@ -7,7 +7,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"io"
-	"math/rand/v2"
+	"math/rand"
 )
 
 func BuildGroupImageUploadReq(groupUin uint32, stream io.Reader) (*OidbPacket, error) {
@@ -72,7 +72,7 @@ func BuildGroupImageUploadReq(groupUin uint32, stream io.Reader) (*OidbPacket, e
 			},
 			TryFastUploadCompleted: true,
 			SrvSendMsg:             false,
-			ClientRandomId:         rand.Uint64(),
+			ClientRandomId:         uint64(rand.Int63()),
 			CompatQMsgSceneType:    2,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
