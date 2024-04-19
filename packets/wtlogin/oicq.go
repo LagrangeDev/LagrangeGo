@@ -155,7 +155,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 	if typ == 0 {
 		reader = binary.NewReader(qqtea.QQTeaDecrypt(tlv[0x119], sig.Tgtgt))
 		tlv = reader.ReadTlv()
-		if tgt, ok := tlv[0x10a]; ok {
+		if tgt, ok := tlv[0x10A]; ok {
 			sig.Tgt = tgt
 		}
 		if d2, ok := tlv[0x143]; ok {
@@ -163,6 +163,14 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 		}
 		if d2Key, ok := tlv[0x305]; ok {
 			sig.D2Key = d2Key
+		}
+		if tlv11a, ok := tlv[0x11A]; ok {
+			loginLogger.Infof("tlv11a data: %x", tlv11a)
+			tlvReader := binary.NewReader(tlv11a)
+			tlvReader.ReadU16()
+			sig.Age = tlvReader.ReadU8()
+			sig.Gender = tlvReader.ReadU8()
+			sig.Nickname = tlvReader.ReadStringWithLength("u8", false)
 		}
 		sig.Tgtgt = utils.Md5Digest(sig.D2Key)
 		sig.TempPwd = tlv[0x106]

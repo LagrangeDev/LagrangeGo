@@ -68,6 +68,10 @@ type QQClient struct {
 	FriendRecallEvent           EventHandle[*event.FriendRecall]
 }
 
+func (c *QQClient) NickName() string {
+	return c.sig.Nickname
+}
+
 func (c *QQClient) SendOidbPacket(pkt *oidb.OidbPacket) error {
 	return c.SendUniPacket(pkt.Cmd, pkt.Data)
 }

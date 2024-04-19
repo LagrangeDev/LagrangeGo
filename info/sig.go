@@ -2,6 +2,7 @@ package info
 
 type SigInfo struct {
 	Uin         uint32
+	Uid         string
 	Sequence    int
 	Tgtgt       []byte
 	Tgt         []byte
@@ -13,12 +14,16 @@ type SigInfo struct {
 	Cookies     string
 	UnusualSig  []byte
 	TempPwd     []byte
-	Uid         string
 	CaptchaInfo [3]string
+
+	Nickname string
+	Age      uint8
+	Gender   uint8
 }
 
 func NewSigInfo(seq int) *SigInfo {
 	return &SigInfo{
+		Uid:         "",
 		Sequence:    seq,
 		Tgtgt:       make([]byte, 0),
 		Tgt:         make([]byte, 0),
@@ -30,7 +35,6 @@ func NewSigInfo(seq int) *SigInfo {
 		Cookies:     "",
 		UnusualSig:  make([]byte, 0),
 		TempPwd:     make([]byte, 0),
-		Uid:         "",
 		CaptchaInfo: [3]string{"", "", ""},
 	}
 }
