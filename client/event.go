@@ -70,6 +70,8 @@ func OnEvent(client *QQClient, msg any) {
 		client.FriendRequestEvent.dispatch(client, msg)
 	case *event.FriendRecall:
 		client.FriendRecallEvent.dispatch(client, msg)
+	case *event.Rename:
+		client.RenameEvent.dispatch(client, msg)
 	case nil:
 		networkLogger.Errorf("nil event msg, ignore")
 	default:

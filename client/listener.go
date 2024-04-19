@@ -95,6 +95,24 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 				return nil, err
 			}
 			return eventConverter.ParseFriendRecallEvent(&pb), nil
+		case 39: // friend rename
+			networkLogger.Info("friend rename")
+			pb := message.FriendRenameMsg{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			return eventConverter.ParseFriendRenameEvent(&pb, c.cache), nil
+		case 29:
+			networkLogger.Info("self rename")
+			pb := message.SelfRenameMsg{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			return eventConverter.ParseSelfRenameEvent(&pb), nil
+		default:
+			networkLogger.Warningf("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	case 0x2DC: // grp event, 732
 		subType := pkg.ContentHead.SubType.Unwrap()

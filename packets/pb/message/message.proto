@@ -113,3 +113,32 @@ message SsoReadedReportGroup {
   uint32 GroupUin = 1;
   uint32 StartSequence = 2;
 }
+
+message SelfRenameMsg {
+  uint32 Field1 = 1; // 20
+  SelfRenameBody Body = 20;
+}
+
+message SelfRenameBody {
+  uint32 Uin = 1;
+  RenameData RenameData = 2;
+}
+
+message FriendRenameMsg {
+  FriendRenameMsgBody Body = 1;
+}
+
+message FriendRenameMsgBody {
+  uint32 Field1 = 2; // 20
+  FriendRenameMsgData Data = 8;
+}
+
+message FriendRenameMsgData {
+  string Uid = 1;
+  RenameData RenameData = 2;
+}
+
+message RenameData {
+  uint32 Field1 = 1; // 20002
+  string NickName = 2;
+}

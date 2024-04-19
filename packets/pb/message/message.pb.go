@@ -126,3 +126,38 @@ type SsoReadedReportGroup struct {
 	StartSequence uint32 `protobuf:"varint,2,opt"`
 	_             [0]func()
 }
+
+type SelfRenameMsg struct {
+	Field1 uint32          `protobuf:"varint,1,opt"` // 20
+	Body   *SelfRenameBody `protobuf:"bytes,20,opt"`
+	_      [0]func()
+}
+
+type SelfRenameBody struct {
+	Uin        uint32      `protobuf:"varint,1,opt"`
+	RenameData *RenameData `protobuf:"bytes,2,opt"`
+	_          [0]func()
+}
+
+type FriendRenameMsg struct {
+	Body *FriendRenameMsgBody `protobuf:"bytes,1,opt"`
+	_    [0]func()
+}
+
+type FriendRenameMsgBody struct {
+	Field1 uint32               `protobuf:"varint,2,opt"` // 20
+	Data   *FriendRenameMsgData `protobuf:"bytes,8,opt"`
+	_      [0]func()
+}
+
+type FriendRenameMsgData struct {
+	Uid        string      `protobuf:"bytes,1,opt"`
+	RenameData *RenameData `protobuf:"bytes,2,opt"`
+	_          [0]func()
+}
+
+type RenameData struct {
+	Field1   uint32 `protobuf:"varint,1,opt"` // 20002
+	NickName string `protobuf:"bytes,2,opt"`
+	_        [0]func()
+}

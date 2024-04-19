@@ -66,6 +66,7 @@ type QQClient struct {
 	GroupRecallEvent            EventHandle[*event.GroupRecall]
 	FriendRequestEvent          EventHandle[*event.FriendRequest] // 好友申请
 	FriendRecallEvent           EventHandle[*event.FriendRecall]
+	RenameEvent                 EventHandle[*event.Rename]
 }
 
 func (c *QQClient) NickName() string {

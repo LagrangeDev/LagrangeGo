@@ -1,6 +1,7 @@
 package event
 
 import (
+	"github.com/LagrangeDev/LagrangeGo/cache"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 )
 
@@ -17,6 +18,12 @@ type (
 		Sequence uint64
 		Time     uint32
 		Random   uint32
+	}
+
+	Rename struct {
+		SubType  uint32 // self 0 friend 1
+		Uin      uint32
+		Nickname string
 	}
 )
 
@@ -37,5 +44,13 @@ func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 		Sequence: uint64(info.Sequence),
 		Time:     info.Time,
 		Random:   info.Random,
+	}
+}
+
+func ParseFriendRenameEvent(event *message.FriendRenameMsg, cache *cache.Cache) *Rename {
+	return &Rename{
+		SubType:  1,
+		Uin:      cache.GetUin(event.Body.Data.Uid),
+		Nickname: event.Body.Data.RenameData.NickName,
 	}
 }
