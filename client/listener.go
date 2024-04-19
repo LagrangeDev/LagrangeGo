@@ -110,7 +110,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseSelfRenameEvent(&pb), nil
+			return eventConverter.ParseSelfRenameEvent(&pb, c.sig), nil
 		default:
 			networkLogger.Warningf("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
