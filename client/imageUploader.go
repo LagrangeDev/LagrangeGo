@@ -80,7 +80,8 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		if err != nil {
 			return nil, err
 		}
-		if !c.UploadSrcByStreamAsync(1004, io.ReadSeeker(bytes.NewReader(image.Stream)), c.sigSession, md5hash, extStream) {
+		sigSession, _ := c.GetServiceServer()
+		if !c.UploadSrcByStreamAsync(1004, io.ReadSeeker(bytes.NewReader(image.Stream)), sigSession, md5hash, extStream) {
 			return nil, errors.New("upload failed")
 		}
 	}
