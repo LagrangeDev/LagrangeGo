@@ -2,6 +2,9 @@ package client
 
 import (
 	"bytes"
+	binary2 "encoding/binary"
+	"fmt"
+	highway2 "github.com/LagrangeDev/LagrangeGo/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -10,7 +13,11 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync/atomic"
 )
+
+var highwayUri map[uint32][]string
+var sequence atomic.Uint32
 
 type UpBlock struct {
 	CommandId  int
@@ -23,6 +30,94 @@ type UpBlock struct {
 	Block      []byte
 	ExtendInfo []byte
 	Timestamp  uint64
+}
+
+func (c *QQClient) GetServiceServer() map[uint32][]string {
+	if highwayUri == nil {
+		highwayUri = make(map[uint32][]string)
+		packet, err := highway2.BuildHighWayUrlReq(c.sig.Tgt)
+		if err != nil {
+			return nil
+		}
+		payload, err := c.SendUniPacketAndAwait("HttpConn.0x6ff_501", packet.Data())
+		if err != nil {
+			networkLogger.Errorf("Failed to get highway server: %v", err)
+			return nil
+		}
+		resp, err := highway2.ParseHighWayUrlReq(payload.Data)
+		if err != nil {
+			networkLogger.Errorf("Failed to parse highway server: %v", err)
+			return nil
+		}
+		for _, info := range resp.HttpConn.ServerInfos {
+			servicetype := info.ServiceType
+			for _, addr := range info.ServerAddrs {
+				ip := make([]byte, 4)
+				binary2.LittleEndian.PutUint32(ip, addr.IP)
+				service := highwayUri[servicetype]
+				service = append(service, fmt.Sprintf("http://%x.%x.%x.%x:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d", ip[0], ip[1], ip[2], ip[3], addr.Port, c.sig.Uin))
+				highwayUri[servicetype] = service
+			}
+		}
+	}
+	return highwayUri
+}
+
+func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ticket []byte, md5 []byte, extendInfo []byte) bool {
+	// Get server URL
+	server := c.GetServiceServer()
+	if server == nil {
+		return false
+	}
+	success := true
+	var upBlocks []UpBlock
+	data, err := io.ReadAll(stream)
+	if err != nil {
+		return false
+	}
+
+	fileSize := uint64(len(data))
+	offset := uint64(0)
+	_, err = stream.Seek(0, io.SeekStart)
+	if err != nil {
+		return false
+	}
+
+	for offset < fileSize {
+		var buffersize uint64
+		if uint64(1024*1024) > fileSize-offset {
+			buffersize = fileSize - offset
+		} else {
+			buffersize = uint64(1024 * 1024)
+		}
+		buffer := make([]byte, buffersize)
+		payload, err := io.ReadFull(stream, buffer)
+		if err != nil {
+			return false
+		}
+		reqBody := UpBlock{
+			CommandId:  commonId,
+			Uin:        uint(c.sig.Uin),
+			Sequence:   uint(sequence.Load()),
+			FileSize:   fileSize,
+			Offset:     offset,
+			Ticket:     ticket,
+			FileMd5:    md5,
+			Block:      buffer,
+			ExtendInfo: extendInfo,
+		}
+		sequence.Add(1)
+		upBlocks = append(upBlocks, reqBody)
+		offset += uint64(payload)
+		// 4 is HighwayConcurrent
+		if len(upBlocks) >= 4 || offset == fileSize {
+			for _, block := range upBlocks {
+				success = success && c.SendUpBlockAsync(block, server[1][0])
+			}
+			upBlocks = nil
+		}
+	}
+	return success
 }
 
 func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
