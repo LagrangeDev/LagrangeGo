@@ -55,7 +55,7 @@ func (c *QQClient) GetServiceServer() map[uint32][]string {
 				ip := make([]byte, 4)
 				binary2.LittleEndian.PutUint32(ip, addr.IP)
 				service := highwayUri[servicetype]
-				service = append(service, fmt.Sprintf("http://%x.%x.%x.%x:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d", ip[0], ip[1], ip[2], ip[3], addr.Port, c.sig.Uin))
+				service = append(service, fmt.Sprintf("http://%d.%d.%d.%d:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d", ip[0], ip[1], ip[2], ip[3], addr.Port, c.sig.Uin))
 				highwayUri[servicetype] = service
 			}
 		}
