@@ -14,7 +14,7 @@ func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
 
 // GetUin 获取缓存中对应的uin
 func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
-	if c.cache.FriendCacheIsEmpty() {
+	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		c.RefreshFriendCache()
 	}
 	if len(groupUin) != 0 && c.cache.GroupMemberCacheIsEmpty(groupUin[0]) {
@@ -34,7 +34,7 @@ func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.Friend {
 // GetCachedGroupInfo 获取群信息(缓存)
 func (c *QQClient) GetCachedGroupInfo(groupUin uint32) *entity.Group {
 	if c.cache.GroupInfoCacheIsEmpty() {
-		c.RefreshGroupMembersCache(groupUin)
+		c.RefreshAllGroupsInfo()
 	}
 	return c.cache.GetGroupInfo(groupUin)
 }
