@@ -83,7 +83,6 @@ type (
 
 	IMessageElement interface {
 		Type() ElementType
-		BuildElement() *message.Elem
 	}
 
 	ElementType int
@@ -297,6 +296,10 @@ func NewSendingMessage() *SendingMessage {
 	return &SendingMessage{}
 }
 
+func (msg *SendingMessage) GetElems() []IMessageElement {
+	return msg.Elements
+}
+
 // Append 要传入msg的引用
 func (msg *SendingMessage) Append(e IMessageElement) *SendingMessage {
 	v := reflect.ValueOf(e)
@@ -306,14 +309,35 @@ func (msg *SendingMessage) Append(e IMessageElement) *SendingMessage {
 	return msg
 }
 
+func (msg *SendingMessage) FirstOrNil(f func(element IMessageElement) bool) IMessageElement {
+	for _, elem := range msg.Elements {
+		if f(elem) {
+			return elem
+		}
+	}
+	return nil
+}
+
 func BuildMessageElements(msgElems []IMessageElement) (msgBody *message.MessageBody) {
 	if len(msgElems) == 0 {
 		return
 	}
 	elems := make([]*message.Elem, 0, len(msgElems))
 	for _, elem := range msgElems {
-		// TODO 涉及到uid的东西应该在这里处理一下
-		elems = append(elems, elem.BuildElement())
+		var pb *message.Elem
+		switch e := elem.(type) {
+		case *TextElement:
+			pb = e.BuildElement()
+		case *AtElement:
+			pb = e.BuildElement()
+		case *ReplyElement:
+			pb = e.BuildElement()
+		case *FaceElement:
+			pb = e.BuildElement()
+		default:
+			continue
+		}
+		elems = append(elems, pb)
 	}
 	msgBody = &message.MessageBody{
 		RichText: &message.RichText{Elems: elems},
