@@ -37,14 +37,14 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
 	}
 	friends := make([]*entity.Friend, len(resp.Friends))
 	for i, raw := range resp.Friends {
-		additional := GetFristType1(raw.Additional)
+		additional := GetFirstType1(raw.Additional)
 		properties := ParseFriendProperty(additional.Layer1.Properties)
 		friends[i] = entity.NewFriend(raw.Uin, raw.Uid, properties[20002], properties[103], properties[102])
 	}
 	return friends, nil
 }
 
-func GetFristType1(additionals []*oidb.OidbFriendAdditional) *oidb.OidbFriendAdditional {
+func GetFirstType1(additionals []*oidb.OidbFriendAdditional) *oidb.OidbFriendAdditional {
 	for _, additional := range additionals {
 		if additional.Type == 1 {
 			return additional
