@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
@@ -20,7 +19,7 @@ func ConvertIP(raw uint32) string {
 	ip[1] = byte((raw >> 8) & 0xFF)
 	ip[2] = byte((raw >> 16) & 0xFF)
 	ip[3] = byte((raw >> 24) & 0xFF)
-	return fmt.Sprintf("%s", ip)
+	return string(ip)
 }
 
 func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
