@@ -43,13 +43,10 @@ func GetImageExt(format ImageFormat) string {
 	}
 }
 
-func ImageResolve(image []byte) (ImageFormat, Vector2, error) {
+func ImageResolve(image []byte) (format ImageFormat, size Vector2, err error) {
 	if len(image) < 10 { // 最小长度检查
 		return Unknown, Vector2{}, errors.New("image data is too short")
 	}
-
-	size := Vector2{}
-	var format ImageFormat
 
 	switch {
 	case bytes.Equal(image[:6], []byte{0x47, 0x49, 0x46, 0x38, 0x39, 0x61}) || bytes.Equal(image[:6], []byte{0x47, 0x49, 0x46, 0x38, 0x37, 0x61}): // GIF
