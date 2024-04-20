@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"github.com/LagrangeDev/LagrangeGo/entity"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 )
@@ -54,4 +55,204 @@ func (c *QQClient) FetchGroupMember(groupID uint32, token string) ([]*entity.Gro
 		return nil, "", err
 	}
 	return members, newToken, nil
+}
+
+func (c *QQClient) GroupRemark(groupID uint32, remark string) error {
+	pkt, err := oidb.BuildGroupRemarkReq(groupID, remark)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupRemarkResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("remark failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupRename(groupID uint32, name string) error {
+	pkt, err := oidb.BuildGroupRenameReq(groupID, name)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupRenameResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("rename failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
+	pkt, err := oidb.BuildGroupMuteGlobalReq(groupID, isMute)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupMuteGlobalResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("mute failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
+	uid := c.GetUid(uin, groupID)
+	if uid == "" {
+		return errors.New("uid not found")
+	}
+	pkt, err := oidb.BuildGroupMuteMemberReq(groupID, duration, uid)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupMuteMemberResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("mute failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupLeave(groupID uint32) error {
+	pkt, err := oidb.BuildGroupLeaveReq(groupID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupLeaveResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("leave failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
+	uid := c.GetUid(uin, groupID)
+	if uid == "" {
+		return errors.New("uid not found")
+	}
+	pkt, err := oidb.BuildGroupSetAdminReq(groupID, uid, isAdmin)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupSetAdminResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("set admin failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
+	uid := c.GetUid(uin, groupID)
+	if uid == "" {
+		return errors.New("uid not found")
+	}
+	pkt, err := oidb.BuildGroupRenameMemberReq(groupID, uid, name)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupRenameMemberResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("rename member failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupKickMember(groupID, uin uint32, rejectAddRequest bool) error {
+	uid := c.GetUid(uin, groupID)
+	if uid == "" {
+		return errors.New("uid not found")
+	}
+	pkt, err := oidb.BuildGroupKickMemberReq(groupID, uid, rejectAddRequest)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupKickMemberResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("kick member failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) error {
+	uid := c.GetUid(uin, groupUin)
+	if uid == "" {
+		return errors.New("uid not found")
+	}
+	pkt, err := oidb.BuildGroupSetSpecialTitleReq(groupUin, uid, title)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParseGroupSetSpecialTitleResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("set special title failed")
+	}
+
+	return nil
 }
