@@ -55,6 +55,10 @@ type QQClient struct {
 
 	cache *cache.Cache
 
+	highwayUri      map[uint32][]string
+	highwaySequence atomic.Uint32
+	sigSession      []byte
+
 	GroupMessageEvent           EventHandle[*message.GroupMessage]
 	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
 	TempMessageEvent            EventHandle[*message.TempMessage]

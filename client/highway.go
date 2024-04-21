@@ -13,11 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"sync/atomic"
 )
-
-var highwayUri map[uint32][]string
-var sequence atomic.Uint32
 
 type UpBlock struct {
 	CommandId  int
@@ -32,40 +28,41 @@ type UpBlock struct {
 	Timestamp  uint64
 }
 
-func (c *QQClient) GetServiceServer() map[uint32][]string {
-	if highwayUri == nil {
-		highwayUri = make(map[uint32][]string)
+func (c *QQClient) GetServiceServer() ([]byte, map[uint32][]string) {
+	if c.highwayUri == nil || c.sigSession == nil {
+		c.highwayUri = make(map[uint32][]string)
 		packet, err := highway2.BuildHighWayUrlReq(c.sig.Tgt)
 		if err != nil {
-			return nil
+			return nil, nil
 		}
 		payload, err := c.SendUniPacketAndAwait("HttpConn.0x6ff_501", packet.Data())
 		if err != nil {
 			networkLogger.Errorf("Failed to get highway server: %v", err)
-			return nil
+			return nil, nil
 		}
 		resp, err := highway2.ParseHighWayUrlReq(payload.Data)
 		if err != nil {
 			networkLogger.Errorf("Failed to parse highway server: %v", err)
-			return nil
+			return nil, nil
 		}
 		for _, info := range resp.HttpConn.ServerInfos {
 			servicetype := info.ServiceType
 			for _, addr := range info.ServerAddrs {
 				ip := make([]byte, 4)
 				binary2.LittleEndian.PutUint32(ip, addr.IP)
-				service := highwayUri[servicetype]
+				service := c.highwayUri[servicetype]
 				service = append(service, fmt.Sprintf("http://%d.%d.%d.%d:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d", ip[0], ip[1], ip[2], ip[3], addr.Port, c.sig.Uin))
-				highwayUri[servicetype] = service
+				c.highwayUri[servicetype] = service
 			}
 		}
+		c.sigSession = resp.HttpConn.SigSession
 	}
-	return highwayUri
+	return c.sigSession, c.highwayUri
 }
 
 func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ticket []byte, md5 []byte, extendInfo []byte) bool {
 	// Get server URL
-	server := c.GetServiceServer()
+	_, server := c.GetServiceServer()
 	if server == nil {
 		return false
 	}
@@ -98,7 +95,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 		reqBody := UpBlock{
 			CommandId:  commonId,
 			Uin:        uint(c.sig.Uin),
-			Sequence:   uint(sequence.Load()),
+			Sequence:   uint(c.highwaySequence.Load()),
 			FileSize:   fileSize,
 			Offset:     offset,
 			Ticket:     ticket,
@@ -106,7 +103,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 			Block:      buffer,
 			ExtendInfo: extendInfo,
 		}
-		sequence.Add(1)
+		c.highwaySequence.Add(1)
 		upBlocks = append(upBlocks, reqBody)
 		offset += uint64(payload)
 		// 4 is HighwayConcurrent
