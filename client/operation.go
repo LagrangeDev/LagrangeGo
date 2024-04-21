@@ -256,3 +256,43 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 
 	return nil
 }
+
+func (c *QQClient) GroupPoke(groupID, uin uint32) error {
+	pkt, err := oidb.BuildGroupPokeReq(groupID, uin)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParsePokeResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("poke failed")
+	}
+
+	return nil
+}
+
+func (c *QQClient) FriendPoke(uin uint32) error {
+	pkt, err := oidb.BuildFriendPokeReq(uin)
+	if err != nil {
+		return err
+	}
+	resp, err := c.SendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	ok, err := oidb.ParsePokeResp(resp.Data)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("poke failed")
+	}
+
+	return nil
+}
