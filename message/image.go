@@ -1,5 +1,9 @@
 package message
 
+import (
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
+)
+
 type GroupImageElement struct {
 	ImageId   string
 	FileId    int64
@@ -13,6 +17,11 @@ type GroupImageElement struct {
 	// EffectID show pic effect id.
 	EffectID int32
 	Flash    bool
+
+	// Send
+	MsgInfo    *oidb.MsgInfo
+	Stream     []byte
+	CompatFace []byte
 }
 
 type FriendImageElement struct {
