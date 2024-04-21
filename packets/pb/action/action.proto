@@ -107,7 +107,7 @@ message HttpConnResponse {
 
 message ServerAddr {
   uint32 Type = 1;
-  uint32 IP = 2;
+  fixed32 IP = 2;
   uint32 Port = 3;
   uint32 Area = 4;
 }

@@ -118,7 +118,7 @@ type HttpConnResponse struct {
 
 type ServerAddr struct {
 	Type uint32 `protobuf:"varint,1,opt"`
-	IP   uint32 `protobuf:"varint,2,opt"`
+	IP   uint32 `protobuf:"fixed32,2,opt"`
 	Port uint32 `protobuf:"varint,3,opt"`
 	Area uint32 `protobuf:"varint,4,opt"`
 	_    [0]func()

@@ -2,12 +2,13 @@ package highway
 
 import (
 	"encoding/hex"
+
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
+
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/action"
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/RomiChan/protobuf/proto"
 )
 
-func BuildHighWayUrlReq(tgt []byte) (*binary.Builder, error) {
+func BuildHighWayUrlReq(tgt []byte) ([]byte, error) {
 	tgtHex := hex.EncodeToString(tgt)
 	body := &action.HttpConn0X6Ff_501{
 		HttpConn: &action.HttpConn{
@@ -24,12 +25,10 @@ func BuildHighWayUrlReq(tgt []byte) (*binary.Builder, error) {
 			Ver:          "1.0.1",
 		},
 	}
-	packet := binary.NewBuilder(nil)
-	marshal, err := proto.Marshal(body)
+	packet, err := proto.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	packet.WriteBytes(marshal, false)
 	return packet, nil
 }
 

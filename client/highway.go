@@ -4,15 +4,16 @@ import (
 	"bytes"
 	binary2 "encoding/binary"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strconv"
+
 	highway2 "github.com/LagrangeDev/LagrangeGo/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/RomiChan/protobuf/proto"
-	"io"
-	"net/http"
-	"net/url"
-	"strconv"
 )
 
 type UpBlock struct {
@@ -35,7 +36,7 @@ func (c *QQClient) GetServiceServer() ([]byte, map[uint32][]string) {
 		if err != nil {
 			return nil, nil
 		}
-		payload, err := c.SendUniPacketAndAwait("HttpConn.0x6ff_501", packet.Data())
+		payload, err := c.SendUniPacketAndAwait("HttpConn.0x6ff_501", packet)
 		if err != nil {
 			networkLogger.Errorf("Failed to get highway server: %v", err)
 			return nil, nil
