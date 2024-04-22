@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
+	message2 "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
@@ -82,12 +83,17 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 			return nil, err
 		}
 		sigSession, _ := c.GetServiceServer()
-		if !c.UploadSrcByStreamAsync(1004, io.ReadSeeker(bytes.NewReader(image.Stream)), sigSession, md5hash, extStream) {
+		if !c.UploadSrcByStreamAsync(1003, io.ReadSeeker(bytes.NewReader(image.Stream)), sigSession, md5hash, extStream) {
 			return nil, errors.New("upload failed")
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo
-	image.CompatFace = uploadResp.Upload.CompatQMsg
+	var compatImage *message2.NotOnlineImage
+	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, compatImage)
+	if err != nil {
+		return nil, err
+	}
+	image.CompatImage = compatImage
 	return image, nil
 }
 

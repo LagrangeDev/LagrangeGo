@@ -201,13 +201,19 @@ func (e *FriendImageElement) BuildElement() []*message.Elem {
 		messageLogger.Errorln("ImageBuild Common Proto Marshall failed:", err)
 		return nil
 	}
-	msg := []*message.Elem{{
+	var msg []*message.Elem
+	if e.CompatImage != nil {
+		msg = []*message.Elem{{
+			NotOnlineImage: e.CompatImage,
+		}}
+	}
+	msg = append(msg, &message.Elem{
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
 			BusinessType: 10,
 		},
-	}}
+	})
 	return msg
 }
 

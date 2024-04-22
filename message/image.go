@@ -1,6 +1,7 @@
 package message
 
 import (
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 )
 
@@ -33,9 +34,9 @@ type FriendImageElement struct {
 	Url     string
 
 	// Send
-	MsgInfo    *oidb.MsgInfo
-	Stream     []byte
-	CompatFace []byte
+	MsgInfo     *oidb.MsgInfo
+	Stream      []byte
+	CompatImage *message.NotOnlineImage
 
 	Flash bool
 }

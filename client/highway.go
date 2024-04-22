@@ -101,7 +101,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 		reqBody := UpBlock{
 			CommandId:  commonId,
 			Uin:        uint(c.sig.Uin),
-			Sequence:   uint(c.highwaySequence.Load() + 1),
+			Sequence:   uint(c.highwaySequence.Add(1)),
 			FileSize:   fileSize,
 			Offset:     offset,
 			Ticket:     ticket,
@@ -109,7 +109,6 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 			Block:      buffer,
 			ExtendInfo: extendInfo,
 		}
-		c.highwaySequence.Add(1)
 		upBlocks = append(upBlocks, reqBody)
 		offset += uint64(payload)
 		// 4 is HighwayConcurrent
