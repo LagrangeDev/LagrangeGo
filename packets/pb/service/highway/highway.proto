@@ -9,8 +9,8 @@ message DataHighwayHead {
   uint32 Version = 1;
   optional string Uin = 2;
   optional string Command = 3;
-  uint32 Seq = 4;
-  uint32 RetryTimes = 5;
+  optional uint32 Seq = 4;
+  optional uint32 RetryTimes = 5;
   uint32 AppId = 6;
   uint32 DataFlag = 7;
   uint32 CommandId = 8;
@@ -132,17 +132,17 @@ message RespDataHighwayHead {
 }
 
 message SegHead {
-  uint32 ServiceId = 1;
+  optional uint32 ServiceId = 1;
   uint64 Filesize = 2;
-  uint64 DataOffset = 3;
+  optional uint64 DataOffset = 3;
   uint32 DataLength = 4;
-  uint32 RetCode = 5;
+  optional uint32 RetCode = 5;
   bytes  ServiceTicket = 6;
   // uint32 Flag = 7;
   bytes Md5 = 8;
   bytes FileMd5 = 9;
-  uint32 CacheAddr = 10;
+  optional uint32 CacheAddr = 10;
   uint32 QueryTimes = 11;
   uint32 UpdateCacheIp = 12;
-  uint32 CachePort = 13;
+  optional uint32 CachePort = 13;
 }
