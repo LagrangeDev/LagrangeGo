@@ -196,7 +196,19 @@ func (e *GroupImageElement) BuildElement() []*message.Elem {
 }
 
 func (e *FriendImageElement) BuildElement() []*message.Elem {
-	return nil
+	common, err := proto.Marshal(e.MsgInfo)
+	if err != nil {
+		messageLogger.Errorln("ImageBuild Common Proto Marshall failed:", err)
+		return nil
+	}
+	msg := []*message.Elem{{
+		CommonElem: &message.CommonElem{
+			ServiceType:  48,
+			PbElem:       common,
+			BusinessType: 10,
+		},
+	}}
+	return msg
 }
 
 func (e *ReplyElement) BuildElement() []*message.Elem {

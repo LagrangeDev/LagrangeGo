@@ -37,12 +37,66 @@ func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 	return IPv4s
 }
 
+func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessageElement) (*message.FriendImageElement, error) {
+	image, ok := element.(*message.FriendImageElement)
+	if !ok {
+		return nil, errors.New("element type is not friend image")
+	}
+	req, err := oidb.BuildImageUploadReq(targetUid, image.Stream)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.SendOidbPacketAndWait(req)
+	if err != nil {
+		return nil, err
+	}
+	uploadResp, err := oidb.ParseImageUploadResp(resp.Data)
+	if err != nil {
+		return nil, err
+	}
+	ukey := uploadResp.Upload.UKey
+	if ukey.Unwrap() != "" {
+		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
+		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
+		if err != nil {
+			return nil, err
+		}
+		extend := &highway.NTV2RichMediaHighwayExt{
+			FileUuid: index.FileUuid,
+			UKey:     ukey.Unwrap(),
+			Network: &highway.NTHighwayNetwork{
+				IPv4S: ConvertNTHighwayNetWork(uploadResp.Upload.IPv4S),
+			},
+			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
+			BlockSize:   1024 * 1024,
+			Hash: &highway.NTHighwayHash{
+				FileSha1: [][]byte{sha1hash},
+			},
+		}
+		extStream, err := proto.Marshal(extend)
+		if err != nil {
+			return nil, err
+		}
+		md5hash, err := hex.DecodeString(index.Info.FileHash)
+		if err != nil {
+			return nil, err
+		}
+		sigSession, _ := c.GetServiceServer()
+		if !c.UploadSrcByStreamAsync(1004, io.ReadSeeker(bytes.NewReader(image.Stream)), sigSession, md5hash, extStream) {
+			return nil, errors.New("upload failed")
+		}
+	}
+	image.MsgInfo = uploadResp.Upload.MsgInfo
+	image.CompatFace = uploadResp.Upload.CompatQMsg
+	return image, nil
+}
+
 func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageElement) (*message.GroupImageElement, error) {
 	image, ok := element.(*message.GroupImageElement)
 	if !ok {
 		return nil, errors.New("element type is not group image")
 	}
-	req, err := oidb.BuildGroupImageUploadReq(groupUin, bytes.NewReader(image.Stream))
+	req, err := oidb.BuildGroupImageUploadReq(groupUin, image.Stream)
 	if err != nil {
 		return nil, err
 	}

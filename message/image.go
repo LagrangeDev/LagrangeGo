@@ -32,5 +32,10 @@ type FriendImageElement struct {
 	Height  int32
 	Url     string
 
+	// Send
+	MsgInfo    *oidb.MsgInfo
+	Stream     []byte
+	CompatFace []byte
+
 	Flash bool
 }
