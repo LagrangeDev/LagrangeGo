@@ -1,12 +1,15 @@
 package message
 
 import (
-	"fmt"
 	"strconv"
+
+	"github.com/LagrangeDev/LagrangeGo/utils"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
+
+var messageLogger = utils.GetLogger("message")
 
 type (
 	TextElement struct {
@@ -162,7 +165,7 @@ func (e *FaceElement) BuildElement() []*message.Elem {
 func (e *GroupImageElement) BuildElement() []*message.Elem {
 	common, err := proto.Marshal(e.MsgInfo)
 	if err != nil {
-		fmt.Println("ImageBuild Common Proto Marshall failed:", err)
+		messageLogger.Errorln("ImageBuild Common Proto Marshall failed:", err)
 		return nil
 	}
 	msg := []*message.Elem{{

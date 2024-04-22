@@ -65,14 +65,14 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 	// Get server URL
 	_, server := c.GetServiceServer()
 	if server == nil {
-		fmt.Println("Failed to get server")
+		networkLogger.Errorln("Failed to get upload server")
 		return false
 	}
 	success := true
 	var upBlocks []UpBlock
 	data, err := io.ReadAll(stream)
 	if err != nil {
-		fmt.Println("Failed to read stream")
+		networkLogger.Errorln("Failed to read stream")
 		return false
 	}
 
@@ -80,7 +80,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 	offset := uint64(0)
 	_, err = stream.Seek(0, io.SeekStart)
 	if err != nil {
-		fmt.Println("Failed to seek stream")
+		networkLogger.Errorln("Failed to seek stream")
 		return false
 	}
 
@@ -94,7 +94,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 		buffer := make([]byte, buffersize)
 		payload, err := io.ReadFull(stream, buffer)
 		if err != nil {
-			fmt.Println("Failed to read stream")
+			networkLogger.Errorln("Failed to read stream")
 			return false
 		}
 		reqBody := UpBlock{
@@ -116,7 +116,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 			for _, block := range upBlocks {
 				success = success && c.SendUpBlockAsync(block, server[1][0])
 				if !success {
-					fmt.Println("Failed to send block")
+					networkLogger.Errorln("Failed to send block")
 					return false
 				}
 			}
@@ -162,12 +162,12 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 	packet.WriteBytes(block.Block, false)
 	payload, err := SendPacketAsync(highwayHead, packet, server, isEnd)
 	if err != nil {
-		fmt.Println("Failed to send packet ", err)
+		networkLogger.Errorln("Failed to send packet ", err)
 		return false
 	}
 	resphead, respbody, err := ParsePacket(payload)
 	if err != nil {
-		fmt.Println("Failed to parse packet ", err)
+		networkLogger.Errorln("Failed to parse packet ", err)
 		return false
 	}
 	networkLogger.Infof("Highway Block Result: %d | %d | %x | %v", resphead.ErrorCode, resphead.MsgSegHead.RetCode, resphead.BytesRspExtendInfo, respbody)
@@ -181,7 +181,6 @@ func ParsePacket(data []byte) (head *highway.RespDataHighwayHead, body *binary.R
 		bodylength := reader.ReadU32()
 		head = &highway.RespDataHighwayHead{}
 		headraw := reader.ReadBytes(int(int64(headlength)))
-		fmt.Println("headraw", headraw)
 		err = proto.Unmarshal(headraw, head)
 		if err != nil {
 			return nil, nil, err

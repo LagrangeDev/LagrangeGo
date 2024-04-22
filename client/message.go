@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
@@ -90,13 +89,13 @@ func preprocessMessage(client *QQClient, groupUin uint32, elements []message2.IM
 		case *message2.GroupImageElement:
 			_, err := client.ImageUploadGroup(groupUin, elem)
 			if err != nil {
-				fmt.Println(err)
+				networkLogger.Errorln(err)
 			}
 			if elem.MsgInfo == nil {
-				fmt.Println("ImageUploadGroup failed")
+				networkLogger.Errorln("ImageUploadGroup failed")
 				continue
 			}
-			fmt.Println("Image MsgInfo: ", elem.MsgInfo)
+			networkLogger.Errorln("Image MsgInfo: ", elem.MsgInfo)
 		default:
 		}
 	}
