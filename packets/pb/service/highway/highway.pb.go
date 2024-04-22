@@ -12,8 +12,8 @@ type DataHighwayHead struct {
 	Version    uint32               `protobuf:"varint,1,opt"`
 	Uin        proto.Option[string] `protobuf:"bytes,2,opt"`
 	Command    proto.Option[string] `protobuf:"bytes,3,opt"`
-	Seq        uint32               `protobuf:"varint,4,opt"`
-	RetryTimes uint32               `protobuf:"varint,5,opt"`
+	Seq        proto.Option[uint32] `protobuf:"varint,4,opt"`
+	RetryTimes proto.Option[uint32] `protobuf:"varint,5,opt"`
 	AppId      uint32               `protobuf:"varint,6,opt"`
 	DataFlag   uint32               `protobuf:"varint,7,opt"`
 	CommandId  uint32               `protobuf:"varint,8,opt"`
@@ -142,17 +142,17 @@ type RespDataHighwayHead struct {
 }
 
 type SegHead struct {
-	ServiceId     uint32 `protobuf:"varint,1,opt"`
-	Filesize      uint64 `protobuf:"varint,2,opt"`
-	DataOffset    uint64 `protobuf:"varint,3,opt"`
-	DataLength    uint32 `protobuf:"varint,4,opt"`
-	RetCode       uint32 `protobuf:"varint,5,opt"`
-	ServiceTicket []byte `protobuf:"bytes,6,opt"`
+	ServiceId     proto.Option[uint32] `protobuf:"varint,1,opt"`
+	Filesize      uint64               `protobuf:"varint,2,opt"`
+	DataOffset    proto.Option[uint64] `protobuf:"varint,3,opt"`
+	DataLength    uint32               `protobuf:"varint,4,opt"`
+	RetCode       proto.Option[uint32] `protobuf:"varint,5,opt"`
+	ServiceTicket []byte               `protobuf:"bytes,6,opt"`
 	// uint32 Flag = 7;
-	Md5           []byte `protobuf:"bytes,8,opt"`
-	FileMd5       []byte `protobuf:"bytes,9,opt"`
-	CacheAddr     uint32 `protobuf:"varint,10,opt"`
-	QueryTimes    uint32 `protobuf:"varint,11,opt"`
-	UpdateCacheIp uint32 `protobuf:"varint,12,opt"`
-	CachePort     uint32 `protobuf:"varint,13,opt"`
+	Md5           []byte               `protobuf:"bytes,8,opt"`
+	FileMd5       []byte               `protobuf:"bytes,9,opt"`
+	CacheAddr     proto.Option[uint32] `protobuf:"varint,10,opt"`
+	QueryTimes    uint32               `protobuf:"varint,11,opt"`
+	UpdateCacheIp uint32               `protobuf:"varint,12,opt"`
+	CachePort     proto.Option[uint32] `protobuf:"varint,13,opt"`
 }

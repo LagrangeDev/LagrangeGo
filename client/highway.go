@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	binary2 "encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -100,7 +101,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 		reqBody := UpBlock{
 			CommandId:  commonId,
 			Uin:        uint(c.sig.Uin),
-			Sequence:   uint(c.highwaySequence.Load()),
+			Sequence:   uint(c.highwaySequence.Load() + 1),
 			FileSize:   fileSize,
 			Offset:     offset,
 			Ticket:     ticket,
@@ -128,22 +129,27 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 
 func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 	head := &highway.DataHighwayHead{
-		Version:   1,
-		Uin:       proto.Some(strconv.Itoa(int(block.Uin))),
-		Command:   proto.Some("PicUp.DataUp"),
-		Seq:       uint32(block.Sequence),
-		AppId:     uint32(c.appInfo.AppID),
-		DataFlag:  16,
-		CommandId: uint32(block.CommandId),
+		Version:    1,
+		Uin:        proto.Some(strconv.Itoa(int(block.Uin))),
+		Command:    proto.Some("PicUp.DataUp"),
+		Seq:        proto.Some(uint32(block.Sequence)),
+		RetryTimes: proto.Some(uint32(0)),
+		AppId:      uint32(c.appInfo.SubAppID),
+		DataFlag:   16,
+		CommandId:  uint32(block.CommandId),
 	}
 	md5 := utils.Md5Digest(block.Block)
 	segHead := &highway.SegHead{
+		ServiceId:     proto.Some(uint32(0)),
 		Filesize:      block.FileSize,
-		DataOffset:    block.Offset,
+		DataOffset:    proto.Some(block.Offset),
 		DataLength:    uint32(len(block.Block)),
+		RetCode:       proto.Some(uint32(0)),
 		ServiceTicket: block.Ticket,
 		Md5:           md5,
 		FileMd5:       block.FileMd5,
+		CacheAddr:     proto.Some(uint32(0)),
+		CachePort:     proto.Some(uint32(0)),
 	}
 	loginHead := &highway.LoginSigHead{
 		Uint32LoginSigType: 8,
@@ -198,7 +204,17 @@ func SendPacketAsync(packet *highway.ReqDataHighwayHead, buffer *binary.Builder,
 	if err != nil {
 		return nil, err
 	}
-	writer := binary.NewBuilder(nil).WriteBytes([]byte{0x28}, false).WriteU32(uint32(len(marshal))).WriteU32(uint32(buffer.Len())).WriteBytes(buffer.Data(), false).WriteBytes([]byte{0x29}, false)
+
+	println(hex.EncodeToString(marshal))
+
+	writer := binary.NewBuilder(nil).
+		WriteBytes([]byte{0x28}, false).
+		WriteU32(uint32(len(marshal))).
+		WriteU32(uint32(buffer.Len())).
+		WriteBytes(marshal, false).
+		WriteBytes(buffer.Data(), false).
+		WriteBytes([]byte{0x29}, false)
+
 	return SendDataAsync(writer.Data(), serverURL, end)
 }
 
