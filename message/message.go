@@ -324,7 +324,7 @@ func BuildMessageElements(msgElems []IMessageElement) (msgBody *message.MessageB
 	}
 	elems := make([]*message.Elem, 0, len(msgElems))
 	for _, elem := range msgElems {
-		var pb *message.Elem
+		var pb []*message.Elem
 		switch e := elem.(type) {
 		case *TextElement:
 			pb = e.BuildElement()
@@ -337,7 +337,7 @@ func BuildMessageElements(msgElems []IMessageElement) (msgBody *message.MessageB
 		default:
 			continue
 		}
-		elems = append(elems, pb)
+		elems = append(elems, pb...)
 	}
 	msgBody = &message.MessageBody{
 		RichText: &message.RichText{Elems: elems},

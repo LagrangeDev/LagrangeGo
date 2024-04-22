@@ -1,6 +1,7 @@
 package message
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
@@ -108,11 +109,11 @@ func (e *ShortVideoElement) Type() ElementType {
 	return Video
 }
 
-func (e *TextElement) BuildElement() *message.Elem {
-	return &message.Elem{Text: &message.Text{Str: proto.Some(e.Content)}}
+func (e *TextElement) BuildElement() []*message.Elem {
+	return []*message.Elem{{Text: &message.Text{Str: proto.Some(e.Content)}}}
 }
 
-func (e *AtElement) BuildElement() *message.Elem {
+func (e *AtElement) BuildElement() []*message.Elem {
 	var atAll int32 = 2
 	if e.Target == 0 {
 		atAll = 1
@@ -124,13 +125,13 @@ func (e *AtElement) BuildElement() *message.Elem {
 		Uid:    proto.Some(e.UID),
 	}
 	reserveData, _ := proto.Marshal(&reserve)
-	return &message.Elem{Text: &message.Text{
+	return []*message.Elem{{Text: &message.Text{
 		Str:       proto.Some(e.Display),
 		PbReserve: reserveData,
-	}}
+	}}}
 }
 
-func (e *FaceElement) BuildElement() *message.Elem {
+func (e *FaceElement) BuildElement() []*message.Elem {
 	faceId := int32(e.FaceID)
 	if e.isLargeFace {
 		qFace := message.QFaceExtra{
@@ -144,36 +145,48 @@ func (e *FaceElement) BuildElement() *message.Elem {
 			Field9:  proto.Some(int32(1)),
 		}
 		qFaceData, _ := proto.Marshal(&qFace)
-		return &message.Elem{
+		return []*message.Elem{{
 			CommonElem: &message.CommonElem{
 				ServiceType:  37,
 				PbElem:       qFaceData,
 				BusinessType: 1,
 			},
-		}
+		}}
 	} else {
-		return &message.Elem{
+		return []*message.Elem{{
 			Face: &message.Face{Index: proto.Some(faceId)},
-		}
+		}}
 	}
 }
 
-func (e *GroupImageElement) BuildElement() *message.Elem {
+func (e *GroupImageElement) BuildElement() []*message.Elem {
+	common, err := proto.Marshal(e.MsgInfo)
+	if err != nil {
+		fmt.Println("ImageBuild Common Proto Marshall failed:", err)
+		return nil
+	}
+	msg := []*message.Elem{{
+		CommonElem: &message.CommonElem{
+			ServiceType:  48,
+			PbElem:       common,
+			BusinessType: 10,
+		},
+	}}
+	return msg
+}
+
+func (e *FriendImageElement) BuildElement() []*message.Elem {
 	return nil
 }
 
-func (e *FriendImageElement) BuildElement() *message.Elem {
+func (e *ReplyElement) BuildElement() []*message.Elem {
 	return nil
 }
 
-func (e *ReplyElement) BuildElement() *message.Elem {
+func (e *VoiceElement) BuildElement() []*message.Elem {
 	return nil
 }
 
-func (e *VoiceElement) BuildElement() *message.Elem {
-	return nil
-}
-
-func (e *ShortVideoElement) BuildElement() *message.Elem {
+func (e *ShortVideoElement) BuildElement() []*message.Elem {
 	return nil
 }

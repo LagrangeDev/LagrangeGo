@@ -65,12 +65,14 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 	// Get server URL
 	_, server := c.GetServiceServer()
 	if server == nil {
+		fmt.Println("Failed to get server")
 		return false
 	}
 	success := true
 	var upBlocks []UpBlock
 	data, err := io.ReadAll(stream)
 	if err != nil {
+		fmt.Println("Failed to read stream")
 		return false
 	}
 
@@ -78,6 +80,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 	offset := uint64(0)
 	_, err = stream.Seek(0, io.SeekStart)
 	if err != nil {
+		fmt.Println("Failed to seek stream")
 		return false
 	}
 
@@ -91,6 +94,7 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 		buffer := make([]byte, buffersize)
 		payload, err := io.ReadFull(stream, buffer)
 		if err != nil {
+			fmt.Println("Failed to read stream")
 			return false
 		}
 		reqBody := UpBlock{
@@ -111,6 +115,10 @@ func (c *QQClient) UploadSrcByStreamAsync(commonId int, stream io.ReadSeeker, ti
 		if len(upBlocks) >= 4 || offset == fileSize {
 			for _, block := range upBlocks {
 				success = success && c.SendUpBlockAsync(block, server[1][0])
+				if !success {
+					fmt.Println("Failed to send block")
+					return false
+				}
 			}
 			upBlocks = nil
 		}
@@ -154,10 +162,12 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 	packet.WriteBytes(block.Block, false)
 	payload, err := SendPacketAsync(highwayHead, packet, server, isEnd)
 	if err != nil {
+		fmt.Println("Failed to send packet ", err)
 		return false
 	}
 	resphead, respbody, err := ParsePacket(payload)
 	if err != nil {
+		fmt.Println("Failed to parse packet ", err)
 		return false
 	}
 	networkLogger.Infof("Highway Block Result: %d | %d | %x | %v", resphead.ErrorCode, resphead.MsgSegHead.RetCode, resphead.BytesRspExtendInfo, respbody)
@@ -169,14 +179,14 @@ func ParsePacket(data []byte) (head *highway.RespDataHighwayHead, body *binary.R
 	if reader.ReadBytes(1)[0] == 0x28 {
 		headlength := reader.ReadU32()
 		bodylength := reader.ReadU32()
-		err = proto.Unmarshal(reader.ReadBytes(int(headlength)), &head)
+		head = &highway.RespDataHighwayHead{}
+		headraw := reader.ReadBytes(int(int64(headlength)))
+		fmt.Println("headraw", headraw)
+		err = proto.Unmarshal(headraw, head)
 		if err != nil {
 			return nil, nil, err
 		}
-		err = proto.Unmarshal(reader.ReadBytes(int(bodylength)), body)
-		if err != nil {
-			return nil, nil, err
-		}
+		body = binary.NewReader(reader.ReadBytes(int(bodylength)))
 		if reader.ReadBytes(1)[0] == 0x29 {
 			return head, body, nil
 		}
