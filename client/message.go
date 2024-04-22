@@ -95,7 +95,6 @@ func preprocessMessage(client *QQClient, groupUin uint32, elements []message2.IM
 				networkLogger.Errorln("ImageUploadGroup failed")
 				continue
 			}
-			networkLogger.Debugln("Image MsgInfo: ", elem.MsgInfo)
 		default:
 		}
 	}

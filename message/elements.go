@@ -1,6 +1,7 @@
 package message
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -78,6 +79,22 @@ func NewAt(target uint32, display ...string) *AtElement {
 		Target:  target,
 		Display: dis,
 	}
+}
+
+func NewGroupImage(data []byte) *GroupImageElement {
+	return &GroupImageElement{
+		Stream: data,
+	}
+}
+
+func NewGroupImageByFile(path string) (*GroupImageElement, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return &GroupImageElement{
+		Stream: data,
+	}, nil
 }
 
 func (e *TextElement) Type() ElementType {
