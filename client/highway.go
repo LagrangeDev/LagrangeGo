@@ -176,7 +176,8 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 		networkLogger.Errorln("Failed to parse packet ", err)
 		return false
 	}
-	networkLogger.Infof("Highway Block Result: %d | %d | %x | %v", resphead.ErrorCode, resphead.MsgSegHead.RetCode, resphead.BytesRspExtendInfo, respbody)
+	networkLogger.Debugf("Highway Block Result: %d | %d | %x | %v",
+		resphead.ErrorCode, resphead.MsgSegHead.RetCode.Unwrap(), resphead.BytesRspExtendInfo, respbody)
 	return resphead.ErrorCode == 0
 }
 

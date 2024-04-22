@@ -334,6 +334,8 @@ func BuildMessageElements(msgElems []IMessageElement) (msgBody *message.MessageB
 			pb = e.BuildElement()
 		case *FaceElement:
 			pb = e.BuildElement()
+		case *GroupImageElement:
+			pb = e.BuildElement()
 		default:
 			continue
 		}
