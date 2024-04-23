@@ -44,7 +44,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 }
 
 func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	elements = preprocessMessage(c, groupUin, elements)
+	elements = preprocessGroupMessage(c, groupUin, elements)
 	body := message2.BuildMessageElements(elements)
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
@@ -53,6 +53,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 }
 
 func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+	elements = preprocessPrivateMessage(c, uin, elements)
 	body := message2.BuildMessageElements(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
@@ -73,7 +74,7 @@ func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []messag
 	return c.SendRawMessage(route, body)
 }
 
-func preprocessMessage(client *QQClient, groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
+func preprocessGroupMessage(client *QQClient, groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
 	for _, element := range elements {
 		switch elem := element.(type) {
 		case *message2.AtElement:
@@ -93,6 +94,25 @@ func preprocessMessage(client *QQClient, groupUin uint32, elements []message2.IM
 			}
 			if elem.MsgInfo == nil {
 				networkLogger.Errorln("ImageUploadGroup failed")
+				continue
+			}
+		default:
+		}
+	}
+	return elements
+}
+
+func preprocessPrivateMessage(client *QQClient, targetUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
+	for _, element := range elements {
+		switch elem := element.(type) {
+		case *message2.GroupImageElement:
+			targetUid := client.GetUid(targetUin)
+			_, err := client.ImageUploadPrivate(targetUid, elem)
+			if err != nil {
+				networkLogger.Errorln(err)
+			}
+			if elem.MsgInfo == nil {
+				networkLogger.Errorln("ImageUploadPrivate failed")
 				continue
 			}
 		default:
