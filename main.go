@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/LagrangeDev/LagrangeGo/message"
+	"os"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/info"
@@ -15,9 +17,27 @@ func main() {
 		SystemKernel:  "Windows 10.0.22631",
 		KernelVersion: "10.0.22631",
 	}
-	sig := info.NewSigInfo(8848)
+	sig := info.LoadSig("./sig.bin")
+	qqclient := client.NewQQclient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, sig)
 
-	qqclient := client.NewQQclient(0, "", appInfo, deviceInfo, sig)
+	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
+		if event.ToString() == "114514" {
+			img, _ := os.ReadFile("/Users/wenxuanlin/Desktop/2373259535.png")
+			_, err := client.SendGroupMessage(event.GroupCode, []message.IMessageElement{&message.GroupImageElement{Stream: img}})
+			if err != nil {
+				return
+			}
+		}
+	})
+
+	qqclient.PrivateMessageEvent.Subscribe(func(client *client.QQClient, event *message.PrivateMessage) {
+		img, _ := os.ReadFile("/Users/wenxuanlin/Desktop/2373259535.png")
+		_, err := client.SendPrivateMessage(event.Sender.Uin, []message.IMessageElement{&message.FriendImageElement{Stream: img}})
+		if err != nil {
+			return
+		}
+	})
+
 	err := qqclient.Loop()
 	if err != nil {
 		fmt.Println(err)
@@ -28,6 +48,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	info.SaveSig(sig, "./sig.bin")
 
 	select {}
 }
