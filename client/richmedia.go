@@ -5,14 +5,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
+	"net"
+
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 	message2 "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
-	"io"
-	"net"
 )
 
 func ConvertIP(raw uint32) string {
@@ -88,7 +89,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo
-	var compatImage *message2.NotOnlineImage
+	compatImage := &message2.NotOnlineImage{}
 	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, compatImage)
 	if err != nil {
 		return nil, err
