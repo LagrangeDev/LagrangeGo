@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+
 	"github.com/LagrangeDev/LagrangeGo/entity"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 )
@@ -181,6 +182,10 @@ func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
 	if !ok {
 		return errors.New("set admin failed")
 	}
+	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
+		m.Permission = entity.Admin
+		c.cache.RefreshGroupMember(groupID, m)
+	}
 
 	return nil
 }
@@ -204,6 +209,10 @@ func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
 	}
 	if !ok {
 		return errors.New("rename member failed")
+	}
+	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
+		m.MemberCard = name
+		c.cache.RefreshGroupMember(groupID, m)
 	}
 
 	return nil
