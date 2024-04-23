@@ -105,7 +105,7 @@ func preprocessGroupMessage(client *QQClient, groupUin uint32, elements []messag
 func preprocessPrivateMessage(client *QQClient, targetUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
 	for _, element := range elements {
 		switch elem := element.(type) {
-		case *message2.GroupImageElement:
+		case *message2.FriendImageElement:
 			targetUid := client.GetUid(targetUin)
 			_, err := client.ImageUploadPrivate(targetUid, elem)
 			if err != nil {
