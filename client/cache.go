@@ -60,13 +60,13 @@ func (c *QQClient) GetCachedAllGroupsInfo() (map[uint32]*entity.Group, error) {
 }
 
 // GetCachedMemberInfo 获取群成员信息(缓存)
-func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) *entity.GroupMember {
+func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) (*entity.GroupMember, error) {
 	if c.cache.GroupMemberCacheIsEmpty(groupUin) {
 		if err := c.RefreshGroupMembersCache(groupUin); err != nil {
-			return nil
+			return nil, err
 		}
 	}
-	return c.cache.GetGroupMember(uin, groupUin)
+	return c.cache.GetGroupMember(uin, groupUin), nil
 }
 
 // GetCachedMembersInfo 获取指定群所有群成员信息(缓存)
