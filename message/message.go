@@ -88,6 +88,10 @@ type (
 	ElementType int
 )
 
+func (s *Sender) IsAnonymous() bool {
+	return s.Uin == 80000000
+}
+
 func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 	return &PrivateMessage{
 		Self:   int64(msg.Message.ResponseHead.ToUin),
