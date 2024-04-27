@@ -56,6 +56,12 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 		if err != nil {
 			return nil, err
 		}
+		// 3 是bot自身被踢出，Operator字段会是一个protobuf
+		if pb.DecreaseType == 3 && pb.Operator != nil {
+			Operator := message.OperatorInfo{}
+			err = proto.Unmarshal(pb.Operator, &Operator)
+			pb.Operator = []byte(Operator.OperatorField1.OperatorUid)
+		}
 		return eventConverter.ParseMemberDecreaseEvent(&pb), nil
 	case 84: // group request join notice
 		pb := message.GroupJoin{}

@@ -55,9 +55,21 @@ message GroupChange {
   uint32 Flag = 2;
   string MemberUid = 3;
   uint32 DecreaseType = 4;
-  optional string OperatorUid = 5;
+  optional bytes Operator = 5;
   uint32 IncreaseType = 6;
   optional bytes Field7 = 7;
+}
+
+message OperatorInfo {
+  OperatorField1 OperatorField1 = 1;
+}
+
+message OperatorField1 {
+  string OperatorUid = 1;
+  uint32 Field2 = 2;
+  bytes Field3 = 3;
+  uint32 Field4 = 4;
+  bytes Field5 = 5;
 }
 
 message GroupInvitation {

@@ -62,13 +62,26 @@ type GroupAdminExtra struct {
 }
 
 type GroupChange struct {
-	GroupUin     uint32               `protobuf:"varint,1,opt"`
-	Flag         uint32               `protobuf:"varint,2,opt"`
-	MemberUid    string               `protobuf:"bytes,3,opt"`
-	DecreaseType uint32               `protobuf:"varint,4,opt"`
-	OperatorUid  proto.Option[string] `protobuf:"bytes,5,opt"`
-	IncreaseType uint32               `protobuf:"varint,6,opt"`
-	Field7       []byte               `protobuf:"bytes,7,opt"`
+	GroupUin     uint32 `protobuf:"varint,1,opt"`
+	Flag         uint32 `protobuf:"varint,2,opt"`
+	MemberUid    string `protobuf:"bytes,3,opt"`
+	DecreaseType uint32 `protobuf:"varint,4,opt"`
+	Operator     []byte `protobuf:"bytes,5,opt"`
+	IncreaseType uint32 `protobuf:"varint,6,opt"`
+	Field7       []byte `protobuf:"bytes,7,opt"`
+}
+
+type OperatorInfo struct {
+	OperatorField1 *OperatorField1 `protobuf:"bytes,1,opt"`
+	_              [0]func()
+}
+
+type OperatorField1 struct {
+	OperatorUid string `protobuf:"bytes,1,opt"`
+	Field2      uint32 `protobuf:"varint,2,opt"`
+	Field3      []byte `protobuf:"bytes,3,opt"`
+	Field4      uint32 `protobuf:"varint,4,opt"`
+	Field5      []byte `protobuf:"bytes,5,opt"`
 }
 
 type GroupInvitation struct {

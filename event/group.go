@@ -96,7 +96,7 @@ func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
 			GroupUin: event.GroupUin,
 		},
 		MemberUid:  event.MemberUid,
-		InvitorUid: event.OperatorUid.Unwrap(),
+		InvitorUid: string(event.Operator),
 		JoinType:   event.IncreaseType,
 	}
 }
@@ -107,7 +107,7 @@ func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
 			GroupUin: event.GroupUin,
 		},
 		MemberUid:   event.MemberUid,
-		OperatorUid: event.OperatorUid.Unwrap(),
+		OperatorUid: string(event.Operator),
 		ExitType:    event.DecreaseType,
 	}
 }
