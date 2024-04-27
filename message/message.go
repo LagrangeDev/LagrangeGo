@@ -94,6 +94,7 @@ func (s *Sender) IsAnonymous() bool {
 
 func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 	return &PrivateMessage{
+		Id:     int32(msg.Message.ContentHead.Sequence.Unwrap()),
 		Self:   int64(msg.Message.ResponseHead.ToUin),
 		Target: int64(msg.Message.ResponseHead.FromUin),
 		Sender: &Sender{
@@ -108,6 +109,7 @@ func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 
 func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
 	return &GroupMessage{
+		Id:        int32(msg.Message.ContentHead.Sequence.Unwrap()),
 		GroupCode: msg.Message.ResponseHead.Grp.GroupUin,
 		GroupName: msg.Message.ResponseHead.Grp.GroupName,
 		Sender: &Sender{

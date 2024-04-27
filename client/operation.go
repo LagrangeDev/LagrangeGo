@@ -3,6 +3,9 @@ package client
 import (
 	"errors"
 
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
+
 	"github.com/LagrangeDev/LagrangeGo/entity"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 )
@@ -304,4 +307,28 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	}
 
 	return nil
+}
+
+func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) (bool, error) {
+	packet := message.GroupRecallMsg{
+		Type:     1,
+		GroupUin: GrpUin,
+		Field3: &message.GroupRecallMsgField3{
+			Sequence: seq,
+			Field3:   0,
+		},
+		Field4: &message.GroupRecallMsgField4{Field1: 0},
+	}
+	pktData, err := proto.Marshal(&packet)
+	if err != nil {
+		return false, err
+	}
+	resp, err := c.SendUniPacketAndAwait("trpc.msg.msg_svc.MsgService.SsoGroupRecallMsg", pktData)
+	if err != nil {
+		return false, err
+	}
+	if len(resp.Data) == 0 {
+		return false, nil
+	}
+	return true, nil
 }
