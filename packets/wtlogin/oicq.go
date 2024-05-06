@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	qqtea "github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 var loginLogger = utils.GetLogger("login")
@@ -46,7 +46,7 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 }
 
 func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte) []byte {
-	encBody := qqtea.QQTeaEncrypt(body, ecdh.ECDH["secp192k1"].GetShareKey())
+	encBody := crypto.NewTeaCipher(ecdh.ECDH["secp192k1"].GetShareKey()).Encrypt(body)
 
 	var _cmd uint16
 	if cmd == "wtlogin.login" {
@@ -123,7 +123,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WriteBytes(body, "u32", true).
 		Pack(-1)
 
-	encrypted := qqtea.QQTeaEncrypt(ssoPacket, sigInfo.D2Key)
+	encrypted := crypto.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
 
 	var _s uint8
 	if len(sigInfo.D2) == 0 {
@@ -153,7 +153,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 	var title, content string
 
 	if typ == 0 {
-		reader = binary.NewReader(qqtea.QQTeaDecrypt(tlv[0x119], sig.Tgtgt))
+		reader = binary.NewReader(crypto.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
 		tlv = reader.ReadTlv()
 		if tgt, ok := tlv[0x10A]; ok {
 			sig.Tgt = tgt

@@ -9,14 +9,16 @@ import (
 )
 
 type PacketBuilder struct {
-	buffer     []byte
-	encryptKey []byte
+	buffer []byte
+	key    crypto.TEA
+	usetea bool
 }
 
-func NewPacketBuilder(encryptKey []byte) *PacketBuilder {
+func NewPacketBuilder(key []byte) *PacketBuilder {
 	return &PacketBuilder{
-		buffer:     make([]byte, 0),
-		encryptKey: encryptKey,
+		buffer: make([]byte, 0),
+		key:    crypto.NewTeaCipher(key),
+		usetea: len(key) == 16,
 	}
 }
 
@@ -75,8 +77,8 @@ func (b *PacketBuilder) Buffer() []byte {
 }
 
 func (b *PacketBuilder) Data() []byte {
-	if b.encryptKey != nil {
-		return crypto.QQTeaEncrypt(b.buffer, b.encryptKey)
+	if b.usetea {
+		return b.key.Encrypt(b.buffer)
 	}
 	return b.buffer
 }
