@@ -6,20 +6,20 @@ import (
 	"crypto/sha256"
 )
 
-func Md5Digest(v []byte) []byte {
-	hasher := md5.New()
-	hasher.Write(v)
-	return hasher.Sum(nil)
+func MD5Digest(v []byte) []byte {
+	h := md5.New()
+	h.Write(v)
+	return h.Sum(make([]byte, 0, md5.Size))
 }
 
-func Sha256Digest(v []byte) []byte {
-	sha256er := sha256.New()
-	sha256er.Write(v)
-	return sha256er.Sum(nil)
+func SHA256Digest(v []byte) []byte {
+	h := sha256.New()
+	h.Write(v)
+	return h.Sum(make([]byte, 0, sha256.Size))
 }
 
-func Sha1Digest(v []byte) []byte {
-	sha1er := sha1.New()
-	sha1er.Write(v)
-	return sha1er.Sum(nil)
+func SHA1Digest(v []byte) []byte {
+	h := sha1.New()
+	h.Write(v)
+	return h.Sum(make([]byte, 0, sha1.Size))
 }

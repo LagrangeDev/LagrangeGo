@@ -18,8 +18,8 @@ type DeviceInfo struct {
 
 func NewDeviceInfo(uin int) *DeviceInfo {
 	return &DeviceInfo{
-		Guid:          fmt.Sprintf("%X", utils.Md5Digest([]byte(strconv.Itoa(uin)))),
-		DeviceName:    fmt.Sprintf("Lagrange-%X", utils.Md5Digest([]byte(strconv.Itoa(uin)))[0:4]),
+		Guid:          fmt.Sprintf("%X", utils.MD5Digest([]byte(strconv.Itoa(uin)))),
+		DeviceName:    fmt.Sprintf("Lagrange-%X", utils.MD5Digest([]byte(strconv.Itoa(uin)))[0:4]),
 		SystemKernel:  fmt.Sprintf("%s %s", platform.GetSystem(), platform.GetVersion()),
 		KernelVersion: platform.GetVersion(),
 	}

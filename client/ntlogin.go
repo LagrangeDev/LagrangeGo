@@ -36,7 +36,7 @@ func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo,
 				1: app.OS,
 				2: device.DeviceName,
 				3: app.NTLoginType,
-				4: utils.GetBytesFromHex(device.Guid),
+				4: utils.MustParseHexStr(device.Guid),
 			},
 			3: proto.DynamicMessage{
 				1: device.KernelVersion,

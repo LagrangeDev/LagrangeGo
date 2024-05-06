@@ -98,9 +98,9 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 
 	if sign != nil {
 		head[24] = proto.DynamicMessage{
-			1: utils.GetBytesFromHex(sign["sign"]),
-			2: utils.GetBytesFromHex(sign["token"]),
-			3: utils.GetBytesFromHex(sign["extra"]),
+			1: utils.MustParseHexStr(sign["sign"]),
+			2: utils.MustParseHexStr(sign["token"]),
+			3: utils.MustParseHexStr(sign["extra"]),
 		}
 	}
 
@@ -112,7 +112,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WriteBytes(sigInfo.Tgt, "u32", true).
 		WriteString(cmd, "u32", true).
 		WriteBytes(make([]byte, 0), "u32", true).
-		WriteBytes(utils.GetBytesFromHex(deviceInfo.Guid), "u32", true).
+		WriteBytes(utils.MustParseHexStr(deviceInfo.Guid), "u32", true).
 		WriteBytes(make([]byte, 0), "u32", true).
 		WriteString(appInfo.CurrentVersion, "u16", true).
 		WriteBytes(head.Encode(), "u32", true).
@@ -172,7 +172,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 			sig.Gender = tlvReader.ReadU8()
 			sig.Nickname = tlvReader.ReadStringWithLength("u8", false)
 		}
-		sig.Tgtgt = utils.Md5Digest(sig.D2Key)
+		sig.Tgtgt = utils.MD5Digest(sig.D2Key)
 		sig.TempPwd = tlv[0x106]
 
 		var resp pb.Tlv543

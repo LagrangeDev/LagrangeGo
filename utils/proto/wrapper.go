@@ -5,8 +5,6 @@ package proto
 import (
 	"reflect"
 
-	"google.golang.org/protobuf/types/known/anypb"
-
 	"github.com/RomiChan/protobuf/proto"
 )
 
@@ -36,13 +34,6 @@ func Marshal(m Message) ([]byte, error) {
 
 func Unmarshal(b []byte, m Message) error {
 	return proto.Unmarshal(b, m)
-}
-
-func Any(pb any) *anypb.Any {
-	data, _ := Marshal(pb)
-	return &anypb.Any{
-		Value: data,
-	}
 }
 
 func Some[T any](val T) proto.Option[T] {

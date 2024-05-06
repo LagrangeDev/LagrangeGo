@@ -13,15 +13,21 @@ func TimeStamp() int64 {
 	return time.Now().Unix()
 }
 
-func GetBytesFromHex(s string) []byte {
-	result, _ := hex.DecodeString(s)
+func MustParseHexStr(s string) []byte {
+	result, err := hex.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
 	return result
 }
 
 func ReadLine(s string) string {
 	inputReader := bufio.NewReader(os.Stdin)
 	fmt.Print(s)
-	rs, _ := inputReader.ReadString('\n')
+	rs, err := inputReader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
 	return strings.TrimSpace(rs)
 }
 

@@ -35,7 +35,7 @@ func T100(ssoVersion, appID, subAppID, appClientVersion, sigmap, dbBufVer int) [
 // T106 抄的时候注意参数顺序
 func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
 	// password_md5 + bytes(4) + write_u32(uin).pack()
-	key := utils.Md5Digest(append(passwordMd5, append(make([]byte, 4),
+	key := utils.MD5Digest(append(passwordMd5, append(make([]byte, 4),
 		utils.NewPacketBuilder(nil).WriteU32(uint32(uin)).Pack(-1)...)...))
 
 	body := utils.NewPacketBuilder(nil).
@@ -52,7 +52,7 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 		WriteBytes(tgtgtKey, "", true).
 		WriteU32(0).
 		WriteBool(true).
-		WriteBytes(utils.GetBytesFromHex(guid), "", true).
+		WriteBytes(utils.MustParseHexStr(guid), "", true).
 		WriteU32(0).
 		WriteU32(1).
 		WriteString(strconv.Itoa(uin), "u16", false).
@@ -124,7 +124,7 @@ func T144(tgtgtKey []byte, appInfo *info.AppInfo, device *info.DeviceInfo) []byt
 		WriteTlv([][]byte{
 			T16e(device.DeviceName),
 			T147(appInfo.AppID, appInfo.PTVersion, appInfo.PackageName),
-			T128(appInfo.OS, utils.GetBytesFromHex(device.Guid)),
+			T128(appInfo.OS, utils.MustParseHexStr(device.Guid)),
 			T124(),
 		}).Pack(0x144)
 }
