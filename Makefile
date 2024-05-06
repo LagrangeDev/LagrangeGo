@@ -1,3 +1,4 @@
+# from https://github.com/Mrs4s/MiraiGo/blob/master/Makefile
 .PHONY: protoc-gen-golite-version clean install-protoc-plugin proto
 .DEFAULT_GOAL := proto
 

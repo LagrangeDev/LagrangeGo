@@ -1,5 +1,7 @@
 package message
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/message/elements.go
+
 import (
 	"os"
 	"strconv"

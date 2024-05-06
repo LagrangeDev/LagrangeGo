@@ -1,5 +1,7 @@
 package proto
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/internal/proto/dynamic_test.go
+
 import (
 	"bytes"
 	"math"

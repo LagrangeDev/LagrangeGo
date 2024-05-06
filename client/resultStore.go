@@ -1,12 +1,13 @@
 package client
 
+// 借鉴 https://github.com/nonebot/adapter-onebot/blob/master/nonebot/adapters/onebot/store.py
+
 import (
 	"errors"
 	"sync"
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
-
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
