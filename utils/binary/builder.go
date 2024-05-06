@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"math"
 
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
@@ -74,9 +75,9 @@ func (b *Builder) WriteBool(v bool) *Builder {
 	return b
 }
 
-// WritePacketBytes prefix = "", withPerfix = true
-func (b *Builder) WritePacketBytes(v []byte, prefix string, withPerfix bool) *Builder {
-	if withPerfix {
+// WritePacketBytes default prefix = "", withPrefix = true
+func (b *Builder) WritePacketBytes(v []byte, prefix string, withPrefix bool) *Builder {
+	if withPrefix {
 		switch prefix {
 		case "":
 		case "u8":
@@ -109,6 +110,10 @@ func (b *Builder) WritePacketBytes(v []byte, prefix string, withPerfix bool) *Bu
 	return b
 }
 
+func (b *Builder) WritePacketString(s, prefix string, withPrefix bool) *Builder {
+	return b.WritePacketBytes(utils.S2B(s), prefix, withPrefix)
+}
+
 func (b *Builder) WriteBytes(v []byte, withLength bool) *Builder {
 	if withLength {
 		b.WriteU16(uint16(len(v)))
@@ -118,7 +123,7 @@ func (b *Builder) WriteBytes(v []byte, withLength bool) *Builder {
 }
 
 func (b *Builder) WriteString(v string) *Builder {
-	return b.WriteBytes([]byte(v), true)
+	return b.WriteBytes(utils.S2B(v), true)
 }
 
 func (b *Builder) WriteStruct(datas ...any) *Builder {

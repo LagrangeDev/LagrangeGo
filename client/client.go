@@ -81,7 +81,7 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 }
 
 func (c *QQClient) FecthQrcode() ([]byte, string, error) {
-	body := utils.NewPacketBuilder(nil).
+	body := binary2.NewBuilder(nil).
 		WriteU16(0).
 		WriteU64(0).
 		WriteU8(0).
@@ -126,8 +126,8 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
 	}
 
-	body := utils.NewPacketBuilder(nil).
-		WriteBytes(c.sig.Qrsig, "u16", false).
+	body := binary2.NewBuilder(nil).
+		WritePacketBytes(c.sig.Qrsig, "u16", false).
 		WriteU64(0).
 		WriteU32(0).
 		WriteU8(0).
@@ -226,10 +226,10 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 
 	app := c.appInfo
 	device := c.deviceInfo
-	body := utils.NewPacketBuilder(nil).
+	body := binary2.NewBuilder(nil).
 		WriteU16(0x09).
 		WriteTlv([][]byte{
-			utils.NewPacketBuilder(nil).WriteBytes(c.t106, "", true).Pack(0x106),
+			binary2.NewBuilder(nil).WritePacketBytes(c.t106, "", true).Pack(0x106),
 			tlv.T144(c.sig.Tgtgt, app, device),
 			tlv.T116(app.SubSigmap),
 			tlv.T142(app.PackageName, 0),
@@ -241,7 +241,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 			tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
 			tlv.T107(1, 0x0d, 0, 1),
 			tlv.T318(make([]byte, 0)),
-			utils.NewPacketBuilder(nil).WriteBytes(c.t16a, "", true).Pack(0x16a),
+			binary2.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
 		}).Pack(-1)
