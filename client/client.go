@@ -12,6 +12,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -94,7 +95,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 			tlv.T35(c.appInfo.PTOSVersion),
 			tlv.T66(c.appInfo.PTOSVersion),
 			tlv.Td1(c.appInfo.OS, c.deviceInfo.DeviceName),
-		}).WriteU8(3).Pack(-1)
+		}).WriteU8(3).Pack(binary.PackTypeNone)
 
 	packet := wtlogin.BuildCode2dPacket(c.Uin, 0x31, c.appInfo, body)
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp", packet)
@@ -131,7 +132,7 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		WriteU64(0).
 		WriteU32(0).
 		WriteU8(0).
-		WriteU8(0x83).Pack(-1)
+		WriteU8(0x83).Pack(binary.PackTypeNone)
 
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp",
 		wtlogin.BuildCode2dPacket(0, 0x12, c.appInfo, body))
@@ -244,7 +245,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 			binary2.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
-		}).Pack(-1)
+		}).Pack(binary.PackTypeNone)
 
 	response, err := c.SendUniPacketAndAwait(
 		"wtlogin.login",

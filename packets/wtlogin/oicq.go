@@ -41,7 +41,7 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 			WritePacketBytes(make([]byte, 14), "", true).
 			WriteU32(uint32(appInfo.AppID)).
 			WritePacketBytes(body, "", true).
-			Pack(-1),
+			Pack(binary.PackTypeNone),
 	)
 }
 
@@ -75,13 +75,13 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 		WritePacketBytes(ecdh.ECDH["secp192k1"].GetPublicKey(), "", true).
 		WritePacketBytes(encBody, "", true).
 		WriteU8(3).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 
 	frame := binary.NewBuilder(nil).
 		WriteU8(2).
 		WriteU16(uint16(len(frameBody))+3). // + 2 + 1
 		WritePacketBytes(frameBody, "", true).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 
 	return frame
 }
@@ -116,12 +116,12 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WritePacketBytes(nil, "u32", true).
 		WritePacketString(appInfo.CurrentVersion, "u16", true).
 		WritePacketBytes(head.Encode(), "u32", true).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 
 	ssoPacket := binary.NewBuilder(nil).
 		WritePacketBytes(ssoHeader, "u32", true).
 		WritePacketBytes(body, "u32", true).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 
 	encrypted := crypto.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
 
@@ -139,9 +139,9 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WriteU8(0).
 		WritePacketString(strconv.Itoa(uin), "u32", true).
 		WritePacketBytes(encrypted, "", true).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 
-	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).Pack(-1)
+	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).Pack(binary.PackTypeNone)
 }
 
 func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
