@@ -56,7 +56,7 @@ func (b *Builder) pack(v any) *Builder {
 func (b *Builder) Pack(typ PackType) []byte {
 	if typ != PackTypeNone {
 		// 或许这里是tlv
-		buf := make([]byte, 4, b.Len()+4)
+		buf := make([]byte, b.Len()+4)
 		binary.BigEndian.PutUint16(buf[0:2], uint16(typ))           // type
 		binary.BigEndian.PutUint16(buf[2:4], uint16(len(b.Data()))) // length
 		copy(buf[4:], b.Data())                                     // type + length + value
@@ -126,8 +126,8 @@ func (b *Builder) WriteString(v string) *Builder {
 	return b.WriteBytes(utils.S2B(v), true)
 }
 
-func (b *Builder) WriteStruct(datas ...any) *Builder {
-	for _, data := range datas {
+func (b *Builder) WriteStruct(data ...any) *Builder {
+	for _, data := range data {
 		b.pack(data)
 	}
 	return b
@@ -172,13 +172,25 @@ func (b *Builder) WriteI64(v int64) *Builder {
 func (b *Builder) WriteFloat(v float32) *Builder {
 	return b.WriteU32(math.Float32bits(v))
 }
+
 func (b *Builder) WriteDouble(v float64) *Builder {
 	return b.WriteU64(math.Float64bits(v))
 }
-func (b *Builder) WriteTlv(tlvs [][]byte) *Builder {
+
+/*
+func (b *Builder) WriteTlv(tlvs ...[]byte) *Builder {
 	b.WriteU16(uint16(len(tlvs)))
 	for _, tlv := range tlvs {
 		b.WriteBytes(tlv, false)
+	}
+	return b
+}
+*/
+
+func (b *Builder) WritePacketTlv(tlvs ...[]byte) *Builder {
+	b.WriteU16(uint16(len(tlvs)))
+	for _, tlv := range tlvs {
+		b.WritePacketBytes(tlv, "", true)
 	}
 	return b
 }

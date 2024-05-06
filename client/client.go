@@ -86,7 +86,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 		WriteU16(0).
 		WriteU64(0).
 		WriteU8(0).
-		WriteTlv([][]byte{
+		WritePacketTlv(
 			tlv.T16(c.appInfo.AppID, c.appInfo.SubAppID,
 				utils.MustParseHexStr(c.deviceInfo.Guid), c.appInfo.PTVersion, c.appInfo.PackageName),
 			tlv.T1b(),
@@ -95,7 +95,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 			tlv.T35(c.appInfo.PTOSVersion),
 			tlv.T66(c.appInfo.PTOSVersion),
 			tlv.Td1(c.appInfo.OS, c.deviceInfo.DeviceName),
-		}).WriteU8(3).Pack(binary.PackTypeNone)
+		).WriteU8(3).Pack(binary.PackTypeNone)
 
 	packet := wtlogin.BuildCode2dPacket(c.Uin, 0x31, c.appInfo, body)
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp", packet)
@@ -229,7 +229,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 	device := c.deviceInfo
 	body := binary2.NewBuilder(nil).
 		WriteU16(0x09).
-		WriteTlv([][]byte{
+		WritePacketTlv(
 			binary2.NewBuilder(nil).WritePacketBytes(c.t106, "", true).Pack(0x106),
 			tlv.T144(c.sig.Tgtgt, app, device),
 			tlv.T116(app.SubSigmap),
@@ -245,7 +245,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 			binary2.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
-		}).Pack(binary.PackTypeNone)
+		).Pack(binary.PackTypeNone)
 
 	response, err := c.SendUniPacketAndAwait(
 		"wtlogin.login",
