@@ -30,7 +30,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 		WriteBytes(encl, false).
 		WriteU32(0).
 		WriteU32(uint32(utils.TimeStamp())).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 
 	p2Hash := utils.SHA256Digest(p2)
 	encP2Hash := crypto.AesGCMEncrypt(p2Hash, encKey)

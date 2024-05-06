@@ -8,6 +8,10 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
+type PackType int
+
+const PackTypeNone PackType = -1
+
 type Builder struct {
 	buffer []byte
 	key    crypto.TEA
@@ -16,7 +20,7 @@ type Builder struct {
 
 func NewBuilder(key []byte) *Builder {
 	return &Builder{
-		buffer: make([]byte, 0),
+		buffer: make([]byte, 0, 64),
 		key:    crypto.NewTeaCipher(key),
 		usetea: len(key) == 16,
 	}
@@ -48,13 +52,14 @@ func (b *Builder) pack(v any) *Builder {
 	return b
 }
 
-func (b *Builder) Pack(typ int64) []byte {
-	if typ != -1 {
+func (b *Builder) Pack(typ PackType) []byte {
+	if typ != PackTypeNone {
 		// 或许这里是tlv
-		buf := new(bytes.Buffer)
-		_ = binary.Write(buf, binary.BigEndian, typ)                  // type
-		_ = binary.Write(buf, binary.BigEndian, int64(len(b.Data()))) // length
-		return append(buf.Bytes(), b.Data()...)                       // type + length + value
+		buf := make([]byte, 4, b.Len()+4)
+		binary.BigEndian.PutUint16(buf[0:2], uint16(typ))           // type
+		binary.BigEndian.PutUint16(buf[2:4], uint16(len(b.Data()))) // length
+		copy(buf[4:], b.Data())                                     // type + length + value
+		return buf
 	}
 	return b.Data()
 }
@@ -69,10 +74,40 @@ func (b *Builder) WriteBool(v bool) *Builder {
 	return b
 }
 
-//func (b *Builder) WriteByte(v byte) *Builder {
-//	b.buffer = append(b.buffer, v)
-//	return b.pack(v)
-//}
+// WritePacketBytes prefix = "", withPerfix = true
+func (b *Builder) WritePacketBytes(v []byte, prefix string, withPerfix bool) *Builder {
+	if withPerfix {
+		switch prefix {
+		case "":
+		case "u8":
+			b.WriteU8(uint8(len(v) + 1))
+		case "u16":
+			b.WriteU16(uint16(len(v) + 2))
+		case "u32":
+			b.WriteU32(uint32(len(v) + 4))
+		case "u64":
+			b.WriteU64(uint64(len(v) + 8))
+		default:
+			panic("Invaild prefix")
+		}
+	} else {
+		switch prefix {
+		case "":
+		case "u8":
+			b.WriteU8(uint8(len(v)))
+		case "u16":
+			b.WriteU16(uint16(len(v)))
+		case "u32":
+			b.WriteU32(uint32(len(v)))
+		case "u64":
+			b.WriteU64(uint64(len(v)))
+		default:
+			panic("Invaild prefix")
+		}
+	}
+	b.append(v)
+	return b
+}
 
 func (b *Builder) WriteBytes(v []byte, withLength bool) *Builder {
 	if withLength {

@@ -2,6 +2,8 @@ package binary
 
 import (
 	"encoding/binary"
+
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 type Reader struct {
@@ -52,7 +54,7 @@ func (r *Reader) ReadBytes(length int) (v []byte) {
 }
 
 func (r *Reader) ReadString(length int) string {
-	return string(r.ReadBytes(length))
+	return utils.B2S(r.ReadBytes(length))
 }
 
 func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) (v []byte) {
@@ -91,7 +93,7 @@ func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) (v []byte) 
 }
 
 func (r *Reader) ReadStringWithLength(prefix string, withPerfix bool) string {
-	return string(r.ReadBytesWithLength(prefix, withPerfix))
+	return utils.B2S(r.ReadBytesWithLength(prefix, withPerfix))
 }
 
 func (r *Reader) ReadTlv() (result map[int][]byte) {

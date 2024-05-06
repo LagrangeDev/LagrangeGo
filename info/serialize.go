@@ -27,7 +27,7 @@ func Encode(sig *SigInfo) []byte {
 	return binary.NewBuilder(nil).
 		WriteBytes(dataHash, true).
 		WriteBytes(buffer.Bytes(), true).
-		Pack(-1)
+		Pack(binary.PackTypeNone)
 }
 
 func Decode(buf []byte, verify bool) *SigInfo {
