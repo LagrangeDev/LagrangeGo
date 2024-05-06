@@ -22,7 +22,7 @@ func Encode(sig *SigInfo) []byte {
 	if err != nil {
 		panic(err)
 	}
-	dataHash := utils.Md5Digest(buffer.Bytes())
+	dataHash := utils.MD5Digest(buffer.Bytes())
 
 	return binary.NewBuilder(nil).
 		WriteBytes(dataHash, true).
@@ -35,7 +35,7 @@ func Decode(buf []byte, verify bool) *SigInfo {
 	dataHash := reader.ReadBytesWithLength("u16", false)
 	data := reader.ReadBytesWithLength("u16", false)
 
-	if verify && string(dataHash) != string(utils.Md5Digest(data)) {
+	if verify && string(dataHash) != string(utils.MD5Digest(data)) {
 		panic("Data hash does not match")
 	}
 	buffer := bytes.NewBuffer(data)

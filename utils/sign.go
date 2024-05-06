@@ -9,14 +9,13 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"sync"
 	"time"
 )
 
 var (
 	signLogger = GetLogger("sign")
 
-	SIGN_PKG_LIST sync.Map
+	signMap = map[string]struct{}{} // 只在启动时初始化, 无并发问题
 )
 
 func init() {
@@ -60,12 +59,12 @@ func init() {
 	}
 
 	for _, cmd := range signPkgList {
-		SIGN_PKG_LIST.Store(cmd, true)
+		signMap[cmd] = struct{}{}
 	}
 }
 
 func containSignPKG(cmd string) bool {
-	_, ok := SIGN_PKG_LIST.Load(cmd)
+	_, ok := signMap[cmd]
 	return ok
 }
 

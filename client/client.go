@@ -87,10 +87,10 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 		WriteU8(0).
 		WriteTlv([][]byte{
 			tlv.T16(c.appInfo.AppID, c.appInfo.SubAppID,
-				utils.GetBytesFromHex(c.deviceInfo.Guid), c.appInfo.PTVersion, c.appInfo.PackageName),
+				utils.MustParseHexStr(c.deviceInfo.Guid), c.appInfo.PTVersion, c.appInfo.PackageName),
 			tlv.T1b(),
 			tlv.T1d(c.appInfo.MiscBitmap),
-			tlv.T33(utils.GetBytesFromHex(c.deviceInfo.Guid)),
+			tlv.T33(utils.MustParseHexStr(c.deviceInfo.Guid)),
 			tlv.T35(c.appInfo.PTOSVersion),
 			tlv.T66(c.appInfo.PTOSVersion),
 			tlv.Td1(c.appInfo.OS, c.deviceInfo.DeviceName),
@@ -172,7 +172,7 @@ func (c *QQClient) KeyExchange() {
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
-	md5Password := utils.Md5Digest([]byte(password))
+	md5Password := utils.MD5Digest([]byte(password))
 
 	cr := tlv.T106(
 		c.appInfo.AppID,
@@ -233,7 +233,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 			tlv.T144(c.sig.Tgtgt, app, device),
 			tlv.T116(app.SubSigmap),
 			tlv.T142(app.PackageName, 0),
-			tlv.T145(utils.GetBytesFromHex(device.Guid)),
+			tlv.T145(utils.MustParseHexStr(device.Guid)),
 			tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
 			tlv.T141([]byte("Unknown"), make([]byte, 0)),
 			tlv.T177(app.WTLoginSDK, 0),

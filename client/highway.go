@@ -137,7 +137,7 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 		DataFlag:   16,
 		CommandId:  uint32(block.CommandId),
 	}
-	md5 := utils.Md5Digest(block.Block)
+	md5 := utils.MD5Digest(block.Block)
 	segHead := &highway.SegHead{
 		ServiceId:     proto.Some(uint32(0)),
 		Filesize:      block.FileSize,

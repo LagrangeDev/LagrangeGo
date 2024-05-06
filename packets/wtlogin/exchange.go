@@ -2,6 +2,7 @@ package wtlogin
 
 import (
 	"encoding/hex"
+
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
@@ -31,7 +32,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 		WriteU32(uint32(utils.TimeStamp())).
 		Pack(-1)
 
-	p2Hash := utils.Sha256Digest(p2)
+	p2Hash := utils.SHA256Digest(p2)
 	encP2Hash := crypto.AesGCMEncrypt(p2Hash, encKey)
 
 	return proto.DynamicMessage{
