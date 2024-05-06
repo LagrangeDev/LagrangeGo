@@ -9,14 +9,16 @@ import (
 )
 
 type Builder struct {
-	buffer     []byte
-	encryptKey []byte
+	buffer []byte
+	key    crypto.TEA
+	usetea bool
 }
 
-func NewBuilder(encryptKey []byte) *Builder {
+func NewBuilder(key []byte) *Builder {
 	return &Builder{
-		buffer:     make([]byte, 0),
-		encryptKey: encryptKey,
+		buffer: make([]byte, 0),
+		key:    crypto.NewTeaCipher(key),
+		usetea: len(key) == 16,
 	}
 }
 
@@ -33,8 +35,8 @@ func (b *Builder) Buffer() []byte {
 }
 
 func (b *Builder) Data() []byte {
-	if b.encryptKey != nil {
-		return crypto.QQTeaEncrypt(b.buffer, b.encryptKey)
+	if b.usetea {
+		return b.key.Encrypt(b.buffer)
 	}
 	return b.buffer
 }

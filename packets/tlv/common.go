@@ -3,10 +3,9 @@ package tlv
 import (
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
-
 	"github.com/LagrangeDev/LagrangeGo/info"
-	qqtea "github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5
@@ -60,7 +59,7 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 		Pack(-1)
 
 	return utils.NewPacketBuilder(nil).
-		WriteBytes(qqtea.QQTeaEncrypt(body, key), "u32", true).
+		WriteBytes(crypto.NewTeaCipher(key).Encrypt(body), "u32", true).
 		Pack(0x106)
 }
 
