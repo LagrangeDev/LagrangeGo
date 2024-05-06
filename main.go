@@ -3,11 +3,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/LagrangeDev/LagrangeGo/message"
 	"os"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
-			img, _ := os.ReadFile("/Users/wenxuanlin/Desktop/2373259535.png")
+			img, _ := os.ReadFile("./testgroup.png")
 			_, err := client.SendGroupMessage(event.GroupCode, []message.IMessageElement{&message.GroupImageElement{Stream: img}})
 			if err != nil {
 				return
@@ -32,7 +32,7 @@ func main() {
 	})
 
 	qqclient.PrivateMessageEvent.Subscribe(func(client *client.QQClient, event *message.PrivateMessage) {
-		img, _ := os.ReadFile("/Users/wenxuanlin/Desktop/2373259535.png")
+		img, _ := os.ReadFile("testprivate.png")
 		_, err := client.SendPrivateMessage(event.Sender.Uin, []message.IMessageElement{&message.FriendImageElement{Stream: img}})
 		if err != nil {
 			return
