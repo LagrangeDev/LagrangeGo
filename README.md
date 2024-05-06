@@ -1,6 +1,8 @@
 # LagrangeGo
 ntqq 协议的golang实现 移植于 [Lagrange.Core](https://github.com/KonataDev/Lagrange.Core)/
-[lagrange-python](https://github.com/LagrangeDev/lagrange-python)
+[lagrange-python](https://github.com/LagrangeDev/lagrange-python)  
+项目架构以及相当一部分的代码借鉴或来源于 [MiraiGo](https://github.com/Mrs4s/MiraiGo)  
+~~Readme也是抄的~~
 
 ## 使用前声明
 本项目为协议实现，不推荐直接使用。
@@ -92,4 +94,11 @@ _为防止滥用，不支持主动邀请新成员进群_
 >     （9） **侵害QQ钱包支付服务系統；**
 
 - [ ] ~~QQ钱包协议(收款/付款等)~~
+
+### 贡献者
+
+[![Contributors](https://contributors-img.web.app/image?repo=LagrangeDev/LagrangeGo)](https://github.com/LagrangeDev/LagrangeGo/graphs/contributors)
+
+此项目引用了[MiraiGo](https://github.com/Mrs4s/MiraiGo)的相当一部分代码，但是没有fork原仓库，所以MiraiGo的Contributors也应该放在这  
+[![Contributors](https://contributors-img.web.app/image?repo=Mrs4s/MiraiGo)](https://github.com/Mrs4s/MiraiGo/graphs/contributors)
 

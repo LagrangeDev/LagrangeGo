@@ -1,5 +1,7 @@
 package client
 
+// 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/client/client.go
+
 import (
 	"sync/atomic"
 	"time"

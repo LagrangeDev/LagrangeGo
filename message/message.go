@@ -1,5 +1,7 @@
 package message
 
+// 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/message/message.go
+
 import (
 	"reflect"
 	"strconv"

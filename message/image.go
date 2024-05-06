@@ -1,5 +1,7 @@
 package message
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/message/image.go
+
 import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
