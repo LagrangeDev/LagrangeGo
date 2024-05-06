@@ -4,20 +4,21 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/rand"
+
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"math/rand"
 )
 
 func BuildGroupImageUploadReq(groupUin uint32, data []byte) (*OidbPacket, error) {
 	// OidbSvcTrpcTcp.0x11c4_100
-	md5Hash := utils.Md5Digest(data)
-	sha1Hash := utils.Sha1Digest(data)
+	md5Hash := utils.MD5Digest(data)
+	sha1Hash := utils.SHA1Digest(data)
 	format, size, err := utils.ImageResolve(data)
 	if err != nil {
 		return nil, err
 	}
-	imageExt := utils.GetImageExt(format)
+	imageExt := format.String()
 
 	hexString := "0800180020004a00500062009201009a0100aa010c080012001800200028003a00"
 	bytesPbReserveTroop, err := hex.DecodeString(hexString)
@@ -57,8 +58,8 @@ func BuildGroupImageUploadReq(groupUin uint32, data []byte) (*OidbPacket, error)
 							VideoFormat: 0,
 							VoiceFormat: 0,
 						},
-						Width:    size.X,
-						Height:   size.Y,
+						Width:    uint32(size.Width),
+						Height:   uint32(size.Height),
 						Time:     0,
 						Original: 1,
 					},

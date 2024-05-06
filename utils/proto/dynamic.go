@@ -42,38 +42,38 @@ func (msg DynamicMessage) Encode() []byte {
 		key := item.key << 3
 		switch v := item.value.(type) {
 		case bool:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			vi := uint64(0)
 			if v {
 				vi = 1
 			}
 			en.uvarint(vi)
 		case int:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.uvarint(uint64(v))
 		case uint:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.uvarint(uint64(v))
 		case int32:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.uvarint(uint64(v))
 		case int64:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.uvarint(uint64(v))
 		case uint32:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.uvarint(uint64(v))
 		case uint64:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.uvarint(v)
 		case SInt:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.svarint(int64(v))
 		case SInt32:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.svarint(int64(v))
 		case SInt64:
-			en.uvarint(key | 0)
+			en.uvarint(key)
 			en.svarint(int64(v))
 		case float32:
 			en.uvarint(key | 5)
@@ -87,7 +87,7 @@ func (msg DynamicMessage) Encode() []byte {
 			en.buf = append(en.buf, v...)
 		case []uint64:
 			for i := 0; i < len(v); i++ {
-				en.uvarint(key | 0)
+				en.uvarint(key)
 				en.uvarint(v[i])
 			}
 		case []byte:

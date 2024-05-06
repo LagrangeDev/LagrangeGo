@@ -15,7 +15,7 @@ type PacketBuilder struct {
 
 func NewPacketBuilder(encryptKey []byte) *PacketBuilder {
 	return &PacketBuilder{
-		buffer:     make([]byte, 0),
+		buffer:     make([]byte, 0, 64),
 		encryptKey: encryptKey,
 	}
 }
