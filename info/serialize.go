@@ -35,7 +35,7 @@ func Decode(buf []byte, verify bool) *SigInfo {
 	dataHash := reader.ReadBytesWithLength("u16", false)
 	data := reader.ReadBytesWithLength("u16", false)
 
-	if verify && string(dataHash) != string(utils.MD5Digest(data)) {
+	if verify && !bytes.Equal(dataHash, utils.MD5Digest(data)) {
 		panic("Data hash does not match")
 	}
 	buffer := bytes.NewBuffer(data)

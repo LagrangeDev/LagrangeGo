@@ -2,10 +2,11 @@ package wtlogin
 
 import (
 	"strings"
-
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/system"
+	"unicode"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/system"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
@@ -53,5 +54,9 @@ func ParseRegisterResponse(response []byte) bool {
 }
 
 func capitalize(s string) string {
-	return strings.ToUpper(string(s[0])) + strings.ToLower(s[1:])
+	news := make([]byte, len(s))
+	rs := []rune(s)
+	n := copy(news, string(unicode.ToUpper(rs[0])))
+	copy(news[n:], strings.ToLower(s[n:]))
+	return utils.B2S(news)
 }

@@ -114,7 +114,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 		// 这样是不对的，调试后发现应该丢一个字节，然后读下一个字节才是数据的大小
 		// string(binary2.NewReader(tlvs[209]).ReadBytesWithLength("u16", true))
 		urlreader.ReadU8()
-		return tlvs[0x17], string(urlreader.ReadBytesWithLength("u8", false)), nil
+		return tlvs[0x17], utils.B2S(urlreader.ReadBytesWithLength("u8", false)), nil
 	}
 
 	return nil, "", fmt.Errorf("err qr retcode %d", retCode)
@@ -172,7 +172,7 @@ func (c *QQClient) KeyExchange() {
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
-	md5Password := utils.MD5Digest([]byte(password))
+	md5Password := utils.MD5Digest(utils.S2B(password))
 
 	cr := tlv.T106(
 		c.appInfo.AppID,
@@ -235,12 +235,12 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 			tlv.T142(app.PackageName, 0),
 			tlv.T145(utils.MustParseHexStr(device.Guid)),
 			tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
-			tlv.T141([]byte("Unknown"), make([]byte, 0)),
+			tlv.T141([]byte("Unknown"), nil),
 			tlv.T177(app.WTLoginSDK, 0),
 			tlv.T191(0),
 			tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
 			tlv.T107(1, 0x0d, 0, 1),
-			tlv.T318(make([]byte, 0)),
+			tlv.T318(nil),
 			binary2.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),

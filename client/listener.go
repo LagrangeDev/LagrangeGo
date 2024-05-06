@@ -10,6 +10,7 @@ import (
 	msgConverter "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
@@ -63,7 +64,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 			if err != nil {
 				return nil, err
 			}
-			pb.Operator = []byte(Operator.OperatorField1.OperatorUid)
+			pb.Operator = utils.S2B(Operator.OperatorField1.OperatorUid)
 		}
 		return eventConverter.ParseMemberDecreaseEvent(&pb), nil
 	case 84: // group request join notice

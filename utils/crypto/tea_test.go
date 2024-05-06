@@ -283,7 +283,7 @@ func xor(a, b []byte) []byte {
 	//_ = binary.Read(readerb, binary.BigEndian, &b1)
 	//_ = binary.Read(readerb, binary.BigEndian, &b2)
 
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, 64)
 	buf = binary.BigEndian.AppendUint32(buf, (a1^b1)&uint32(OP))
 	buf = binary.BigEndian.AppendUint32(buf, (a2^b2)&uint32(OP))
 
@@ -331,7 +331,7 @@ func teaCode(v, k []byte) []byte {
 		v1 &= OP
 	}
 
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, 64)
 	buf = binary.BigEndian.AppendUint32(buf, uint32(v0))
 	buf = binary.BigEndian.AppendUint32(buf, uint32(v1))
 
@@ -380,7 +380,7 @@ func teaDecipher(v, k []byte) []byte {
 		sum &= OP
 	}
 
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, 64)
 	buf = binary.BigEndian.AppendUint32(buf, uint32(v0))
 	buf = binary.BigEndian.AppendUint32(buf, uint32(v1))
 
@@ -391,7 +391,7 @@ func preprocess(data []byte) []byte {
 	dataLen := len(data)
 	// 保证取余出来是正数
 	filln := ((8-(dataLen+2))%8+8)%8 + 2
-	fills := make([]byte, 0)
+	fills := make([]byte, 0, 64)
 	for i := 0; i < filln; i++ {
 		fills = append(fills, 220)
 	}
@@ -406,7 +406,7 @@ func encrypt(data, key []byte) []byte {
 	data = preprocess(data)
 	tr := make([]byte, 8)
 	to := make([]byte, 8)
-	result := make([]byte, 0)
+	result := make([]byte, 0, 64)
 	for i := 0; i < len(data); i += 8 {
 		o := xor(data[i:i+8], tr)
 		tr = xor(teaCode(o, key), to)

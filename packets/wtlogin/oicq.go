@@ -111,9 +111,9 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WritePacketBytes(append([]byte{0x02}, make([]byte, 11)...), "", true). //020000000000000000000000
 		WritePacketBytes(sigInfo.Tgt, "u32", true).
 		WritePacketString(cmd, "u32", true).
-		WritePacketBytes(make([]byte, 0), "u32", true).
+		WritePacketBytes(nil, "u32", true).
 		WritePacketBytes(utils.MustParseHexStr(deviceInfo.Guid), "u32", true).
-		WritePacketBytes(make([]byte, 0), "u32", true).
+		WritePacketBytes(nil, "u32", true).
 		WritePacketString(appInfo.CurrentVersion, "u16", true).
 		WritePacketBytes(head.Encode(), "u32", true).
 		Pack(-1)

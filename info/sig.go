@@ -23,18 +23,7 @@ type SigInfo struct {
 
 func NewSigInfo(seq int) *SigInfo {
 	return &SigInfo{
-		Uid:         "",
-		Sequence:    seq,
-		Tgtgt:       make([]byte, 0),
-		Tgt:         make([]byte, 0),
-		D2:          make([]byte, 0),
-		D2Key:       make([]byte, 16),
-		Qrsig:       make([]byte, 0),
-		ExchangeKey: make([]byte, 0),
-		KeySig:      make([]byte, 0),
-		Cookies:     "",
-		UnusualSig:  make([]byte, 0),
-		TempPwd:     make([]byte, 0),
-		CaptchaInfo: [3]string{"", "", ""},
+		Sequence: seq,
+		D2Key:    make([]byte, 16),
 	}
 }

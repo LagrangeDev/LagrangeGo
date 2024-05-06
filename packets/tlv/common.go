@@ -158,7 +158,7 @@ func T16a(noPicSig []byte) []byte {
 
 func T16e(deviceName string) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes([]byte(deviceName), "", true).
+		WritePacketBytes(utils.S2B(deviceName), "", true).
 		Pack(0x16e)
 }
 
