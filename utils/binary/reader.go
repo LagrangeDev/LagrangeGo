@@ -70,7 +70,7 @@ func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) (v []byte) 
 		case "u64":
 			length = int(r.ReadU64() - 8)
 		default:
-			panic("Invaild prefix")
+			panic("invaild prefix")
 		}
 	} else {
 		switch prefix {
@@ -83,7 +83,7 @@ func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) (v []byte) 
 		case "u64":
 			length = int(r.ReadU64())
 		default:
-			panic("Invaild prefix")
+			panic("invaild prefix")
 		}
 	}
 	v = make([]byte, length)

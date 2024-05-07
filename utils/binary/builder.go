@@ -99,7 +99,7 @@ func (b *Builder) WritePacketBytes(v []byte, prefix string, withPrefix bool) *Bu
 	case "u64":
 		b.WriteU64(uint64(n))
 	default:
-		panic("Invaild prefix")
+		panic("invaild prefix")
 	}
 	b.append(v)
 	return b

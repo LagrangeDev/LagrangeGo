@@ -171,9 +171,14 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 }
 
 func (c *QQClient) KeyExchange() error {
+	data, err := wtlogin.BuildKexExchangeRequest(c.Uin, c.deviceInfo.Guid)
+	if err != nil {
+		return err
+	}
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoKeyExchange",
-		wtlogin.BuildKexExchangeRequest(c.Uin, c.deviceInfo.Guid))
+		data,
+	)
 	if err != nil {
 		networkLogger.Errorln(err)
 		return err
@@ -194,9 +199,14 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 		make([]byte, 4),
 		true)[4:]
 
+	data, err := buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, cr)
+	if err != nil {
+		return -998, err
+	}
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
-		buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, cr))
+		data,
+	)
 	if err != nil {
 		return -999, err
 	}
@@ -204,9 +214,14 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 }
 
 func (c *QQClient) TokenLogin(token []byte) (loginState.State, error) {
+	data, err := buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, token)
+	if err != nil {
+		return -998, err
+	}
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginEasyLogin",
-		buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, token))
+		data,
+	)
 	if err != nil {
 		return -999, err
 	}
