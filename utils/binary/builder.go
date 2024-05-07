@@ -50,14 +50,13 @@ func (b *Builder) ToBytes() []byte {
 	return b.data()
 }
 
-// Pack TLV
+// Pack TLV without tea encryption
 func (b *Builder) Pack(typ uint16) []byte {
 	buf := make([]byte, b.Len()+2+2)
 	binary.BigEndian.PutUint16(buf[0:2], typ)                     // type
 	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.buffer))) // length
-	copy(buf[2+2:], b.buffer)                                     // type + length + value
-	b.buffer = buf
-	return b.data()
+	copy(buf[2+2:], b.buffer)
+	return buf
 }
 
 func (b *Builder) WriteBool(v bool) *Builder {
