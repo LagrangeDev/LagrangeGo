@@ -32,10 +32,6 @@ func (b *Builder) append(v []byte) {
 	b.buffer = append(b.buffer, v...)
 }
 
-func (b *Builder) Buffer() []byte {
-	return b.buffer
-}
-
 func (b *Builder) data() []byte {
 	if b.usetea {
 		return b.key.Encrypt(b.buffer)
@@ -43,19 +39,18 @@ func (b *Builder) data() []byte {
 	return b.buffer
 }
 
-func (b *Builder) pack(v any) *Builder {
+func (b *Builder) pack(v any) {
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.BigEndian, v)
 	b.append(buf.Bytes())
-	return b
 }
 
 func (b *Builder) ToBytes() []byte {
 	return b.data()
 }
 
+// Pack TLV
 func (b *Builder) Pack(typ uint16) []byte {
-	// 或许这里是tlv
 	buf := make([]byte, b.Len()+2+2)
 	binary.BigEndian.PutUint16(buf[0:2], typ)                     // type
 	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.data()))) // length

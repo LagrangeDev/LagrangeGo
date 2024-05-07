@@ -163,6 +163,8 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		c.t106 = t[0x18]
 		c.t16a = t[0x19]
 		c.sig.Tgtgt = t[0x1e]
+		networkLogger.Debugln("len(c.t106) =", len(c.t106), "len(c.t16a) =", len(c.t16a))
+		networkLogger.Debugln("len(c.sig.Tgtgt) =", len(c.sig.Tgtgt))
 	}
 
 	return retCode, nil

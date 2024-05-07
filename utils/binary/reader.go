@@ -96,13 +96,13 @@ func (r *Reader) ReadStringWithLength(prefix string, withPerfix bool) string {
 	return utils.B2S(r.ReadBytesWithLength(prefix, withPerfix))
 }
 
-func (r *Reader) ReadTlv() (result map[int][]byte) {
-	result = map[int][]byte{}
+func (r *Reader) ReadTlv() (result map[uint16][]byte) {
+	result = map[uint16][]byte{}
 	count := r.ReadU16()
 
 	for i := 0; i < int(count); i++ {
 		tag := r.ReadU16()
-		result[int(tag)] = r.ReadBytes(int(r.ReadU16()))
+		result[tag] = r.ReadBytes(int(r.ReadU16()))
 	}
 	return
 }
