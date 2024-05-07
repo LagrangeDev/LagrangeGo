@@ -139,7 +139,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WritePacketBytes(encrypted, "", true).
 		Pack(binary.PackTypeNone)
 
-	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).Pack(binary.PackTypeNone)
+	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).ToBytes()
 }
 
 func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {

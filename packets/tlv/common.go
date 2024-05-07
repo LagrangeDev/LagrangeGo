@@ -37,7 +37,7 @@ func T100(ssoVersion, appID, subAppID, appClientVersion, sigmap, dbBufVer int) [
 func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
 	// password_md5 + bytes(4) + write_u32(uin).pack()
 	key := utils.MD5Digest(append(passwordMd5, append(make([]byte, 4),
-		binary.NewBuilder(nil).WriteU32(uint32(uin)).Pack(binary.PackTypeNone)...)...))
+		binary.NewBuilder(nil).WriteU32(uint32(uin)).ToBytes()...)...))
 
 	body := binary.NewBuilder(nil).
 		WriteStruct(uint16(4), //  tgtgt version

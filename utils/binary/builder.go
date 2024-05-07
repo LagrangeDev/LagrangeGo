@@ -58,15 +58,12 @@ func (b *Builder) ToBytes() []byte {
 }
 
 func (b *Builder) Pack(typ PackType) []byte {
-	if typ != PackTypeNone {
-		// 或许这里是tlv
-		buf := make([]byte, b.Len()+2+2)
-		binary.BigEndian.PutUint16(buf[0:2], uint16(typ))             // type
-		binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.data()))) // length
-		copy(buf[2+2:], b.data())                                     // type + length + value
-		return buf
-	}
-	return b.data()
+	// 或许这里是tlv
+	buf := make([]byte, b.Len()+2+2)
+	binary.BigEndian.PutUint16(buf[0:2], uint16(typ))             // type
+	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.data()))) // length
+	copy(buf[2+2:], b.data())                                     // type + length + value
+	return buf
 }
 
 func (b *Builder) WriteBool(v bool) *Builder {

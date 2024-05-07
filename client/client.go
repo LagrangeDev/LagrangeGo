@@ -102,7 +102,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 			tlv.T35(c.appInfo.PTOSVersion),
 			tlv.T66(c.appInfo.PTOSVersion),
 			tlv.Td1(c.appInfo.OS, c.deviceInfo.DeviceName),
-		).WriteU8(3).Pack(binary.PackTypeNone)
+		).WriteU8(3).ToBytes()
 
 	packet := wtlogin.BuildCode2dPacket(c.Uin, 0x31, c.appInfo, body)
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp", packet)
@@ -139,7 +139,7 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		WriteU64(0).
 		WriteU32(0).
 		WriteU8(0).
-		WriteU8(0x83).Pack(binary.PackTypeNone)
+		WriteU8(0x83).ToBytes()
 
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp",
 		wtlogin.BuildCode2dPacket(0, 0x12, c.appInfo, body))
@@ -252,7 +252,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) error {
 			binary.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
-		).Pack(binary.PackTypeNone)
+		).ToBytes()
 
 	response, err := c.SendUniPacketAndAwait(
 		"wtlogin.login",
