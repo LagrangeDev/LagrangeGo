@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fumiama/terasu/dns"
 	"github.com/fumiama/terasu/http2"
 )
 
@@ -63,6 +64,8 @@ func init() {
 	for _, cmd := range signPkgList {
 		signMap[cmd] = struct{}{}
 	}
+
+	dns.SetTimeout(time.Second)
 }
 
 func containSignPKG(cmd string) bool {
