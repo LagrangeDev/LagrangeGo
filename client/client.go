@@ -29,6 +29,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 			loginLogger.Errorln(err)
 			return err
 		}
+		return nil
 	}
 
 	if len(c.sig.TempPwd) != 0 {
