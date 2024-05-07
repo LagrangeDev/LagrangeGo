@@ -240,14 +240,11 @@ func SendDataAsync(packet []byte, serverURL string, end bool) ([]byte, error) {
 	}
 
 	// Send request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	// Read response data
 	data, err := io.ReadAll(resp.Body)

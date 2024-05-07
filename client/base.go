@@ -266,11 +266,5 @@ func (c *QQClient) OnDisconnected() {
 }
 
 func (c *QQClient) getSeq() int {
-	defer func() {
-		if c.sig.Sequence >= 0x8000 {
-			c.sig.Sequence = 0
-		}
-		c.sig.Sequence++
-	}()
-	return c.sig.Sequence
+	return int(atomic.AddUint32(&c.sig.Sequence, 1) % 0x8000)
 }
