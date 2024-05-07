@@ -6,20 +6,21 @@ import (
 	"math"
 	"strconv"
 
+	ftea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 type Builder struct {
 	buffer []byte
-	key    crypto.TEA
+	key    ftea.TEA
 	usetea bool
 }
 
 func NewBuilder(key []byte) *Builder {
 	return &Builder{
 		buffer: make([]byte, 0, 64),
-		key:    crypto.NewTeaCipher(key),
+		key:    ftea.NewTeaCipher(key),
 		usetea: len(key) == 16,
 	}
 }
@@ -46,17 +47,26 @@ func (b *Builder) pack(v any) {
 	b.append(buf.Bytes())
 }
 
+// ToBytes return data with tea encryption
 func (b *Builder) ToBytes() []byte {
 	return b.data()
 }
 
-// Pack TLV without tea encryption
+// Pack TLV with tea encryption
 func (b *Builder) Pack(typ uint16) []byte {
-	buf := make([]byte, b.Len()+2+2)
-	binary.BigEndian.PutUint16(buf[0:2], typ)                     // type
-	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.buffer))) // length
-	copy(buf[2+2:], b.buffer)
-	return buf
+	buf := make([]byte, b.Len()+2+2+16)
+
+	n := 0
+	if b.usetea {
+		n = b.key.EncryptTo(b.buffer, buf[2+2:])
+	} else {
+		n = copy(buf[2+2:], b.buffer)
+	}
+
+	binary.BigEndian.PutUint16(buf[0:2], typ)         // type
+	binary.BigEndian.PutUint16(buf[2:2+2], uint16(n)) // length
+
+	return buf[:n+2+2]
 }
 
 func (b *Builder) WriteBool(v bool) *Builder {

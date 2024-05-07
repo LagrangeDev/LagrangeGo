@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strconv"
 
+	ftea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
@@ -42,7 +43,7 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 }
 
 func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte) []byte {
-	encBody := crypto.NewTeaCipher(ecdh.S192().SharedKey()).Encrypt(body)
+	encBody := ftea.NewTeaCipher(ecdh.S192().SharedKey()).Encrypt(body)
 
 	var _cmd uint16
 	if cmd == "wtlogin.login" {
@@ -121,7 +122,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WritePacketBytes(body, "u32", true).
 		ToBytes()
 
-	encrypted := crypto.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
+	encrypted := ftea.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
 
 	var _s uint8
 	if len(sigInfo.D2) == 0 {
@@ -151,7 +152,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	var title, content string
 
 	if typ == 0 {
-		reader = binary.NewReader(crypto.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
+		reader = binary.NewReader(ftea.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
 		tlv = reader.ReadTlv()
 		if tgt, ok := tlv[0x10A]; ok {
 			sig.Tgt = tgt

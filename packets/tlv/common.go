@@ -3,10 +3,11 @@ package tlv
 import (
 	"strconv"
 
+	ftea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5
@@ -60,7 +61,7 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 		ToBytes()
 
 	return binary.NewBuilder(nil).
-		WritePacketBytes(crypto.NewTeaCipher(key).Encrypt(body), "u32", true).
+		WritePacketBytes(ftea.NewTeaCipher(key).Encrypt(body), "u32", true).
 		Pack(0x106)
 }
 

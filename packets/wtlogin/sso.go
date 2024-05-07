@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	ftea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
 )
 
@@ -64,11 +65,11 @@ func ParseSSOHeader(raw, d2Key []byte) (*SSOHeader, error) {
 	} else if flag == 1 { // enc with d2key
 		temp := make([]byte, buf.Len())
 		_ = binary.Read(buf, binary.BigEndian, temp)
-		dec = crypto.NewTeaCipher(d2Key).Decrypt(temp)
+		dec = ftea.NewTeaCipher(d2Key).Decrypt(temp)
 	} else if flag == 2 { // enc with \x00*16
 		temp := make([]byte, buf.Len())
 		_ = binary.Read(buf, binary.BigEndian, temp)
-		dec = crypto.NewTeaCipher(nil).Decrypt(temp)
+		dec = ftea.NewTeaCipher(nil).Decrypt(temp)
 	} else {
 		return nil, fmt.Errorf("invalid encrypt flag: %d", flag)
 	}
@@ -135,7 +136,7 @@ func ParseOicqBody(buf []byte) ([]byte, error) {
 
 	body := buf[16 : len(buf)-1]
 	if encType == 0 {
-		return crypto.NewTeaCipher(ecdh.S192().SharedKey()).Decrypt(body), nil
+		return ftea.NewTeaCipher(ecdh.S192().SharedKey()).Decrypt(body), nil
 	} else {
 		return nil, fmt.Errorf("unknown encrypt type: %d", encType)
 	}

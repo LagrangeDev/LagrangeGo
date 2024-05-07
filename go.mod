@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/RomiChan/protobuf v0.1.1-0.20230204044148-2ed269a2e54d
+	github.com/fumiama/gofastTEA v0.0.10
 	github.com/fumiama/imgsz v0.0.4
 	github.com/mattn/go-colorable v0.1.13
 	github.com/sirupsen/logrus v1.9.3
