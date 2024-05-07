@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
+	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -72,36 +73,27 @@ func (b *Builder) WriteBool(v bool) *Builder {
 	return b
 }
 
-// WritePacketBytes default prefix = "", withPrefix = true
+// WritePacketBytes prefix must not be empty
 func (b *Builder) WritePacketBytes(v []byte, prefix string, withPrefix bool) *Builder {
+	n := len(v)
 	if withPrefix {
-		switch prefix {
-		case "":
-		case "u8":
-			b.WriteU8(uint8(len(v) + 1))
-		case "u16":
-			b.WriteU16(uint16(len(v) + 2))
-		case "u32":
-			b.WriteU32(uint32(len(v) + 4))
-		case "u64":
-			b.WriteU64(uint64(len(v) + 8))
-		default:
-			panic("Invaild prefix")
+		plus, err := strconv.Atoi(prefix[1:])
+		if err != nil {
+			panic(err)
 		}
-	} else {
-		switch prefix {
-		case "":
-		case "u8":
-			b.WriteU8(uint8(len(v)))
-		case "u16":
-			b.WriteU16(uint16(len(v)))
-		case "u32":
-			b.WriteU32(uint32(len(v)))
-		case "u64":
-			b.WriteU64(uint64(len(v)))
-		default:
-			panic("Invaild prefix")
-		}
+		n += plus / 8
+	}
+	switch prefix {
+	case "u8":
+		b.WriteU8(uint8(n))
+	case "u16":
+		b.WriteU16(uint16(n))
+	case "u32":
+		b.WriteU32(uint32(n))
+	case "u64":
+		b.WriteU64(uint64(n))
+	default:
+		panic("Invaild prefix")
 	}
 	b.append(v)
 	return b
@@ -174,20 +166,10 @@ func (b *Builder) WriteDouble(v float64) *Builder {
 	return b.WriteU64(math.Float64bits(v))
 }
 
-/*
 func (b *Builder) WriteTlv(tlvs ...[]byte) *Builder {
 	b.WriteU16(uint16(len(tlvs)))
 	for _, tlv := range tlvs {
 		b.WriteBytes(tlv, false)
-	}
-	return b
-}
-*/
-
-func (b *Builder) WritePacketTlv(tlvs ...[]byte) *Builder {
-	b.WriteU16(uint16(len(tlvs)))
-	for _, tlv := range tlvs {
-		b.WritePacketBytes(tlv, "", true)
 	}
 	return b
 }
