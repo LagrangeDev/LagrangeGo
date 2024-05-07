@@ -18,7 +18,7 @@ func NewReader(buffer []byte) *Reader {
 	}
 }
 
-func (r *Reader) GetRamin() int {
+func (r *Reader) Remain() int {
 	return len(r.buffer) - r.pos
 }
 
