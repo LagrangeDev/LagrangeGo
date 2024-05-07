@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 type (
@@ -96,7 +97,7 @@ func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
 			GroupUin: event.GroupUin,
 		},
 		MemberUid:  event.MemberUid,
-		InvitorUid: string(event.Operator),
+		InvitorUid: utils.B2S(event.Operator),
 		JoinType:   event.IncreaseType,
 	}
 }
@@ -107,7 +108,7 @@ func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
 			GroupUin: event.GroupUin,
 		},
 		MemberUid:   event.MemberUid,
-		OperatorUid: string(event.Operator),
+		OperatorUid: utils.B2S(event.Operator),
 		ExitType:    event.DecreaseType,
 	}
 }

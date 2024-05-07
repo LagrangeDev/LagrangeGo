@@ -56,7 +56,7 @@ func ParseSSOHeader(raw, d2Key []byte) (*SSOHeader, error) {
 	var flag uint8
 	_ = binary.Read(buf, binary.BigEndian, &flag)
 	buf.Next(1)
-	uin := string(ParseLv(buf))
+	uin := utils.B2S(ParseLv(buf))
 
 	var dec []byte
 	if flag == 0 { // no encrypted
@@ -90,7 +90,7 @@ func ParseSSOFrame(buffer []byte, IsOicqBody bool) (*SSOPacket, error) {
 	sessionID := reader.ReadBytesWithLength("u32", true)
 
 	if retCode != 0 {
-		return NewSSOPacket(int(seq), int(retCode), extra, sessionID, "", make([]byte, 0)), nil
+		return NewSSOPacket(int(seq), int(retCode), extra, sessionID, "", nil), nil
 	}
 
 	compressType := reader.ReadU32()

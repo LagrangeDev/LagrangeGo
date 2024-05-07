@@ -62,7 +62,7 @@ func (f *ColoredFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 			timestamp, levelColor, strings.ToUpper(entry.Level.String()), colorReset, 7-len(entry.Level.String()), "", entry.Data["prefix"], entry.Message)
 	}
 
-	return []byte(message), nil
+	return S2B(message), nil
 }
 
 func GetLogger(prefix string) *logrus.Entry {

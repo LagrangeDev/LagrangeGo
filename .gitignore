@@ -103,3 +103,6 @@ fabric.properties
 # Go workspace file
 go.work
 
+# Running stub
+sig.bin
+qrcode.png

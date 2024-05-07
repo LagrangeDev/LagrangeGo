@@ -12,6 +12,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -81,11 +82,11 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 }
 
 func (c *QQClient) FecthQrcode() ([]byte, string, error) {
-	body := utils.NewPacketBuilder(nil).
+	body := binary2.NewBuilder(nil).
 		WriteU16(0).
 		WriteU64(0).
 		WriteU8(0).
-		WriteTlv([][]byte{
+		WritePacketTlv(
 			tlv.T16(c.appInfo.AppID, c.appInfo.SubAppID,
 				utils.MustParseHexStr(c.deviceInfo.Guid), c.appInfo.PTVersion, c.appInfo.PackageName),
 			tlv.T1b(),
@@ -94,7 +95,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 			tlv.T35(c.appInfo.PTOSVersion),
 			tlv.T66(c.appInfo.PTOSVersion),
 			tlv.Td1(c.appInfo.OS, c.deviceInfo.DeviceName),
-		}).WriteU8(3).Pack(-1)
+		).WriteU8(3).Pack(binary.PackTypeNone)
 
 	packet := wtlogin.BuildCode2dPacket(c.Uin, 0x31, c.appInfo, body)
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp", packet)
@@ -114,7 +115,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 		// 这样是不对的，调试后发现应该丢一个字节，然后读下一个字节才是数据的大小
 		// string(binary2.NewReader(tlvs[209]).ReadBytesWithLength("u16", true))
 		urlreader.ReadU8()
-		return tlvs[0x17], string(urlreader.ReadBytesWithLength("u8", false)), nil
+		return tlvs[0x17], utils.B2S(urlreader.ReadBytesWithLength("u8", false)), nil
 	}
 
 	return nil, "", fmt.Errorf("err qr retcode %d", retCode)
@@ -126,12 +127,12 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
 	}
 
-	body := utils.NewPacketBuilder(nil).
-		WriteBytes(c.sig.Qrsig, "u16", false).
+	body := binary2.NewBuilder(nil).
+		WritePacketBytes(c.sig.Qrsig, "u16", false).
 		WriteU64(0).
 		WriteU32(0).
 		WriteU8(0).
-		WriteU8(0x83).Pack(-1)
+		WriteU8(0x83).Pack(binary.PackTypeNone)
 
 	response, err := c.SendUniPacketAndAwait("wtlogin.trans_emp",
 		wtlogin.BuildCode2dPacket(0, 0x12, c.appInfo, body))
@@ -172,7 +173,7 @@ func (c *QQClient) KeyExchange() {
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
-	md5Password := utils.MD5Digest([]byte(password))
+	md5Password := utils.MD5Digest(utils.S2B(password))
 
 	cr := tlv.T106(
 		c.appInfo.AppID,
@@ -226,25 +227,25 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 
 	app := c.appInfo
 	device := c.deviceInfo
-	body := utils.NewPacketBuilder(nil).
+	body := binary2.NewBuilder(nil).
 		WriteU16(0x09).
-		WriteTlv([][]byte{
-			utils.NewPacketBuilder(nil).WriteBytes(c.t106, "", true).Pack(0x106),
+		WritePacketTlv(
+			binary2.NewBuilder(nil).WritePacketBytes(c.t106, "", true).Pack(0x106),
 			tlv.T144(c.sig.Tgtgt, app, device),
 			tlv.T116(app.SubSigmap),
 			tlv.T142(app.PackageName, 0),
 			tlv.T145(utils.MustParseHexStr(device.Guid)),
 			tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
-			tlv.T141([]byte("Unknown"), make([]byte, 0)),
+			tlv.T141([]byte("Unknown"), nil),
 			tlv.T177(app.WTLoginSDK, 0),
 			tlv.T191(0),
 			tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
 			tlv.T107(1, 0x0d, 0, 1),
-			tlv.T318(make([]byte, 0)),
-			utils.NewPacketBuilder(nil).WriteBytes(c.t16a, "", true).Pack(0x16a),
+			tlv.T318(nil),
+			binary2.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
-		}).Pack(-1)
+		).Pack(binary.PackTypeNone)
 
 	response, err := c.SendUniPacketAndAwait(
 		"wtlogin.login",

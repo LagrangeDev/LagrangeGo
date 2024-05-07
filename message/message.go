@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
@@ -195,7 +196,7 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			return []IMessageElement{
 				&ShortVideoElement{
 					Name:      elem.VideoFile.FileName,
-					Uuid:      []byte(elem.VideoFile.FileUuid),
+					Uuid:      utils.S2B(elem.VideoFile.FileUuid),
 					Size:      elem.VideoFile.FileSize,
 					ThumbSize: elem.VideoFile.ThumbFileSize,
 					Md5:       elem.VideoFile.FileMd5,

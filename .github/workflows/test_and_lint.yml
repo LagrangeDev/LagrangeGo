@@ -19,7 +19,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.19'
+          go-version: '1.20'
           cache: false
       - run: go get
       - run: go generate ./...
@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           cache: false
-          go-version: '1.19'
+          go-version: '1.20'
       - run: go get
       - run: go generate ./...
       - name: Go vet
