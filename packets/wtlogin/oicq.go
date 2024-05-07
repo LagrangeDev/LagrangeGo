@@ -86,7 +86,7 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 	return frame
 }
 
-func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
+func BuildUniPacket(uin int, seq uint32, cmd string, sign map[string]string,
 	appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sigInfo *info.SigInfo, body []byte) []byte {
 
 	trace := generateTrace()

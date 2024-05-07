@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	resultStore   = NewResultStore()
+	fetcher       = newssofetcher()
 	networkLogger = utils.GetLogger("network")
 )
 

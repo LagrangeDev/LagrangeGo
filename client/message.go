@@ -1,8 +1,6 @@
 package client
 
 import (
-	"sync/atomic"
-
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
@@ -20,7 +18,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 			DivSeq:  proto.Some(uint32(0)),
 		},
 		Body: body,
-		Seq:  proto.Some(atomic.LoadUint32(&c.sig.Sequence)),
+		Seq:  proto.Some(c.getSequence()),
 		Rand: proto.Some(crypto.RandU32()),
 	}
 	// grp_id not null
