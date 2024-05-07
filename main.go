@@ -29,7 +29,7 @@ func main() {
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
-			img, _ := os.ReadFile("./testgroup.png")
+			img, _ := os.ReadFile("testgroup.png")
 			_, err := client.SendGroupMessage(event.GroupCode, []message.IMessageElement{&message.GroupImageElement{Stream: img}})
 			if err != nil {
 				return
