@@ -10,9 +10,6 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-
-	"github.com/fumiama/terasu/dns"
-	"github.com/fumiama/terasu/http2"
 )
 
 var (
@@ -64,8 +61,6 @@ func init() {
 	for _, cmd := range signPkgList {
 		signMap[cmd] = struct{}{}
 	}
-
-	dns.SetTimeout(time.Second / 2)
 }
 
 func containSignPKG(cmd string) bool {
@@ -124,7 +119,7 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 		return fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	resp, err := http2.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return fmt.Errorf("request timed out")
