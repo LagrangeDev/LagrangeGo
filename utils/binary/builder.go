@@ -134,7 +134,7 @@ func (b *Builder) WriteU8(v uint8) *Builder {
 	return b
 }
 
-func writeint[T ~uint16 | uint32 | uint64](b *Builder, v T) *Builder {
+func writeint[T ~uint16 | ~uint32 | ~uint64](b *Builder, v T) *Builder {
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(v))
 	b.buffer.Write(buf[8-unsafe.Sizeof(v):])
