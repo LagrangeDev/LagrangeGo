@@ -1,63 +1,92 @@
 package ecdh
 
 import (
-	"encoding/hex"
+	"crypto/ecdh"
+	"crypto/rand"
 )
 
-var (
-	ECDH               map[string]*BaseECDH
-	EcdhPrimePublic, _ = hex.DecodeString("049D1423332735980EDABE7E9EA451B3395B6F35250DB8FC56F25889F628CBAE3E8E73077914071EEEBC108F4E0170057792BB17AA303AF652313D17C1AC815E79")
-	EcdhSecpPublic, _  = hex.DecodeString("04928D8850673088B343264E0C6BACB8496D697799F37211DEB25BB73906CB089FEA9639B4E0260498B51A992D50813DA8")
-)
+type Exchanger interface {
+	PublicKey() []byte
+	SharedKey() []byte
+	Exange(remote []byte) ([]byte, error)
+}
 
-type BaseECDH struct {
-	provider    *ECDHProvider
+type s192exchanger struct {
+	provider    *provider
 	publicKey   []byte
 	shareKey    []byte
 	compressKey bool
 }
 
-func (e *BaseECDH) GetPublicKey() []byte {
+func (e *s192exchanger) PublicKey() []byte {
 	return e.publicKey
 }
 
-func (e *BaseECDH) GetShareKey() []byte {
+func (e *s192exchanger) SharedKey() []byte {
 	return e.shareKey
 }
 
-func (e *BaseECDH) Exange(newKey []byte) []byte {
+func (e *s192exchanger) Exange(newKey []byte) ([]byte, error) {
 	return e.provider.keyExchange(newKey, e.compressKey)
 }
 
-// newECDHPrime exchange key
-func newECDHPrime() (baseECDH *BaseECDH) {
-	baseECDH = &BaseECDH{
-		provider:    newECDHProvider(CURVE["prime256v1"]),
-		publicKey:   nil,
-		shareKey:    nil,
-		compressKey: false,
+func news192exchanger() (baseECDH *s192exchanger) {
+	p, err := newProvider(newS192Curve())
+	if err != nil {
+		panic(err)
 	}
-	baseECDH.publicKey = baseECDH.provider.packPublic(false)
-	baseECDH.shareKey = baseECDH.provider.keyExchange(EcdhPrimePublic, false)
-	return
-}
-
-// newECDHSecp login and others
-func newECDHSecp() (baseECDH *BaseECDH) {
-	baseECDH = &BaseECDH{
-		provider:    newECDHProvider(CURVE["secp192k1"]),
-		publicKey:   nil,
-		shareKey:    nil,
+	shk, err := p.keyExchange(ecdhS192PublicBytes, true)
+	if err != nil {
+		panic(err)
+	}
+	baseECDH = &s192exchanger{
+		provider:    p,
+		publicKey:   p.packPublic(true),
+		shareKey:    shk,
 		compressKey: true,
 	}
-	baseECDH.publicKey = baseECDH.provider.packPublic(true)
-	baseECDH.shareKey = baseECDH.provider.keyExchange(EcdhSecpPublic, true)
 	return
 }
 
-func initImpl() {
-	ECDH = map[string]*BaseECDH{
-		"secp192k1":  newECDHSecp(),
-		"prime256v1": newECDHPrime(),
+type p256exchanger struct {
+	privateKey *ecdh.PrivateKey
+	publicKey  *ecdh.PublicKey
+	shareKey   []byte
+}
+
+func (e *p256exchanger) PublicKey() []byte {
+	return e.publicKey.Bytes()
+}
+
+func (e *p256exchanger) SharedKey() []byte {
+	return e.shareKey
+}
+
+func (e *p256exchanger) Exange(remote []byte) ([]byte, error) {
+	rk, err := e.publicKey.Curve().NewPublicKey(remote)
+	if err != nil {
+		return nil, err
+	}
+	return e.privateKey.ECDH(rk)
+}
+
+func newp256exchanger() (baseECDH *p256exchanger) {
+	p256 := ecdh.P256()
+	privateKey, err := p256.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	pk, err := p256.NewPublicKey(ecdhP256PublicBytes)
+	if err != nil {
+		panic(err)
+	}
+	shk, err := privateKey.ECDH(pk)
+	if err != nil {
+		panic(err)
+	}
+	return &p256exchanger{
+		privateKey: privateKey,
+		publicKey:  privateKey.PublicKey(),
+		shareKey:   shk,
 	}
 }

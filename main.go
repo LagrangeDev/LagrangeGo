@@ -2,13 +2,15 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
+
+var mainLogger = utils.GetLogger("main")
 
 func main() {
 	appInfo := info.AppList["linux"]
@@ -18,8 +20,12 @@ func main() {
 		SystemKernel:  "Windows 10.0.22631",
 		KernelVersion: "10.0.22631",
 	}
-	sig := info.LoadSig("./sig.bin")
-	qqclient := client.NewQQclient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, sig)
+	sig, err := info.LoadSig("./sig.bin")
+	if err != nil {
+		mainLogger.Errorln("load sig error:", err)
+		return
+	}
+	qqclient := client.NewQQclient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, &sig)
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
@@ -39,17 +45,23 @@ func main() {
 		}
 	})
 
-	err := qqclient.Loop()
+	err = qqclient.Loop()
 	if err != nil {
-		fmt.Println(err)
+		mainLogger.Errorln("quit client loop:", err)
 		return
 	}
 
-	_, err = qqclient.Login("", "./qrcode.png")
+	err = qqclient.Login("", "./qrcode.png")
 	if err != nil {
-		fmt.Println(err)
+		mainLogger.Errorln("login err:", err)
+		return
 	}
-	info.SaveSig(sig, "./sig.bin")
+
+	err = info.SaveSig(&sig, "./sig.bin")
+	if err != nil {
+		mainLogger.Errorln("save sig.bin err:", err)
+		return
+	}
 
 	select {}
 }

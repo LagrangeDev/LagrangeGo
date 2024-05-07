@@ -129,7 +129,6 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
-
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {

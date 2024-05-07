@@ -46,7 +46,7 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 }
 
 func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte) []byte {
-	encBody := crypto.NewTeaCipher(ecdh.ECDH["secp192k1"].GetShareKey()).Encrypt(body)
+	encBody := crypto.NewTeaCipher(ecdh.Instance["secp192k1"].SharedKey()).Encrypt(body)
 
 	var _cmd uint16
 	if cmd == "wtlogin.login" {
@@ -71,8 +71,8 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 		WriteU8(1).
 		WritePacketBytes(make([]byte, 16), "", true).
 		WriteU16(0x102).
-		WriteU16(uint16(len(ecdh.ECDH["secp192k1"].GetPublicKey()))).
-		WritePacketBytes(ecdh.ECDH["secp192k1"].GetPublicKey(), "", true).
+		WriteU16(uint16(len(ecdh.Instance["secp192k1"].PublicKey()))).
+		WritePacketBytes(ecdh.Instance["secp192k1"].PublicKey(), "", true).
 		WritePacketBytes(encBody, "", true).
 		WriteU8(3).
 		Pack(binary.PackTypeNone)
@@ -144,7 +144,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).Pack(binary.PackTypeNone)
 }
 
-func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
+func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	reader := binary.NewReader(buf)
 	reader.ReadBytes(2)
 	typ := reader.ReadU8()
@@ -178,14 +178,15 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 		var resp pb.Tlv543
 		err := proto.Unmarshal(tlv[0x543], &resp)
 		if err != nil {
-			loginLogger.Errorf("parsing login response error: %s", err)
-			return false, err
+			err = fmt.Errorf("parsing login response error: %s", err)
+			loginLogger.Errorln(err)
+			return err
 		}
 		sig.Uid = resp.Layer1.Layer2.Uid
 
 		loginLogger.Debugln("SigInfo got")
 
-		return true, nil
+		return nil
 	} else if errData, ok := tlv[0x146]; ok {
 		errBuf := binary.NewReader(errData)
 		errBuf.ReadBytes(4)
@@ -201,8 +202,9 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 		content = "无法解析错误原因，请将完整日志提交给开发者"
 	}
 
-	loginLogger.Errorf("Login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
-	return false, fmt.Errorf("login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
+	err := fmt.Errorf("login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
+	loginLogger.Errorln(err)
+	return err
 }
 
 func generateTrace() string {

@@ -21,8 +21,8 @@ type SigInfo struct {
 	Gender   uint8
 }
 
-func NewSigInfo(seq int) *SigInfo {
-	return &SigInfo{
+func NewSigInfo(seq int) SigInfo {
+	return SigInfo{
 		Sequence: seq,
 		D2Key:    make([]byte, 16),
 	}

@@ -22,10 +22,10 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 		2: guid,
 	}.Encode()
 
-	encl := crypto.AesGCMEncrypt(p1, ecdh.ECDH["prime256v1"].GetShareKey())
+	encl := crypto.AesGCMEncrypt(p1, ecdh.Instance["prime256v1"].SharedKey())
 
 	p2 := binary.NewBuilder(nil).
-		WriteBytes(ecdh.ECDH["prime256v1"].GetPublicKey(), false).
+		WriteBytes(ecdh.Instance["prime256v1"].PublicKey(), false).
 		WriteU32(1).
 		WriteBytes(encl, false).
 		WriteU32(0).
@@ -36,7 +36,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 	encP2Hash := crypto.AesGCMEncrypt(p2Hash, encKey)
 
 	return proto.DynamicMessage{
-		1: ecdh.ECDH["prime256v1"].GetPublicKey(),
+		1: ecdh.Instance["prime256v1"].PublicKey(),
 		2: 1,
 		3: encl,
 		4: utils.TimeStamp(),
@@ -44,21 +44,31 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 	}.Encode()
 }
 
-func ParseKeyExchangeResponse(response []byte, sig *info.SigInfo) {
+func ParseKeyExchangeResponse(response []byte, sig *info.SigInfo) error {
 	keyExangeLogger.Debugf("keyexchange proto data: %x", response)
+
 	var p login.SsoKeyExchangeResponse
 	err := proto.Unmarshal(response, &p)
 	if err != nil {
-		keyExangeLogger.Error(err)
+		keyExangeLogger.Errorln(err)
+		return err
 	}
 
-	shareKey := ecdh.ECDH["prime256v1"].Exange(p.PublicKey)
+	shareKey, err := ecdh.Instance["prime256v1"].Exange(p.PublicKey)
+	if err != nil {
+		keyExangeLogger.Errorln(err)
+		return err
+	}
+
 	var decPb login.SsoKeyExchangeDecrypted
 	err = proto.Unmarshal(crypto.AesGCMDecrypt(p.GcmEncrypted, shareKey), &decPb)
 	if err != nil {
-		keyExangeLogger.Error(err)
+		keyExangeLogger.Errorln(err)
+		return err
 	}
 
 	sig.ExchangeKey = decPb.GcmKey
 	sig.KeySig = decPb.Sign
+
+	return nil
 }

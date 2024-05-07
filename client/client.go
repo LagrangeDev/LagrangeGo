@@ -6,16 +6,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/qrcodeState"
-
-	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
-
 	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 var (
@@ -23,23 +19,27 @@ var (
 	networkLogger = utils.GetLogger("network")
 )
 
-func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
+func (c *QQClient) Login(password, qrcodePath string) error {
 	if len(c.sig.D2) != 0 && c.sig.Uin != 0 { // prefer session login
 		loginLogger.Infoln("Session found, try to login with session")
 		c.Uin = c.sig.Uin
-		if ok, err := c.Register(); ok {
-			return true, nil
-		} else {
-			loginLogger.Errorf("Failed to register session: %v", err)
+		err := c.Register()
+		if err != nil {
+			err = fmt.Errorf("failed to register session: %v", err)
+			loginLogger.Errorln(err)
+			return err
 		}
 	}
 
 	if len(c.sig.TempPwd) != 0 {
-		c.KeyExchange()
+		err := c.KeyExchange()
+		if err != nil {
+			return err
+		}
 
 		ret, err := c.TokenLogin(c.sig.TempPwd)
 		if err != nil {
-			return false, fmt.Errorf("EasyLogin fail: %s", err)
+			return fmt.Errorf("EasyLogin fail: %s", err)
 		}
 		if ret.Successful() {
 			return c.Register()
@@ -48,12 +48,15 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 
 	if password != "" {
 		loginLogger.Infoln("login with password")
-		c.KeyExchange()
+		err := c.KeyExchange()
+		if err != nil {
+			return err
+		}
 
 		for {
 			ret, err := c.PasswordLogin(password)
 			if err != nil {
-				return false, err
+				return err
 			}
 			if ret.Successful() {
 				return c.Register()
@@ -69,20 +72,23 @@ func (c *QQClient) Login(password, qrcodePath string) (bool, error) {
 		loginLogger.Infoln("login with qrcode")
 		png, _, err := c.FecthQrcode()
 		if err != nil {
-			return false, err
+			return err
 		}
-		_ = os.WriteFile(qrcodePath, png, 0666)
+		err = os.WriteFile(qrcodePath, png, 0666)
+		if err != nil {
+			return err
+		}
 		loginLogger.Infof("qrcode saved to %s", qrcodePath)
-		ok, err := c.QrcodeLogin(3)
-		if ok {
-			return c.Register()
+		err = c.QrcodeLogin(3)
+		if err != nil {
+			return err
 		}
-		return false, err
+		return c.Register()
 	}
 }
 
 func (c *QQClient) FecthQrcode() ([]byte, string, error) {
-	body := binary2.NewBuilder(nil).
+	body := binary.NewBuilder(nil).
 		WriteU16(0).
 		WriteU64(0).
 		WriteU8(0).
@@ -103,7 +109,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 		return nil, "", err
 	}
 
-	decrypted := binary2.NewReader(response.Data)
+	decrypted := binary.NewReader(response.Data)
 	decrypted.ReadBytes(54)
 	retCode := decrypted.ReadU8()
 	qrsig := decrypted.ReadBytesWithLength("u16", false)
@@ -111,9 +117,9 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 
 	if retCode == 0 && tlvs[0x17] != nil {
 		c.sig.Qrsig = qrsig
-		urlreader := binary2.NewReader(tlvs[209])
+		urlreader := binary.NewReader(tlvs[209])
 		// 这样是不对的，调试后发现应该丢一个字节，然后读下一个字节才是数据的大小
-		// string(binary2.NewReader(tlvs[209]).ReadBytesWithLength("u16", true))
+		// string(binary.NewReader(tlvs[209]).ReadBytesWithLength("u16", true))
 		urlreader.ReadU8()
 		return tlvs[0x17], utils.B2S(urlreader.ReadBytesWithLength("u8", false)), nil
 	}
@@ -127,7 +133,7 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
 	}
 
-	body := binary2.NewBuilder(nil).
+	body := binary.NewBuilder(nil).
 		WritePacketBytes(c.sig.Qrsig, "u16", false).
 		WriteU64(0).
 		WriteU32(0).
@@ -140,7 +146,7 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 		return -1, err
 	}
 
-	reader := binary2.NewReader(response.Data)
+	reader := binary.NewReader(response.Data)
 	//length := reader.ReadU32()
 	reader.ReadBytes(8) // 4 + 4
 	reader.ReadU16()    // cmd, 0x12
@@ -161,15 +167,15 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 	return retCode, nil
 }
 
-func (c *QQClient) KeyExchange() {
+func (c *QQClient) KeyExchange() error {
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoKeyExchange",
 		wtlogin.BuildKexExchangeRequest(c.Uin, c.deviceInfo.Guid))
 	if err != nil {
 		networkLogger.Errorln(err)
-		return
+		return err
 	}
-	wtlogin.ParseKeyExchangeResponse(packet.Data, c.sig)
+	return wtlogin.ParseKeyExchangeResponse(packet.Data, c.sig)
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
@@ -204,9 +210,9 @@ func (c *QQClient) TokenLogin(token []byte) (loginState.State, error) {
 	return ParseNtloginResponse(packet.Data, c.sig)
 }
 
-func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
+func (c *QQClient) QrcodeLogin(refreshInterval int) error {
 	if c.sig.Qrsig == nil {
-		return false, errors.New("no QrSig found, fetch qrcode first")
+		return errors.New("no QrSig found, fetch qrcode first")
 	}
 
 	for !c.tcp.IsClosed() {
@@ -214,11 +220,11 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 		retCode, err := c.GetQrcodeResult()
 		if err != nil {
 			loginLogger.Error(err)
-			return false, err
+			return err
 		}
 		if !retCode.Waitable() {
 			if !retCode.Success() {
-				return false, errors.New(retCode.Name())
+				return errors.New(retCode.Name())
 			} else {
 				break
 			}
@@ -227,10 +233,10 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 
 	app := c.appInfo
 	device := c.deviceInfo
-	body := binary2.NewBuilder(nil).
+	body := binary.NewBuilder(nil).
 		WriteU16(0x09).
 		WritePacketTlv(
-			binary2.NewBuilder(nil).WritePacketBytes(c.t106, "", true).Pack(0x106),
+			binary.NewBuilder(nil).WritePacketBytes(c.t106, "", true).Pack(0x106),
 			tlv.T144(c.sig.Tgtgt, app, device),
 			tlv.T116(app.SubSigmap),
 			tlv.T142(app.PackageName, 0),
@@ -242,7 +248,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 			tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
 			tlv.T107(1, 0x0d, 0, 1),
 			tlv.T318(nil),
-			binary2.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
+			binary.NewBuilder(nil).WritePacketBytes(c.t16a, "", true).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
 		).Pack(binary.PackTypeNone)
@@ -252,28 +258,29 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) (bool, error) {
 		wtlogin.BuildLoginPacket(c.Uin, "wtlogin.login", app, body))
 
 	if err != nil {
-		return false, err
+		networkLogger.Error(err)
+		return err
 	}
 
 	return wtlogin.DecodeLoginResponse(response.Data, c.sig)
 }
 
-func (c *QQClient) Register() (bool, error) {
+func (c *QQClient) Register() error {
 	response, err := c.SendUniPacketAndAwait(
 		"trpc.qq_new_tech.status_svc.StatusService.Register",
 		wtlogin.BuildRegisterRequest(c.appInfo, c.deviceInfo))
 
 	if err != nil {
-		networkLogger.Error(err)
-		return false, err
+		networkLogger.Errorln(err)
+		return err
 	}
 
 	if wtlogin.ParseRegisterResponse(response.Data) {
 		c.sig.Uin = c.Uin
 		c.setOnline()
 		networkLogger.Info("Register successful")
-		return true, nil
+		return nil
 	}
 	networkLogger.Error("Register failure")
-	return false, errors.New("register failure")
+	return errors.New("register failure")
 }

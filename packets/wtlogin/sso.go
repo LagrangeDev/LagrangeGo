@@ -136,7 +136,7 @@ func ParseOicqBody(buf []byte) ([]byte, error) {
 
 	body := buf[16 : len(buf)-1]
 	if encType == 0 {
-		return crypto.NewTeaCipher(ecdh.ECDH["secp192k1"].GetShareKey()).Decrypt(body), nil
+		return crypto.NewTeaCipher(ecdh.Instance["secp192k1"].SharedKey()).Decrypt(body), nil
 	} else {
 		return nil, fmt.Errorf("unknown encrypt type: %d", encType)
 	}

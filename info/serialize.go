@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"os"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -11,57 +12,56 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
+var (
+	ErrDataHashMismatch = errors.New("data hash mismatch")
+)
+
 func init() {
 	// 这里不注册好像也可以
 	gob.Register(SigInfo{})
 }
 
-func Encode(sig *SigInfo) []byte {
+func Encode(sig *SigInfo) ([]byte, error) {
 	buffer := new(bytes.Buffer)
 	err := gob.NewEncoder(buffer).Encode(sig)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	dataHash := utils.MD5Digest(buffer.Bytes())
 
 	return binary.NewBuilder(nil).
 		WriteBytes(dataHash, true).
 		WriteBytes(buffer.Bytes(), true).
-		Pack(binary.PackTypeNone)
+		Pack(binary.PackTypeNone), nil
 }
 
-func Decode(buf []byte, verify bool) *SigInfo {
+func Decode(buf []byte, verify bool) (siginfo SigInfo, err error) {
 	reader := binary.NewReader(buf)
 	dataHash := reader.ReadBytesWithLength("u16", false)
 	data := reader.ReadBytesWithLength("u16", false)
 
 	if verify && !bytes.Equal(dataHash, utils.MD5Digest(data)) {
-		panic("Data hash does not match")
+		err = ErrDataHashMismatch
+		return
 	}
-	buffer := bytes.NewBuffer(data)
-	var siginfo SigInfo
-	err := gob.NewDecoder(buffer).Decode(&siginfo)
-	if err != nil {
-		panic(err)
-	}
-	return &siginfo
+
+	err = gob.NewDecoder(bytes.NewReader(data)).Decode(&siginfo)
+	return
 }
 
-func LoadDevice(path string) *DeviceInfo {
+func LoadDevice(path string) (*DeviceInfo, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		deviceinfo := NewDeviceInfo(int(utils.RandU32()))
-		_ = SaveDevice(deviceinfo, path)
-		return deviceinfo
+		return deviceinfo, SaveDevice(deviceinfo, path)
 	}
 	var dinfo DeviceInfo
 	err = json.Unmarshal(data, &dinfo)
 	if err != nil {
 		deviceinfo := NewDeviceInfo(int(utils.RandU32()))
-		_ = SaveDevice(deviceinfo, path)
-		return deviceinfo
+		return deviceinfo, SaveDevice(deviceinfo, path)
 	}
-	return &dinfo
+	return &dinfo, nil
 }
 
 func SaveDevice(deviceInfo *DeviceInfo, path string) error {
@@ -76,15 +76,18 @@ func SaveDevice(deviceInfo *DeviceInfo, path string) error {
 	return nil
 }
 
-func LoadSig(path string) *SigInfo {
+func LoadSig(path string) (SigInfo, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return NewSigInfo(8848)
+		return NewSigInfo(8848), nil
 	}
 	return Decode(data, true)
 }
 
 func SaveSig(sig *SigInfo, path string) error {
-	data := Encode(sig)
+	data, err := Encode(sig)
+	if err != nil {
+		return err
+	}
 	return os.WriteFile(path, data, 0666)
 }
