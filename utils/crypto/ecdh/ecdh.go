@@ -3,39 +3,54 @@ package ecdh
 import (
 	"crypto/md5"
 	"crypto/rand"
+	"errors"
 	"math/big"
 )
 
-type ECDHProvider struct {
-	curve  *EllipticCurve
+var (
+	ErrPubKeyLenMismatch = errors.New("public key len mismatch")
+	ErrInvalidPubKey     = errors.New("invalid public key")
+	ErrECCheckFailed     = errors.New("ec check failed")
+	ErrPointUnexist      = errors.New("points is not on the curve")
+	ErrInverseUnexist    = errors.New("inverse does not exist")
+)
+
+type provider struct {
+	curve  *ec
 	secret *big.Int
-	public *EllipticPoint
+	public *ep
 }
 
-func newECDHProvider(curve *EllipticCurve) *ECDHProvider {
-	p := &ECDHProvider{
+func newProvider(curve *ec) (p *provider, err error) {
+	p = &provider{
 		curve:  curve,
 		secret: big.NewInt(0),
-		public: &EllipticPoint{},
+		public: &ep{},
 	}
 
 	p.secret = p.createSecret()
-	p.public = p.createPublic(p.secret)
+	p.public, err = p.createPublic(p.secret)
 
-	return p
+	return
 }
 
-func (p *ECDHProvider) keyExchange(bobPub []byte, hashed bool) []byte {
-	unpacked := p.unpackPublic(bobPub)
-	shared := p.createShared(p.secret, unpacked)
-	return p.packShared(shared, hashed)
+func (p *provider) keyExchange(bobPub []byte, hashed bool) ([]byte, error) {
+	unpacked, err := p.unpackPublic(bobPub)
+	if err != nil {
+		return nil, err
+	}
+	shared, err := p.createShared(p.secret, unpacked)
+	if err != nil {
+		return nil, err
+	}
+	return p.packShared(shared, hashed), nil
 }
 
-func (p *ECDHProvider) unpackPublic(pub []byte) *EllipticPoint {
+func (p *provider) unpackPublic(pub []byte) (*ep, error) {
 	length := uint64(len(pub))
 	// if length != p.curve.size*2+1 && length != p.curve.size+1
 	if length != p.curve.size.Uint64()*2+1 && length != p.curve.size.Uint64()+1 {
-		panic("Length of public key does not match")
+		return nil, ErrPubKeyLenMismatch
 	}
 
 	x := append(make([]byte, 1), pub[1:p.curve.size.Uint64()+1]...)
@@ -44,10 +59,10 @@ func (p *ECDHProvider) unpackPublic(pub []byte) *EllipticPoint {
 		y := append(make([]byte, 1), pub[p.curve.size.Uint64()+1:p.curve.size.Uint64()*2+1]...)
 		gx := new(big.Int).SetBytes(x)
 		gy := new(big.Int).SetBytes(y)
-		return &EllipticPoint{
+		return &ep{
 			x: gx,
 			y: gy,
-		}
+		}, nil
 	}
 
 	px := new(big.Int).SetBytes(x)
@@ -71,13 +86,13 @@ func (p *ECDHProvider) unpackPublic(pub []byte) *EllipticPoint {
 		py = tmp
 	}
 
-	return &EllipticPoint{
+	return &ep{
 		x: px,
 		y: py,
-	}
+	}, nil
 }
 
-func (p *ECDHProvider) packPublic(compress bool) (result []byte) {
+func (p *provider) packPublic(compress bool) (result []byte) {
 	if compress {
 		result = append(make([]byte, int(p.curve.size.Uint64())-len(p.public.x.Bytes())), p.public.x.Bytes()...)
 		result = append(make([]byte, 1), result...)
@@ -98,7 +113,7 @@ func (p *ECDHProvider) packPublic(compress bool) (result []byte) {
 	return result
 }
 
-func (p *ECDHProvider) packShared(shared *EllipticPoint, hashed bool) (x []byte) {
+func (p *provider) packShared(shared *ep, hashed bool) (x []byte) {
 	x = append(make([]byte, int(p.curve.size.Uint64())-len(shared.x.Bytes())), shared.x.Bytes()...)
 	if hashed {
 		hash := md5.Sum(x[0:p.curve.packSize.Uint64()])
@@ -107,11 +122,11 @@ func (p *ECDHProvider) packShared(shared *EllipticPoint, hashed bool) (x []byte)
 	return x
 }
 
-func (p *ECDHProvider) createPublic(sec *big.Int) *EllipticPoint {
+func (p *provider) createPublic(sec *big.Int) (*ep, error) {
 	return p.createShared(sec, p.curve.g)
 }
 
-func (p *ECDHProvider) createSecret() *big.Int {
+func (p *provider) createSecret() *big.Int {
 	result := big.NewInt(0)
 	for result.Cmp(big.NewInt(1)) == -1 || result.Cmp(p.curve.n) != -1 {
 		buffer := make([]byte, p.curve.size.Uint64()+1)
@@ -123,63 +138,77 @@ func (p *ECDHProvider) createSecret() *big.Int {
 }
 
 // TODO 上次看到这里
-func (p *ECDHProvider) createShared(sec *big.Int, pub *EllipticPoint) *EllipticPoint {
+func (p *provider) createShared(sec *big.Int, pub *ep) (*ep, error) {
 	// if sec % p.curve.n == 0 || pub.IsDefault():
 	if new(big.Int).Mod(sec, p.curve.n).Cmp(big.NewInt(0)) == 0 || pub.IsDefault() {
-		return newEllipticPoint(big.NewInt(0), big.NewInt(0))
+		return newEllipticPoint(big.NewInt(0), big.NewInt(0)), nil
 	}
 	// if sec < 0:
 	if sec.Cmp(big.NewInt(0)) == -1 {
-		p.createShared(new(big.Int).Neg(sec), pub.Negate())
+		return p.createShared(new(big.Int).Neg(sec), pub.Negate())
 	}
 
 	if !p.curve.checkOn(pub) {
-		panic("Incorrect public key")
+		return nil, ErrInvalidPubKey
 	}
 
 	pr := newEllipticPoint(big.NewInt(0), big.NewInt(0))
 	pa := pub
+	var err error
 	for sec.Cmp(big.NewInt(0)) == 1 {
 		// if (sec & 1) > 0
 		if new(big.Int).And(sec, big.NewInt(1)).Cmp(big.NewInt(0)) == 1 {
-			pr = pointAdd(p.curve, pr, pa)
+			pr, err = pointAdd(p.curve, pr, pa)
+			if err != nil {
+				return nil, err
+			}
 		}
-		pa = pointAdd(p.curve, pa, pa)
+		pa, err = pointAdd(p.curve, pa, pa)
+		if err != nil {
+			return nil, err
+		}
 		// sec >>= 1
 		sec = new(big.Int).Rsh(sec, 1)
 	}
 
 	if !p.curve.checkOn(pr) {
-		panic("Incorrect result assertion")
+		return nil, ErrECCheckFailed
 	}
-	return pr
+
+	return pr, nil
 }
 
-func pointAdd(curve *EllipticCurve, p1, p2 *EllipticPoint) *EllipticPoint {
+func pointAdd(curve *ec, p1, p2 *ep) (*ep, error) {
 	if p1.IsDefault() {
-		return p2
+		return p2, nil
 	}
 	if p2.IsDefault() {
-		return p1
+		return p1, nil
 	}
 	if !(curve.checkOn(p1) && curve.checkOn(p2)) {
-		panic("Points is not on the curve")
+		return nil, ErrPointUnexist
 	}
 
 	var m *big.Int
 	if p1.x.Cmp(p2.x) == 0 {
 		if p1.y.Cmp(p2.y) == 0 {
-			// m = (3 * p1.x * p1.x + curve.A) * _mod_inverse(p1.y << 1, curve.P)
+			inv, err := modInverse(new(big.Int).Lsh(p1.y, 1), curve.p)
+			if err != nil {
+				return nil, err
+			}
 			m = new(big.Int).Mul(new(big.Int).Add(new(big.Int).Mul(
 				big.NewInt(3), new(big.Int).Exp(p1.x, big.NewInt(2), nil)), curve.a),
-				modInverse(new(big.Int).Lsh(p1.y, 1), curve.p))
+				inv,
+			)
 		} else {
-			return newEllipticPoint(big.NewInt(0), big.NewInt(0))
+			return newEllipticPoint(big.NewInt(0), big.NewInt(0)), nil
 		}
 	} else {
-		// m = (p1.y - p2.y) * _mod_inverse(p1.x - p2.x, curve.P)
-		m = new(big.Int).Mul(new(big.Int).Sub(p1.y, p2.y),
-			modInverse(new(big.Int).Sub(p1.x, p2.x), curve.p))
+		inv, err := modInverse(new(big.Int).Sub(p1.x, p2.x), curve.p)
+		if err != nil {
+			return nil, err
+		}
+		m = new(big.Int).Mul(new(big.Int).Sub(p1.y, p2.y), inv)
 	}
 
 	// xr = _mod(m * m - p1.x - p2.x, curve.P)
@@ -189,9 +218,10 @@ func pointAdd(curve *EllipticCurve, p1, p2 *EllipticPoint) *EllipticPoint {
 	pr := newEllipticPoint(xr, yr)
 
 	if !curve.checkOn(pr) {
-		panic("Result point is not on the curve")
+		return nil, ErrPointUnexist
 	}
-	return pr
+
+	return pr, nil
 }
 
 func mod(a, b *big.Int) (result *big.Int) {
@@ -202,17 +232,21 @@ func mod(a, b *big.Int) (result *big.Int) {
 	return result
 }
 
-func modInverse(a, p *big.Int) *big.Int {
+func modInverse(a, p *big.Int) (*big.Int, error) {
 	if a.Cmp(big.NewInt(0)) == -1 {
-		return new(big.Int).Sub(p, modInverse(a.Neg(a), p))
+		inv, err := modInverse(a.Neg(a), p)
+		if err != nil {
+			return nil, err
+		}
+		return new(big.Int).Sub(p, inv), nil
 	}
 
 	g := new(big.Int).GCD(nil, nil, a, p)
 	if g.Cmp(big.NewInt(1)) != 0 {
-		panic("Inverse does not exist.")
+		return nil, ErrInverseUnexist
 	}
 
-	return new(big.Int).Exp(a, new(big.Int).Sub(p, big.NewInt(2)), p)
+	return new(big.Int).Exp(a, new(big.Int).Sub(p, big.NewInt(2)), p), nil
 }
 
 func reverseBytes(bytes []byte) []byte {

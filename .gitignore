@@ -106,3 +106,5 @@ go.work
 # Running stub
 sig.bin
 qrcode.png
+testgroup.png
+testprivate.png

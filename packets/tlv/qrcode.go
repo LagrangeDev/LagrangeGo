@@ -7,7 +7,7 @@ import (
 
 func T11(unusualSign []byte) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(unusualSign, "", true).
+		WriteBytes(unusualSign, false).
 		Pack(0x11)
 }
 
@@ -16,7 +16,7 @@ func T16(appid, subAppid int, guid []byte, ptVersion, packageName string) []byte
 		WriteU32(0).
 		WriteU32(uint32(appid)).
 		WriteU32(uint32(subAppid)).
-		WritePacketBytes(guid, "", true).
+		WriteBytes(guid, false).
 		WritePacketString(packageName, "u16", false).
 		WritePacketString(ptVersion, "u16", false).
 		WritePacketString(packageName, "u16", false).
@@ -39,7 +39,7 @@ func T1d(miscBitmap int) []byte {
 }
 
 func T33(guid []byte) []byte {
-	return binary.NewBuilder(nil).WritePacketBytes(guid, "", true).Pack(0x33)
+	return binary.NewBuilder(nil).WriteBytes(guid, false).Pack(0x33)
 }
 
 func T35(PtOSVersion int) []byte {
@@ -52,7 +52,7 @@ func T66(PtOSVersion int) []byte {
 
 func Td1(AppOS, DeviceName string) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(proto.DynamicMessage{
+		WriteBytes(proto.DynamicMessage{
 			1: proto.DynamicMessage{
 				1: AppOS,
 				2: DeviceName,
@@ -60,7 +60,6 @@ func Td1(AppOS, DeviceName string) []byte {
 			4: proto.DynamicMessage{
 				6: 1,
 			},
-		}.Encode(), "", true).
+		}.Encode(), false).
 		Pack(0xd1)
-
 }

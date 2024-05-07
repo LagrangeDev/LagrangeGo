@@ -4,25 +4,23 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
+	"strconv"
+
+	ftea "github.com/fumiama/gofastTEA"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
-
-type PackType int
-
-const PackTypeNone PackType = -1
 
 type Builder struct {
 	buffer []byte
-	key    crypto.TEA
+	key    ftea.TEA
 	usetea bool
 }
 
 func NewBuilder(key []byte) *Builder {
 	return &Builder{
 		buffer: make([]byte, 0, 64),
-		key:    crypto.NewTeaCipher(key),
+		key:    ftea.NewTeaCipher(key),
 		usetea: len(key) == 16,
 	}
 }
@@ -35,34 +33,40 @@ func (b *Builder) append(v []byte) {
 	b.buffer = append(b.buffer, v...)
 }
 
-func (b *Builder) Buffer() []byte {
-	return b.buffer
-}
-
-func (b *Builder) Data() []byte {
+// data 带 tea 加密, 不可用作提取 b.buffer
+func (b *Builder) data() []byte {
 	if b.usetea {
 		return b.key.Encrypt(b.buffer)
 	}
 	return b.buffer
 }
 
-func (b *Builder) pack(v any) *Builder {
+func (b *Builder) pack(v any) {
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.BigEndian, v)
 	b.append(buf.Bytes())
-	return b
 }
 
-func (b *Builder) Pack(typ PackType) []byte {
-	if typ != PackTypeNone {
-		// 或许这里是tlv
-		buf := make([]byte, b.Len()+4)
-		binary.BigEndian.PutUint16(buf[0:2], uint16(typ))           // type
-		binary.BigEndian.PutUint16(buf[2:4], uint16(len(b.Data()))) // length
-		copy(buf[4:], b.Data())                                     // type + length + value
-		return buf
+// ToBytes return data with tea encryption
+func (b *Builder) ToBytes() []byte {
+	return b.data()
+}
+
+// Pack TLV with tea encryption
+func (b *Builder) Pack(typ uint16) []byte {
+	buf := make([]byte, b.Len()+2+2+16)
+
+	n := 0
+	if b.usetea {
+		n = b.key.EncryptTo(b.buffer, buf[2+2:])
+	} else {
+		n = copy(buf[2+2:], b.buffer)
 	}
-	return b.Data()
+
+	binary.BigEndian.PutUint16(buf[0:2], typ)         // type
+	binary.BigEndian.PutUint16(buf[2:2+2], uint16(n)) // length
+
+	return buf[:n+2+2]
 }
 
 func (b *Builder) WriteBool(v bool) *Builder {
@@ -75,36 +79,27 @@ func (b *Builder) WriteBool(v bool) *Builder {
 	return b
 }
 
-// WritePacketBytes default prefix = "", withPrefix = true
+// WritePacketBytes prefix must not be empty
 func (b *Builder) WritePacketBytes(v []byte, prefix string, withPrefix bool) *Builder {
+	n := len(v)
 	if withPrefix {
-		switch prefix {
-		case "":
-		case "u8":
-			b.WriteU8(uint8(len(v) + 1))
-		case "u16":
-			b.WriteU16(uint16(len(v) + 2))
-		case "u32":
-			b.WriteU32(uint32(len(v) + 4))
-		case "u64":
-			b.WriteU64(uint64(len(v) + 8))
-		default:
-			panic("Invaild prefix")
+		plus, err := strconv.Atoi(prefix[1:])
+		if err != nil {
+			panic(err)
 		}
-	} else {
-		switch prefix {
-		case "":
-		case "u8":
-			b.WriteU8(uint8(len(v)))
-		case "u16":
-			b.WriteU16(uint16(len(v)))
-		case "u32":
-			b.WriteU32(uint32(len(v)))
-		case "u64":
-			b.WriteU64(uint64(len(v)))
-		default:
-			panic("Invaild prefix")
-		}
+		n += plus / 8
+	}
+	switch prefix {
+	case "u8":
+		b.WriteU8(uint8(n))
+	case "u16":
+		b.WriteU16(uint16(n))
+	case "u32":
+		b.WriteU32(uint32(n))
+	case "u64":
+		b.WriteU64(uint64(n))
+	default:
+		panic("Invaild prefix")
 	}
 	b.append(v)
 	return b
@@ -177,20 +172,10 @@ func (b *Builder) WriteDouble(v float64) *Builder {
 	return b.WriteU64(math.Float64bits(v))
 }
 
-/*
 func (b *Builder) WriteTlv(tlvs ...[]byte) *Builder {
 	b.WriteU16(uint16(len(tlvs)))
 	for _, tlv := range tlvs {
 		b.WriteBytes(tlv, false)
-	}
-	return b
-}
-*/
-
-func (b *Builder) WritePacketTlv(tlvs ...[]byte) *Builder {
-	b.WriteU16(uint16(len(tlvs)))
-	for _, tlv := range tlvs {
-		b.WritePacketBytes(tlv, "", true)
 	}
 	return b
 }

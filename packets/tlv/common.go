@@ -3,10 +3,11 @@ package tlv
 import (
 	"strconv"
 
+	ftea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5
@@ -37,7 +38,7 @@ func T100(ssoVersion, appID, subAppID, appClientVersion, sigmap, dbBufVer int) [
 func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
 	// password_md5 + bytes(4) + write_u32(uin).pack()
 	key := utils.MD5Digest(append(passwordMd5, append(make([]byte, 4),
-		binary.NewBuilder(nil).WriteU32(uint32(uin)).Pack(binary.PackTypeNone)...)...))
+		binary.NewBuilder(nil).WriteU32(uint32(uin)).ToBytes()...)...))
 
 	body := binary.NewBuilder(nil).
 		WriteStruct(uint16(4), //  tgtgt version
@@ -47,20 +48,20 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 			uint32(appClientVersion),
 			uint64(uin)).
 		WriteU32(uint32(utils.TimeStamp())).
-		WritePacketBytes(ip, "", true).
+		WriteBytes(ip, false).
 		WriteBool(savePassword).
-		WritePacketBytes(passwordMd5, "", true).
-		WritePacketBytes(tgtgtKey, "", true).
+		WriteBytes(passwordMd5, false).
+		WriteBytes(tgtgtKey, false).
 		WriteU32(0).
 		WriteBool(true).
-		WritePacketBytes(utils.MustParseHexStr(guid), "", true).
+		WriteBytes(utils.MustParseHexStr(guid), false).
 		WriteU32(0).
 		WriteU32(1).
 		WritePacketString(strconv.Itoa(uin), "u16", false).
-		Pack(binary.PackTypeNone)
+		ToBytes()
 
 	return binary.NewBuilder(nil).
-		WritePacketBytes(crypto.NewTeaCipher(key).Encrypt(body), "u32", true).
+		WritePacketBytes(ftea.NewTeaCipher(key).Encrypt(body), "u32", true).
 		Pack(0x106)
 }
 
@@ -85,7 +86,7 @@ func T116(subSigmap int) []byte {
 
 func T124() []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(make([]byte, 12), "", true).
+		WriteBytes(make([]byte, 12), false).
 		Pack(0x124)
 }
 
@@ -122,7 +123,7 @@ func T142(apkID string, version int) []byte {
 
 func T144(tgtgtKey []byte, appInfo *info.AppInfo, device *info.DeviceInfo) []byte {
 	return binary.NewBuilder(tgtgtKey).
-		WritePacketTlv(
+		WriteTlv(
 			T16e(device.DeviceName),
 			T147(appInfo.AppID, appInfo.PTVersion, appInfo.PackageName),
 			T128(appInfo.OS, utils.MustParseHexStr(device.Guid)),
@@ -132,7 +133,7 @@ func T144(tgtgtKey []byte, appInfo *info.AppInfo, device *info.DeviceInfo) []byt
 
 func T145(guid []byte) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(guid, "", true).
+		WriteBytes(guid, false).
 		Pack(0x145)
 }
 
@@ -152,13 +153,13 @@ func T166(imageType int) []byte {
 
 func T16a(noPicSig []byte) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(noPicSig, "", true).
+		WriteBytes(noPicSig, false).
 		Pack(0x16a)
 }
 
 func T16e(deviceName string) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(utils.S2B(deviceName), "", true).
+		WriteBytes(utils.S2B(deviceName), false).
 		Pack(0x16e)
 }
 
@@ -180,7 +181,7 @@ func T191(canWebVerify int) []byte {
 // T318 默认参数 tgtQr = []byte{0}
 func T318(tgtQr []byte) []byte {
 	return binary.NewBuilder(nil).
-		WritePacketBytes(tgtQr, "", true).
+		WriteBytes(tgtQr, false).
 		Pack(0x318)
 }
 

@@ -5,17 +5,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
-
-	"github.com/LagrangeDev/LagrangeGo/packets/pb"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
+	ftea "github.com/fumiama/gofastTEA"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
+	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 var loginLogger = utils.GetLogger("login")
@@ -30,23 +27,23 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 			WriteU16(uint16(len(body))+53).
 			WriteU32(uint32(appInfo.AppID)).
 			WriteU32(0x72).
-			WritePacketBytes(make([]byte, 3), "", true).
+			WriteBytes(make([]byte, 3), false).
 			WriteU32(uint32(utils.TimeStamp())).
 			WriteU8(2).
 			WriteU16(uint16(len(body)+49)).
 			WriteU16(uint16(cmdID)).
-			WritePacketBytes(make([]byte, 21), "", true).
+			WriteBytes(make([]byte, 21), false).
 			WriteU8(3).
 			WriteU32(50).
-			WritePacketBytes(make([]byte, 14), "", true).
+			WriteBytes(make([]byte, 14), false).
 			WriteU32(uint32(appInfo.AppID)).
-			WritePacketBytes(body, "", true).
-			Pack(binary.PackTypeNone),
+			WriteBytes(body, false).
+			ToBytes(),
 	)
 }
 
 func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte) []byte {
-	encBody := crypto.NewTeaCipher(ecdh.ECDH["secp192k1"].GetShareKey()).Encrypt(body)
+	encBody := ftea.NewTeaCipher(ecdh.S192().SharedKey()).Encrypt(body)
 
 	var _cmd uint16
 	if cmd == "wtlogin.login" {
@@ -54,6 +51,8 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 	} else {
 		_cmd = 2066
 	}
+
+	pk := ecdh.S192().PublicKey()
 
 	frameBody := binary.NewBuilder(nil).
 		WriteU16(8001).
@@ -69,19 +68,19 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 		WriteU32(0).
 		WriteU8(1).
 		WriteU8(1).
-		WritePacketBytes(make([]byte, 16), "", true).
+		WriteBytes(make([]byte, 16), false).
 		WriteU16(0x102).
-		WriteU16(uint16(len(ecdh.ECDH["secp192k1"].GetPublicKey()))).
-		WritePacketBytes(ecdh.ECDH["secp192k1"].GetPublicKey(), "", true).
-		WritePacketBytes(encBody, "", true).
+		WriteU16(uint16(len(pk))).
+		WriteBytes(pk, false).
+		WriteBytes(encBody, false).
 		WriteU8(3).
-		Pack(binary.PackTypeNone)
+		ToBytes()
 
 	frame := binary.NewBuilder(nil).
 		WriteU8(2).
 		WriteU16(uint16(len(frameBody))+3). // + 2 + 1
-		WritePacketBytes(frameBody, "", true).
-		Pack(binary.PackTypeNone)
+		WriteBytes(frameBody, false).
+		ToBytes()
 
 	return frame
 }
@@ -107,8 +106,8 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 	ssoHeader := binary.NewBuilder(nil).
 		WriteU32(uint32(seq)).
 		WriteU32(uint32(appInfo.SubAppID)).
-		WriteU32(2052).                                                        // locate id
-		WritePacketBytes(append([]byte{0x02}, make([]byte, 11)...), "", true). //020000000000000000000000
+		WriteU32(2052).                                               // locate id
+		WriteBytes(append([]byte{0x02}, make([]byte, 11)...), false). //020000000000000000000000
 		WritePacketBytes(sigInfo.Tgt, "u32", true).
 		WritePacketString(cmd, "u32", true).
 		WritePacketBytes(nil, "u32", true).
@@ -116,14 +115,14 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WritePacketBytes(nil, "u32", true).
 		WritePacketString(appInfo.CurrentVersion, "u16", true).
 		WritePacketBytes(head.Encode(), "u32", true).
-		Pack(binary.PackTypeNone)
+		ToBytes()
 
 	ssoPacket := binary.NewBuilder(nil).
 		WritePacketBytes(ssoHeader, "u32", true).
 		WritePacketBytes(body, "u32", true).
-		Pack(binary.PackTypeNone)
+		ToBytes()
 
-	encrypted := crypto.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
+	encrypted := ftea.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
 
 	var _s uint8
 	if len(sigInfo.D2) == 0 {
@@ -138,13 +137,13 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 		WritePacketBytes(sigInfo.D2, "u32", true).
 		WriteU8(0).
 		WritePacketString(strconv.Itoa(uin), "u32", true).
-		WritePacketBytes(encrypted, "", true).
-		Pack(binary.PackTypeNone)
+		WriteBytes(encrypted, false).
+		ToBytes()
 
-	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).Pack(binary.PackTypeNone)
+	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).ToBytes()
 }
 
-func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
+func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	reader := binary.NewReader(buf)
 	reader.ReadBytes(2)
 	typ := reader.ReadU8()
@@ -153,7 +152,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 	var title, content string
 
 	if typ == 0 {
-		reader = binary.NewReader(crypto.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
+		reader = binary.NewReader(ftea.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
 		tlv = reader.ReadTlv()
 		if tgt, ok := tlv[0x10A]; ok {
 			sig.Tgt = tgt
@@ -178,14 +177,15 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 		var resp pb.Tlv543
 		err := proto.Unmarshal(tlv[0x543], &resp)
 		if err != nil {
-			loginLogger.Errorf("parsing login response error: %s", err)
-			return false, err
+			err = fmt.Errorf("parsing login response error: %s", err)
+			loginLogger.Errorln(err)
+			return err
 		}
 		sig.Uid = resp.Layer1.Layer2.Uid
 
 		loginLogger.Debugln("SigInfo got")
 
-		return true, nil
+		return nil
 	} else if errData, ok := tlv[0x146]; ok {
 		errBuf := binary.NewReader(errData)
 		errBuf.ReadBytes(4)
@@ -201,8 +201,9 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) (bool, error) {
 		content = "无法解析错误原因，请将完整日志提交给开发者"
 	}
 
-	loginLogger.Errorf("Login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
-	return false, fmt.Errorf("login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
+	err := fmt.Errorf("login fail on oicq (0x%02x): [%s]>[%s]", typ, title, content)
+	loginLogger.Errorln(err)
+	return err
 }
 
 func generateTrace() string {
