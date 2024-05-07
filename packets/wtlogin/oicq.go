@@ -145,7 +145,7 @@ func BuildUniPacket(uin, seq int, cmd string, sign map[string]string,
 
 func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	reader := binary.NewReader(buf)
-	reader.ReadBytes(2)
+	reader.SkipBytes(2)
 	typ := reader.ReadU8()
 	tlv := reader.ReadTlv()
 
@@ -188,12 +188,12 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 		return nil
 	} else if errData, ok := tlv[0x146]; ok {
 		errBuf := binary.NewReader(errData)
-		errBuf.ReadBytes(4)
+		errBuf.SkipBytes(4)
 		title = errBuf.ReadString(int(errBuf.ReadU16()))
 		content = errBuf.ReadString(int(errBuf.ReadU16()))
 	} else if errData, ok := tlv[0x149]; ok {
 		errBuf := binary.NewReader(errData)
-		errBuf.ReadBytes(2)
+		errBuf.SkipBytes(2)
 		title = errBuf.ReadString(int(errBuf.ReadU16()))
 		content = errBuf.ReadString(int(errBuf.ReadU16()))
 	} else {

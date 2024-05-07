@@ -45,6 +45,19 @@ func (r *Reader) ReadU64() (v uint64) {
 	return
 }
 
+func (r *Reader) SkipBytes(length int) {
+	r.pos += length
+}
+
+// ReadBytesNoCopy 不拷贝读取的数据, 用于读取后立即使用, 慎用
+//
+// 如需使用, 请确保 Reader 未被回收
+func (r *Reader) ReadBytesNoCopy(length int) (v []byte) {
+	v = r.buffer[r.pos : r.pos+length]
+	r.pos += length
+	return
+}
+
 func (r *Reader) ReadBytes(length int) (v []byte) {
 	// 返回一个全新的数组罢
 	v = make([]byte, length)
@@ -55,6 +68,38 @@ func (r *Reader) ReadBytes(length int) (v []byte) {
 
 func (r *Reader) ReadString(length int) string {
 	return utils.B2S(r.ReadBytes(length))
+}
+
+func (r *Reader) SkipBytesWithLength(prefix string, withPerfix bool) {
+	var length int
+	if withPerfix {
+		switch prefix {
+		case "u8":
+			length = int(r.ReadU8() - 1)
+		case "u16":
+			length = int(r.ReadU16() - 2)
+		case "u32":
+			length = int(r.ReadU32() - 4)
+		case "u64":
+			length = int(r.ReadU64() - 8)
+		default:
+			panic("invaild prefix")
+		}
+	} else {
+		switch prefix {
+		case "u8":
+			length = int(r.ReadU8())
+		case "u16":
+			length = int(r.ReadU16())
+		case "u32":
+			length = int(r.ReadU32())
+		case "u64":
+			length = int(r.ReadU64())
+		default:
+			panic("invaild prefix")
+		}
+	}
+	r.pos += length
 }
 
 func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) (v []byte) {

@@ -153,7 +153,7 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			switch {
 			case len(elem.Text.Attr6Buf) > 0:
 				att6 := binary.NewReader(elem.Text.Attr6Buf)
-				att6.ReadBytes(7)
+				att6.SkipBytes(7)
 				target := att6.ReadU32()
 				at := NewAt(target, elem.Text.Str.Unwrap())
 				at.SubType = AtTypeGroupMember

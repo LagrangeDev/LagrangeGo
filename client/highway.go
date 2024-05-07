@@ -182,17 +182,17 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 
 func ParsePacket(data []byte) (head *highway.RespDataHighwayHead, body *binary.Reader, err error) {
 	reader := binary.NewReader(data)
-	if reader.ReadBytes(1)[0] == 0x28 {
+	if reader.ReadBytesNoCopy(1)[0] == 0x28 {
 		headlength := reader.ReadU32()
 		bodylength := reader.ReadU32()
 		head = &highway.RespDataHighwayHead{}
-		headraw := reader.ReadBytes(int(int64(headlength)))
+		headraw := reader.ReadBytesNoCopy(int(int64(headlength)))
 		err = proto.Unmarshal(headraw, head)
 		if err != nil {
 			return nil, nil, err
 		}
-		body = binary.NewReader(reader.ReadBytes(int(bodylength)))
-		if reader.ReadBytes(1)[0] == 0x29 {
+		body = binary.NewReader(reader.ReadBytesNoCopy(int(bodylength)))
+		if reader.ReadBytesNoCopy(1)[0] == 0x29 {
 			return head, body, nil
 		}
 	}

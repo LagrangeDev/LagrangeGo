@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"math"
 	"strconv"
+	"unsafe"
 
 	ftea "github.com/fumiama/gofastTEA"
 
@@ -12,39 +13,37 @@ import (
 )
 
 type Builder struct {
-	buffer []byte
+	buffer *bytes.Buffer
 	key    ftea.TEA
 	usetea bool
 }
 
 func NewBuilder(key []byte) *Builder {
 	return &Builder{
-		buffer: make([]byte, 0, 64),
+		buffer: bytes.NewBuffer(make([]byte, 0, 64)),
 		key:    ftea.NewTeaCipher(key),
 		usetea: len(key) == 16,
 	}
 }
 
 func (b *Builder) Len() int {
-	return len(b.buffer)
+	return b.buffer.Len()
 }
 
 func (b *Builder) append(v []byte) {
-	b.buffer = append(b.buffer, v...)
+	b.buffer.Write(v)
 }
 
 // data 带 tea 加密, 不可用作提取 b.buffer
 func (b *Builder) data() []byte {
 	if b.usetea {
-		return b.key.Encrypt(b.buffer)
+		return b.key.Encrypt(b.buffer.Bytes())
 	}
-	return b.buffer
+	return b.buffer.Bytes()
 }
 
-func (b *Builder) pack(v any) {
-	buf := new(bytes.Buffer)
-	_ = binary.Write(buf, binary.BigEndian, v)
-	b.append(buf.Bytes())
+func (b *Builder) pack(v any) error {
+	return binary.Write(b.buffer, binary.BigEndian, v)
 }
 
 // ToBytes return data with tea encryption
@@ -58,9 +57,9 @@ func (b *Builder) Pack(typ uint16) []byte {
 
 	n := 0
 	if b.usetea {
-		n = b.key.EncryptTo(b.buffer, buf[2+2:])
+		n = b.key.EncryptTo(b.buffer.Bytes(), buf[2+2:])
 	} else {
-		n = copy(buf[2+2:], b.buffer)
+		n = copy(buf[2+2:], b.buffer.Bytes())
 	}
 
 	binary.BigEndian.PutUint16(buf[0:2], typ)         // type
@@ -71,11 +70,10 @@ func (b *Builder) Pack(typ uint16) []byte {
 
 func (b *Builder) WriteBool(v bool) *Builder {
 	if v {
-		b.buffer = append(b.buffer, 1)
+		b.buffer.WriteByte('1')
 	} else {
-		b.buffer = append(b.buffer, 0)
+		b.buffer.WriteByte('0')
 	}
-
 	return b
 }
 
@@ -123,29 +121,36 @@ func (b *Builder) WriteString(v string) *Builder {
 
 func (b *Builder) WriteStruct(data ...any) *Builder {
 	for _, data := range data {
-		b.pack(data)
+		err := b.pack(data)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return b
 }
 
 func (b *Builder) WriteU8(v uint8) *Builder {
-	b.buffer = append(b.buffer, v)
+	b.buffer.WriteByte(v)
+	return b
+}
+
+func writeint[T ~uint16 | uint32 | uint64](b *Builder, v T) *Builder {
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(v))
+	b.buffer.Write(buf[8-unsafe.Sizeof(v):])
 	return b
 }
 
 func (b *Builder) WriteU16(v uint16) *Builder {
-	b.buffer = binary.BigEndian.AppendUint16(b.buffer, v)
-	return b
+	return writeint(b, v)
 }
 
 func (b *Builder) WriteU32(v uint32) *Builder {
-	b.buffer = binary.BigEndian.AppendUint32(b.buffer, v)
-	return b
+	return writeint(b, v)
 }
 
 func (b *Builder) WriteU64(v uint64) *Builder {
-	b.buffer = binary.BigEndian.AppendUint64(b.buffer, v)
-	return b
+	return writeint(b, v)
 }
 
 func (b *Builder) WriteI8(v int8) *Builder {

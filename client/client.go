@@ -111,7 +111,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 	}
 
 	decrypted := binary.NewReader(response.Data)
-	decrypted.ReadBytes(54)
+	decrypted.SkipBytes(54)
 	retCode := decrypted.ReadU8()
 	qrsig := decrypted.ReadBytesWithLength("u16", false)
 	tlvs := decrypted.ReadTlv()
@@ -149,16 +149,16 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 
 	reader := binary.NewReader(response.Data)
 	//length := reader.ReadU32()
-	reader.ReadBytes(8) // 4 + 4
+	reader.SkipBytes(8) // 4 + 4
 	reader.ReadU16()    // cmd, 0x12
-	reader.ReadBytes(40)
+	reader.SkipBytes(40)
 	_ = reader.ReadU32() // app id
 	retCode := qrcodeState.State(reader.ReadU8())
 
 	if retCode == 0 {
-		reader.ReadBytes(4)
+		reader.SkipBytes(4)
 		c.Uin = reader.ReadU32()
-		reader.ReadBytes(4)
+		reader.SkipBytes(4)
 		t := reader.ReadTlv()
 		c.t106 = t[0x18]
 		c.t16a = t[0x19]
