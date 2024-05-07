@@ -65,7 +65,7 @@ func init() {
 		signMap[cmd] = struct{}{}
 	}
 
-	dns.SetTimeout(time.Second)
+	dns.SetTimeout(time.Second / 2)
 }
 
 func containSignPKG(cmd string) bool {
