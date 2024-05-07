@@ -7,9 +7,8 @@ import (
 	"errors"
 	"os"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
-
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 var (
@@ -27,7 +26,7 @@ func Encode(sig *SigInfo) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	dataHash := utils.MD5Digest(buffer.Bytes())
+	dataHash := crypto.MD5Digest(buffer.Bytes())
 
 	return binary.NewBuilder(nil).
 		WriteBytes(dataHash, true).
@@ -40,7 +39,7 @@ func Decode(buf []byte, verify bool) (siginfo SigInfo, err error) {
 	dataHash := reader.ReadBytesWithLength("u16", false)
 	data := reader.ReadBytesWithLength("u16", false)
 
-	if verify && !bytes.Equal(dataHash, utils.MD5Digest(data)) {
+	if verify && !bytes.Equal(dataHash, crypto.MD5Digest(data)) {
 		err = ErrDataHashMismatch
 		return
 	}
@@ -52,13 +51,13 @@ func Decode(buf []byte, verify bool) (siginfo SigInfo, err error) {
 func LoadDevice(path string) (*DeviceInfo, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		deviceinfo := NewDeviceInfo(int(utils.RandU32()))
+		deviceinfo := NewDeviceInfo(int(crypto.RandU32()))
 		return deviceinfo, SaveDevice(deviceinfo, path)
 	}
 	var dinfo DeviceInfo
 	err = json.Unmarshal(data, &dinfo)
 	if err != nil {
-		deviceinfo := NewDeviceInfo(int(utils.RandU32()))
+		deviceinfo := NewDeviceInfo(int(crypto.RandU32()))
 		return deviceinfo, SaveDevice(deviceinfo, path)
 	}
 	return &dinfo, nil

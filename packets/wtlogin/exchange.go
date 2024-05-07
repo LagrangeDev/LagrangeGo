@@ -34,7 +34,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 		WriteU32(uint32(utils.TimeStamp())).
 		ToBytes()
 
-	p2Hash := utils.SHA256Digest(p2)
+	p2Hash := crypto.SHA256Digest(p2)
 	encP2Hash, err := crypto.AesGCMEncrypt(p2Hash, encKey)
 	if err != nil {
 		return nil, err

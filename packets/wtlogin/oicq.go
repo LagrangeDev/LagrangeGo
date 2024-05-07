@@ -11,6 +11,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
@@ -171,7 +172,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 			sig.Gender = tlvReader.ReadU8()
 			sig.Nickname = tlvReader.ReadStringWithLength("u8", false)
 		}
-		sig.Tgtgt = utils.MD5Digest(sig.D2Key)
+		sig.Tgtgt = crypto.MD5Digest(sig.D2Key)
 		sig.TempPwd = tlv[0x106]
 
 		var resp pb.Tlv543

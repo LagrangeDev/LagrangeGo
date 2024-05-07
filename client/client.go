@@ -12,6 +12,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/qrcodeState"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 var (
@@ -187,7 +188,7 @@ func (c *QQClient) KeyExchange() error {
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
-	md5Password := utils.MD5Digest(utils.S2B(password))
+	md5Password := crypto.MD5Digest(utils.S2B(password))
 
 	cr := tlv.T106(
 		c.appInfo.AppID,
