@@ -32,6 +32,7 @@ func (b *Builder) append(v []byte) {
 	b.buffer = append(b.buffer, v...)
 }
 
+// data 带 tea 加密, 不可用作提取 b.buffer
 func (b *Builder) data() []byte {
 	if b.usetea {
 		return b.key.Encrypt(b.buffer)
@@ -53,9 +54,10 @@ func (b *Builder) ToBytes() []byte {
 func (b *Builder) Pack(typ uint16) []byte {
 	buf := make([]byte, b.Len()+2+2)
 	binary.BigEndian.PutUint16(buf[0:2], typ)                     // type
-	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.data()))) // length
-	copy(buf[2+2:], b.data())                                     // type + length + value
-	return buf
+	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.buffer))) // length
+	copy(buf[2+2:], b.buffer)                                     // type + length + value
+	b.buffer = buf
+	return b.data()
 }
 
 func (b *Builder) WriteBool(v bool) *Builder {
