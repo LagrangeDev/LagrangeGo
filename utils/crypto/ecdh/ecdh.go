@@ -145,7 +145,7 @@ func (p *provider) createShared(sec *big.Int, pub *ep) (*ep, error) {
 	}
 	// if sec < 0:
 	if sec.Cmp(big.NewInt(0)) == -1 {
-		p.createShared(new(big.Int).Neg(sec), pub.Negate())
+		return p.createShared(new(big.Int).Neg(sec), pub.Negate())
 	}
 
 	if !p.curve.checkOn(pub) {
