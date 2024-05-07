@@ -9,10 +9,6 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-type PackType int
-
-const PackTypeNone PackType = -1
-
 type Builder struct {
 	buffer []byte
 	key    crypto.TEA
@@ -57,10 +53,10 @@ func (b *Builder) ToBytes() []byte {
 	return b.data()
 }
 
-func (b *Builder) Pack(typ PackType) []byte {
+func (b *Builder) Pack(typ uint16) []byte {
 	// 或许这里是tlv
 	buf := make([]byte, b.Len()+2+2)
-	binary.BigEndian.PutUint16(buf[0:2], uint16(typ))             // type
+	binary.BigEndian.PutUint16(buf[0:2], typ)                     // type
 	binary.BigEndian.PutUint16(buf[2:2+2], uint16(len(b.data()))) // length
 	copy(buf[2+2:], b.data())                                     // type + length + value
 	return buf

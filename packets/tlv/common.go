@@ -57,7 +57,7 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 		WriteU32(0).
 		WriteU32(1).
 		WritePacketString(strconv.Itoa(uin), "u16", false).
-		Pack(binary.PackTypeNone)
+		ToBytes()
 
 	return binary.NewBuilder(nil).
 		WritePacketBytes(crypto.NewTeaCipher(key).Encrypt(body), "u32", true).
