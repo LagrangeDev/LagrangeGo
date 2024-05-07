@@ -7,13 +7,13 @@ import (
 
 func TestBuilder(t *testing.T) {
 	r := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	data := NewBuilder(nil).WriteBytes(r, true).Pack(PackTypeNone)
+	data := NewBuilder(nil).WriteBytes(r, true).ToBytes()
 	fmt.Printf("%x\n", data)
 }
 
 func build() []byte {
 	r := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	return NewBuilder(nil).WriteBytes(r, true).WriteBytes(r, true).Pack(PackTypeNone)
+	return NewBuilder(nil).WriteBytes(r, true).WriteBytes(r, true).ToBytes()
 }
 
 func TestReader(t *testing.T) {

@@ -32,7 +32,7 @@ func Encode(sig *SigInfo) ([]byte, error) {
 	return binary.NewBuilder(nil).
 		WriteBytes(dataHash, true).
 		WriteBytes(buffer.Bytes(), true).
-		Pack(binary.PackTypeNone), nil
+		ToBytes(), nil
 }
 
 func Decode(buf []byte, verify bool) (siginfo SigInfo, err error) {

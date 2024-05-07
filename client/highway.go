@@ -212,10 +212,10 @@ func SendPacketAsync(packet *highway.ReqDataHighwayHead, buffer *binary.Builder,
 		WriteU32(uint32(len(marshal))).
 		WriteU32(uint32(buffer.Len())).
 		WriteBytes(marshal, false).
-		WriteBytes(buffer.Data(), false).
+		WriteBytes(buffer.ToBytes(), false).
 		WriteBytes([]byte{0x29}, false)
 
-	return SendDataAsync(writer.Data(), serverURL, end)
+	return SendDataAsync(writer.ToBytes(), serverURL, end)
 }
 
 func SendDataAsync(packet []byte, serverURL string, end bool) ([]byte, error) {

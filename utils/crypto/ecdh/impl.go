@@ -14,7 +14,7 @@ type Exchanger interface {
 type s192exchanger struct {
 	provider    *provider
 	publicKey   []byte
-	shareKey    []byte
+	sharedKey   []byte
 	compressKey bool
 }
 
@@ -23,14 +23,14 @@ func (e *s192exchanger) PublicKey() []byte {
 }
 
 func (e *s192exchanger) SharedKey() []byte {
-	return e.shareKey
+	return e.sharedKey
 }
 
 func (e *s192exchanger) Exange(newKey []byte) ([]byte, error) {
 	return e.provider.keyExchange(newKey, e.compressKey)
 }
 
-func news192exchanger() (baseECDH *s192exchanger) {
+func news192exchanger() *s192exchanger {
 	p, err := newProvider(newS192Curve())
 	if err != nil {
 		panic(err)
@@ -39,23 +39,21 @@ func news192exchanger() (baseECDH *s192exchanger) {
 	if err != nil {
 		panic(err)
 	}
-	baseECDH = &s192exchanger{
+	return &s192exchanger{
 		provider:    p,
 		publicKey:   p.packPublic(true),
-		shareKey:    shk,
+		sharedKey:   shk,
 		compressKey: true,
 	}
-	return
 }
 
 type p256exchanger struct {
 	privateKey *ecdh.PrivateKey
-	publicKey  *ecdh.PublicKey
 	shareKey   []byte
 }
 
 func (e *p256exchanger) PublicKey() []byte {
-	return e.publicKey.Bytes()
+	return e.privateKey.PublicKey().Bytes()
 }
 
 func (e *p256exchanger) SharedKey() []byte {
@@ -63,14 +61,14 @@ func (e *p256exchanger) SharedKey() []byte {
 }
 
 func (e *p256exchanger) Exange(remote []byte) ([]byte, error) {
-	rk, err := e.publicKey.Curve().NewPublicKey(remote)
+	rk, err := e.privateKey.Curve().NewPublicKey(remote)
 	if err != nil {
 		return nil, err
 	}
 	return e.privateKey.ECDH(rk)
 }
 
-func newp256exchanger() (baseECDH *p256exchanger) {
+func newp256exchanger() *p256exchanger {
 	p256 := ecdh.P256()
 	privateKey, err := p256.GenerateKey(rand.Reader)
 	if err != nil {
@@ -86,7 +84,6 @@ func newp256exchanger() (baseECDH *p256exchanger) {
 	}
 	return &p256exchanger{
 		privateKey: privateKey,
-		publicKey:  privateKey.PublicKey(),
 		shareKey:   shk,
 	}
 }

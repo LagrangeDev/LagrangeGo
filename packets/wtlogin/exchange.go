@@ -3,9 +3,8 @@ package wtlogin
 import (
 	"encoding/hex"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
-
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -22,21 +21,21 @@ func BuildKexExchangeRequest(uin uint32, guid string) []byte {
 		2: guid,
 	}.Encode()
 
-	encl := crypto.AesGCMEncrypt(p1, ecdh.Instance["prime256v1"].SharedKey())
+	encl := crypto.AesGCMEncrypt(p1, ecdh.P256().SharedKey())
 
 	p2 := binary.NewBuilder(nil).
-		WriteBytes(ecdh.Instance["prime256v1"].PublicKey(), false).
+		WriteBytes(ecdh.P256().PublicKey(), false).
 		WriteU32(1).
 		WriteBytes(encl, false).
 		WriteU32(0).
 		WriteU32(uint32(utils.TimeStamp())).
-		Pack(binary.PackTypeNone)
+		ToBytes()
 
 	p2Hash := utils.SHA256Digest(p2)
 	encP2Hash := crypto.AesGCMEncrypt(p2Hash, encKey)
 
 	return proto.DynamicMessage{
-		1: ecdh.Instance["prime256v1"].PublicKey(),
+		1: ecdh.P256().PublicKey(),
 		2: 1,
 		3: encl,
 		4: utils.TimeStamp(),
@@ -54,7 +53,7 @@ func ParseKeyExchangeResponse(response []byte, sig *info.SigInfo) error {
 		return err
 	}
 
-	shareKey, err := ecdh.Instance["prime256v1"].Exange(p.PublicKey)
+	shareKey, err := ecdh.P256().Exange(p.PublicKey)
 	if err != nil {
 		keyExangeLogger.Errorln(err)
 		return err

@@ -5,17 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/packets/pb"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
-
-	"github.com/LagrangeDev/LagrangeGo/packets/pb"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
-
-	"github.com/LagrangeDev/LagrangeGo/info"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 var loginLogger = utils.GetLogger("login")
@@ -46,7 +42,7 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 }
 
 func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte) []byte {
-	encBody := crypto.NewTeaCipher(ecdh.Instance["secp192k1"].SharedKey()).Encrypt(body)
+	encBody := crypto.NewTeaCipher(ecdh.S192().SharedKey()).Encrypt(body)
 
 	var _cmd uint16
 	if cmd == "wtlogin.login" {
@@ -54,6 +50,8 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 	} else {
 		_cmd = 2066
 	}
+
+	pk := ecdh.S192().PublicKey()
 
 	frameBody := binary.NewBuilder(nil).
 		WriteU16(8001).
@@ -71,8 +69,8 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 		WriteU8(1).
 		WritePacketBytes(make([]byte, 16), "", true).
 		WriteU16(0x102).
-		WriteU16(uint16(len(ecdh.Instance["secp192k1"].PublicKey()))).
-		WritePacketBytes(ecdh.Instance["secp192k1"].PublicKey(), "", true).
+		WriteU16(uint16(len(pk))).
+		WritePacketBytes(pk, "", true).
 		WritePacketBytes(encBody, "", true).
 		WriteU8(3).
 		Pack(binary.PackTypeNone)
@@ -202,7 +200,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 		content = "无法解析错误原因，请将完整日志提交给开发者"
 	}
 
-	err := fmt.Errorf("login fail on oicq (%2x): [%s]>[%s]", typ, title, content)
+	err := fmt.Errorf("login fail on oicq (0x%02x): [%s]>[%s]", typ, title, content)
 	loginLogger.Errorln(err)
 	return err
 }

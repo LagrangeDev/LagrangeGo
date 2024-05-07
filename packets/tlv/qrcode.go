@@ -62,5 +62,4 @@ func Td1(AppOS, DeviceName string) []byte {
 			},
 		}.Encode(), "", true).
 		Pack(0xd1)
-
 }

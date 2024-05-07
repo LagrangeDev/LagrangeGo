@@ -7,10 +7,9 @@ import (
 	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
+	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
-
-	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 type SSOPacket struct {
@@ -136,7 +135,7 @@ func ParseOicqBody(buf []byte) ([]byte, error) {
 
 	body := buf[16 : len(buf)-1]
 	if encType == 0 {
-		return crypto.NewTeaCipher(ecdh.Instance["secp192k1"].SharedKey()).Decrypt(body), nil
+		return crypto.NewTeaCipher(ecdh.S192().SharedKey()).Decrypt(body), nil
 	} else {
 		return nil, fmt.Errorf("unknown encrypt type: %d", encType)
 	}
