@@ -5,58 +5,57 @@ import (
 )
 
 func (c *Cache) RefreshAll(friendCache map[uint32]*entity.Friend, groupCache map[uint32]*entity.Group, groupMemberCache map[uint32]map[uint32]*entity.GroupMember) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.FriendCache = friendCache
-	c.GroupMemberCache = groupMemberCache
-	c.GroupInfoCache = groupCache
+	c.RefreshAllFriend(friendCache)
+	c.RefreshAllGroup(groupCache)
+	c.RefreshAllGroupMembers(groupMemberCache)
 }
 
 // RefreshFriend 刷新一个好友的缓存
 func (c *Cache) RefreshFriend(friend *entity.Friend) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.FriendCache[friend.Uin] = friend
+	setCacheOf(c, friend.Uin, friend)
 }
 
 // RefreshAllFriend 刷新所有好友缓存
 func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.Friend) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.FriendCache = friendCache
+	refreshAllCacheOf(c, friendCache)
 }
 
 // RefreshGroupMember 刷新指定群的一个群成员缓存
 func (c *Cache) RefreshGroupMember(groupUin uint32, groupMember *entity.GroupMember) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupMemberCache[groupUin][groupMember.Uin] = groupMember
+	group, ok := getCacheOf[Cache](c, groupUin)
+	if !ok {
+		group = &Cache{}
+		setCacheOf(c, groupUin, group)
+	}
+	setCacheOf(group, groupMember.Uin, groupMember)
 }
 
 // RefreshGroupMembers 刷新一个群内的所有群成员缓存
 func (c *Cache) RefreshGroupMembers(groupUin uint32, groupMembers map[uint32]*entity.GroupMember) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupMemberCache[groupUin] = groupMembers
+	newc := &Cache{}
+	for k, v := range groupMembers {
+		setCacheOf(newc, k, v)
+	}
+	setCacheOf(c, groupUin, newc)
 }
 
 // RefreshAllGroupMembers 刷新所有群的群员缓存
 func (c *Cache) RefreshAllGroupMembers(groupMemberCache map[uint32]map[uint32]*entity.GroupMember) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupMemberCache = groupMemberCache
+	newc := make(map[uint32]*Cache, len(groupMemberCache)*2)
+	for groupUin, v := range groupMemberCache {
+		group := &Cache{}
+		refreshAllCacheOf(group, v)
+		newc[groupUin] = group
+	}
+	refreshAllCacheOf(c, newc)
 }
 
 // RefreshGroup 刷新一个群的群信息缓存
 func (c *Cache) RefreshGroup(group *entity.Group) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupInfoCache[group.GroupUin] = group
+	setCacheOf(c, group.GroupUin, group)
 }
 
 // RefreshAllGroup 刷新所有群的群信息缓存
 func (c *Cache) RefreshAllGroup(groupCache map[uint32]*entity.Group) {
-	c.refreshLock.Lock()
-	defer c.refreshLock.Unlock()
-	c.GroupInfoCache = groupCache
+	refreshAllCacheOf(c, groupCache)
 }

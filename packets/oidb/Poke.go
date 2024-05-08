@@ -1,7 +1,6 @@
 package oidb
 
 import (
-	"errors"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/RomiChan/protobuf/proto"
 )
@@ -24,13 +23,6 @@ func BuildFriendPokeReq(uin uint32) (*OidbPacket, error) {
 	return BuildOidbPacket(0xED3, 1, body, false, false)
 }
 
-func ParsePokeResp(data []byte) (bool, error) {
-	baseResp, err := ParseOidbPacket(data, nil)
-	if err != nil {
-		return false, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return false, errors.New(baseResp.ErrorMsg)
-	}
-	return true, nil
+func ParsePokeResp(data []byte) error {
+	return CheckError(data)
 }

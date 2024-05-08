@@ -24,13 +24,6 @@ func BuildSetGroupRequestReq(accept bool, sequence uint64, typ uint32, groupUin 
 	return BuildOidbPacket(0x10C8, 1, body, false, false)
 }
 
-func ParseSetGroupRequestResp(data []byte) (bool, error) {
-	baseResp, err := ParseOidbPacket(data, nil)
-	if err != nil {
-		return false, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return false, nil
-	}
-	return true, nil
+func ParseSetGroupRequestResp(data []byte) error {
+	return CheckError(data)
 }

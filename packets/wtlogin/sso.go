@@ -80,7 +80,7 @@ func ParseSSOHeader(raw, d2Key []byte) (*SSOHeader, error) {
 	}, nil
 }
 
-func ParseSSOFrame(buffer []byte, IsOicqBody bool) (*SSOPacket, error) {
+func ParseSSOFrame(buffer []byte, isoicqbody bool) (*SSOPacket, error) {
 	reader := binary2.NewReader(buffer)
 	_ = reader.ReadU32() // head length
 	seq := reader.ReadI32()
@@ -111,7 +111,7 @@ func ParseSSOFrame(buffer []byte, IsOicqBody bool) (*SSOPacket, error) {
 	}
 
 	var err error
-	if IsOicqBody && strings.Index(cmd, "wtlogin") == 0 {
+	if isoicqbody && strings.Index(cmd, "wtlogin") == 0 {
 		data, err = ParseOicqBody(data)
 		if err != nil {
 			return nil, err

@@ -10,18 +10,18 @@ const (
 	Canceled          State = 54
 )
 
+var statenames = map[State]string{
+	Confirmed:         "Confirmed",
+	Expired:           "Expired",
+	WaitingForScan:    "WaitingForScan",
+	WaitingForConfirm: "WaitingForConfirm",
+	Canceled:          "Canceled",
+}
+
 func (r State) Name() string {
-	switch r {
-	case Confirmed:
-		return "Confirmed"
-	case Expired:
-		return "Expired"
-	case WaitingForScan:
-		return "WaitingForScan"
-	case WaitingForConfirm:
-		return "WaitingForConfirm"
-	case Canceled:
-		return "Canceled"
+	name, ok := statenames[r]
+	if ok {
+		return name
 	}
 	return "Unknown"
 }

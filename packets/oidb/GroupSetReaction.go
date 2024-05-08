@@ -1,8 +1,6 @@
 package oidb
 
 import (
-	"errors"
-
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
@@ -19,13 +17,6 @@ func BuildGroupSetReactionReq(groupUin, sequence uint32, code string) (*OidbPack
 	return BuildOidbPacket(0x9082, 1, body, false, true)
 }
 
-func ParseGroupSetReactionResp(data []byte) (bool, error) {
-	baseResp, err := ParseOidbPacket(data, nil)
-	if err != nil {
-		return false, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return false, errors.New(baseResp.ErrorMsg)
-	}
-	return true, nil
+func ParseGroupSetReactionResp(data []byte) error {
+	return CheckError(data)
 }

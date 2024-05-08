@@ -1,6 +1,7 @@
 package wtlogin
 
 import (
+	"errors"
 	"strings"
 	"unicode"
 
@@ -40,17 +41,17 @@ func BuildSSOHeartbeatRequest() []byte {
 	return []byte{0x08, 0x01}
 }
 
-func ParseRegisterResponse(response []byte) bool {
+func ParseRegisterResponse(response []byte) error {
 	var resp system.ServiceRegisterResponse
 	err := proto.Unmarshal(response, &resp)
 	if err != nil {
-		loginLogger.Errorf("Unmarshal register response failed: %s", err)
-		return false
+		return err
 	}
-	if resp.Message.Unwrap() == "register success" {
-		return true
+	msg := resp.Message.Unwrap()
+	if msg == "register success" {
+		return nil
 	}
-	return false
+	return errors.New(msg)
 }
 
 func capitalize(s string) string {

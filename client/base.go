@@ -32,7 +32,7 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		pushStore: make(chan *wtlogin.SSOPacket, 128),
 		stopChan:  make(chan struct{}),
 		tcp:       NewTCPClient(Server, 5),
-		cache:     cache.NewCache(),
+		cache:     &cache.Cache{},
 	}
 	client.Online.Store(false)
 	return client

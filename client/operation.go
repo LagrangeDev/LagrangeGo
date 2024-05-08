@@ -70,15 +70,7 @@ func (c *QQClient) GroupRemark(groupID uint32, remark string) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupRemarkResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("remark failed")
-	}
-
-	return nil
+	return oidb.ParseGroupRemarkResp(resp.Data)
 }
 
 func (c *QQClient) GroupRename(groupID uint32, name string) error {
@@ -90,15 +82,7 @@ func (c *QQClient) GroupRename(groupID uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupRenameResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("rename failed")
-	}
-
-	return nil
+	return oidb.ParseGroupRenameResp(resp.Data)
 }
 
 func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
@@ -110,15 +94,7 @@ func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupMuteGlobalResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("mute failed")
-	}
-
-	return nil
+	return oidb.ParseGroupMuteGlobalResp(resp.Data)
 }
 
 func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
@@ -134,15 +110,7 @@ func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupMuteMemberResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("mute failed")
-	}
-
-	return nil
+	return oidb.ParseGroupMuteMemberResp(resp.Data)
 }
 
 func (c *QQClient) GroupLeave(groupID uint32) error {
@@ -154,15 +122,7 @@ func (c *QQClient) GroupLeave(groupID uint32) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupLeaveResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("leave failed")
-	}
-
-	return nil
+	return oidb.ParseGroupLeaveResp(resp.Data)
 }
 
 func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
@@ -178,12 +138,9 @@ func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupSetAdminResp(resp.Data)
+	err = oidb.ParseGroupSetAdminResp(resp.Data)
 	if err != nil {
 		return err
-	}
-	if !ok {
-		return errors.New("set admin failed")
 	}
 	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
 		m.Permission = entity.Admin
@@ -206,12 +163,9 @@ func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupRenameMemberResp(resp.Data)
+	err = oidb.ParseGroupRenameMemberResp(resp.Data)
 	if err != nil {
 		return err
-	}
-	if !ok {
-		return errors.New("rename member failed")
 	}
 	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
 		m.MemberCard = name
@@ -234,15 +188,7 @@ func (c *QQClient) GroupKickMember(groupID, uin uint32, rejectAddRequest bool) e
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupKickMemberResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("kick member failed")
-	}
-
-	return nil
+	return oidb.ParseGroupKickMemberResp(resp.Data)
 }
 
 func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) error {
@@ -258,15 +204,7 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParseGroupSetSpecialTitleResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("set special title failed")
-	}
-
-	return nil
+	return oidb.ParseGroupSetSpecialTitleResp(resp.Data)
 }
 
 func (c *QQClient) GroupPoke(groupID, uin uint32) error {
@@ -278,15 +216,7 @@ func (c *QQClient) GroupPoke(groupID, uin uint32) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParsePokeResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("poke failed")
-	}
-
-	return nil
+	return oidb.ParsePokeResp(resp.Data)
 }
 
 func (c *QQClient) FriendPoke(uin uint32) error {
@@ -298,18 +228,10 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	if err != nil {
 		return err
 	}
-	ok, err := oidb.ParsePokeResp(resp.Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("poke failed")
-	}
-
-	return nil
+	return oidb.ParsePokeResp(resp.Data)
 }
 
-func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) (bool, error) {
+func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	packet := message.GroupRecallMsg{
 		Type:     1,
 		GroupUin: GrpUin,
@@ -321,14 +243,14 @@ func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) (bool, error) {
 	}
 	pktData, err := proto.Marshal(&packet)
 	if err != nil {
-		return false, err
+		return err
 	}
 	resp, err := c.SendUniPacketAndAwait("trpc.msg.msg_svc.MsgService.SsoGroupRecallMsg", pktData)
 	if err != nil {
-		return false, err
+		return err
 	}
 	if len(resp.Data) == 0 {
-		return false, nil
+		return errors.New("empty response data")
 	}
-	return true, nil
+	return nil
 }
