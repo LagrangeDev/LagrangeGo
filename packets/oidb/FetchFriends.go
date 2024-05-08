@@ -37,14 +37,14 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
 	}
 	friends := make([]*entity.Friend, len(resp.Friends))
 	for i, raw := range resp.Friends {
-		additional := GetFirstType1(raw.Additional)
-		properties := ParseFriendProperty(additional.Layer1.Properties)
+		additional := getFirstFriendAdditionalTypeEqualTo1(raw.Additional)
+		properties := parseFriendProperty(additional.Layer1.Properties)
 		friends[i] = entity.NewFriend(raw.Uin, raw.Uid, properties[20002], properties[103], properties[102])
 	}
 	return friends, nil
 }
 
-func GetFirstType1(additionals []*oidb.OidbFriendAdditional) *oidb.OidbFriendAdditional {
+func getFirstFriendAdditionalTypeEqualTo1(additionals []*oidb.OidbFriendAdditional) *oidb.OidbFriendAdditional {
 	for _, additional := range additionals {
 		if additional.Type == 1 {
 			return additional
@@ -53,9 +53,9 @@ func GetFirstType1(additionals []*oidb.OidbFriendAdditional) *oidb.OidbFriendAdd
 	return nil
 }
 
-func ParseFriendProperty(propertys []*oidb.OidbFriendProperty) map[uint32]string {
-	dict := make(map[uint32]string, len(propertys))
-	for _, property := range propertys {
+func parseFriendProperty(properties []*oidb.OidbFriendProperty) map[uint32]string {
+	dict := make(map[uint32]string, len(properties))
+	for _, property := range properties {
 		dict[property.Code] = property.Value
 	}
 	return dict
