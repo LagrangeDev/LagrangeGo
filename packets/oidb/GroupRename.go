@@ -1,8 +1,6 @@
 package oidb
 
 import (
-	"errors"
-
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 )
 
@@ -14,13 +12,6 @@ func BuildGroupRenameReq(groupUin uint32, name string) (*OidbPacket, error) {
 	return BuildOidbPacket(0x89A, 15, body, false, false)
 }
 
-func ParseGroupRenameResp(data []byte) (bool, error) {
-	baseResp, err := ParseOidbPacket(data, nil)
-	if err != nil {
-		return false, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return false, errors.New(baseResp.ErrorMsg)
-	}
-	return true, nil
+func ParseGroupRenameResp(data []byte) error {
+	return CheckError(data)
 }

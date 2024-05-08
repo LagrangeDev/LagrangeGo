@@ -1,7 +1,6 @@
 package oidb
 
 import (
-	"errors"
 	"math"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
@@ -19,13 +18,6 @@ func BuildGroupMuteGlobalReq(groupUin uint32, isMute bool) (*OidbPacket, error) 
 	return BuildOidbPacket(0x89A, 0, body, false, false)
 }
 
-func ParseGroupMuteGlobalResp(data []byte) (bool, error) {
-	baseResp, err := ParseOidbPacket(data, nil)
-	if err != nil {
-		return false, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return false, errors.New(baseResp.ErrorMsg)
-	}
-	return true, nil
+func ParseGroupMuteGlobalResp(data []byte) error {
+	return CheckError(data)
 }

@@ -1,6 +1,7 @@
 package oidb
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
@@ -8,8 +9,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
-//nolint:unused
-var oidbLogger = utils.GetLogger("oidb")
+// var oidbLogger = utils.GetLogger("oidb")
 
 type OidbPacket struct {
 	Cmd       string
@@ -26,9 +26,6 @@ func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUid bool) (*OidbP
 		Command:    cmd,
 		SubCommand: subCmd,
 		Body:       bodyData,
-		ErrorMsg:   "",
-		Lafter:     nil,
-		Properties: make([]*oidb.OidbProperty, 0),
 		Reserved:   int32(utils.Bool2Int(isUid)),
 	}
 	if isLafter {
@@ -46,14 +43,37 @@ func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUid bool) (*OidbP
 	}, nil
 }
 
-func ParseOidbPacket(b []byte, pkt any) (*oidb.OidbSvcTrpcTcpBase, error) {
-	var oidbBaseResp oidb.OidbSvcTrpcTcpBase
-	err := proto.Unmarshal(b, &oidbBaseResp)
+func ParseOidbPacket(b []byte, pkt any) (oidbBaseResp oidb.OidbSvcTrpcTcpBase, err error) {
+	err = proto.Unmarshal(b, &oidbBaseResp)
 	if err != nil {
-		return nil, err
+		return
 	}
 	if pkt == nil {
-		return &oidbBaseResp, nil
+		return
 	}
-	return &oidbBaseResp, proto.Unmarshal(oidbBaseResp.Body, pkt)
+	err = proto.Unmarshal(oidbBaseResp.Body, pkt)
+	return
+}
+
+func CheckError(data []byte) error {
+	baseResp, err := ParseOidbPacket(data, nil)
+	if err != nil {
+		return err
+	}
+	if baseResp.ErrorCode != 0 {
+		return errors.New(baseResp.ErrorMsg)
+	}
+	return nil
+}
+
+func CheckTypedError[T any](data []byte) error {
+	var resp T
+	baseResp, err := ParseOidbPacket(data, &resp)
+	if err != nil {
+		return err
+	}
+	if baseResp.ErrorCode != 0 {
+		return errors.New(baseResp.ErrorMsg)
+	}
+	return nil
 }
