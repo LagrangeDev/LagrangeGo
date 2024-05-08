@@ -8,12 +8,13 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 func BuildImageUploadReq(targetUid string, data []byte) (*OidbPacket, error) {
 	// OidbSvcTrpcTcp.0x11c5_100
-	md5Hash := utils.MD5Digest(data)
-	sha1Hash := utils.SHA1Digest(data)
+	md5Hash := crypto.MD5Digest(data)
+	sha1Hash := crypto.SHA1Digest(data)
 	format, size, err := utils.ImageResolve(data)
 	if err != nil {
 		return nil, err

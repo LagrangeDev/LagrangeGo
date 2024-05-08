@@ -12,8 +12,8 @@ import (
 
 	highway2 "github.com/LagrangeDev/LagrangeGo/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/RomiChan/protobuf/proto"
 )
 
@@ -137,7 +137,7 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 		DataFlag:   16,
 		CommandId:  uint32(block.CommandId),
 	}
-	md5 := utils.MD5Digest(block.Block)
+	md5 := crypto.MD5Digest(block.Block)
 	segHead := &highway.SegHead{
 		ServiceId:     proto.Some(uint32(0)),
 		Filesize:      block.FileSize,
@@ -182,17 +182,17 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 
 func ParsePacket(data []byte) (head *highway.RespDataHighwayHead, body *binary.Reader, err error) {
 	reader := binary.NewReader(data)
-	if reader.ReadBytes(1)[0] == 0x28 {
+	if reader.ReadBytesNoCopy(1)[0] == 0x28 {
 		headlength := reader.ReadU32()
 		bodylength := reader.ReadU32()
 		head = &highway.RespDataHighwayHead{}
-		headraw := reader.ReadBytes(int(int64(headlength)))
+		headraw := reader.ReadBytesNoCopy(int(int64(headlength)))
 		err = proto.Unmarshal(headraw, head)
 		if err != nil {
 			return nil, nil, err
 		}
-		body = binary.NewReader(reader.ReadBytes(int(bodylength)))
-		if reader.ReadBytes(1)[0] == 0x29 {
+		body = binary.NewReader(reader.ReadBytesNoCopy(int(bodylength)))
+		if reader.ReadBytesNoCopy(1)[0] == 0x29 {
 			return head, body, nil
 		}
 	}
@@ -240,14 +240,11 @@ func SendDataAsync(packet []byte, serverURL string, end bool) ([]byte, error) {
 	}
 
 	// Send request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	// Read response data
 	data, err := io.ReadAll(resp.Body)

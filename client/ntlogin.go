@@ -26,7 +26,7 @@ func buildNtloginCaptchaSubmit(ticket, randStr, aid string) proto.DynamicMessage
 	}
 }
 
-func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo, sig *info.SigInfo, credential []byte) []byte {
+func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo, sig *info.SigInfo, credential []byte) ([]byte, error) {
 	body := proto.DynamicMessage{
 		1: proto.DynamicMessage{
 			1: proto.DynamicMessage{
@@ -57,11 +57,16 @@ func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo,
 		body[2].(proto.DynamicMessage)[2] = buildNtloginCaptchaSubmit(sig.CaptchaInfo[0], sig.CaptchaInfo[1], sig.CaptchaInfo[2])
 	}
 
+	data, err := crypto.AesGCMEncrypt(body.Encode(), sig.ExchangeKey)
+	if err != nil {
+		return nil, err
+	}
+
 	return proto.DynamicMessage{
 		1: sig.KeySig,
-		3: crypto.AesGCMEncrypt(body.Encode(), sig.ExchangeKey),
+		3: data,
 		4: 1,
-	}.Encode()
+	}.Encode(), nil
 }
 
 func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State, error) {
@@ -72,7 +77,11 @@ func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State,
 	}
 
 	var base login.SsoNTLoginBase
-	err = proto.Unmarshal(crypto.AesGCMDecrypt(frame.GcmCalc, sig.ExchangeKey), &base)
+	data, err := crypto.AesGCMDecrypt(frame.GcmCalc, sig.ExchangeKey)
+	if err != nil {
+		return -1, err
+	}
+	err = proto.Unmarshal(data, &base)
 	if err != nil {
 		return -1, fmt.Errorf("proto decode failed: %s", err)
 	}

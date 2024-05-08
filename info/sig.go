@@ -2,8 +2,8 @@ package info
 
 type SigInfo struct {
 	Uin         uint32
+	Sequence    uint32
 	Uid         string
-	Sequence    int
 	Tgtgt       []byte
 	Tgt         []byte
 	D2          []byte
@@ -23,7 +23,7 @@ type SigInfo struct {
 
 func NewSigInfo(seq int) SigInfo {
 	return SigInfo{
-		Sequence: seq,
+		Sequence: uint32(seq),
 		D2Key:    make([]byte, 16),
 	}
 }

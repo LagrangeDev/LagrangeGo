@@ -68,11 +68,11 @@ func containSignPKG(cmd string) bool {
 	return ok
 }
 
-func SignProvider(rawUrl string) func(string, int, []byte) map[string]string {
+func SignProvider(rawUrl string) func(string, uint32, []byte) map[string]string {
 	if rawUrl == "" {
 		return nil
 	}
-	return func(cmd string, seq int, buf []byte) map[string]string {
+	return func(cmd string, seq uint32, buf []byte) map[string]string {
 		if !containSignPKG(cmd) {
 			return nil
 		}
@@ -80,7 +80,7 @@ func SignProvider(rawUrl string) func(string, int, []byte) map[string]string {
 		resp := signResponse{}
 		err := httpGet(rawUrl, map[string]string{
 			"cmd": cmd,
-			"seq": strconv.Itoa(seq),
+			"seq": strconv.Itoa(int(seq)),
 			"src": fmt.Sprintf("%x", buf),
 		}, time.Duration(5)*time.Second, &resp)
 		if err != nil {
@@ -119,17 +119,14 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 		return fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return fmt.Errorf("request timed out")
 		}
 		return fmt.Errorf("failed to perform GET request: %w", err)
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)

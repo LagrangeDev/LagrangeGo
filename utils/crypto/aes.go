@@ -6,41 +6,41 @@ import (
 	"crypto/rand"
 )
 
-func AesGCMEncrypt(data []byte, key []byte) []byte {
+func AesGCMEncrypt(data []byte, key []byte) ([]byte, error) {
 	nonce := make([]byte, 12)
 	if _, err := rand.Read(nonce); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	aead, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	ciphertext := aead.Seal(nil, nonce, data, nil)
 
-	return append(nonce, ciphertext...)
+	return append(nonce, ciphertext...), nil
 }
 
-func AesGCMDecrypt(data []byte, key []byte) []byte {
+func AesGCMDecrypt(data []byte, key []byte) ([]byte, error) {
 	nonce := data[:12]
 	ciphertext := data[12:]
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	aead, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	plaintext, err := aead.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return plaintext
+	return plaintext, nil
 }

@@ -43,7 +43,7 @@ type QQClient struct {
 	appInfo      *info.AppInfo
 	deviceInfo   *info.DeviceInfo
 	sig          *info.SigInfo
-	signProvider func(string, int, []byte) map[string]string
+	signProvider func(string, uint32, []byte) map[string]string
 
 	pushStore chan *wtlogin.SSOPacket
 
@@ -88,7 +88,7 @@ func (c *QQClient) SendOidbPacketAndWait(pkt *oidb.OidbPacket) (*wtlogin.SSOPack
 }
 
 func (c *QQClient) SendUniPacket(cmd string, buf []byte) error {
-	seq := c.getSeq()
+	seq := c.getAndIncreaseSequence()
 	var sign map[string]string
 	if c.signProvider != nil {
 		sign = c.signProvider(cmd, seq, buf)
@@ -98,27 +98,27 @@ func (c *QQClient) SendUniPacket(cmd string, buf []byte) error {
 }
 
 func (c *QQClient) SendUniPacketAndAwait(cmd string, buf []byte) (*wtlogin.SSOPacket, error) {
-	seq := c.getSeq()
+	seq := c.getAndIncreaseSequence()
 	var sign map[string]string
 	if c.signProvider != nil {
 		sign = c.signProvider(cmd, seq, buf)
 	}
 	packet := wtlogin.BuildUniPacket(int(c.Uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
-	return c.SendAndWait(packet, seq, 5)
+	return c.SendAndWait(packet, int(seq), 5)
 }
 
 func (c *QQClient) Send(data []byte) error {
 	return c.tcp.Write(data)
 }
 
-func (c *QQClient) SendAndWait(data []byte, seq, timeout int) (*wtlogin.SSOPacket, error) {
-	resultStore.AddSeq(seq)
+func (c *QQClient) SendAndWait(data []byte, seq int, timeout int) (*wtlogin.SSOPacket, error) {
+	fetcher.AddSeq(seq)
 	err := c.tcp.Write(data)
 	if err != nil {
 		// 出错了要删掉
-		resultStore.DeleteSeq(seq)
+		fetcher.DeleteSeq(seq)
 	}
-	return resultStore.Fecth(seq, timeout)
+	return fetcher.Fecth(seq, timeout)
 }
 
 func (c *QQClient) SSOHeartbeat(calcLatency bool) int64 {
@@ -178,17 +178,17 @@ func (c *QQClient) OnMessage(msgLen int) {
 
 		if packet.Seq > 0 { // uni rsp
 			networkLogger.Debugf("%d(%d) -> %s, extra: %s", packet.Seq, packet.RetCode, packet.Cmd, packet.Extra)
-			if packet.RetCode != 0 && resultStore.ContainSeq(packet.Seq) {
+			if packet.RetCode != 0 && fetcher.ContainSeq(packet.Seq) {
 				networkLogger.Errorf("error ssopacket retcode: %d, extra: %s", packet.RetCode, packet.Extra)
 				return
 			} else if packet.RetCode != 0 {
 				networkLogger.Errorf("Unexpected error on sso layer: %d: %s", packet.RetCode, packet.Extra)
 				return
 			}
-			if !resultStore.ContainSeq(packet.Seq) {
+			if !fetcher.ContainSeq(packet.Seq) {
 				networkLogger.Warningf("Unknown packet: %s(%d), ignore", packet.Cmd, packet.Seq)
 			} else {
-				resultStore.AddResult(packet.Seq, packet)
+				fetcher.AddResult(packet.Seq, packet)
 			}
 		} else { // server pushed
 			if _, ok := listeners[packet.Cmd]; ok {
@@ -265,12 +265,10 @@ func (c *QQClient) OnDisconnected() {
 	c.Online.Store(false)
 }
 
-func (c *QQClient) getSeq() int {
-	defer func() {
-		if c.sig.Sequence >= 0x8000 {
-			c.sig.Sequence = 0
-		}
-		c.sig.Sequence++
-	}()
-	return c.sig.Sequence
+func (c *QQClient) getAndIncreaseSequence() uint32 {
+	return atomic.AddUint32(&c.sig.Sequence, 1) % 0x8000
+}
+
+func (c *QQClient) getSequence() uint32 {
+	return atomic.LoadUint32(&c.sig.Sequence) % 0x8000
 }

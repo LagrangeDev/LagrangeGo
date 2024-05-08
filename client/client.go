@@ -12,10 +12,11 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/qrcodeState"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 var (
-	resultStore   = NewResultStore()
+	fetcher       = newssofetcher()
 	networkLogger = utils.GetLogger("network")
 )
 
@@ -111,7 +112,7 @@ func (c *QQClient) FecthQrcode() ([]byte, string, error) {
 	}
 
 	decrypted := binary.NewReader(response.Data)
-	decrypted.ReadBytes(54)
+	decrypted.SkipBytes(54)
 	retCode := decrypted.ReadU8()
 	qrsig := decrypted.ReadBytesWithLength("u16", false)
 	tlvs := decrypted.ReadTlv()
@@ -149,16 +150,16 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 
 	reader := binary.NewReader(response.Data)
 	//length := reader.ReadU32()
-	reader.ReadBytes(8) // 4 + 4
+	reader.SkipBytes(8) // 4 + 4
 	reader.ReadU16()    // cmd, 0x12
-	reader.ReadBytes(40)
+	reader.SkipBytes(40)
 	_ = reader.ReadU32() // app id
 	retCode := qrcodeState.State(reader.ReadU8())
 
 	if retCode == 0 {
-		reader.ReadBytes(4)
+		reader.SkipBytes(4)
 		c.Uin = reader.ReadU32()
-		reader.ReadBytes(4)
+		reader.SkipBytes(4)
 		t := reader.ReadTlv()
 		c.t106 = t[0x18]
 		c.t16a = t[0x19]
@@ -171,9 +172,14 @@ func (c *QQClient) GetQrcodeResult() (qrcodeState.State, error) {
 }
 
 func (c *QQClient) KeyExchange() error {
+	data, err := wtlogin.BuildKexExchangeRequest(c.Uin, c.deviceInfo.Guid)
+	if err != nil {
+		return err
+	}
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoKeyExchange",
-		wtlogin.BuildKexExchangeRequest(c.Uin, c.deviceInfo.Guid))
+		data,
+	)
 	if err != nil {
 		networkLogger.Errorln(err)
 		return err
@@ -182,7 +188,7 @@ func (c *QQClient) KeyExchange() error {
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
-	md5Password := utils.MD5Digest(utils.S2B(password))
+	md5Password := crypto.MD5Digest(utils.S2B(password))
 
 	cr := tlv.T106(
 		c.appInfo.AppID,
@@ -194,9 +200,14 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 		make([]byte, 4),
 		true)[4:]
 
+	data, err := buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, cr)
+	if err != nil {
+		return -998, err
+	}
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
-		buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, cr))
+		data,
+	)
 	if err != nil {
 		return -999, err
 	}
@@ -204,9 +215,14 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 }
 
 func (c *QQClient) TokenLogin(token []byte) (loginState.State, error) {
+	data, err := buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, token)
+	if err != nil {
+		return -998, err
+	}
 	packet, err := c.SendUniPacketAndAwait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginEasyLogin",
-		buildNtloginRequest(c.Uin, c.appInfo, c.deviceInfo, c.sig, token))
+		data,
+	)
 	if err != nil {
 		return -999, err
 	}

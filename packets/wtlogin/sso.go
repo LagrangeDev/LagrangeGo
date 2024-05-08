@@ -95,7 +95,7 @@ func ParseSSOFrame(buffer []byte, IsOicqBody bool) (*SSOPacket, error) {
 
 	compressType := reader.ReadU32()
 
-	reader.ReadBytesWithLength("u32", false)
+	reader.SkipBytesWithLength("u32", false)
 	// withprefix 应该是true
 	data := reader.ReadBytesWithLength("u32", true)
 

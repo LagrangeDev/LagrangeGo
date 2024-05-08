@@ -5,11 +5,11 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/RomiChan/protobuf/proto"
 )
 
 func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.MessageBody) (resp *action.SendMessageResponse, err error) {
-	seq := c.sig.Sequence + 1
 	msg := &message.Message{
 		RoutingHead: route,
 		ContentHead: &message.ContentHead{
@@ -18,8 +18,8 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 			DivSeq:  proto.Some(uint32(0)),
 		},
 		Body: body,
-		Seq:  proto.Some(uint32(seq)),
-		Rand: proto.Some(utils.RandU32()),
+		Seq:  proto.Some(c.getSequence()),
+		Rand: proto.Some(crypto.RandU32()),
 	}
 	// grp_id not null
 	if (route.Grp != nil && route.Grp.GroupCode.IsSome()) || (route.GrpTmp != nil && route.GrpTmp.GroupUin.IsSome()) {

@@ -2,7 +2,10 @@ package utils
 
 // from https://github.com/Mrs4s/MiraiGo/blob/master/utils/string.go
 
-import "unsafe"
+import (
+	"encoding/hex"
+	"unsafe"
+)
 
 // B2S converts byte slice to a string without memory allocation.
 func B2S(b []byte) string {
@@ -19,4 +22,12 @@ func B2S(b []byte) string {
 // in the future go versions.
 func S2B(s string) (b []byte) {
 	return unsafe.Slice(unsafe.StringData(s), len(s))
+}
+
+func MustParseHexStr(s string) []byte {
+	result, err := hex.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }

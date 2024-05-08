@@ -8,6 +8,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5
@@ -37,12 +38,12 @@ func T100(ssoVersion, appID, subAppID, appClientVersion, sigmap, dbBufVer int) [
 // T106 抄的时候注意参数顺序
 func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
 	// password_md5 + bytes(4) + write_u32(uin).pack()
-	key := utils.MD5Digest(append(passwordMd5, append(make([]byte, 4),
+	key := crypto.MD5Digest(append(passwordMd5, append(make([]byte, 4),
 		binary.NewBuilder(nil).WriteU32(uint32(uin)).ToBytes()...)...))
 
 	body := binary.NewBuilder(nil).
 		WriteStruct(uint16(4), //  tgtgt version
-			utils.RandU32(),
+			crypto.RandU32(),
 			uint32(0), // sso_version, depreciated
 			uint32(appId),
 			uint32(appClientVersion),

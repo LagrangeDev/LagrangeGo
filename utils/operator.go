@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bufio"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
@@ -11,14 +10,6 @@ import (
 
 func TimeStamp() int64 {
 	return time.Now().Unix()
-}
-
-func MustParseHexStr(s string) []byte {
-	result, err := hex.DecodeString(s)
-	if err != nil {
-		panic(err)
-	}
-	return result
 }
 
 func ReadLine(s string) string {
