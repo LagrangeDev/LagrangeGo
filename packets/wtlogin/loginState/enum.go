@@ -16,30 +16,24 @@ const (
 	Success          State = 0
 )
 
+var statenames = map[State]string{
+	TokenExpired:     "TokenExpired",
+	UnusualVerify:    "UnusualVerify",
+	LoginFailure:     "LoginFailure",
+	UserTokenExpired: "UserTokenExpired",
+	ServerFailure:    "ServerFailure",
+	WrongCaptcha:     "WrongCaptcha",
+	WrongArgument:    "WrongArgument",
+	NewDeviceVerify:  "NewDeviceVerify",
+	CaptchaVerify:    "CaptchaVerify",
+	UnknownError:     "UnknownError",
+	Success:          "Success",
+}
+
 func (r State) Name() string {
-	switch r {
-	case TokenExpired:
-		return "TokenExpired"
-	case UnusualVerify:
-		return "UnusualVerify"
-	case LoginFailure:
-		return "LoginFailure"
-	case UserTokenExpired:
-		return "UserTokenExpired"
-	case ServerFailure:
-		return "ServerFailure"
-	case WrongCaptcha:
-		return "WrongCaptcha"
-	case WrongArgument:
-		return "WrongArgument"
-	case NewDeviceVerify:
-		return "NewDeviceVerify"
-	case CaptchaVerify:
-		return "CaptchaVerify"
-	case UnknownError:
-		return "UnknownError"
-	case Success:
-		return "Success"
+	name, ok := statenames[r]
+	if ok {
+		return name
 	}
 	return "Unknown"
 }

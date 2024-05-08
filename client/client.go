@@ -184,7 +184,8 @@ func (c *QQClient) KeyExchange() error {
 		networkLogger.Errorln(err)
 		return err
 	}
-	return wtlogin.ParseKeyExchangeResponse(packet.Data, c.sig)
+	c.sig.ExchangeKey, c.sig.KeySig, err = wtlogin.ParseKeyExchangeResponse(packet.Data)
+	return err
 }
 
 func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
@@ -294,12 +295,13 @@ func (c *QQClient) Register() error {
 		return err
 	}
 
-	if wtlogin.ParseRegisterResponse(response.Data) {
+	err = wtlogin.ParseRegisterResponse(response.Data)
+	if err == nil {
 		c.sig.Uin = c.Uin
 		c.setOnline()
-		networkLogger.Info("Register successful")
+		networkLogger.Info("Register succeeded")
 		return nil
 	}
-	networkLogger.Error("Register failure")
-	return errors.New("register failure")
+	networkLogger.Errorln("Register failed:", err)
+	return err
 }

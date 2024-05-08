@@ -165,7 +165,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 			sig.D2Key = d2Key
 		}
 		if tlv11a, ok := tlv[0x11A]; ok {
-			loginLogger.Infof("tlv11a data: %x", tlv11a)
+			loginLogger.Debugf("tlv11a data: %x", tlv11a)
 			tlvReader := binary.NewReader(tlv11a)
 			tlvReader.ReadU16()
 			sig.Age = tlvReader.ReadU8()

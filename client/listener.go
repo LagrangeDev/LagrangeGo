@@ -106,7 +106,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 			}
 			return eventConverter.ParseFriendRecallEvent(&pb), nil
 		case 39: // friend rename
-			networkLogger.Info("friend rename")
+			networkLogger.Debugln("friend rename")
 			pb := message.FriendRenameMsg{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
@@ -114,7 +114,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *wtlogin.SSOPacket) (any, error)
 			}
 			return eventConverter.ParseFriendRenameEvent(&pb, c.cache), nil
 		case 29:
-			networkLogger.Info("self rename")
+			networkLogger.Debugln("self rename")
 			pb := message.SelfRenameMsg{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
