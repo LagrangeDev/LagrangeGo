@@ -18,7 +18,7 @@ import (
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-const Server = "msfwifi.3g.qq.com:8080"
+const msfwifiServer = "msfwifi.3g.qq.com:8080"
 
 // NewQQclient 创建一个新的QQClient
 func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
@@ -31,7 +31,7 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		// 128应该够用了吧
 		pushStore: make(chan *wtlogin.SSOPacket, 128),
 		stopChan:  make(chan struct{}),
-		tcp:       NewTCPClient(Server, 5),
+		tcp:       &TCPClient{},
 		cache:     &cache.Cache{},
 	}
 	client.Online.Store(false)
@@ -233,7 +233,7 @@ func (c *QQClient) Loop() error {
 }
 
 func (c *QQClient) Connect() error {
-	err := c.tcp.Connect()
+	err := c.tcp.Connect(msfwifiServer, 5*time.Second)
 	if err != nil {
 		return err
 	}

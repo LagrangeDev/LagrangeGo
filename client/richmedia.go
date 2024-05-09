@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"io"
 	"net/netip"
 
 	"github.com/LagrangeDev/LagrangeGo/message"
@@ -80,9 +79,12 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 		if err != nil {
 			return nil, err
 		}
-		sigSession, _ := c.GetServiceServer()
-		if !c.UploadSrcByStreamAsync(1003, io.ReadSeeker(bytes.NewReader(image.Stream)), sigSession, md5hash, extStream) {
-			return nil, errors.New("upload failed")
+		err = c.UploadSrcByStream(1003,
+			bytes.NewReader(image.Stream), uint64(len(image.Stream)),
+			md5hash, extStream,
+		)
+		if err != nil {
+			return nil, err
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo
@@ -139,9 +141,12 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		if err != nil {
 			return nil, err
 		}
-		sigSession, _ := c.GetServiceServer()
-		if !c.UploadSrcByStreamAsync(1004, io.ReadSeeker(bytes.NewReader(image.Stream)), sigSession, md5hash, extStream) {
-			return nil, errors.New("upload failed")
+		err = c.UploadSrcByStream(1004,
+			bytes.NewReader(image.Stream), uint64(len(image.Stream)),
+			md5hash, extStream,
+		)
+		if err != nil {
+			return nil, err
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo

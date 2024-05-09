@@ -1,5 +1,7 @@
 package client
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/client/internal/network/conn.go
+
 import (
 	"errors"
 	"io"
@@ -12,23 +14,11 @@ var ErrConnectionClosed = errors.New("connection closed")
 
 type TCPClient struct {
 	lock sync.RWMutex
-
-	addr    string
-	conn    net.Conn
-	timeout int
-
-	connected bool
+	conn net.Conn
 }
 
-func NewTCPClient(addr string, timeout int) *TCPClient {
-	return &TCPClient{
-		addr:    addr,
-		timeout: timeout,
-	}
-}
-
-func (c *TCPClient) Connect() error {
-	conn, err := net.DialTimeout("tcp", c.addr, time.Duration(c.timeout)*time.Second)
+func (c *TCPClient) Connect(addr string, timeout time.Duration) error {
+	conn, err := net.DialTimeout("tcp", addr, timeout)
 	if err != nil {
 		return err
 	}
@@ -36,7 +26,6 @@ func (c *TCPClient) Connect() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.conn = conn
-	c.connected = true
 	return nil
 }
 
@@ -75,7 +64,6 @@ func (c *TCPClient) Close() {
 		_ = c.conn.Close()
 		networkLogger.Error("tcp closed")
 		c.conn = nil
-		c.connected = false
 	}
 }
 
@@ -86,5 +74,5 @@ func (c *TCPClient) getConn() net.Conn {
 }
 
 func (c *TCPClient) IsClosed() bool {
-	return !c.connected
+	return c.conn == nil
 }

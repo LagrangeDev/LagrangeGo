@@ -2,50 +2,81 @@ package binary
 
 import (
 	"encoding/binary"
+	"io"
+	"strconv"
+	"unsafe"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 type Reader struct {
+	reader io.Reader
 	buffer []byte
 	pos    int
+}
+
+func ParseReader(reader io.Reader) *Reader {
+	return &Reader{
+		reader: reader,
+	}
 }
 
 func NewReader(buffer []byte) *Reader {
 	return &Reader{
 		buffer: buffer,
-		pos:    0,
 	}
 }
 
-func (r *Reader) Remain() int {
-	return len(r.buffer) - r.pos
+func (r *Reader) String() string {
+	if r.reader != nil {
+		data, err := io.ReadAll(r.reader)
+		if err != nil {
+			return err.Error()
+		}
+		return utils.B2S(data)
+	}
+	return utils.B2S(r.buffer[r.pos:])
 }
 
 func (r *Reader) ReadU8() (v uint8) {
+	if r.reader != nil {
+		_, _ = r.reader.Read(unsafe.Slice(&v, 1))
+		return
+	}
 	v = r.buffer[r.pos]
 	r.pos++
 	return
 }
 
-func (r *Reader) ReadU16() (v uint16) {
-	v = binary.BigEndian.Uint16(r.buffer[r.pos : r.pos+2])
-	r.pos += 2
+func readint[T ~uint16 | ~uint32 | ~uint64](r *Reader) (v T) {
+	sz := unsafe.Sizeof(v)
+	buf := make([]byte, 8)
+	if r.reader != nil {
+		_, _ = r.reader.Read(buf[8-sz:])
+	} else {
+		copy(buf[8-sz:], r.buffer[r.pos:r.pos+int(sz)])
+		r.pos += int(sz)
+	}
+	v = (T)(binary.BigEndian.Uint64(buf))
 	return
+}
+
+func (r *Reader) ReadU16() (v uint16) {
+	return readint[uint16](r)
 }
 
 func (r *Reader) ReadU32() (v uint32) {
-	v = binary.BigEndian.Uint32(r.buffer[r.pos : r.pos+4])
-	r.pos += 4
-	return
+	return readint[uint32](r)
 }
 func (r *Reader) ReadU64() (v uint64) {
-	v = binary.BigEndian.Uint64(r.buffer[r.pos : r.pos+8])
-	r.pos += 8
-	return
+	return readint[uint64](r)
 }
 
 func (r *Reader) SkipBytes(length int) {
+	if r.reader != nil {
+		_, _ = r.reader.Read(make([]byte, length))
+		return
+	}
 	r.pos += length
 }
 
@@ -53,6 +84,9 @@ func (r *Reader) SkipBytes(length int) {
 //
 // 如需使用, 请确保 Reader 未被回收
 func (r *Reader) ReadBytesNoCopy(length int) (v []byte) {
+	if r.reader != nil {
+		return r.ReadBytes(length)
+	}
 	v = r.buffer[r.pos : r.pos+length]
 	r.pos += length
 	return
@@ -61,8 +95,12 @@ func (r *Reader) ReadBytesNoCopy(length int) (v []byte) {
 func (r *Reader) ReadBytes(length int) (v []byte) {
 	// 返回一个全新的数组罢
 	v = make([]byte, length)
-	copy(v, r.buffer[r.pos:r.pos+length])
-	r.pos += length
+	if r.reader != nil {
+		_, _ = r.reader.Read(v)
+	} else {
+		copy(v, r.buffer[r.pos:r.pos+length])
+		r.pos += length
+	}
 	return
 }
 
@@ -72,69 +110,50 @@ func (r *Reader) ReadString(length int) string {
 
 func (r *Reader) SkipBytesWithLength(prefix string, withPerfix bool) {
 	var length int
-	if withPerfix {
-		switch prefix {
-		case "u8":
-			length = int(r.ReadU8() - 1)
-		case "u16":
-			length = int(r.ReadU16() - 2)
-		case "u32":
-			length = int(r.ReadU32() - 4)
-		case "u64":
-			length = int(r.ReadU64() - 8)
-		default:
-			panic("invaild prefix")
-		}
-	} else {
-		switch prefix {
-		case "u8":
-			length = int(r.ReadU8())
-		case "u16":
-			length = int(r.ReadU16())
-		case "u32":
-			length = int(r.ReadU32())
-		case "u64":
-			length = int(r.ReadU64())
-		default:
-			panic("invaild prefix")
-		}
+	switch prefix {
+	case "u8":
+		length = int(r.ReadU8())
+	case "u16":
+		length = int(r.ReadU16())
+	case "u32":
+		length = int(r.ReadU32())
+	case "u64":
+		length = int(r.ReadU64())
+	default:
+		panic("invaild prefix")
 	}
-	r.pos += length
+	if withPerfix {
+		plus, err := strconv.Atoi(prefix[1:])
+		if err != nil {
+			panic(err)
+		}
+		length -= plus / 8
+	}
+	r.SkipBytes(length)
 }
 
-func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) (v []byte) {
+func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) []byte {
 	var length int
-	if withPerfix {
-		switch prefix {
-		case "u8":
-			length = int(r.ReadU8() - 1)
-		case "u16":
-			length = int(r.ReadU16() - 2)
-		case "u32":
-			length = int(r.ReadU32() - 4)
-		case "u64":
-			length = int(r.ReadU64() - 8)
-		default:
-			panic("invaild prefix")
-		}
-	} else {
-		switch prefix {
-		case "u8":
-			length = int(r.ReadU8())
-		case "u16":
-			length = int(r.ReadU16())
-		case "u32":
-			length = int(r.ReadU32())
-		case "u64":
-			length = int(r.ReadU64())
-		default:
-			panic("invaild prefix")
-		}
+	switch prefix {
+	case "u8":
+		length = int(r.ReadU8())
+	case "u16":
+		length = int(r.ReadU16())
+	case "u32":
+		length = int(r.ReadU32())
+	case "u64":
+		length = int(r.ReadU64())
+	default:
+		panic("invaild prefix")
 	}
-	v = make([]byte, length)
-	copy(v, r.buffer[r.pos:r.pos+length])
-	r.pos += length
-	return
+	if withPerfix {
+		plus, err := strconv.Atoi(prefix[1:])
+		if err != nil {
+			panic(err)
+		}
+		length -= plus / 8
+	}
+	return r.ReadBytes(length)
 }
 
 func (r *Reader) ReadStringWithLength(prefix string, withPerfix bool) string {
@@ -151,11 +170,6 @@ func (r *Reader) ReadTlv() (result map[uint16][]byte) {
 	}
 	return
 }
-
-// go的残废泛型
-//func (r *Reader) ReadStruct(){
-//
-//}
 
 func (r *Reader) ReadI8() (v int8) {
 	return int8(r.ReadU8())
