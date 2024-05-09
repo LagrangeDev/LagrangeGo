@@ -191,7 +191,7 @@ func sendHighwayPacket(packet *highway.ReqDataHighwayHead, buffer io.Reader, buf
 		WriteU32(bufferSize).
 		WriteBytes(marshal, false)
 	_, _ = io.Copy(writer, buffer)
-	writer.Write([]byte{0x29})
+	_, _ = writer.Write([]byte{0x29})
 
 	return postHighwayContent(writer.ToReader(), serverURL, end)
 }
