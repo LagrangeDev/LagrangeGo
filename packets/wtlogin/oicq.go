@@ -28,17 +28,17 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 			WriteU16(uint16(len(body))+53).
 			WriteU32(uint32(appInfo.AppID)).
 			WriteU32(0x72).
-			WriteBytes(make([]byte, 3), false).
+			WriteBytes(make([]byte, 3)).
 			WriteU32(uint32(utils.TimeStamp())).
 			WriteU8(2).
 			WriteU16(uint16(len(body)+49)).
 			WriteU16(uint16(cmdID)).
-			WriteBytes(make([]byte, 21), false).
+			WriteBytes(make([]byte, 21)).
 			WriteU8(3).
 			WriteU32(50).
-			WriteBytes(make([]byte, 14), false).
+			WriteBytes(make([]byte, 14)).
 			WriteU32(uint32(appInfo.AppID)).
-			WriteBytes(body, false).
+			WriteBytes(body).
 			ToBytes(),
 	)
 }
@@ -69,18 +69,18 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 		WriteU32(0).
 		WriteU8(1).
 		WriteU8(1).
-		WriteBytes(make([]byte, 16), false).
+		WriteBytes(make([]byte, 16)).
 		WriteU16(0x102).
 		WriteU16(uint16(len(pk))).
-		WriteBytes(pk, false).
-		WriteBytes(encBody, false).
+		WriteBytes(pk).
+		WriteBytes(encBody).
 		WriteU8(3).
 		ToBytes()
 
 	frame := binary.NewBuilder(nil).
 		WriteU8(2).
-		WriteU16(uint16(len(frameBody))+3). // + 2 + 1
-		WriteBytes(frameBody, false).
+		WriteU16(uint16(len(frameBody)) + 3). // + 2 + 1
+		WriteBytes(frameBody).
 		ToBytes()
 
 	return frame
@@ -107,8 +107,8 @@ func BuildUniPacket(uin int, seq uint32, cmd string, sign map[string]string,
 	ssoHeader := binary.NewBuilder(nil).
 		WriteU32(uint32(seq)).
 		WriteU32(uint32(appInfo.SubAppID)).
-		WriteU32(2052).                                               // locate id
-		WriteBytes(append([]byte{0x02}, make([]byte, 11)...), false). //020000000000000000000000
+		WriteU32(2052).                                        // locate id
+		WriteBytes(append([]byte{0x02}, make([]byte, 11)...)). //020000000000000000000000
 		WritePacketBytes(sigInfo.Tgt, "u32", true).
 		WritePacketString(cmd, "u32", true).
 		WritePacketBytes(nil, "u32", true).
@@ -138,7 +138,7 @@ func BuildUniPacket(uin int, seq uint32, cmd string, sign map[string]string,
 		WritePacketBytes(sigInfo.D2, "u32", true).
 		WriteU8(0).
 		WritePacketString(strconv.Itoa(uin), "u32", true).
-		WriteBytes(encrypted, false).
+		WriteBytes(encrypted).
 		ToBytes()
 
 	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).ToBytes()

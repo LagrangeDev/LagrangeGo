@@ -122,16 +122,19 @@ func (b *Builder) ReadFrom(r io.Reader) (n int64, err error) {
 	return io.Copy(b.buffer, r)
 }
 
-func (b *Builder) WriteBytes(v []byte, withLength bool) *Builder {
-	if withLength {
-		b.WriteU16(uint16(len(v)))
-	}
+func (b *Builder) WriteLenBytes(v []byte) *Builder {
+	b.WriteU16(uint16(len(v)))
 	b.append(v)
 	return b
 }
 
-func (b *Builder) WriteString(v string) *Builder {
-	return b.WriteBytes(utils.S2B(v), true)
+func (b *Builder) WriteBytes(v []byte) *Builder {
+	b.append(v)
+	return b
+}
+
+func (b *Builder) WriteLenString(v string) *Builder {
+	return b.WriteLenBytes(utils.S2B(v))
 }
 
 func (b *Builder) WriteStruct(data ...any) *Builder {
@@ -195,7 +198,7 @@ func (b *Builder) WriteDouble(v float64) *Builder {
 func (b *Builder) WriteTlv(tlvs ...[]byte) *Builder {
 	b.WriteU16(uint16(len(tlvs)))
 	for _, tlv := range tlvs {
-		b.WriteBytes(tlv, false)
+		b.WriteBytes(tlv)
 	}
 	return b
 }
