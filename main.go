@@ -25,7 +25,7 @@ func main() {
 		mainLogger.Errorln("load sig error:", err)
 		return
 	}
-	qqclient := client.NewQQclient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, &sig)
+	qqclient := client.NewQQClient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, &sig)
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {

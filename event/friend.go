@@ -1,7 +1,6 @@
 package event
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/cache"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 )
 
@@ -27,7 +26,7 @@ type (
 	}
 )
 
-func ParseFriendRequestNotice(msg *message.PushMsg, event *message.FriendRequest) *FriendRequest {
+func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg) *FriendRequest {
 	info := event.Info
 	return &FriendRequest{
 		SourceUin: msg.Message.ResponseHead.FromUin,
@@ -47,10 +46,10 @@ func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 	}
 }
 
-func ParseFriendRenameEvent(event *message.FriendRenameMsg, cache *cache.Cache) *Rename {
+func ParseFriendRenameEvent(event *message.FriendRenameMsg, uin uint32) *Rename {
 	return &Rename{
 		SubType:  1,
-		Uin:      cache.GetUin(event.Body.Data.Uid),
+		Uin:      uin,
 		Nickname: event.Body.Data.RenameData.NickName,
 	}
 }

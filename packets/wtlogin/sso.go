@@ -103,7 +103,7 @@ func ParseSSOFrame(buffer []byte, isoicqbody bool) (*SSOPacket, error) {
 	if compressType == 0 {
 
 	} else if compressType == 1 {
-		data, _ = utils.DecompressData(data)
+		data = binary2.ZlibUncompress(data)
 	} else if compressType == 8 {
 		data = data[4:]
 	} else {
