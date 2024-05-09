@@ -49,13 +49,13 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 			uint32(appClientVersion),
 			uint64(uin)).
 		WriteU32(uint32(utils.TimeStamp())).
-		WriteBytes(ip, false).
+		WriteBytes(ip).
 		WriteBool(savePassword).
-		WriteBytes(passwordMd5, false).
-		WriteBytes(tgtgtKey, false).
+		WriteBytes(passwordMd5).
+		WriteBytes(tgtgtKey).
 		WriteU32(0).
 		WriteBool(true).
-		WriteBytes(utils.MustParseHexStr(guid), false).
+		WriteBytes(utils.MustParseHexStr(guid)).
 		WriteU32(0).
 		WriteU32(1).
 		WritePacketString(strconv.Itoa(uin), "u16", false).
@@ -87,7 +87,7 @@ func T116(subSigmap int) []byte {
 
 func T124() []byte {
 	return binary.NewBuilder(nil).
-		WriteBytes(make([]byte, 12), false).
+		WriteBytes(make([]byte, 12)).
 		Pack(0x124)
 }
 
@@ -134,7 +134,7 @@ func T144(tgtgtKey []byte, appInfo *info.AppInfo, device *info.DeviceInfo) []byt
 
 func T145(guid []byte) []byte {
 	return binary.NewBuilder(nil).
-		WriteBytes(guid, false).
+		WriteBytes(guid).
 		Pack(0x145)
 }
 
@@ -154,13 +154,13 @@ func T166(imageType int) []byte {
 
 func T16a(noPicSig []byte) []byte {
 	return binary.NewBuilder(nil).
-		WriteBytes(noPicSig, false).
+		WriteBytes(noPicSig).
 		Pack(0x16a)
 }
 
 func T16e(deviceName string) []byte {
 	return binary.NewBuilder(nil).
-		WriteBytes(utils.S2B(deviceName), false).
+		WriteBytes(utils.S2B(deviceName)).
 		Pack(0x16e)
 }
 
@@ -182,7 +182,7 @@ func T191(canWebVerify int) []byte {
 // T318 默认参数 tgtQr = []byte{0}
 func T318(tgtQr []byte) []byte {
 	return binary.NewBuilder(nil).
-		WriteBytes(tgtQr, false).
+		WriteBytes(tgtQr).
 		Pack(0x318)
 }
 

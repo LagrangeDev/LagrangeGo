@@ -186,10 +186,10 @@ func sendHighwayPacket(packet *highway.ReqDataHighwayHead, buffer io.Reader, buf
 	}
 
 	writer := binary.NewBuilder(nil).
-		WriteBytes([]byte{0x28}, false).
+		WriteBytes([]byte{0x28}).
 		WriteU32(uint32(len(marshal))).
 		WriteU32(bufferSize).
-		WriteBytes(marshal, false)
+		WriteBytes(marshal)
 	_, _ = io.Copy(writer, buffer)
 	_, _ = writer.Write([]byte{0x29})
 

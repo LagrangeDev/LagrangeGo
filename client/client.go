@@ -256,7 +256,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) error {
 	body := binary.NewBuilder(nil).
 		WriteU16(0x09).
 		WriteTlv(
-			binary.NewBuilder(nil).WriteBytes(c.t106, false).Pack(0x106),
+			binary.NewBuilder(nil).WriteBytes(c.t106).Pack(0x106),
 			tlv.T144(c.sig.Tgtgt, app, device),
 			tlv.T116(app.SubSigmap),
 			tlv.T142(app.PackageName, 0),
@@ -268,7 +268,7 @@ func (c *QQClient) QrcodeLogin(refreshInterval int) error {
 			tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
 			tlv.T107(1, 0x0d, 0, 1),
 			tlv.T318(nil),
-			binary.NewBuilder(nil).WriteBytes(c.t16a, false).Pack(0x16a),
+			binary.NewBuilder(nil).WriteBytes(c.t16a).Pack(0x16a),
 			tlv.T166(5),
 			tlv.T521(0x13, "basicim"),
 		).ToBytes()

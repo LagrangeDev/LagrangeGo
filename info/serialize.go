@@ -29,8 +29,8 @@ func Encode(sig *SigInfo) ([]byte, error) {
 	dataHash := crypto.MD5Digest(buffer.Bytes())
 
 	return binary.NewBuilder(nil).
-		WriteBytes(dataHash, true).
-		WriteBytes(buffer.Bytes(), true).
+		WriteLenBytes(dataHash).
+		WriteLenBytes(buffer.Bytes()).
 		ToBytes(), nil
 }
 
