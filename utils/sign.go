@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/LagrangeDev/LagrangeGo/client/http2"
 )
 
 var (
@@ -119,7 +121,7 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 		return fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http2.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return fmt.Errorf("request timed out")
