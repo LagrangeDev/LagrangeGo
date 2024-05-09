@@ -191,9 +191,9 @@ func (c *QQClient) OnMessage(msgLen int) {
 				fetcher.AddResult(packet.Seq, packet)
 			}
 		} else { // server pushed
-			if _, ok := listeners[packet.Cmd]; ok {
+			if fn, ok := listeners[packet.Cmd]; ok {
 				networkLogger.Debugf("Server Push(%d) <- %s, extra: %s", packet.RetCode, packet.Cmd, packet.Extra)
-				msg, err := listeners[packet.Cmd](c, packet)
+				msg, err := fn(c, packet)
 				if err != nil {
 					return
 				}
