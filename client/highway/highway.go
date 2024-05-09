@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"runtime"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -41,7 +42,7 @@ func (a Addr) empty() bool {
 }
 
 type Session struct {
-	Uin        string
+	Uin        *uint32
 	AppID      uint32
 	SubAppID   uint32
 	SigSession []byte
@@ -76,7 +77,7 @@ func (s *Session) AppendAddr(ip, port uint32) {
 	s.SsoAddr = append(s.SsoAddr, addr)
 }
 
-func (s *Session) nextSeq() uint32 {
+func (s *Session) NextSeq() uint32 {
 	return atomic.AddUint32(&s.seq, 2)
 }
 
@@ -84,16 +85,16 @@ func (s *Session) sendHeartbreak(conn net.Conn) error {
 	head, _ := proto.Marshal(&highway.ReqDataHighwayHead{
 		MsgBaseHead: &highway.DataHighwayHead{
 			Version:   1,
-			Uin:       proto.Some(s.Uin),
+			Uin:       proto.Some(strconv.Itoa(int(*s.Uin))),
 			Command:   proto.Some(_REQ_CMD_HEART_BREAK),
-			Seq:       proto.Some(s.nextSeq()),
+			Seq:       proto.Some(s.NextSeq()),
 			AppId:     s.SubAppID,
 			DataFlag:  16,
 			CommandId: 0,
 			// LocaleId:  2052,
 		},
 	})
-	buffers := frame(head, nil)
+	buffers := Frame(head, nil)
 	_, err := buffers.WriteTo(conn)
 	return err
 }

@@ -9,7 +9,7 @@ import (
 
 var etx = []byte{0x29}
 
-// frame 包格式
+// Frame 包格式
 //
 //   - STX: 0x28(40)
 //   - head length
@@ -19,7 +19,7 @@ var etx = []byte{0x29}
 //   - ETX: 0x29(41)
 //
 // 节省内存, 可被go runtime优化为writev操作
-func frame(head []byte, body []byte) net.Buffers {
+func Frame(head []byte, body []byte) net.Buffers {
 	buffers := make(net.Buffers, 4)
 	// buffer0 format:
 	// 	- STX

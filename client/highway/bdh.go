@@ -5,6 +5,7 @@ package highway
 import (
 	"crypto/md5"
 	"io"
+	"strconv"
 	"sync"
 	"sync/atomic"
 
@@ -41,13 +42,13 @@ func (trans *Transaction) encrypt(key []byte) error {
 	return nil
 }
 
-func (trans *Transaction) build(s *Session, offset uint64, length uint32, md5hash []byte) *highway.ReqDataHighwayHead {
+func (trans *Transaction) Build(s *Session, offset uint64, length uint32, md5hash []byte) *highway.ReqDataHighwayHead {
 	return &highway.ReqDataHighwayHead{
 		MsgBaseHead: &highway.DataHighwayHead{
 			Version:    1,
-			Uin:        proto.Some(s.Uin),
+			Uin:        proto.Some(strconv.Itoa(int(*s.Uin))),
 			Command:    proto.Some(_REQ_CMD_DATA),
-			Seq:        proto.Some(s.nextSeq()),
+			Seq:        proto.Some(s.NextSeq()),
 			RetryTimes: proto.Some(uint32(0)),
 			AppId:      s.SubAppID,
 			DataFlag:   16,
@@ -75,7 +76,7 @@ func (trans *Transaction) build(s *Session, offset uint64, length uint32, md5has
 	}
 }
 
-func (s *Session) uploadSingle(trans Transaction) ([]byte, error) {
+func (s *Session) uploadSingle(trans *Transaction) ([]byte, error) {
 	pc, err := s.selectConn()
 	if err != nil {
 		return nil, err
@@ -96,9 +97,9 @@ func (s *Session) uploadSingle(trans Transaction) ([]byte, error) {
 			chunk = chunk[:rl]
 		}
 		ch := md5.Sum(chunk)
-		head, _ := proto.Marshal(trans.build(s, uint64(offset), uint32(rl), ch[:]))
+		head, _ := proto.Marshal(trans.Build(s, uint64(offset), uint32(rl), ch[:]))
 		offset += rl
-		buffers := frame(head, chunk)
+		buffers := Frame(head, chunk)
 		_, err = buffers.WriteTo(pc.conn)
 		if err != nil {
 			return nil, errors.Wrap(err, "write conn error")
@@ -120,7 +121,7 @@ func (s *Session) uploadSingle(trans Transaction) ([]byte, error) {
 	return rspExt, nil
 }
 
-func (s *Session) Upload(trans Transaction) ([]byte, error) {
+func (s *Session) Upload(trans *Transaction) ([]byte, error) {
 	// encrypt ext data
 	if err := trans.encrypt(s.SessionKey); err != nil {
 		return nil, err
@@ -194,8 +195,8 @@ func (s *Session) Upload(trans Transaction) ([]byte, error) {
 				chunk = chunk[:n]
 			}
 			ch := md5.Sum(chunk)
-			head, _ := proto.Marshal(trans.build(s, off, uint32(n), ch[:]))
-			buffers := frame(head, chunk)
+			head, _ := proto.Marshal(trans.Build(s, off, uint32(n), ch[:]))
+			buffers := Frame(head, chunk)
 			_, err = buffers.WriteTo(pc.conn)
 			if err != nil {
 				return errors.Wrap(err, "write conn error")

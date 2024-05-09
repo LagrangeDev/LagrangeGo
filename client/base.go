@@ -3,7 +3,6 @@ package client
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/client/client.go
 
 import (
-	"strconv"
 	"sync/atomic"
 	"time"
 
@@ -34,11 +33,11 @@ func NewQQClient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		pushStore: make(chan *wtlogin.SSOPacket, 128),
 		stopChan:  make(chan struct{}),
 		highwaySession: highway.Session{
-			Uin:      strconv.FormatInt(int64(uin), 10),
 			AppID:    uint32(appInfo.AppID),
 			SubAppID: uint32(appInfo.SubAppID),
 		},
 	}
+	client.highwaySession.Uin = &client.sig.Uin
 	client.Online.Store(false)
 	return client
 }
