@@ -163,7 +163,7 @@ func (c *QQClient) SendUpBlockAsync(block UpBlock, server string) bool {
 		MsgLoginSigHead:    loginHead,
 	}
 	isEnd := block.Offset+uint64(len(block.Block)) == block.FileSize
-	packet := &binary.Builder{}
+	packet := binary.NewBuilder(nil)
 	packet.WriteBytes(block.Block, false)
 	payload, err := SendPacketAsync(highwayHead, packet, server, isEnd)
 	if err != nil {
