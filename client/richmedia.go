@@ -8,10 +8,10 @@ import (
 	"net/netip"
 
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
-	message2 "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
-	oidb2 "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/pkg/oidb"
+	message2 "github.com/LagrangeDev/LagrangeGo/pkg/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/pkg/pb/service/highway"
+	oidb2 "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 

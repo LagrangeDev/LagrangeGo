@@ -102,3 +102,5 @@ _为防止滥用，不支持主动邀请新成员进群_
 此项目引用了[MiraiGo](https://github.com/Mrs4s/MiraiGo)的相当一部分代码，但是没有fork原仓库，所以MiraiGo的Contributors也应该放在这  
 [![Contributors](https://contributors-img.web.app/image?repo=Mrs4s/MiraiGo)](https://github.com/Mrs4s/MiraiGo/graphs/contributors)
 
+
+项目结构/设计规范说明：参考internal/README.md

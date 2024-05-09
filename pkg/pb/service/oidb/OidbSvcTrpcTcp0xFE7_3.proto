@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+// Fetch Group Member List
+message OidbSvcTrpcTcp0xFE7_3 {
+  uint32 GroupUin = 1;
+  uint32 Field2 = 2;
+  uint32 Field3 = 3;
+  OidbSvcTrpcScp0xFE7_3Body Body = 4;
+  optional string Token = 15;
+}
+
+message OidbSvcTrpcScp0xFE7_3Body {
+  // all ture
+  bool MemberName = 10;
+  bool MemberCard = 11;
+  bool Level = 12;
+  bool Field4 = 20;
+  bool Field5 = 21;
+  bool JoinTimestamp = 100;
+  bool LastMsgTimestamp = 101;
+  bool Field8 = 102;
+  bool Field9 = 103;
+  bool Field10 = 104;
+  bool Field11 = 105;
+  bool Field12 = 106;
+  bool Permission = 107;
+}
+
+message OidbSvcTrpcTcp0xFE7_2Response {
+  uint32 GroupUin = 1;
+  repeated OidbSvcTrpcTcp0xFE7_2Member Members = 2;
+  uint32 Field3 = 3;
+  uint32 MemberChangeSeq = 5;
+  uint32 MemberCardChangeSeq = 6;
+  optional string Token = 15; // for the next page
+}
+
+message OidbSvcTrpcTcp0xFE7_2Member {
+  OidbSvcTrpcTcp0xFE7_2Uin Uin = 1;
+  string MemberName = 10;
+  OidbSvcTrpcTcp0xFE7_2Card MemberCard = 11;
+  optional OidbSvcTrpcTcp0xFE7_2Level Level = 12;
+  uint32 JoinTimestamp = 100;
+  uint32 LastMsgTimestamp = 101;
+  uint32 Permission = 107;
+}
+
+message OidbSvcTrpcTcp0xFE7_2Uin {
+  string Uid = 2;
+  uint32 Uin = 4;
+}
+
+message OidbSvcTrpcTcp0xFE7_2Card {
+  optional string MemberCard = 2;
+}
+
+message OidbSvcTrpcTcp0xFE7_2Level {
+  repeated uint32 Infos = 1;
+  uint32 Level = 2;
+}

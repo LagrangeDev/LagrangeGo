@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/message";
+
+import "pb/message/c2c.proto";
+import "pb/message/routing.proto";
+import "pb/message/component.proto";
+import "pb/system/system.proto";
+
+message ContentHead {
+  uint32 Type = 1;
+  optional uint32 SubType = 2;
+  optional uint32 DivSeq = 3;
+  optional uint64 MsgId = 4;
+  optional uint32 Sequence = 5;
+  optional uint64 TimeStamp = 6;
+  optional uint64 Field7 = 7;
+  optional uint32 Field8 = 8;
+  optional uint32 Field9 = 9;
+  optional uint64 NewId = 12;
+  optional ForwardHead Foward = 15;
+}
+
+message MessageBody {
+  optional RichText RichText = 1;
+  optional bytes MsgContent = 2;
+  optional bytes MsgEncryptContent = 3;
+}
+
+message GroupRecallMsg {
+  uint32 Type = 1;
+  uint32 GroupUin = 2;
+  GroupRecallMsgField3 Field3 = 3;
+  GroupRecallMsgField4 Field4 = 4;
+}
+
+message GroupRecallMsgField3 {
+  uint32 Sequence = 1;
+  uint32 Random = 2;
+  uint32 Field3 = 3;
+}
+
+message GroupRecallMsgField4 {
+  uint32 Field1 = 1;
+}
+
+message Message {
+  optional RoutingHead RoutingHead = 1;
+  optional ContentHead ContentHead = 2;
+  optional MessageBody Body = 3;
+  optional uint32 Seq = 4;
+  optional uint32 Rand = 5;
+  optional bytes SyncCookie = 6;
+  // optional AppShareInfo AppShare = 7;
+  optional uint32 Via = 8;
+  optional uint32 DataStatist = 9;
+  // optional MultiMsgAssist MultiMsgAssist = 10;
+  // optional InputNotifyInfo InputNotifyInfo = 11;
+  optional MessageControl Ctrl = 12;
+  // optional ReceiptReq ReceiptReq = 13;
+  uint32 MultiSendSeq = 14;
+}
+
+message MessageControl {
+  int32 MsgFlag = 1;
+}
+
+message PushMsg {
+  PushMsgBody Message = 1;
+  optional int32 Status = 3;
+  optional NTSysEvent NtEvent = 4;
+  optional int32 PingFLag = 5;
+  optional int32 GeneralFlag = 9;
+}
+
+message PushMsgBody {
+  ResponseHead ResponseHead = 1;
+  ContentHead ContentHead = 2;
+  optional MessageBody Body = 3;
+}
+
+message ResponseHead {
+  uint32 FromUin = 1;
+  optional string FromUid = 2;
+  uint32 Type = 3;
+  uint32 SigMap = 4;  // 鬼知道是啥
+  uint32 ToUin = 5;
+  optional string ToUid = 6;
+  optional ResponseForward Forward = 7;
+  optional ResponseGrp Grp = 8;
+}
+
+message RoutingHead {
+  optional C2C C2C = 1;
+  optional Grp Grp = 2;
+  optional GrpTmp GrpTmp = 3;
+  optional WPATmp WpaTmp = 6;
+  optional Trans0X211 Trans0X211 = 15;
+}
+
+message SsoReadedReport {
+  optional SsoReadedReportGroup Group = 1;
+  optional SsoReadedReportC2C C2C = 2;
+}
+
+message SsoReadedReportC2C {
+  optional string TargetUid = 2;
+  uint32 Time = 3;
+  uint32 StartSequence = 4;
+}
+
+message SsoReadedReportGroup {
+  uint32 GroupUin = 1;
+  uint32 StartSequence = 2;
+}
+
+message SelfRenameMsg {
+  uint32 Field1 = 1; // 20
+  SelfRenameBody Body = 20;
+}
+
+message SelfRenameBody {
+  uint32 Uin = 1;
+  RenameData RenameData = 2;
+}
+
+message FriendRenameMsg {
+  FriendRenameMsgBody Body = 1;
+}
+
+message FriendRenameMsgBody {
+  uint32 Field1 = 2; // 20
+  FriendRenameMsgData Data = 8;
+}
+
+message FriendRenameMsgData {
+  string Uid = 1;
+  RenameData RenameData = 2;
+}
+
+message RenameData {
+  uint32 Field1 = 1; // 20002
+  string NickName = 2;
+}

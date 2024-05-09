@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+import "pb/service/oidb/generics.proto";
+
+// Protobuf版Tlv sbtx
+
+message OidbSvcTrpcTcpBase {
+  uint32 Command = 1;
+  uint32 SubCommand = 2;
+  uint32 ErrorCode = 3;
+  bytes Body = 4;
+  string ErrorMsg = 5;
+  optional OidbLafter Lafter = 7;
+  repeated OidbProperty Properties = 11;
+  int32 Reserved = 12;
+}

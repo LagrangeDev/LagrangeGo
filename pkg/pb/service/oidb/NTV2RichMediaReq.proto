@@ -1,0 +1,223 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+message NTV2RichMediaReq {
+  MultiMediaReqHead ReqHead = 1;
+  UploadReq Upload = 2;
+  DownloadReq Download = 3;
+  DownloadRKeyReq DownloadRKey = 4;
+  DeleteReq Delete = 5;
+  UploadCompletedReq UploadCompleted = 6;
+  MsgInfoAuthReq MsgInfoAuth = 7;
+  UploadKeyRenewalReq UploadKeyRenewal = 8;
+  DownloadSafeReq DownloadSafe = 9;
+  optional bytes Extension = 99;
+}
+
+message MultiMediaReqHead {
+  CommonHead Common = 1;
+  SceneInfo Scene = 2;
+  ClientMeta Client = 3;
+}
+
+message CommonHead {
+  uint32 RequestId = 1; // 1
+  uint32 Command = 2; // 200
+}
+
+message SceneInfo {
+  uint32 RequestType = 101; // 1
+  uint32 BusinessType = 102; // 3
+  uint32 SceneType = 200; // 1
+  optional C2CUserInfo C2C = 201;
+  optional NTGroupInfo Group = 202;
+}
+
+message C2CUserInfo {
+  uint32 AccountType = 1; // 2
+  string TargetUid = 2;
+}
+
+message NTGroupInfo {
+  uint32 GroupUin = 1;
+}
+
+message ClientMeta {
+  uint32 AgentType = 1; // 2
+}
+
+message DownloadReq {
+  IndexNode  Node = 1;
+  DownloadExt Download = 2;
+}
+
+message IndexNode {
+  FileInfo Info = 1;
+  string FileUuid = 2;
+  uint32 StoreId = 3; // 0旧服务器 1为nt服务器
+  uint32 UploadTime = 4; // 0
+  uint32 Ttl = 5; // 0
+  uint32 SubType = 6; // 0
+}
+
+message FileInfo {
+  uint32 FileSize = 1; // 0
+  string FileHash = 2;
+  string FileSha1 = 3; // ""
+  string FileName = 4;
+  FileType Type = 5;
+  uint32 Width = 6; // 0
+  uint32 Height = 7;  // 0
+  uint32 Time = 8; // 2
+  uint32 Original = 9; // 0
+}
+
+message FileType {
+  uint32 Type = 1; // 2
+  uint32 PicFormat = 2; // 0
+  uint32 VideoFormat = 3; // 0
+  uint32 VoiceFormat = 4; // 1
+}
+
+message DownloadExt {
+  PicDownloadExt Pic = 1;
+  VideoDownloadExt Video = 2;
+  PttDownloadExt Ptt = 3;
+}
+
+message VideoDownloadExt {
+  uint32 BusiType = 1; // 0
+  uint32 SceneType = 2; // 0
+  uint32 SubBusiType = 3; // 0
+}
+
+message PicDownloadExt {
+
+}
+
+message PttDownloadExt {
+
+}
+
+message PicUrlExtInfo {
+  string OriginalParameter = 1;
+  string BigParameter = 2;
+  string ThumbParameter = 3;
+}
+
+message VideoExtInfo {
+  uint32 VideoCodecFormat = 1;
+}
+
+message MsgInfo {
+  repeated MsgInfoBody MsgInfoBody = 1;
+  ExtBizInfo ExtBizInfo = 2;
+}
+
+message MsgInfoBody {
+  IndexNode Index = 1;
+  PictureInfo Picture = 2;
+  VideoInfo Video = 3;
+  AudioInfo Audio = 4;
+  bool FileExist = 5;
+  bytes HashSum = 6;
+}
+
+message VideoInfo {
+
+}
+
+message AudioInfo {
+
+}
+
+message PictureInfo {
+  string UrlPath = 1;
+  PicUrlExtInfo Ext = 2;
+  string Domain = 3;
+}
+
+message ExtBizInfo {
+  PicExtBizInfo Pic = 1;
+  VideoExtBizInfo Video = 2;
+  PttExtBizInfo Ptt = 3;
+  uint32 BusiType = 10;
+}
+
+message PttExtBizInfo {
+  uint64 SrcUin = 1;
+  uint32 PttScene = 2;
+  uint32 PttType = 3;
+  uint32 ChangeVoice = 4;
+  bytes Waveform = 5;
+  uint32 AutoConvertText = 6;
+  bytes BytesReserve = 11;
+  bytes BytesPbReserve = 12;
+  bytes BytesGeneralFlags = 13;
+}
+
+message VideoExtBizInfo {
+  uint32 FromScene = 1;
+  uint32 ToScene = 2;
+  bytes BytesPbReserve = 3;
+}
+
+message PicExtBizInfo {
+  uint32 BizType = 1;
+  string TextSummary = 2;
+  bytes BytesPbReserveC2c = 11;
+  bytes BytesPbReserveTroop = 12;
+  uint32 FromScene = 1001;
+  uint32 ToScene = 1002;
+  uint32 OldFileId = 1003;
+}
+
+message DownloadSafeReq {
+  IndexNode Index = 1;
+}
+
+message UploadKeyRenewalReq {
+  string OldUKey = 1;
+  uint32 SubType = 2;
+}
+
+message MsgInfoAuthReq {
+  bytes Msg = 1;
+  uint64 AuthTime = 2;
+}
+
+message UploadCompletedReq {
+  bool SrvSendMsg = 1;
+  uint64 ClientRandomId = 2;
+  MsgInfo MsgInfo = 3;
+  uint32 ClientSeq = 4;
+}
+
+message DeleteReq {
+  repeated IndexNode Index = 1;
+  bool NeedRecallMsg = 2;
+  uint64 MsgSeq = 3;
+  uint64 MsgRandom = 4;
+  uint64 MsgTime = 5;
+}
+
+message DownloadRKeyReq {
+  repeated int32 Types = 1;
+}
+
+message UploadInfo {
+  FileInfo FileInfo = 1;
+  uint32 SubFileType = 2;
+}
+
+message UploadReq {
+  repeated UploadInfo UploadInfo = 1;
+  bool TryFastUploadCompleted = 2;
+  bool SrvSendMsg = 3;
+  uint64 ClientRandomId = 4;
+  uint32 CompatQMsgSceneType = 5;
+  ExtBizInfo ExtBizInfo = 6;
+  uint32 ClientSeq = 7;
+  bool NoNeedCompatMsg = 8;
+}

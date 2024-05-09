@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+// Group File Upload
+message OidbSvcTrpcTcp0x6D6 {
+  optional OidbSvcTrpcTcp0x6D6Upload File = 1;
+  optional OidbSvcTrpcTcp0x6D6Download Download = 3;
+  optional OidbSvcTrpcTcp0x6D6Move Move = 6;
+}
+
+message OidbSvcTrpcTcp0x6D6Upload {
+  uint32 GroupUin = 1;
+  uint32 AppId = 2; // 7
+  uint32 BusId = 3; // 102
+  uint32 Entrance = 4; // 6
+  string TargetDirectory = 5;
+  string FileName = 6;
+  string LocalDirectory = 7;
+  uint64 FileSize = 8;
+  bytes FileSha1 = 9;
+  bytes FileSha3 = 10;
+  bytes FileMd5 = 11;
+  bool Field15 = 15;
+}
+
+message OidbSvcTrpcTcp0x6D6Download {
+  uint32 GroupUin = 1;
+  uint32 AppId = 2; // 7
+  uint32 BusId = 3; // 102
+  string FileId = 4;
+}
+
+message OidbSvcTrpcTcp0x6D6Move {
+  uint32 GroupUin = 1;
+  uint32 AppId = 2; // 7
+  uint32 BusId = 3; // 102
+  string FileId = 4;
+  string ParentDirectory = 5;
+  string TargetDirectory = 6;
+}
+
+message OidbSvcTrpcTcp0x6D6Response {
+  OidbSvcTrpcTcp0x6D6_0Response Upload = 1;
+  OidbSvcTrpcTcp0x6D6_2Response Download = 3;
+}
+
+message OidbSvcTrpcTcp0x6D6_0Response {
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
+  string UploadIp = 4;
+  string ServerDns = 5;
+  int32 BusId = 6;
+  string FileId = 7;
+  bytes CheckKey = 8;
+  bytes FileKey = 9;
+  bool BoolFileExist = 10;
+  repeated string UploadIpLanV4 = 12;
+  repeated string UploadIpLanV6 = 13;
+  uint32 UploadPort = 14;
+}
+
+message OidbSvcTrpcTcp0x6D6_2Response {
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
+  string DownloadIp = 4;
+  string DownloadDns = 5;
+  bytes DownloadUrl = 6;
+  bytes FileSha1 = 7;
+  bytes FileSha3 = 8;
+  bytes FileMd5 = 9;
+  bytes CookieVal = 10;
+  string SaveFileName = 11;
+  uint32 PreviewPort = 12;
+}

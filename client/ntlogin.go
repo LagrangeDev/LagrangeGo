@@ -2,16 +2,16 @@ package client
 
 import (
 	"fmt"
+	info2 "github.com/LagrangeDev/LagrangeGo/internal/info"
 	"net/url"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/pkg/wtlogin/loginState"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
+	"github.com/LagrangeDev/LagrangeGo/pkg/pb/login"
 
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
-	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
@@ -26,7 +26,7 @@ func buildNtloginCaptchaSubmit(ticket, randStr, aid string) proto.DynamicMessage
 	}
 }
 
-func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo, sig *info.SigInfo, credential []byte) ([]byte, error) {
+func buildNtloginRequest(uin uint32, app *info2.AppInfo, device *info2.DeviceInfo, sig *info2.SigInfo, credential []byte) ([]byte, error) {
 	body := proto.DynamicMessage{
 		1: proto.DynamicMessage{
 			1: proto.DynamicMessage{
@@ -69,7 +69,7 @@ func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo,
 	}.Encode(), nil
 }
 
-func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State, error) {
+func ParseNtloginResponse(response []byte, sig *info2.SigInfo) (loginState.State, error) {
 	var frame login.SsoNTLoginEncryptedData
 	err := proto.Unmarshal(response, &frame)
 	if err != nil {

@@ -3,17 +3,16 @@ package client
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/client/client.go
 
 import (
+	"github.com/LagrangeDev/LagrangeGo/internal/cache"
+	info2 "github.com/LagrangeDev/LagrangeGo/internal/info"
 	"sync/atomic"
 	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/cache"
-
 	"github.com/LagrangeDev/LagrangeGo/event"
 
-	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/pkg/oidb"
+	"github.com/LagrangeDev/LagrangeGo/pkg/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
@@ -21,7 +20,7 @@ import (
 const msfwifiServer = "msfwifi.3g.qq.com:8080"
 
 // NewQQclient 创建一个新的QQClient
-func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
+func NewQQclient(uin uint32, signUrl string, appInfo *info2.AppInfo, deviceInfo *info2.DeviceInfo, sig *info2.SigInfo) *QQClient {
 	client := &QQClient{
 		Uin:          uin,
 		appInfo:      appInfo,
@@ -40,9 +39,9 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 
 type QQClient struct {
 	Uin          uint32
-	appInfo      *info.AppInfo
-	deviceInfo   *info.DeviceInfo
-	sig          *info.SigInfo
+	appInfo      *info2.AppInfo
+	deviceInfo   *info2.DeviceInfo
+	sig          *info2.SigInfo
 	signProvider func(string, uint32, []byte) map[string]string
 
 	pushStore chan *wtlogin.SSOPacket

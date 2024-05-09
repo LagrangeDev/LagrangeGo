@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+import "pb/service/oidb/generics.proto";
+
+// Fetch Friends List
+message OidbSvcTrpcTcp0xFD4_1 {
+  uint32 Field2 = 2; // 300
+  uint32 Field4 = 4; // 0
+  uint32 Field6 = 6; // 1
+  repeated OidbSvcTrpcTcp0xFD4_1Body Body = 10001;
+  repeated uint32 Field10002 = 10002; // [13578, 13579, 13573, 13572, 13568]
+  uint32 Field10003 = 10003;
+}
+
+message OidbSvcTrpcTcp0xFD4_1Body {
+  uint32 Type = 1;
+  OidbNumber Number = 2;
+}
+
+message OidbSvcTrpcTcp0xFD4_1Response {
+  uint32 DisplayFriendCount = 3;
+  uint32 Timestamp = 6;
+  uint32 SelfUin = 7;
+  repeated OidbFriend Friends = 101;
+}

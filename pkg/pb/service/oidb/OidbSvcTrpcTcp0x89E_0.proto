@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+// GroupTransfer
+message OidbSvcTrpcTcp0x89E_0 {
+  uint32 GroupUin = 1;
+  string SourceUid = 2;
+  string TargetUid = 3;
+}

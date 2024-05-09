@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+// GroupFSView
+message OidbSvcTrpcTcp0x6D8 {
+  optional OidbSvcTrpcTcp0x6D8List List = 2;
+  optional OidbSvcTrpcTcp0x6D8Count Count = 3;
+  optional OidbSvcTrpcTcp0x6D8Space Space = 4;
+}
+
+message OidbSvcTrpcTcp0x6D8List {
+  uint32 GroupUin = 1;
+  uint32 AppId = 2; // 7
+  string TargetDirectory = 3;
+  uint32 FileCount = 5; // 20
+  uint32 SortBy = 9; // 1
+  uint32 StartIndex = 13; // default 0
+  uint32 Field17 = 17; // 2
+  uint32 Field18 = 18; // 0
+}
+
+message OidbSvcTrpcTcp0x6D8Count {
+  uint32 GroupUin = 1;
+  uint32 AppId = 2; // 7
+  uint32 BusId = 3; // 6
+}
+
+message OidbSvcTrpcTcp0x6D8Space {
+  uint32 GroupUin = 1;
+  uint32 AppId = 2; // 7
+}
+
+message OidbSvcTrpcTcp0x6D8_1Response {
+  optional OidbSvcTrpcTcp0x6D8_1ResponseList List = 2;
+  optional OidbSvcTrpcTcp0x6D8_1ResponseCount Count = 3;
+  optional OidbSvcTrpcTcp0x6D8_1ResponseSpace Space = 4;
+}
+
+message OidbSvcTrpcTcp0x6D8_1ResponseList {
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
+  bool IsEnd = 4;
+  repeated OidbSvcTrpcTcp0x6D8_1ResponseItem Items = 5;
+}
+
+message OidbSvcTrpcTcp0x6D8_1ResponseCount {
+  uint32 FileCount = 4;
+  uint32 LimitCount = 6;
+  bool IsFull = 7;
+}
+
+message OidbSvcTrpcTcp0x6D8_1ResponseSpace {
+  uint64 TotalSpace = 4;
+  uint64 UsedSpace = 5;
+  uint32 Field6 = 6;
+}
+
+message OidbSvcTrpcTcp0x6D8_1ResponseItem {
+  uint32 Type = 1;
+  OidbSvcTrpcTcp0x6D8_1ResponseFolderInfo FolderInfo = 2;
+  OidbSvcTrpcTcp0x6D8_1ResponseFileInfo FileInfo = 3;
+}
+
+message OidbSvcTrpcTcp0x6D8_1ResponseFolderInfo {
+  string FolderId = 1;
+  string ParentDirectoryId = 2;
+  string FolderName = 3;
+  uint32 CreateTime = 4;
+  uint32 ModifiedTime = 5;
+  uint32 CreatorUin = 6;
+  string CreatorName = 7;
+  uint32 TotalFileCount = 8;
+}
+
+message OidbSvcTrpcTcp0x6D8_1ResponseFileInfo {
+  string FileId = 1;
+  string FileName = 2;
+  uint64 FileSize = 3;
+  uint32 BusId = 4;
+  uint64 UploadedSize = 5;
+  uint32 UploadedTime = 6;
+  uint32 ExpireTime = 7;
+  uint32 ModifiedTime = 8;
+  uint32 DownloadedTimes = 9;
+  bytes FileSha1 = 10;
+  bytes FileMd5 = 12;
+  string UploaderName = 14;
+  uint32 UploaderUin = 15;
+  string ParentDirectory = 16;
+  uint32 Field17 = 17;
+  string Field22 = 22;
+}

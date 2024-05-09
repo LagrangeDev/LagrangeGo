@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"strconv"
 
-	highway2 "github.com/LagrangeDev/LagrangeGo/packets/highway"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
+	highway2 "github.com/LagrangeDev/LagrangeGo/pkg/highway"
+	"github.com/LagrangeDev/LagrangeGo/pkg/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/RomiChan/protobuf/proto"

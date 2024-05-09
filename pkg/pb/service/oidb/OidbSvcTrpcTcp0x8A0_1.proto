@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+// Group Kick Member
+message OidbSvcTrpcTcp0x8A0_1 {
+  uint32 GroupUin = 1;
+  string TargetUid = 3;
+  bool RejectAddRequest = 4;
+  string Field5 = 5;
+}
+
+message OidbSvcTrpcTcp0x8A0_1Response {
+  uint32 GroupUin = 1;
+  optional string ErrorMsg = 2;
+}

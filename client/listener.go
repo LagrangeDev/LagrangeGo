@@ -8,8 +8,8 @@ import (
 
 	eventConverter "github.com/LagrangeDev/LagrangeGo/event"
 	msgConverter "github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/pkg/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/pkg/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )

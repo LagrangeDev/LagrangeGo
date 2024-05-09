@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+// Fetch Friends & Group Notification List
+message OidbSvcTrpcTcp0x10C0_1 {
+  uint32 Count = 1;
+  uint32 Field2 = 2;
+}
+
+message OidbSvcTrpcTcp0x10C0_1Response {
+  repeated OidbSvcTrpcTcp0x10C0_1ResponseRequests Requests = 1;
+  uint64 Field2 = 2;
+  uint64 NewLatestSeq = 3;
+  uint32 Field4 = 4;
+  uint64 Field5 = 5;
+  uint32 Field6 = 6;
+}
+
+message OidbSvcTrpcTcp0x10C0_1ResponseRequests {
+  uint64 Sequence = 1;
+  uint32 EventType = 2;
+  uint32 State = 3;
+  OidbSvcTrpcTcp0x10C0_1ResponseGroup Group = 5;
+  optional OidbSvcTrpcTcp0x10C0_1ResponseUser Invitor = 6;
+  optional OidbSvcTrpcTcp0x10C0_1ResponseUser Operator = 7;
+  string Field9 = 9;
+  string Comment = 10;
+}
+
+message OidbSvcTrpcTcp0x10C0_1ResponseGroup {
+  uint32 GroupUin = 1;
+  string GroupName = 2;
+}
+
+message OidbSvcTrpcTcp0x10C0_1ResponseUser {
+  string Uid = 1;
+  string Name = 2;
+}

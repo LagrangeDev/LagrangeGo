@@ -1,7 +1,7 @@
 package event
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/pkg/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 

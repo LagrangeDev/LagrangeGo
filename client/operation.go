@@ -2,16 +2,16 @@ package client
 
 import (
 	"errors"
+	entity2 "github.com/LagrangeDev/LagrangeGo/internal/entity"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/pkg/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 
-	"github.com/LagrangeDev/LagrangeGo/entity"
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/pkg/oidb"
 )
 
 // FetchFriends 获取好友列表信息
-func (c *QQClient) FetchFriends() ([]*entity.Friend, error) {
+func (c *QQClient) FetchFriends() ([]*entity2.Friend, error) {
 	pkt, err := oidb.BuildFetchFriendsReq()
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (c *QQClient) FetchFriends() ([]*entity.Friend, error) {
 }
 
 // FetchGroups 获取所有已加入的群的信息
-func (c *QQClient) FetchGroups() ([]*entity.Group, error) {
+func (c *QQClient) FetchGroups() ([]*entity2.Group, error) {
 	pkt, err := oidb.BuildFetchGroupsReq()
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (c *QQClient) FetchGroups() ([]*entity.Group, error) {
 }
 
 // FetchGroupMember 获取对应群的群成员信息，使用token可以获取下一页的群成员信息
-func (c *QQClient) FetchGroupMember(groupID uint32, token string) ([]*entity.GroupMember, string, error) {
+func (c *QQClient) FetchGroupMember(groupID uint32, token string) ([]*entity2.GroupMember, string, error) {
 	pkt, err := oidb.BuildFetchMembersReq(groupID, token)
 	if err != nil {
 		return nil, "", err
@@ -143,7 +143,7 @@ func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
 		return err
 	}
 	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
-		m.Permission = entity.Admin
+		m.Permission = entity2.Admin
 		c.cache.RefreshGroupMember(groupID, m)
 	}
 

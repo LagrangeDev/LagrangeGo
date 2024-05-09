@@ -8,7 +8,7 @@ import (
 
 	"github.com/RomiChan/syncx"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/pkg/wtlogin"
 )
 
 // var resultLogger = utils.GetLogger("resultstore")

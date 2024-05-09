@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/entity"
+	entity2 "github.com/LagrangeDev/LagrangeGo/internal/entity"
 )
 
 // GetUid 获取缓存中对应uin的uid
@@ -30,7 +30,7 @@ func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
 }
 
 // GetCachedFriendInfo 获取好友信息(缓存)
-func (c *QQClient) GetCachedFriendInfo(uin uint32) (*entity.Friend, error) {
+func (c *QQClient) GetCachedFriendInfo(uin uint32) (*entity2.Friend, error) {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return nil, err
@@ -40,7 +40,7 @@ func (c *QQClient) GetCachedFriendInfo(uin uint32) (*entity.Friend, error) {
 }
 
 // GetCachedGroupInfo 获取群信息(缓存)
-func (c *QQClient) GetCachedGroupInfo(groupUin uint32) (*entity.Group, error) {
+func (c *QQClient) GetCachedGroupInfo(groupUin uint32) (*entity2.Group, error) {
 	if c.cache.GroupInfoCacheIsEmpty() {
 		if err := c.RefreshAllGroupsInfo(); err != nil {
 			return nil, err
@@ -50,7 +50,7 @@ func (c *QQClient) GetCachedGroupInfo(groupUin uint32) (*entity.Group, error) {
 }
 
 // GetCachedAllGroupsInfo 获取所有群信息(缓存)
-func (c *QQClient) GetCachedAllGroupsInfo() (map[uint32]*entity.Group, error) {
+func (c *QQClient) GetCachedAllGroupsInfo() (map[uint32]*entity2.Group, error) {
 	if c.cache.GroupInfoCacheIsEmpty() {
 		if err := c.RefreshAllGroupsInfo(); err != nil {
 			return nil, err
@@ -60,7 +60,7 @@ func (c *QQClient) GetCachedAllGroupsInfo() (map[uint32]*entity.Group, error) {
 }
 
 // GetCachedMemberInfo 获取群成员信息(缓存)
-func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) (*entity.GroupMember, error) {
+func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) (*entity2.GroupMember, error) {
 	if c.cache.GroupMemberCacheIsEmpty(groupUin) {
 		if err := c.RefreshGroupMembersCache(groupUin); err != nil {
 			return nil, err
@@ -70,7 +70,7 @@ func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) (*entity.GroupMembe
 }
 
 // GetCachedMembersInfo 获取指定群所有群成员信息(缓存)
-func (c *QQClient) GetCachedMembersInfo(groupUin uint32) (map[uint32]*entity.GroupMember, error) {
+func (c *QQClient) GetCachedMembersInfo(groupUin uint32) (map[uint32]*entity2.GroupMember, error) {
 	if c.cache.GroupMemberCacheIsEmpty(groupUin) {
 		if err := c.RefreshGroupMembersCache(groupUin); err != nil {
 			return nil, err
@@ -120,12 +120,12 @@ func (c *QQClient) RefreshAllGroupsInfo() error {
 }
 
 // GetFriendsData 获取好友列表数据
-func (c *QQClient) GetFriendsData() (map[uint32]*entity.Friend, error) {
+func (c *QQClient) GetFriendsData() (map[uint32]*entity2.Friend, error) {
 	friends, err := c.FetchFriends()
 	if err != nil {
 		return nil, err
 	}
-	friendsData := make(map[uint32]*entity.Friend, len(friends))
+	friendsData := make(map[uint32]*entity2.Friend, len(friends))
 	for _, friend := range friends {
 		friendsData[friend.Uin] = friend
 	}
@@ -134,8 +134,8 @@ func (c *QQClient) GetFriendsData() (map[uint32]*entity.Friend, error) {
 }
 
 // GetGroupMembersData 获取指定群所有成员信息
-func (c *QQClient) GetGroupMembersData(groupUin uint32) (map[uint32]*entity.GroupMember, error) {
-	groupMembers := make(map[uint32]*entity.GroupMember)
+func (c *QQClient) GetGroupMembersData(groupUin uint32) (map[uint32]*entity2.GroupMember, error) {
+	groupMembers := make(map[uint32]*entity2.GroupMember)
 	members, token, err := c.FetchGroupMember(groupUin, "")
 	if err != nil {
 		return groupMembers, err
@@ -156,12 +156,12 @@ func (c *QQClient) GetGroupMembersData(groupUin uint32) (map[uint32]*entity.Grou
 }
 
 // GetAllGroupsMembersData 获取所有群的群成员信息
-func (c *QQClient) GetAllGroupsMembersData() (map[uint32]map[uint32]*entity.GroupMember, error) {
+func (c *QQClient) GetAllGroupsMembersData() (map[uint32]map[uint32]*entity2.GroupMember, error) {
 	groups, err := c.FetchGroups()
 	if err != nil {
 		return nil, err
 	}
-	groupsData := make(map[uint32]map[uint32]*entity.GroupMember, len(groups))
+	groupsData := make(map[uint32]map[uint32]*entity2.GroupMember, len(groups))
 	for _, group := range groups {
 		groupMembersData, err := c.GetGroupMembersData(group.GroupUin)
 		if err != nil {
@@ -173,12 +173,12 @@ func (c *QQClient) GetAllGroupsMembersData() (map[uint32]map[uint32]*entity.Grou
 	return groupsData, err
 }
 
-func (c *QQClient) GetAllGroupsInfo() (map[uint32]*entity.Group, error) {
+func (c *QQClient) GetAllGroupsInfo() (map[uint32]*entity2.Group, error) {
 	groupsInfo, err := c.FetchGroups()
 	if err != nil {
 		return nil, err
 	}
-	groupsData := make(map[uint32]*entity.Group, len(groupsInfo))
+	groupsData := make(map[uint32]*entity2.Group, len(groupsInfo))
 	for _, group := range groupsInfo {
 		groupsData[group.GroupUin] = group
 	}

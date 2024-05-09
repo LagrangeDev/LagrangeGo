@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/pkg/pb/service/oidb";
+
+import "pb/service/oidb/generics.proto";
+
+// Get Cookie
+message OidbSvcTrpcTcp0x102A_0 {
+  repeated string Domain = 1;
+}
+
+message OidbSvcTrpcTcp0x102A_0Response {
+  repeated OidbProperty Urls = 1;
+}
+
