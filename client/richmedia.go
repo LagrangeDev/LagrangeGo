@@ -2,11 +2,11 @@ package client
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
-	"net"
+	"net/netip"
 
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
@@ -16,27 +16,24 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
-func ConvertIP(raw uint32) string {
-	ip := make(net.IP, 4)
-	ip[0] = byte(raw & 0xFF)
-	ip[1] = byte((raw >> 8) & 0xFF)
-	ip[2] = byte((raw >> 16) & 0xFF)
-	ip[3] = byte((raw >> 24) & 0xFF)
-	return fmt.Sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3])
+func le32toipstr(raw uint32) string {
+	var buf [4]byte
+	binary.LittleEndian.PutUint32(buf[:], raw)
+	return netip.AddrFrom4(buf).String()
 }
 
 func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
-	var IPv4s []*highway.NTHighwayIPv4
-	for _, ipv4 := range ipv4s {
-		IPv4s = append(IPv4s, &highway.NTHighwayIPv4{
+	hwipv4s := make([]*highway.NTHighwayIPv4, len(ipv4s))
+	for i, ip := range ipv4s {
+		hwipv4s[i] = &highway.NTHighwayIPv4{
 			Domain: &highway.NTHighwayDomain{
 				IsEnable: true,
-				IP:       ConvertIP(ipv4.OutIP),
+				IP:       le32toipstr(ip.OutIP),
 			},
-			Port: ipv4.OutPort,
-		})
+			Port: ip.OutPort,
+		}
 	}
-	return IPv4s
+	return hwipv4s
 }
 
 func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessageElement) (*message.FriendImageElement, error) {
