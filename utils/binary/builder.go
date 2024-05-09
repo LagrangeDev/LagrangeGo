@@ -3,6 +3,7 @@ package binary
 import (
 	"bytes"
 	"encoding/binary"
+	"io"
 	"math"
 	"strconv"
 	"unsafe"
@@ -16,6 +17,8 @@ type Builder struct {
 	buffer *bytes.Buffer
 	key    ftea.TEA
 	usetea bool
+	io.Writer
+	io.ReaderFrom
 }
 
 func NewBuilder(key []byte) *Builder {
@@ -44,6 +47,10 @@ func (b *Builder) data() []byte {
 
 func (b *Builder) pack(v any) error {
 	return binary.Write(b.buffer, binary.BigEndian, v)
+}
+
+func (b *Builder) ToReader() io.Reader {
+	return b.buffer
 }
 
 // ToBytes return data with tea encryption
@@ -105,6 +112,14 @@ func (b *Builder) WritePacketBytes(v []byte, prefix string, withPrefix bool) *Bu
 
 func (b *Builder) WritePacketString(s, prefix string, withPrefix bool) *Builder {
 	return b.WritePacketBytes(utils.S2B(s), prefix, withPrefix)
+}
+
+func (b *Builder) Write(p []byte) (n int, err error) {
+	return b.buffer.Write(p)
+}
+
+func (b *Builder) ReadFrom(r io.Reader) (n int64, err error) {
+	return io.Copy(b.buffer, r)
 }
 
 func (b *Builder) WriteBytes(v []byte, withLength bool) *Builder {
