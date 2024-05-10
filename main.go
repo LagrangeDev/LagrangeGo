@@ -3,6 +3,8 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/info"
@@ -53,7 +55,7 @@ func main() {
 		}
 	})
 
-	err = qqclient.Login("", "./qrcode.png")
+	err = qqclient.Login("", "qrcode.png")
 	if err != nil {
 		mainLogger.Errorln("login err:", err)
 		return
@@ -75,5 +77,13 @@ func main() {
 		mainLogger.Infoln("sig saved into sig.bin")
 	}()
 
-	select {}
+	// setup the main stop channel
+	mc := make(chan os.Signal, 2)
+	signal.Notify(mc, os.Interrupt, syscall.SIGTERM)
+	for {
+		switch <-mc {
+		case os.Interrupt, syscall.SIGTERM:
+			return
+		}
+	}
 }
