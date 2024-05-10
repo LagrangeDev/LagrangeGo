@@ -338,16 +338,13 @@ func (c *QQClient) netLoop() {
 			}()
 
 			if decoder, ok := decoders[pkt.CommandName]; ok {
-				println(1)
 				// found predefined decoder
 				info, ok := c.handlers.LoadAndDelete(pkt.SequenceId)
 				var decoded any
 				decoded = pkt.Payload
 				if info == nil || !info.dynamic {
 					pkt.Params = info.getParams()
-					println(2)
 					decoded, err = decoder(c, pkt)
-					println(3)
 					if err != nil {
 						networkLogger.Debugf("decode pkt %v error: %+v", pkt.CommandName, err)
 					}

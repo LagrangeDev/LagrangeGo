@@ -9,14 +9,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/RomiChan/syncx"
+
 	"github.com/LagrangeDev/LagrangeGo/cache"
 	"github.com/LagrangeDev/LagrangeGo/client/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/network"
 	"github.com/LagrangeDev/LagrangeGo/client/oicq"
-	"github.com/RomiChan/syncx"
-
 	"github.com/LagrangeDev/LagrangeGo/event"
-
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
@@ -75,9 +74,10 @@ type QQClient struct {
 	cache cache.Cache
 
 	// event handles
-	GroupMessageEvent           EventHandle[*message.GroupMessage]
-	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
-	TempMessageEvent            EventHandle[*message.TempMessage]
+	GroupMessageEvent   EventHandle[*message.GroupMessage]
+	PrivateMessageEvent EventHandle[*message.PrivateMessage]
+	TempMessageEvent    EventHandle[*message.TempMessage]
+
 	GroupInvitedEvent           EventHandle[*event.GroupInvite]            // 邀请入群
 	GroupMemberJoinRequestEvent EventHandle[*event.GroupMemberJoinRequest] // 加群申请
 	GroupMemberJoinEvent        EventHandle[*event.GroupMemberIncrease]    // 成员入群

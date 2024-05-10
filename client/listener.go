@@ -87,14 +87,16 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		return eventConverter.ParseRequestInvitationNotice(&pb), nil
+		c.GroupMemberJoinRequestEvent.dispatch(c, eventConverter.ParseRequestInvitationNotice(&pb))
+		return nil, nil
 	case 87: // group invite notice
 		pb := message.GroupInvite{}
 		err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 		if err != nil {
 			return nil, err
 		}
-		return eventConverter.ParseInviteNotice(&pb), nil
+		c.GroupInvitedEvent.dispatch(c, eventConverter.ParseInviteNotice(&pb))
+		return nil, nil
 	case 0x210: // friend event, 528
 		subType := pkg.ContentHead.SubType.Unwrap()
 		switch subType {
@@ -104,14 +106,16 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseFriendRequestNotice(&pb, &msg), nil
+			c.FriendRequestEvent.dispatch(c, eventConverter.ParseFriendRequestNotice(&pb, &msg))
+			return nil, nil
 		case 138: // friend recall
 			pb := message.FriendRecall{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseFriendRecallEvent(&pb), nil
+			c.FriendRecallEvent.dispatch(c, eventConverter.ParseFriendRecallEvent(&pb))
+			return nil, nil
 		case 39: // friend rename
 			networkLogger.Debugln("friend rename")
 			pb := message.FriendRenameMsg{}
@@ -119,7 +123,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseFriendRenameEvent(&pb, c.cache.GetUin(pb.Body.Data.Uid)), nil
+			c.RenameEvent.dispatch(c, eventConverter.ParseFriendRenameEvent(&pb, c.cache.GetUin(pb.Body.Data.Uid)))
+			return nil, nil
 		case 29:
 			networkLogger.Debugln("self rename")
 			pb := message.SelfRenameMsg{}
@@ -127,7 +132,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseSelfRenameEvent(&pb, &c.transport.Sig), nil
+			c.RenameEvent.dispatch(c, eventConverter.ParseSelfRenameEvent(&pb, &c.transport.Sig))
+			return nil, nil
 		default:
 			networkLogger.Warningf("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
@@ -145,14 +151,16 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseGroupRecallEvent(&pb), nil
+			c.GroupRecallEvent.dispatch(c, eventConverter.ParseGroupRecallEvent(&pb))
+			return nil, nil
 		case 12: // mute
 			pb := message.GroupMute{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
 				return nil, err
 			}
-			return eventConverter.ParseGroupMuteEvent(&pb), nil
+			c.GroupMuteEvent.dispatch(c, eventConverter.ParseGroupMuteEvent(&pb))
+			return nil, nil
 		default:
 			networkLogger.Warningf("Unsupported group event, subType: %v", subType)
 		}
