@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/netip"
 
+	highway2 "github.com/LagrangeDev/LagrangeGo/client/highway"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 	message2 "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
@@ -52,8 +53,9 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 	if err != nil {
 		return nil, err
 	}
-	ukey := uploadResp.Upload.UKey
-	if ukey.Unwrap() != "" {
+	ukey := uploadResp.Upload.UKey.Unwrap()
+	networkLogger.Debugln("private image upload ukey:", ukey)
+	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
 		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
 		if err != nil {
@@ -61,12 +63,12 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 		}
 		extend := &highway.NTV2RichMediaHighwayExt{
 			FileUuid: index.FileUuid,
-			UKey:     ukey.Unwrap(),
+			UKey:     ukey,
 			Network: &highway.NTHighwayNetwork{
 				IPv4S: ConvertNTHighwayNetWork(uploadResp.Upload.IPv4S),
 			},
 			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
-			BlockSize:   1024 * 1024,
+			BlockSize:   uint32(highway2.BlockSize),
 			Hash: &highway.NTHighwayHash{
 				FileSha1: [][]byte{sha1hash},
 			},
@@ -114,8 +116,9 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 	if err != nil {
 		return nil, err
 	}
-	ukey := uploadResp.Upload.UKey
-	if ukey.Unwrap() != "" {
+	ukey := uploadResp.Upload.UKey.Unwrap()
+	networkLogger.Debugln("private image upload ukey:", ukey)
+	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
 		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
 		if err != nil {
@@ -123,12 +126,12 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		}
 		extend := &highway.NTV2RichMediaHighwayExt{
 			FileUuid: index.FileUuid,
-			UKey:     ukey.Unwrap(),
+			UKey:     ukey,
 			Network: &highway.NTHighwayNetwork{
 				IPv4S: ConvertNTHighwayNetWork(uploadResp.Upload.IPv4S),
 			},
 			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
-			BlockSize:   1024 * 1024,
+			BlockSize:   uint32(highway2.BlockSize),
 			Hash: &highway.NTHighwayHash{
 				FileSha1: [][]byte{sha1hash},
 			},

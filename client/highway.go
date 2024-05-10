@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 
+	hw "github.com/LagrangeDev/LagrangeGo/client/highway"
 	highway2 "github.com/LagrangeDev/LagrangeGo/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -17,29 +18,8 @@ import (
 	"github.com/RomiChan/protobuf/proto"
 )
 
-const (
-	uploadBlockSize        = 1024 * 1024
-	httpServiceType uint32 = 1
-)
-
-type UpBlock struct {
-	CommandId  int
-	Uin        uint
-	Sequence   uint
-	FileSize   uint64
-	Offset     uint64
-	Ticket     []byte
-	FileMd5    []byte
-	Block      io.Reader
-	BlockMd5   []byte
-	BlockSize  uint32
-	ExtendInfo []byte
-	Timestamp  uint64
-}
-
 func (c *QQClient) EnsureHighwayServers() error {
-	if c.highwayUri == nil || c.sigSession == nil {
-		c.highwayUri = make(map[uint32][]string)
+	if c.highwaySession.SsoAddr == nil || c.highwaySession.SigSession == nil || c.highwaySession.SessionKey == nil {
 		packet, err := highway2.BuildHighWayUrlReq(c.sig.Tgt)
 		if err != nil {
 			return err
@@ -52,20 +32,19 @@ func (c *QQClient) EnsureHighwayServers() error {
 		if err != nil {
 			return fmt.Errorf("parse highway server: %v", err)
 		}
+		c.highwaySession.SigSession = resp.HttpConn.SigSession
+		c.highwaySession.SessionKey = resp.HttpConn.SessionKey
 		for _, info := range resp.HttpConn.ServerInfos {
-			servicetype := info.ServiceType
+			if info.ServiceType != 1 {
+				continue
+			}
 			for _, addr := range info.ServerAddrs {
-				service := c.highwayUri[servicetype]
-				service = append(service, fmt.Sprintf(
-					"http://%s:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d",
-					le32toipstr(addr.IP), addr.Port, c.sig.Uin,
-				))
-				c.highwayUri[servicetype] = service
+				networkLogger.Debugln("add highway server", binary.UInt32ToIPV4Address(addr.IP), "port", addr.Port)
+				c.highwaySession.AppendAddr(addr.IP, addr.Port)
 			}
 		}
-		c.sigSession = resp.HttpConn.SigSession
 	}
-	if c.highwayUri == nil || c.sigSession == nil {
+	if c.highwaySession.SsoAddr == nil || c.highwaySession.SigSession == nil || c.highwaySession.SessionKey == nil {
 		return errors.New("empty highway servers")
 	}
 	return nil
@@ -76,30 +55,36 @@ func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64,
 	if err != nil {
 		return err
 	}
-	servers := c.highwayUri[httpServiceType]
-	server := servers[rand.Intn(len(servers))]
-	buffer := make([]byte, uploadBlockSize)
-	for offset := uint64(0); offset < fileSize; offset += uploadBlockSize {
-		if uploadBlockSize > fileSize-offset {
+	trans := &hw.Transaction{
+		CommandID: uint32(commonId),
+		Body:      r,
+		Sum:       md5,
+		Size:      fileSize,
+		Ticket:    c.highwaySession.SigSession,
+		LoginSig:  c.sig.Tgt,
+		Ext:       extendInfo,
+	}
+	_, err = c.highwaySession.Upload(trans)
+	if err == nil {
+		return nil
+	}
+	// fallback to http upload
+	servers := c.highwaySession.SsoAddr
+	saddr := servers[rand.Intn(len(servers))]
+	server := fmt.Sprintf(
+		"http://%s:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d",
+		binary.UInt32ToIPV4Address(saddr.IP), saddr.Port, c.sig.Uin,
+	)
+	buffer := make([]byte, hw.BlockSize)
+	for offset := uint64(0); offset < fileSize; offset += hw.BlockSize {
+		if hw.BlockSize > fileSize-offset {
 			buffer = buffer[:fileSize-offset]
 		}
 		_, err := io.ReadFull(r, buffer)
 		if err != nil {
 			return err
 		}
-		err = c.SendUpBlock(&UpBlock{
-			CommandId:  commonId,
-			Uin:        uint(c.sig.Uin),
-			Sequence:   uint(c.highwaySequence.Add(1)),
-			FileSize:   fileSize,
-			Offset:     offset,
-			Ticket:     c.sigSession,
-			FileMd5:    md5,
-			Block:      bytes.NewReader(buffer),
-			BlockMd5:   crypto.MD5Digest(buffer),
-			BlockSize:  uint32(len(buffer)),
-			ExtendInfo: extendInfo,
-		}, server)
+		err = c.SendUpBlock(trans, server, offset, crypto.MD5Digest(buffer), buffer)
 		if err != nil {
 			return err
 		}
@@ -107,43 +92,12 @@ func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64,
 	return nil
 }
 
-func (c *QQClient) SendUpBlock(block *UpBlock, server string) error {
-	head := &highway.DataHighwayHead{
-		Version:    1,
-		Uin:        proto.Some(strconv.Itoa(int(block.Uin))),
-		Command:    proto.Some("PicUp.DataUp"),
-		Seq:        proto.Some(uint32(block.Sequence)),
-		RetryTimes: proto.Some(uint32(0)),
-		AppId:      uint32(c.appInfo.SubAppID),
-		DataFlag:   16,
-		CommandId:  uint32(block.CommandId),
-	}
-	segHead := &highway.SegHead{
-		ServiceId:     proto.Some(uint32(0)),
-		Filesize:      block.FileSize,
-		DataOffset:    proto.Some(block.Offset),
-		DataLength:    uint32(block.BlockSize),
-		RetCode:       proto.Some(uint32(0)),
-		ServiceTicket: block.Ticket,
-		Md5:           block.BlockMd5,
-		FileMd5:       block.FileMd5,
-		CacheAddr:     proto.Some(uint32(0)),
-		CachePort:     proto.Some(uint32(0)),
-	}
-	loginHead := &highway.LoginSigHead{
-		Uint32LoginSigType: 8,
-		BytesLoginSig:      c.sig.Tgt,
-		AppId:              uint32(c.appInfo.AppID),
-	}
-	highwayHead := &highway.ReqDataHighwayHead{
-		MsgBaseHead:        head,
-		MsgSegHead:         segHead,
-		BytesReqExtendInfo: block.ExtendInfo,
-		Timestamp:          block.Timestamp,
-		MsgLoginSigHead:    loginHead,
-	}
-	isEnd := block.Offset+uint64(block.BlockSize) == block.FileSize
-	payload, err := sendHighwayPacket(highwayHead, block.Block, block.BlockSize, server, isEnd)
+func (c *QQClient) SendUpBlock(trans *hw.Transaction, server string, offset uint64, blkmd5 []byte, blk []byte) error {
+	blksz := uint64(len(blk))
+	isEnd := offset+blksz == trans.Size
+	payload, err := sendHighwayPacket(
+		trans.Build(&c.highwaySession, offset, uint32(blksz), blkmd5), blk, server, isEnd,
+	)
 	if err != nil {
 		return fmt.Errorf("send highway packet: %v", err)
 	}
@@ -179,21 +133,27 @@ func parseHighwayPacket(data io.Reader) (head *highway.RespDataHighwayHead, body
 	return head, reader, nil
 }
 
-func sendHighwayPacket(packet *highway.ReqDataHighwayHead, buffer io.Reader, bufferSize uint32, serverURL string, end bool) (io.ReadCloser, error) {
+func sendHighwayPacket(packet *highway.ReqDataHighwayHead, block []byte, serverURL string, end bool) (io.ReadCloser, error) {
 	marshal, err := proto.Marshal(packet)
 	if err != nil {
 		return nil, err
 	}
-
-	writer := binary.NewBuilder(nil).
-		WriteBytes([]byte{0x28}).
-		WriteU32(uint32(len(marshal))).
-		WriteU32(bufferSize).
-		WriteBytes(marshal)
-	_, _ = io.Copy(writer, buffer)
-	_, _ = writer.Write([]byte{0x29})
-
-	return postHighwayContent(writer.ToReader(), serverURL, end)
+	buf := hw.Frame(marshal, block)
+	data, err := io.ReadAll(&buf)
+	if err != nil {
+		return nil, err
+	}
+	return postHighwayContent(bytes.NewReader(data), serverURL, end)
+	/*
+		return postHighwayContent(
+			binary.NewBuilder(nil).
+				WriteBytes([]byte{0x28}).
+				WriteU32(uint32(len(marshal))).
+				WriteU32(uint32(len(block))).
+				WriteBytes(marshal).
+				WriteBytes(block).
+				WriteBytes([]byte{0x29}).ToReader(), serverURL, end)
+	*/
 }
 
 func postHighwayContent(content io.Reader, serverURL string, end bool) (io.ReadCloser, error) {

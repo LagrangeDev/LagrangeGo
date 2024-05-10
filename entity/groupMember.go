@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type GroupMemberPermission uint
+type GroupMemberPermission uint32
 
 const (
 	Member GroupMemberPermission = iota
@@ -24,17 +24,17 @@ type GroupMember struct {
 	Avatar      string
 }
 
-func NewGroupMember(uin uint32, uid string, permission GroupMemberPermission, GroupLevel uint32, MemberCard,
-	MemberName string, JoinTime, LastMsgTime uint32) *GroupMember {
+func NewGroupMember(uin uint32, uid string, permission GroupMemberPermission, groupLevel uint32,
+	memberCard, memberName string, joinTime, lastMsgTime uint32) *GroupMember {
 	return &GroupMember{
 		Uin:         uin,
 		Uid:         uid,
 		Permission:  permission,
-		GroupLevel:  GroupLevel,
-		MemberCard:  MemberCard,
-		MemberName:  MemberName,
-		JoinTime:    JoinTime,
-		LastMsgTime: LastMsgTime,
+		GroupLevel:  groupLevel,
+		MemberCard:  memberCard,
+		MemberName:  memberName,
+		JoinTime:    joinTime,
+		LastMsgTime: lastMsgTime,
 		Avatar:      fmt.Sprintf("https://q1.qlogo.cn/g?b=qq&nk=%v&s=640", uin),
 	}
 }

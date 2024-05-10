@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/cache"
+	"github.com/LagrangeDev/LagrangeGo/client/highway"
 
 	"github.com/LagrangeDev/LagrangeGo/event"
 
@@ -20,8 +21,8 @@ import (
 
 const msfwifiServer = "msfwifi.3g.qq.com:8080"
 
-// NewQQclient 创建一个新的QQClient
-func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
+// NewQQClient 创建一个新的QQClient
+func NewQQClient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
 	client := &QQClient{
 		Uin:          uin,
 		appInfo:      appInfo,
@@ -31,9 +32,12 @@ func NewQQclient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *
 		// 128应该够用了吧
 		pushStore: make(chan *wtlogin.SSOPacket, 128),
 		stopChan:  make(chan struct{}),
-		tcp:       &TCPClient{},
-		cache:     &cache.Cache{},
+		highwaySession: highway.Session{
+			AppID:    uint32(appInfo.AppID),
+			SubAppID: uint32(appInfo.SubAppID),
+		},
 	}
+	client.highwaySession.Uin = &client.sig.Uin
 	client.Online.Store(false)
 	return client
 }
@@ -53,13 +57,10 @@ type QQClient struct {
 	t106 []byte
 	t16a []byte
 
-	tcp *TCPClient
+	tcp            TCPClient
+	highwaySession highway.Session
 
-	cache *cache.Cache
-
-	highwayUri      map[uint32][]string
-	highwaySequence atomic.Uint32
-	sigSession      []byte
+	cache cache.Cache
 
 	GroupMessageEvent           EventHandle[*message.GroupMessage]
 	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
