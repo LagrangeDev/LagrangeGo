@@ -3,68 +3,81 @@ package client
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/client/client.go
 
 import (
+	"errors"
+	"net/netip"
+	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/RomiChan/syncx"
+
 	"github.com/LagrangeDev/LagrangeGo/cache"
 	"github.com/LagrangeDev/LagrangeGo/client/highway"
-
+	"github.com/LagrangeDev/LagrangeGo/client/network"
+	"github.com/LagrangeDev/LagrangeGo/client/oicq"
 	"github.com/LagrangeDev/LagrangeGo/event"
-
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	binary2 "github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-const msfwifiServer = "msfwifi.3g.qq.com:8080"
-
-// NewQQClient 创建一个新的QQClient
-func NewQQClient(uin uint32, signUrl string, appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sig *info.SigInfo) *QQClient {
+// NewClient 创建一个新的 QQ Client
+func NewClient(uin uint32, signUrl string, appInfo *info.AppInfo) *QQClient {
 	client := &QQClient{
 		Uin:          uin,
-		appInfo:      appInfo,
-		deviceInfo:   deviceInfo,
-		sig:          sig,
 		signProvider: utils.SignProvider(signUrl),
-		// 128应该够用了吧
-		pushStore: make(chan *wtlogin.SSOPacket, 128),
-		stopChan:  make(chan struct{}),
+		oicq:         oicq.NewCodec(int64(uin)),
 		highwaySession: highway.Session{
 			AppID:    uint32(appInfo.AppID),
 			SubAppID: uint32(appInfo.SubAppID),
 		},
+		alive: true,
 	}
-	client.highwaySession.Uin = &client.sig.Uin
+	client.transport.Version = appInfo
+	client.transport.Sig.D2Key = make([]byte, 0, 16)
+	client.highwaySession.Uin = &client.transport.Sig.Uin
 	client.Online.Store(false)
+	client.TCP.PlannedDisconnect(client.plannedDisconnect)
+	client.TCP.UnexpectedDisconnect(client.unexpectedDisconnect)
 	return client
 }
 
 type QQClient struct {
 	Uin          uint32
-	appInfo      *info.AppInfo
-	deviceInfo   *info.DeviceInfo
-	sig          *info.SigInfo
 	signProvider func(string, uint32, []byte) map[string]string
 
-	pushStore chan *wtlogin.SSOPacket
+	stat Statistics
+	once sync.Once
 
-	Online   atomic.Bool
-	stopChan chan struct{}
+	Online atomic.Bool
 
 	t106 []byte
 	t16a []byte
 
-	tcp            TCPClient
+	TCP            network.TCPClient // todo: combine other protocol state into one struct
+	ConnectTime    time.Time
+	transport      network.Transport
+	oicq           *oicq.Codec
 	highwaySession highway.Session
+
+	// internal state
+	handlers        syncx.Map[uint32, *handlerInfo]
+	waiters         syncx.Map[string, func(any, error)]
+	initServerOnce  sync.Once
+	servers         []netip.AddrPort
+	currServerIndex int
+	retryTimes      int
+	alive           bool
 
 	cache cache.Cache
 
-	GroupMessageEvent           EventHandle[*message.GroupMessage]
-	PrivateMessageEvent         EventHandle[*message.PrivateMessage]
-	TempMessageEvent            EventHandle[*message.TempMessage]
+	// event handles
+	GroupMessageEvent   EventHandle[*message.GroupMessage]
+	PrivateMessageEvent EventHandle[*message.PrivateMessage]
+	TempMessageEvent    EventHandle[*message.TempMessage]
+
 	GroupInvitedEvent           EventHandle[*event.GroupInvite]            // 邀请入群
 	GroupMemberJoinRequestEvent EventHandle[*event.GroupMemberJoinRequest] // 加群申请
 	GroupMemberJoinEvent        EventHandle[*event.GroupMemberIncrease]    // 成员入群
@@ -74,183 +87,81 @@ type QQClient struct {
 	FriendRequestEvent          EventHandle[*event.FriendRequest] // 好友申请
 	FriendRecallEvent           EventHandle[*event.FriendRecall]
 	RenameEvent                 EventHandle[*event.Rename]
+
+	// client event handles
+	eventHandlers     eventHandlers
+	DisconnectedEvent EventHandle[*ClientDisconnectedEvent]
+}
+
+func (c *QQClient) version() *info.AppInfo {
+	return c.transport.Version
+}
+
+func (c *QQClient) Device() *info.DeviceInfo {
+	return c.transport.Device
+}
+
+func (c *QQClient) UseDevice(d *info.DeviceInfo) {
+	c.transport.Device = d
+}
+
+func (c *QQClient) UseSig(s info.SigInfo) {
+	c.transport.Sig = s
+}
+
+func (c *QQClient) Sig() *info.SigInfo {
+	return &c.transport.Sig
+}
+
+func (c *QQClient) Release() {
+	if c.Online.Load() {
+		c.Disconnect()
+	}
+	c.alive = false
 }
 
 func (c *QQClient) NickName() string {
-	return c.sig.Nickname
+	return c.transport.Sig.Nickname
 }
 
-func (c *QQClient) SendOidbPacket(pkt *oidb.OidbPacket) error {
-	return c.SendUniPacket(pkt.Cmd, pkt.Data)
+func (c *QQClient) sendOidbPacketAndWait(pkt *oidb.OidbPacket) ([]byte, error) {
+	return c.sendUniPacketAndWait(pkt.Cmd, pkt.Data)
 }
 
-func (c *QQClient) SendOidbPacketAndWait(pkt *oidb.OidbPacket) (*wtlogin.SSOPacket, error) {
-	return c.SendUniPacketAndAwait(pkt.Cmd, pkt.Data)
-}
-
-func (c *QQClient) SendUniPacket(cmd string, buf []byte) error {
-	seq := c.getAndIncreaseSequence()
-	var sign map[string]string
-	if c.signProvider != nil {
-		sign = c.signProvider(cmd, seq, buf)
-	}
-	packet := wtlogin.BuildUniPacket(int(c.Uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
-	return c.Send(packet)
-}
-
-func (c *QQClient) SendUniPacketAndAwait(cmd string, buf []byte) (*wtlogin.SSOPacket, error) {
-	seq := c.getAndIncreaseSequence()
-	var sign map[string]string
-	if c.signProvider != nil {
-		sign = c.signProvider(cmd, seq, buf)
-	}
-	packet := wtlogin.BuildUniPacket(int(c.Uin), seq, cmd, sign, c.appInfo, c.deviceInfo, c.sig, buf)
-	return c.SendAndWait(packet, int(seq), 5)
-}
-
-func (c *QQClient) Send(data []byte) error {
-	return c.tcp.Write(data)
-}
-
-func (c *QQClient) SendAndWait(data []byte, seq int, timeout int) (*wtlogin.SSOPacket, error) {
-	fetcher.AddSeq(seq)
-	err := c.tcp.Write(data)
+func (c *QQClient) sendUniPacketAndWait(cmd string, buf []byte) ([]byte, error) {
+	seq, packet := c.uniPacket(cmd, buf)
+	pkt, err := c.sendAndWait(seq, packet)
 	if err != nil {
-		// 出错了要删掉
-		fetcher.DeleteSeq(seq)
+		return nil, err
 	}
-	return fetcher.Fecth(seq, timeout)
+	rsp, ok := pkt.([]byte)
+	if !ok {
+		return nil, errors.New("cannot parse response to bytes")
+	}
+	return rsp, nil
 }
 
-func (c *QQClient) SSOHeartbeat(calcLatency bool) int64 {
-	startTime := time.Now().Unix()
-	_, err := c.SendUniPacketAndAwait(
-		"trpc.qq_new_tech.status_svc.StatusService.SsoHeartBeat",
-		wtlogin.BuildSSOHeartbeatRequest())
-	if err != nil {
-		return 0
-	}
-	if calcLatency {
-		return time.Now().Unix() - startTime
-	}
-	return 0
-}
-
-func (c *QQClient) ssoHeartBeatLoop() {
-heartBeatLoop:
-	for {
-		select {
-		case <-c.stopChan:
-			break heartBeatLoop
-		case <-time.After(270 * time.Second):
-			if !c.Online.Load() {
-				continue heartBeatLoop
-			}
-			startTime := time.Now().UnixMilli()
-			_, err := c.SendUniPacketAndAwait(
-				"trpc.qq_new_tech.status_svc.StatusService.SsoHeartBeat",
-				wtlogin.BuildSSOHeartbeatRequest())
-			if err != nil {
-				networkLogger.Errorf("heartbeat err %s", err)
-			}
+func (c *QQClient) doHeartbeat() {
+	for c.Online.Load() {
+		time.Sleep(270 * time.Second)
+		if !c.Online.Load() {
+			continue
+		}
+		startTime := time.Now().UnixMilli()
+		_, err := c.sendUniPacketAndWait(
+			"trpc.qq_new_tech.status_svc.StatusService.SsoHeartBeat",
+			wtlogin.BuildSSOHeartbeatRequest())
+		if errors.Is(err, network.ErrConnectionClosed) {
+			continue
+		}
+		if err != nil {
+			networkLogger.Errorf("heartbeat err %s", err)
+		} else {
 			networkLogger.Debugf("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
+			//TODO: times
 		}
 	}
 	networkLogger.Debug("heartbeat task stoped")
-}
-
-func (c *QQClient) OnMessage(msgLen int) {
-	raw, err := c.tcp.ReadBytes(msgLen)
-	if err != nil {
-		networkLogger.Errorf("read message error: %s", err)
-		return
-	}
-	go func(c *QQClient, raw []byte) {
-		ssoHeader, err := wtlogin.ParseSSOHeader(raw, c.sig.D2Key)
-		if err != nil {
-			networkLogger.Errorf("ParseSSOHeader error %s", err)
-			return
-		}
-		packet, err := wtlogin.ParseSSOFrame(ssoHeader.Dec, ssoHeader.Flag == 2)
-		if err != nil {
-			networkLogger.Errorf("ParseSSOFrame error %s", err)
-			return
-		}
-
-		if packet.Seq > 0 { // uni rsp
-			networkLogger.Debugf("%d(%d) -> %s, extra: %s", packet.Seq, packet.RetCode, packet.Cmd, packet.Extra)
-			if packet.RetCode != 0 && fetcher.ContainSeq(packet.Seq) {
-				networkLogger.Errorf("error ssopacket retcode: %d, extra: %s", packet.RetCode, packet.Extra)
-				return
-			} else if packet.RetCode != 0 {
-				networkLogger.Errorf("Unexpected error on sso layer: %d: %s", packet.RetCode, packet.Extra)
-				return
-			}
-			if !fetcher.ContainSeq(packet.Seq) {
-				networkLogger.Warningf("Unknown packet: %s(%d), ignore", packet.Cmd, packet.Seq)
-			} else {
-				fetcher.AddResult(packet.Seq, packet)
-			}
-		} else { // server pushed
-			if fn, ok := listeners[packet.Cmd]; ok {
-				networkLogger.Debugf("Server Push(%d) <- %s, extra: %s", packet.RetCode, packet.Cmd, packet.Extra)
-				msg, err := fn(c, packet)
-				if err != nil {
-					return
-				}
-				go OnEvent(c, msg)
-			} else {
-				networkLogger.Warningf("unsupported command: %s", packet.Cmd)
-			}
-		}
-	}(c, raw)
-}
-
-func (c *QQClient) ReadLoop() {
-	for !c.tcp.IsClosed() {
-		lengthData, err := c.tcp.ReadBytes(4)
-		if err != nil {
-			networkLogger.Errorf("tcp read length error: %s", err)
-			break
-		}
-		length := int(binary2.NewReader(lengthData).ReadU32() - 4)
-		if length > 0 {
-			c.OnMessage(length)
-		} else {
-			c.tcp.Close()
-		}
-	}
-	c.OnDisconnected()
-}
-
-func (c *QQClient) Loop() error {
-	err := c.Connect()
-	if err != nil {
-		return err
-	}
-	go c.ReadLoop()
-	go c.ssoHeartBeatLoop()
-	return nil
-}
-
-func (c *QQClient) Connect() error {
-	err := c.tcp.Connect(msfwifiServer, 5*time.Second)
-	if err != nil {
-		return err
-	}
-	c.OnConnected()
-	return nil
-}
-
-func (c *QQClient) DisConnect() {
-	c.tcp.Close()
-	c.OnDisconnected()
-}
-
-// Stop 停止整个client，一旦停止不能重新连接
-func (c *QQClient) Stop() {
-	c.DisConnect()
-	close(c.stopChan)
 }
 
 // setOnline 设置qq已经上线
@@ -258,18 +169,10 @@ func (c *QQClient) setOnline() {
 	c.Online.Store(true)
 }
 
-func (c *QQClient) OnConnected() {
-
-}
-
-func (c *QQClient) OnDisconnected() {
-	c.Online.Store(false)
-}
-
 func (c *QQClient) getAndIncreaseSequence() uint32 {
-	return atomic.AddUint32(&c.sig.Sequence, 1) % 0x8000
+	return atomic.AddUint32(&c.transport.Sig.Sequence, 1) % 0x8000
 }
 
 func (c *QQClient) getSequence() uint32 {
-	return atomic.LoadUint32(&c.sig.Sequence) % 0x8000
+	return atomic.LoadUint32(&c.transport.Sig.Sequence) % 0x8000
 }

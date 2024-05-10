@@ -2,10 +2,8 @@ package client
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"net/netip"
 
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/highway"
 	"github.com/LagrangeDev/LagrangeGo/message"
@@ -13,14 +11,9 @@ import (
 	message2 "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
-
-func le32toipstr(raw uint32) string {
-	var buf [4]byte
-	binary.LittleEndian.PutUint32(buf[:], raw)
-	return netip.AddrFrom4(buf).String()
-}
 
 func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 	hwipv4s := make([]*highway.NTHighwayIPv4, len(ipv4s))
@@ -28,7 +21,7 @@ func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 		hwipv4s[i] = &highway.NTHighwayIPv4{
 			Domain: &highway.NTHighwayDomain{
 				IsEnable: true,
-				IP:       le32toipstr(ip.OutIP),
+				IP:       binary.UInt32ToIPV4Address(ip.OutIP),
 			},
 			Port: ip.OutPort,
 		}
@@ -45,11 +38,11 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.SendOidbPacketAndWait(req)
+	resp, err := c.sendOidbPacketAndWait(req)
 	if err != nil {
 		return nil, err
 	}
-	uploadResp, err := oidb.ParseImageUploadResp(resp.Data)
+	uploadResp, err := oidb.ParseImageUploadResp(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +74,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 		if err != nil {
 			return nil, err
 		}
-		err = c.UploadSrcByStream(1003,
+		err = c.highwayUpload(1003,
 			bytes.NewReader(image.Stream), uint64(len(image.Stream)),
 			md5hash, extStream,
 		)
@@ -108,11 +101,11 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.SendOidbPacketAndWait(req)
+	resp, err := c.sendOidbPacketAndWait(req)
 	if err != nil {
 		return nil, err
 	}
-	uploadResp, err := oidb.ParseGroupImageUploadResp(resp.Data)
+	uploadResp, err := oidb.ParseGroupImageUploadResp(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +137,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		if err != nil {
 			return nil, err
 		}
-		err = c.UploadSrcByStream(1004,
+		err = c.highwayUpload(1004,
 			bytes.NewReader(image.Stream), uint64(len(image.Stream)),
 			md5hash, extStream,
 		)

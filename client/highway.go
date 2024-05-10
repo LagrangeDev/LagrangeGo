@@ -18,17 +18,17 @@ import (
 	"github.com/RomiChan/protobuf/proto"
 )
 
-func (c *QQClient) EnsureHighwayServers() error {
+func (c *QQClient) ensureHighwayServers() error {
 	if c.highwaySession.SsoAddr == nil || c.highwaySession.SigSession == nil || c.highwaySession.SessionKey == nil {
-		packet, err := highway2.BuildHighWayUrlReq(c.sig.Tgt)
+		packet, err := highway2.BuildHighWayUrlReq(c.transport.Sig.Tgt)
 		if err != nil {
 			return err
 		}
-		payload, err := c.SendUniPacketAndAwait("HttpConn.0x6ff_501", packet)
+		payload, err := c.sendUniPacketAndWait("HttpConn.0x6ff_501", packet)
 		if err != nil {
 			return fmt.Errorf("get highway server: %v", err)
 		}
-		resp, err := highway2.ParseHighWayUrlReq(payload.Data)
+		resp, err := highway2.ParseHighWayUrlReq(payload)
 		if err != nil {
 			return fmt.Errorf("parse highway server: %v", err)
 		}
@@ -50,8 +50,8 @@ func (c *QQClient) EnsureHighwayServers() error {
 	return nil
 }
 
-func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
-	err := c.EnsureHighwayServers()
+func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
+	err := c.ensureHighwayServers()
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64,
 		Sum:       md5,
 		Size:      fileSize,
 		Ticket:    c.highwaySession.SigSession,
-		LoginSig:  c.sig.Tgt,
+		LoginSig:  c.transport.Sig.Tgt,
 		Ext:       extendInfo,
 	}
 	_, err = c.highwaySession.Upload(trans)
@@ -73,7 +73,7 @@ func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64,
 	saddr := servers[rand.Intn(len(servers))]
 	server := fmt.Sprintf(
 		"http://%s:%d/cgi-bin/httpconn?htcmd=0x6FF0087&uin=%d",
-		binary.UInt32ToIPV4Address(saddr.IP), saddr.Port, c.sig.Uin,
+		binary.UInt32ToIPV4Address(saddr.IP), saddr.Port, c.transport.Sig.Uin,
 	)
 	buffer := make([]byte, hw.BlockSize)
 	for offset := uint64(0); offset < fileSize; offset += hw.BlockSize {
@@ -84,7 +84,7 @@ func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64,
 		if err != nil {
 			return err
 		}
-		err = c.SendUpBlock(trans, server, offset, crypto.MD5Digest(buffer), buffer)
+		err = c.highwayUploadBlock(trans, server, offset, crypto.MD5Digest(buffer), buffer)
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (c *QQClient) UploadSrcByStream(commonId int, r io.Reader, fileSize uint64,
 	return nil
 }
 
-func (c *QQClient) SendUpBlock(trans *hw.Transaction, server string, offset uint64, blkmd5 []byte, blk []byte) error {
+func (c *QQClient) highwayUploadBlock(trans *hw.Transaction, server string, offset uint64, blkmd5 []byte, blk []byte) error {
 	blksz := uint64(len(blk))
 	isEnd := offset+blksz == trans.Size
 	payload, err := sendHighwayPacket(

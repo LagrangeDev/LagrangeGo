@@ -3,6 +3,8 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/info"
@@ -20,12 +22,20 @@ func main() {
 		SystemKernel:  "Windows 10.0.22631",
 		KernelVersion: "10.0.22631",
 	}
-	sig, err := info.LoadSig("./sig.bin")
+
+	qqclient := client.NewClient(0, "https://sign.lagrangecore.org/api/sign", appInfo)
+	qqclient.UseDevice(deviceInfo)
+	data, err := os.ReadFile("sig.bin")
 	if err != nil {
-		mainLogger.Errorln("load sig error:", err)
-		return
+		mainLogger.Warnln("read sig error:", err)
+	} else {
+		sig, err := info.UnmarshalSigInfo(data, true)
+		if err != nil {
+			mainLogger.Warnln("load sig error:", err)
+		} else {
+			qqclient.UseSig(sig)
+		}
 	}
-	qqclient := client.NewQQClient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, &sig)
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
@@ -45,23 +55,35 @@ func main() {
 		}
 	})
 
-	err = qqclient.Loop()
-	if err != nil {
-		mainLogger.Errorln("quit client loop:", err)
-		return
-	}
-
-	err = qqclient.Login("", "./qrcode.png")
+	err = qqclient.Login("", "qrcode.png")
 	if err != nil {
 		mainLogger.Errorln("login err:", err)
 		return
 	}
 
-	err = info.SaveSig(&sig, "./sig.bin")
-	if err != nil {
-		mainLogger.Errorln("save sig.bin err:", err)
-		return
-	}
+	defer qqclient.Release()
 
-	select {}
+	defer func() {
+		data, err = qqclient.Sig().Marshal()
+		if err != nil {
+			mainLogger.Errorln("marshal sig.bin err:", err)
+			return
+		}
+		err = os.WriteFile("sig.bin", data, 0644)
+		if err != nil {
+			mainLogger.Errorln("write sig.bin err:", err)
+			return
+		}
+		mainLogger.Infoln("sig saved into sig.bin")
+	}()
+
+	// setup the main stop channel
+	mc := make(chan os.Signal, 2)
+	signal.Notify(mc, os.Interrupt, syscall.SIGTERM)
+	for {
+		switch <-mc {
+		case os.Interrupt, syscall.SIGTERM:
+			return
+		}
+	}
 }

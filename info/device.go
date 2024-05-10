@@ -1,7 +1,9 @@
 package info
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -24,4 +26,31 @@ func NewDeviceInfo(uin int) *DeviceInfo {
 		SystemKernel:  fmt.Sprintf("%s %s", platform.GetSystem(), platform.GetVersion()),
 		KernelVersion: platform.GetVersion(),
 	}
+}
+
+func LoadOrSaveDevice(path string) (*DeviceInfo, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		deviceinfo := NewDeviceInfo(int(crypto.RandU32()))
+		return deviceinfo, deviceinfo.Save(path)
+	}
+	var dinfo DeviceInfo
+	err = json.Unmarshal(data, &dinfo)
+	if err != nil {
+		deviceinfo := NewDeviceInfo(int(crypto.RandU32()))
+		return deviceinfo, deviceinfo.Save(path)
+	}
+	return &dinfo, nil
+}
+
+func (deviceInfo *DeviceInfo) Save(path string) error {
+	data, err := json.Marshal(deviceInfo)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(path, data, 0666)
+	if err != nil {
+		return err
+	}
+	return nil
 }

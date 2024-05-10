@@ -21,12 +21,16 @@ type Builder struct {
 	io.ReaderFrom
 }
 
-func NewBuilder(key []byte) *Builder {
+func newBuilder(buffer *bytes.Buffer, key []byte) *Builder {
 	return &Builder{
-		buffer: bytes.NewBuffer(make([]byte, 0, 64)),
+		buffer: buffer,
 		key:    ftea.NewTeaCipher(key),
 		usetea: len(key) == 16,
 	}
+}
+
+func NewBuilder(key []byte) *Builder {
+	return newBuilder(bytes.NewBuffer(make([]byte, 0, 64)), key)
 }
 
 func (b *Builder) Len() int {
@@ -116,6 +120,10 @@ func (b *Builder) WritePacketString(s, prefix string, withPrefix bool) *Builder 
 
 func (b *Builder) Write(p []byte) (n int, err error) {
 	return b.buffer.Write(p)
+}
+
+func (w *Builder) EncryptAndWrite(key []byte, data []byte) {
+	_, _ = w.Write(ftea.NewTeaCipher(key).Encrypt(data))
 }
 
 func (b *Builder) ReadFrom(r io.Reader) (n int64, err error) {

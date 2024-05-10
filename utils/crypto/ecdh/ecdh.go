@@ -1,5 +1,7 @@
 package ecdh
 
+/*
+
 import (
 	"crypto/md5"
 	"crypto/rand"
@@ -256,3 +258,5 @@ func reverseBytes(bytes []byte) []byte {
 	}
 	return reversed
 }
+
+*/

@@ -3,7 +3,9 @@ package utils
 // from https://github.com/Mrs4s/MiraiGo/blob/master/utils/string.go
 
 import (
+	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"unsafe"
 )
 
@@ -30,4 +32,15 @@ func MustParseHexStr(s string) []byte {
 		panic(err)
 	}
 	return result
+}
+
+func NewTrace() string {
+	randomBytes := make([]byte, 16+8)
+
+	if _, err := rand.Read(randomBytes); err != nil {
+		return ""
+	}
+
+	trace := fmt.Sprintf("00-%x-%x-01", randomBytes[:16], randomBytes[16:])
+	return trace
 }

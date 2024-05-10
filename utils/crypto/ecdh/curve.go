@@ -1,5 +1,7 @@
 package ecdh
 
+/*
+
 import (
 	"math/big"
 )
@@ -34,7 +36,6 @@ func (c *ec) checkOn(point *ep) bool {
 	return left.Cmp(big.NewInt(0)) == 0
 }
 
-/*
 func newP256Curve() *ec {
 	// SetString方法接收纯16进制字符串，需要去掉0x前缀
 	P256P, _ := new(big.Int).SetString("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16)
@@ -58,7 +59,6 @@ func newP256Curve() *ec {
 		big.NewInt(16),
 	)
 }
-*/
 
 func newS192Curve() *ec {
 	// SetString方法接收纯16进制字符串，需要去掉0x前缀
@@ -80,3 +80,5 @@ func newS192Curve() *ec {
 		big.NewInt(24),
 	)
 }
+
+*/

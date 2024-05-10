@@ -9,7 +9,14 @@ import (
 	"time"
 
 	"golang.org/x/net/http2"
+
+	"github.com/fumiama/terasu/dns"
+	trsh2 "github.com/fumiama/terasu/http2"
 )
+
+func init() {
+	dns.SetTimeout(time.Second)
+}
 
 var (
 	ErrEmptyHostAddress = errors.New("empty host addr")
@@ -26,6 +33,8 @@ func SetDefaultClientTimeout(t time.Duration) {
 var DefaultClient = http.Client{
 	Transport: &http2.Transport{},
 }
+
+var TRSClient = &trsh2.DefaultClient
 
 func Get(url string) (resp *http.Response, err error) {
 	return DefaultClient.Get(url)
