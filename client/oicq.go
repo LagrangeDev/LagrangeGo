@@ -1,30 +1,26 @@
-package wtlogin
+package client
 
 import (
 	"fmt"
 
-	ftea "github.com/fumiama/gofastTEA"
-
+	"github.com/LagrangeDev/LagrangeGo/client/oicq"
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
+	"github.com/RomiChan/protobuf/proto"
+	tea "github.com/fumiama/gofastTEA"
 )
 
-var loginLogger = utils.GetLogger("login")
-
-func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte) []byte {
-	return BuildLoginPacket(
+func (c *QQClient) buildCode2dPacket(uin uint32, cmdID int, body []byte) []byte {
+	return c.buildLoginPacket(
 		uin,
 		"wtlogin.trans_emp",
-		appInfo,
 		binary.NewBuilder(nil).
 			WriteU8(0).
 			WriteU16(uint16(len(body))+53).
-			WriteU32(uint32(appInfo.AppID)).
+			WriteU32(uint32(c.version().AppID)).
 			WriteU32(0x72).
 			WriteBytes(make([]byte, 3)).
 			WriteU32(uint32(utils.TimeStamp())).
@@ -35,15 +31,13 @@ func BuildCode2dPacket(uin uint32, cmdID int, appInfo *info.AppInfo, body []byte
 			WriteU8(3).
 			WriteU32(50).
 			WriteBytes(make([]byte, 14)).
-			WriteU32(uint32(appInfo.AppID)).
+			WriteU32(uint32(c.version().AppID)).
 			WriteBytes(body).
 			ToBytes(),
 	)
 }
 
-func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte) []byte {
-	encBody := ftea.NewTeaCipher(ecdh.S192().SharedKey()).Encrypt(body)
-
+func (c *QQClient) buildLoginPacket(uin uint32, cmd string, body []byte) []byte {
 	var _cmd uint16
 	if cmd == "wtlogin.login" {
 		_cmd = 2064
@@ -51,40 +45,15 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 		_cmd = 2066
 	}
 
-	pk := ecdh.S192().PublicKey()
-
-	frameBody := binary.NewBuilder(nil).
-		WriteU16(8001).
-		WriteU16(_cmd).
-		WriteU16(0).
-		WriteU32(uin).
-		WriteU8(3).
-		WriteU8(135).
-		WriteU32(0).
-		WriteU8(19).
-		WriteU16(0).
-		WriteU16(uint16(appinfo.AppClientVersion)).
-		WriteU32(0).
-		WriteU8(1).
-		WriteU8(1).
-		WriteBytes(make([]byte, 16)).
-		WriteU16(0x102).
-		WriteU16(uint16(len(pk))).
-		WriteBytes(pk).
-		WriteBytes(encBody).
-		WriteU8(3).
-		ToBytes()
-
-	frame := binary.NewBuilder(nil).
-		WriteU8(2).
-		WriteU16(uint16(len(frameBody)) + 3). // + 2 + 1
-		WriteBytes(frameBody).
-		ToBytes()
-
-	return frame
+	return c.oicq.Marshal(&oicq.Message{
+		Uin:              uin,
+		Command:          _cmd,
+		EncryptionMethod: oicq.EM_ECDH,
+		Body:             body,
+	})
 }
 
-func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
+func (c *QQClient) decodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	reader := binary.NewReader(buf)
 	reader.SkipBytes(2)
 	typ := reader.ReadU8()
@@ -93,7 +62,7 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	var title, content string
 
 	if typ == 0 {
-		reader = binary.NewReader(ftea.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
+		reader = binary.NewReader(tea.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
 		tlv = reader.ReadTlv()
 		if tgt, ok := tlv[0x10A]; ok {
 			sig.Tgt = tgt

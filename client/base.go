@@ -109,6 +109,10 @@ func (c *QQClient) UseSig(s info.SigInfo) {
 	c.transport.Sig = s
 }
 
+func (c *QQClient) Sig() *info.SigInfo {
+	return &c.transport.Sig
+}
+
 func (c *QQClient) Release() {
 	if c.Online.Load() {
 		c.Disconnect()

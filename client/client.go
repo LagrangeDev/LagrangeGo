@@ -119,6 +119,14 @@ func (c *QQClient) TokenLogin() (loginState.State, error) {
 }
 
 func (c *QQClient) FecthQRCode() ([]byte, string, error) {
+	if c.Online.Load() {
+		return nil, "", ErrAlreadyOnline
+	}
+	err := c.connect()
+	if err != nil {
+		return nil, "", err
+	}
+
 	body := binary.NewBuilder(nil).
 		WriteU16(0).
 		WriteU64(0).
@@ -134,7 +142,7 @@ func (c *QQClient) FecthQRCode() ([]byte, string, error) {
 			tlv.Td1(c.version().OS, c.Device().DeviceName),
 		).WriteU8(3).ToBytes()
 
-	packet := wtlogin.BuildCode2dPacket(c.Uin, 0x31, c.version(), body)
+	packet := c.buildCode2dPacket(c.Uin, 0x31, body)
 	response, err := c.sendUniPacketAndWait("wtlogin.trans_emp", packet)
 	if err != nil {
 		return nil, "", err
@@ -172,7 +180,7 @@ func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
 		WriteU8(0x83).ToBytes()
 
 	response, err := c.sendUniPacketAndWait("wtlogin.trans_emp",
-		wtlogin.BuildCode2dPacket(0, 0x12, c.version(), body))
+		c.buildCode2dPacket(0, 0x12, body))
 	if err != nil {
 		return -1, err
 	}
@@ -253,14 +261,6 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 }
 
 func (c *QQClient) QRCodeLogin(refreshInterval int) error {
-	if c.Online.Load() {
-		return ErrAlreadyOnline
-	}
-	err := c.connect()
-	if err != nil {
-		return err
-	}
-
 	if c.transport.Sig.Qrsig == nil {
 		return errors.New("no QrSig found, fetch qrcode first")
 	}
@@ -283,36 +283,34 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 
 	app := c.version()
 	device := c.Device()
-	body := binary.NewBuilder(nil).
-		WriteU16(0x09).
-		WriteTlv(
-			binary.NewBuilder(nil).WriteBytes(c.t106).Pack(0x106),
-			tlv.T144(c.transport.Sig.Tgtgt, app, device),
-			tlv.T116(app.SubSigmap),
-			tlv.T142(app.PackageName, 0),
-			tlv.T145(utils.MustParseHexStr(device.Guid)),
-			tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
-			tlv.T141([]byte("Unknown"), nil),
-			tlv.T177(app.WTLoginSDK, 0),
-			tlv.T191(0),
-			tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
-			tlv.T107(1, 0x0d, 0, 1),
-			tlv.T318(nil),
-			binary.NewBuilder(nil).WriteBytes(c.t16a).Pack(0x16a),
-			tlv.T166(5),
-			tlv.T521(0x13, "basicim"),
-		).ToBytes()
-
 	response, err := c.sendUniPacketAndWait(
 		"wtlogin.login",
-		wtlogin.BuildLoginPacket(c.Uin, "wtlogin.login", app, body))
+		c.buildLoginPacket(c.Uin, "wtlogin.login", binary.NewBuilder(nil).
+			WriteU16(0x09).
+			WriteTlv(
+				binary.NewBuilder(nil).WriteBytes(c.t106).Pack(0x106),
+				tlv.T144(c.transport.Sig.Tgtgt, app, device),
+				tlv.T116(app.SubSigmap),
+				tlv.T142(app.PackageName, 0),
+				tlv.T145(utils.MustParseHexStr(device.Guid)),
+				tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
+				tlv.T141([]byte("Unknown"), nil),
+				tlv.T177(app.WTLoginSDK, 0),
+				tlv.T191(0),
+				tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
+				tlv.T107(1, 0x0d, 0, 1),
+				tlv.T318(nil),
+				binary.NewBuilder(nil).WriteBytes(c.t16a).Pack(0x16a),
+				tlv.T166(5),
+				tlv.T521(0x13, "basicim"),
+			).ToBytes()))
 
 	if err != nil {
 		networkLogger.Error(err)
 		return err
 	}
 
-	return wtlogin.DecodeLoginResponse(response, &c.transport.Sig)
+	return c.decodeLoginResponse(response, &c.transport.Sig)
 }
 
 func (c *QQClient) init() error {

@@ -11,6 +11,8 @@ type Exchanger interface {
 	Exange(remote []byte) ([]byte, error)
 }
 
+/*
+
 type s192exchanger struct {
 	provider    *provider
 	publicKey   []byte
@@ -46,6 +48,8 @@ func news192exchanger() *s192exchanger {
 		compressKey: true,
 	}
 }
+
+*/
 
 type p256exchanger struct {
 	privateKey *ecdh.PrivateKey

@@ -1,5 +1,7 @@
 package ecdh
 
+/*
+
 import "math/big"
 
 type ep struct {
@@ -27,3 +29,5 @@ func (p *ep) IsDefault() bool {
 	// return p.x == 0 && p.y == 0
 	return (p.x.Cmp(big.NewInt(0)) == 0) && (p.y.Cmp(big.NewInt(0)) == 0)
 }
+
+*/

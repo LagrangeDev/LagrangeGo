@@ -20,14 +20,20 @@ func main() {
 		SystemKernel:  "Windows 10.0.22631",
 		KernelVersion: "10.0.22631",
 	}
-	sig, err := info.LoadSig("./sig.bin")
-	if err != nil {
-		mainLogger.Errorln("load sig error:", err)
-		return
-	}
+
 	qqclient := client.NewClient(0, "https://sign.lagrangecore.org/api/sign", appInfo)
 	qqclient.UseDevice(deviceInfo)
-	qqclient.UseSig(sig)
+	data, err := os.ReadFile("sig.bin")
+	if err != nil {
+		mainLogger.Warnln("read sig error:", err)
+	} else {
+		sig, err := info.UnmarshalSigInfo(data, true)
+		if err != nil {
+			mainLogger.Warnln("load sig error:", err)
+		} else {
+			qqclient.UseSig(sig)
+		}
+	}
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
@@ -53,11 +59,21 @@ func main() {
 		return
 	}
 
-	err = info.SaveSig(&sig, "./sig.bin")
-	if err != nil {
-		mainLogger.Errorln("save sig.bin err:", err)
-		return
-	}
+	defer qqclient.Release()
+
+	defer func() {
+		data, err = qqclient.Sig().Marshal()
+		if err != nil {
+			mainLogger.Errorln("marshal sig.bin err:", err)
+			return
+		}
+		err = os.WriteFile("sig.bin", data, 0644)
+		if err != nil {
+			mainLogger.Errorln("write sig.bin err:", err)
+			return
+		}
+		mainLogger.Infoln("sig saved into sig.bin")
+	}()
 
 	select {}
 }
