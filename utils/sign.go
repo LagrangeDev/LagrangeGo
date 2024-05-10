@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -84,7 +83,7 @@ func SignProvider(rawUrl string) func(string, uint32, []byte) map[string]string 
 			"cmd": cmd,
 			"seq": strconv.Itoa(int(seq)),
 			"src": fmt.Sprintf("%x", buf),
-		}, time.Duration(5)*time.Second, &resp)
+		}, 8*time.Second, &resp)
 		if err != nil {
 			signLogger.Error(err)
 			return nil
@@ -121,12 +120,18 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 		return fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	resp, err := http2.DefaultClient.Do(req)
+	resp, err := http2.TRSClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return fmt.Errorf("request timed out")
 		}
-		return fmt.Errorf("failed to perform GET request: %w", err)
+		resp, err = http2.DefaultClient.Do(req)
+		if err != nil {
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				return fmt.Errorf("request timed out")
+			}
+			return fmt.Errorf("failed to perform GET request: %w", err)
+		}
 	}
 	defer resp.Body.Close()
 
@@ -134,12 +139,7 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	if err := json.Unmarshal(bodyBytes, target); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
 		return fmt.Errorf("failed to unmarshal JSON response: %w", err)
 	}
 
