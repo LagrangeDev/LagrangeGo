@@ -3,12 +3,8 @@ package client
 // from https://github.com/Mrs4s/MiraiGo/blob/master/client/events.go
 
 import (
-	"reflect"
 	"runtime/debug"
 	"sync"
-
-	"github.com/LagrangeDev/LagrangeGo/event"
-	"github.com/LagrangeDev/LagrangeGo/message"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
@@ -47,36 +43,19 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 	}
 }
 
-// OnEvent 事件响应，耗时操作，需提交协程处理
-func OnEvent(client *QQClient, msg any) {
-	switch msg := msg.(type) {
-	case *message.PrivateMessage:
-		client.PrivateMessageEvent.dispatch(client, msg)
-	case *message.GroupMessage:
-		client.GroupMessageEvent.dispatch(client, msg)
-	case *message.TempMessage:
-		client.TempMessageEvent.dispatch(client, msg)
-	case *event.GroupInvite:
-		client.GroupInvitedEvent.dispatch(client, msg)
-	case *event.GroupMemberJoinRequest:
-		client.GroupMemberJoinRequestEvent.dispatch(client, msg)
-	case *event.GroupMemberIncrease:
-		client.GroupMemberJoinEvent.dispatch(client, msg)
-	case *event.GroupMemberDecrease:
-		client.GroupMemberLeaveEvent.dispatch(client, msg)
-	case *event.GroupMute:
-		client.GroupMuteEvent.dispatch(client, msg)
-	case *event.GroupRecall:
-		client.GroupRecallEvent.dispatch(client, msg)
-	case *event.FriendRequest:
-		client.FriendRequestEvent.dispatch(client, msg)
-	case *event.FriendRecall:
-		client.FriendRecallEvent.dispatch(client, msg)
-	case *event.Rename:
-		client.RenameEvent.dispatch(client, msg)
-	case nil:
-		networkLogger.Errorf("nil event msg, ignore")
-	default:
-		networkLogger.Warningf("Unknown event type: %v, ignore", reflect.TypeOf(msg).String())
+type eventHandlers struct {
+	subscribedEventHandlers     []any
+	groupMessageReceiptHandlers sync.Map
+}
+
+func (c *QQClient) SubscribeEventHandler(handler any) {
+	c.eventHandlers.subscribedEventHandlers = append(c.eventHandlers.subscribedEventHandlers, handler)
+}
+
+func (c *QQClient) onGroupMessageReceipt(id string, f ...func(*QQClient, *groupMessageReceiptEvent)) {
+	if len(f) == 0 {
+		c.eventHandlers.groupMessageReceiptHandlers.Delete(id)
+		return
 	}
+	c.eventHandlers.groupMessageReceiptHandlers.LoadOrStore(id, f[0])
 }

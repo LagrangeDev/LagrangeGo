@@ -25,7 +25,9 @@ func main() {
 		mainLogger.Errorln("load sig error:", err)
 		return
 	}
-	qqclient := client.NewQQClient(0, "https://sign.lagrangecore.org/api/sign", appInfo, deviceInfo, &sig)
+	qqclient := client.NewClient(0, "https://sign.lagrangecore.org/api/sign", appInfo)
+	qqclient.UseDevice(deviceInfo)
+	qqclient.UseSig(sig)
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
@@ -44,12 +46,6 @@ func main() {
 			return
 		}
 	})
-
-	err = qqclient.Loop()
-	if err != nil {
-		mainLogger.Errorln("quit client loop:", err)
-		return
-	}
 
 	err = qqclient.Login("", "./qrcode.png")
 	if err != nil {

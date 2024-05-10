@@ -1,9 +1,7 @@
 package wtlogin
 
 import (
-	"crypto/rand"
 	"fmt"
-	"strconv"
 
 	ftea "github.com/fumiama/gofastTEA"
 
@@ -86,64 +84,6 @@ func BuildLoginPacket(uin uint32, cmd string, appinfo *info.AppInfo, body []byte
 	return frame
 }
 
-func BuildUniPacket(uin int, seq uint32, cmd string, sign map[string]string,
-	appInfo *info.AppInfo, deviceInfo *info.DeviceInfo, sigInfo *info.SigInfo, body []byte) []byte {
-
-	trace := generateTrace()
-
-	head := proto.DynamicMessage{
-		15: trace,
-		16: sigInfo.Uid,
-	}
-
-	if sign != nil {
-		head[24] = proto.DynamicMessage{
-			1: utils.MustParseHexStr(sign["sign"]),
-			2: utils.MustParseHexStr(sign["token"]),
-			3: utils.MustParseHexStr(sign["extra"]),
-		}
-	}
-
-	ssoHeader := binary.NewBuilder(nil).
-		WriteU32(uint32(seq)).
-		WriteU32(uint32(appInfo.SubAppID)).
-		WriteU32(2052).                                        // locate id
-		WriteBytes(append([]byte{0x02}, make([]byte, 11)...)). //020000000000000000000000
-		WritePacketBytes(sigInfo.Tgt, "u32", true).
-		WritePacketString(cmd, "u32", true).
-		WritePacketBytes(nil, "u32", true).
-		WritePacketBytes(utils.MustParseHexStr(deviceInfo.Guid), "u32", true).
-		WritePacketBytes(nil, "u32", true).
-		WritePacketString(appInfo.CurrentVersion, "u16", true).
-		WritePacketBytes(head.Encode(), "u32", true).
-		ToBytes()
-
-	ssoPacket := binary.NewBuilder(nil).
-		WritePacketBytes(ssoHeader, "u32", true).
-		WritePacketBytes(body, "u32", true).
-		ToBytes()
-
-	encrypted := ftea.NewTeaCipher(sigInfo.D2Key).Encrypt(ssoPacket)
-
-	var _s uint8
-	if len(sigInfo.D2) == 0 {
-		_s = 2
-	} else {
-		_s = 1
-	}
-
-	service := binary.NewBuilder(nil).
-		WriteU32(12).
-		WriteU8(_s).
-		WritePacketBytes(sigInfo.D2, "u32", true).
-		WriteU8(0).
-		WritePacketString(strconv.Itoa(uin), "u32", true).
-		WriteBytes(encrypted).
-		ToBytes()
-
-	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).ToBytes()
-}
-
 func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	reader := binary.NewReader(buf)
 	reader.SkipBytes(2)
@@ -205,19 +145,4 @@ func DecodeLoginResponse(buf []byte, sig *info.SigInfo) error {
 	err := fmt.Errorf("login fail on oicq (0x%02x): [%s]>[%s]", typ, title, content)
 	loginLogger.Errorln(err)
 	return err
-}
-
-func generateTrace() string {
-	randomBytes1 := make([]byte, 16)
-	randomBytes2 := make([]byte, 8)
-
-	if _, err := rand.Read(randomBytes1); err != nil {
-		return ""
-	}
-	if _, err := rand.Read(randomBytes2); err != nil {
-		return ""
-	}
-
-	trace := fmt.Sprintf("00-%x-%x-01", randomBytes1, randomBytes2)
-	return trace
 }

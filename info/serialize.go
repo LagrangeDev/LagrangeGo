@@ -75,10 +75,10 @@ func SaveDevice(deviceInfo *DeviceInfo, path string) error {
 	return nil
 }
 
-func LoadSig(path string) (SigInfo, error) {
+func LoadSig(path string) (sig SigInfo, err error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return NewSigInfo(8848), nil
+		return
 	}
 	return Decode(data, true)
 }

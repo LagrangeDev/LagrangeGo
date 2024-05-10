@@ -16,11 +16,11 @@ func (c *QQClient) FetchFriends() ([]*entity.Friend, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return nil, err
 	}
-	friends, err := oidb.ParseFetchFriendsResp(resp.Data)
+	friends, err := oidb.ParseFetchFriendsResp(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +33,11 @@ func (c *QQClient) FetchGroups() ([]*entity.Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return nil, err
 	}
-	groups, err := oidb.ParseFetchGroupsResp(resp.Data)
+	groups, err := oidb.ParseFetchGroupsResp(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -50,11 +50,11 @@ func (c *QQClient) FetchGroupMember(groupID uint32, token string) ([]*entity.Gro
 	if err != nil {
 		return nil, "", err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return nil, "", err
 	}
-	members, newToken, err := oidb.ParseFetchMembersResp(resp.Data)
+	members, newToken, err := oidb.ParseFetchMembersResp(resp)
 	if err != nil {
 		return nil, "", err
 	}
@@ -66,11 +66,11 @@ func (c *QQClient) GroupRemark(groupID uint32, remark string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupRemarkResp(resp.Data)
+	return oidb.ParseGroupRemarkResp(resp)
 }
 
 func (c *QQClient) GroupRename(groupID uint32, name string) error {
@@ -78,11 +78,11 @@ func (c *QQClient) GroupRename(groupID uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupRenameResp(resp.Data)
+	return oidb.ParseGroupRenameResp(resp)
 }
 
 func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
@@ -90,11 +90,11 @@ func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupMuteGlobalResp(resp.Data)
+	return oidb.ParseGroupMuteGlobalResp(resp)
 }
 
 func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
@@ -106,11 +106,11 @@ func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupMuteMemberResp(resp.Data)
+	return oidb.ParseGroupMuteMemberResp(resp)
 }
 
 func (c *QQClient) GroupLeave(groupID uint32) error {
@@ -118,11 +118,11 @@ func (c *QQClient) GroupLeave(groupID uint32) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupLeaveResp(resp.Data)
+	return oidb.ParseGroupLeaveResp(resp)
 }
 
 func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
@@ -134,11 +134,11 @@ func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	err = oidb.ParseGroupSetAdminResp(resp.Data)
+	err = oidb.ParseGroupSetAdminResp(resp)
 	if err != nil {
 		return err
 	}
@@ -159,11 +159,11 @@ func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	err = oidb.ParseGroupRenameMemberResp(resp.Data)
+	err = oidb.ParseGroupRenameMemberResp(resp)
 	if err != nil {
 		return err
 	}
@@ -184,11 +184,11 @@ func (c *QQClient) GroupKickMember(groupID, uin uint32, rejectAddRequest bool) e
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupKickMemberResp(resp.Data)
+	return oidb.ParseGroupKickMemberResp(resp)
 }
 
 func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) error {
@@ -200,11 +200,11 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParseGroupSetSpecialTitleResp(resp.Data)
+	return oidb.ParseGroupSetSpecialTitleResp(resp)
 }
 
 func (c *QQClient) GroupPoke(groupID, uin uint32) error {
@@ -212,11 +212,11 @@ func (c *QQClient) GroupPoke(groupID, uin uint32) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParsePokeResp(resp.Data)
+	return oidb.ParsePokeResp(resp)
 }
 
 func (c *QQClient) FriendPoke(uin uint32) error {
@@ -224,11 +224,11 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendOidbPacketAndWait(pkt)
+	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
 		return err
 	}
-	return oidb.ParsePokeResp(resp.Data)
+	return oidb.ParsePokeResp(resp)
 }
 
 func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
@@ -245,11 +245,11 @@ func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.SendUniPacketAndAwait("trpc.msg.msg_svc.MsgService.SsoGroupRecallMsg", pktData)
+	resp, err := c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoGroupRecallMsg", pktData)
 	if err != nil {
 		return err
 	}
-	if len(resp.Data) == 0 {
+	if len(resp) == 0 {
 		return errors.New("empty response data")
 	}
 	return nil

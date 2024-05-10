@@ -27,6 +27,16 @@ func NewReader(buffer []byte) *Reader {
 	}
 }
 
+func (r *Reader) Len() int {
+	if r.reader != nil {
+		return -1
+	}
+	return len(r.buffer) - r.pos
+}
+
+// String means read all available data and return them as a string
+//
+// if r.reader got error, it will returns as err.Error()
 func (r *Reader) String() string {
 	if r.reader != nil {
 		data, err := io.ReadAll(r.reader)
@@ -35,7 +45,29 @@ func (r *Reader) String() string {
 		}
 		return utils.B2S(data)
 	}
-	return utils.B2S(r.buffer[r.pos:])
+	s := string(r.buffer[r.pos:])
+	r.pos = 0
+	r.buffer = r.buffer[:0]
+	return s
+}
+
+// ReadAll means read all available data and return them
+//
+// if r.reader got error, it will return nil
+func (r *Reader) ReadAll() []byte {
+	if r.reader != nil {
+		data, err := io.ReadAll(r.reader)
+		if err != nil {
+			return nil
+		}
+		return data
+	}
+	s := r.buffer[r.pos:]
+	r.pos = 0
+	r.buffer = r.buffer[:0]
+	buf := make([]byte, len(s))
+	copy(buf, s)
+	return s
 }
 
 func (r *Reader) ReadU8() (v uint8) {

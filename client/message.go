@@ -31,12 +31,12 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 		return
 	}
 
-	packet, err := c.SendUniPacketAndAwait("MessageSvc.PbSendMsg", data)
+	packet, err := c.sendUniPacketAndWait("MessageSvc.PbSendMsg", data)
 	if err != nil {
 		return
 	}
 	resp = &action.SendMessageResponse{}
-	err = proto.Unmarshal(packet.Data, resp)
+	err = proto.Unmarshal(packet, resp)
 	if err != nil {
 		return
 	}

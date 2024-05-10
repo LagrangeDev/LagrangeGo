@@ -118,6 +118,10 @@ func (b *Builder) Write(p []byte) (n int, err error) {
 	return b.buffer.Write(p)
 }
 
+func (w *Builder) EncryptAndWrite(key []byte, data []byte) {
+	w.Write(ftea.NewTeaCipher(key).Encrypt(data))
+}
+
 func (b *Builder) ReadFrom(r io.Reader) (n int64, err error) {
 	return io.Copy(b.buffer, r)
 }
