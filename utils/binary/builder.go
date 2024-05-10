@@ -123,7 +123,7 @@ func (b *Builder) Write(p []byte) (n int, err error) {
 }
 
 func (w *Builder) EncryptAndWrite(key []byte, data []byte) {
-	w.Write(ftea.NewTeaCipher(key).Encrypt(data))
+	_, _ = w.Write(ftea.NewTeaCipher(key).Encrypt(data))
 }
 
 func (b *Builder) ReadFrom(r io.Reader) (n int64, err error) {
