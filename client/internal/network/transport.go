@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/fumiama/gofastTEA"
 
-	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -15,9 +15,9 @@ import (
 
 // Transport is a network transport.
 type Transport struct {
-	Sig     info.SigInfo
-	Version *info.AppInfo
-	Device  *info.DeviceInfo
+	Sig     auth.SigInfo
+	Version *auth.AppInfo
+	Device  *auth.DeviceInfo
 }
 
 // PackPacket packs a packet.

@@ -5,7 +5,7 @@ import (
 
 	ftea "github.com/fumiama/gofastTEA"
 
-	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -122,7 +122,7 @@ func T142(apkID string, version int) []byte {
 		Pack(0x142)
 }
 
-func T144(tgtgtKey []byte, appInfo *info.AppInfo, device *info.DeviceInfo) []byte {
+func T144(tgtgtKey []byte, appInfo *auth.AppInfo, device *auth.DeviceInfo) []byte {
 	return binary.NewBuilder(tgtgtKey).
 		WriteTLV(
 			T16e(device.DeviceName),

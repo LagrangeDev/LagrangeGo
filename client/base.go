@@ -11,12 +11,12 @@ import (
 
 	"github.com/RomiChan/syncx"
 
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/event"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/cache"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
-	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
 	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
@@ -24,7 +24,7 @@ import (
 )
 
 // NewClient 创建一个新的 QQ Client
-func NewClient(uin uint32, signUrl string, appInfo *info.AppInfo) *QQClient {
+func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
 	client := &QQClient{
 		Uin:          uin,
 		signProvider: utils.SignProvider(signUrl),
@@ -93,23 +93,23 @@ type QQClient struct {
 	DisconnectedEvent EventHandle[*ClientDisconnectedEvent]
 }
 
-func (c *QQClient) version() *info.AppInfo {
+func (c *QQClient) version() *auth.AppInfo {
 	return c.transport.Version
 }
 
-func (c *QQClient) Device() *info.DeviceInfo {
+func (c *QQClient) Device() *auth.DeviceInfo {
 	return c.transport.Device
 }
 
-func (c *QQClient) UseDevice(d *info.DeviceInfo) {
+func (c *QQClient) UseDevice(d *auth.DeviceInfo) {
 	c.transport.Device = d
 }
 
-func (c *QQClient) UseSig(s info.SigInfo) {
+func (c *QQClient) UseSig(s auth.SigInfo) {
 	c.transport.Sig = s
 }
 
-func (c *QQClient) Sig() *info.SigInfo {
+func (c *QQClient) Sig() *auth.SigInfo {
 	return &c.transport.Sig
 }
 

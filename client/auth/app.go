@@ -1,4 +1,4 @@
-package info
+package auth
 
 var AppList = map[string]*AppInfo{
 	"linux": {

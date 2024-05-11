@@ -5,14 +5,14 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/system"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 // BuildRegisterRequest trpc.qq_new_tech.status_svc.StatusService.Register
-func BuildRegisterRequest(app *info.AppInfo, device *info.DeviceInfo) []byte {
+func BuildRegisterRequest(app *auth.AppInfo, device *auth.DeviceInfo) []byte {
 	return proto.DynamicMessage{
 		1: strings.ToUpper(device.Guid),
 		2: 0,
