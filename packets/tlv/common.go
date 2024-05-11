@@ -124,7 +124,7 @@ func T142(apkID string, version int) []byte {
 
 func T144(tgtgtKey []byte, appInfo *info.AppInfo, device *info.DeviceInfo) []byte {
 	return binary.NewBuilder(tgtgtKey).
-		WriteTlv(
+		WriteTLV(
 			T16e(device.DeviceName),
 			T147(appInfo.AppID, appInfo.PTVersion, appInfo.PackageName),
 			T128(appInfo.OS, utils.MustParseHexStr(device.Guid)),

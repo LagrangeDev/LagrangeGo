@@ -66,17 +66,17 @@ func (c *Codec) Marshal(m *Message) []byte {
 	case EM_ECDH:
 		w.WriteU8(0x02)
 		w.WriteU8(0x01)
-		_, _ = w.Write(c.randomKey)
+		w.WriteBytes(c.randomKey)
 		w.WriteU16(0x01_31)
 		w.WriteU16(c.ecdh.SvrPublicKeyVer)
 		w.WriteU16(uint16(len(c.ecdh.PublicKey)))
-		_, _ = w.Write(c.ecdh.PublicKey)
+		w.WriteBytes(c.ecdh.PublicKey)
 		w.EncryptAndWrite(c.ecdh.ShareKey, m.Body)
 
 	case EM_ST:
 		w.WriteU8(0x01)
 		w.WriteU8(0x03)
-		_, _ = w.Write(c.randomKey)
+		w.WriteBytes(c.randomKey)
 		w.WriteU16(0x0102)
 		w.WriteU16(0x0000)
 		w.EncryptAndWrite(c.randomKey, m.Body)
@@ -139,7 +139,7 @@ func (t *TLV) Marshal() []byte {
 	w.WriteU16(t.Command)
 	w.WriteU16(uint16(len(t.List)))
 	for _, elem := range t.List {
-		_, _ = w.Write(elem)
+		w.WriteBytes(elem)
 	}
 
 	return append([]byte(nil), w.ToBytes()...)
