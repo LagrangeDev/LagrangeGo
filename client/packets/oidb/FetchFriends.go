@@ -3,6 +3,7 @@ package oidb
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 // BuildFetchFriendsReq OidbSvcTrpcTcp.0xfd4_1
@@ -36,10 +37,18 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
 		return nil, err
 	}
 	friends := make([]*entity.Friend, len(resp.Friends))
+	interner := utils.NewStringInterner()
 	for i, raw := range resp.Friends {
 		additional := getFirstFriendAdditionalTypeEqualTo1(raw.Additional)
 		properties := parseFriendProperty(additional.Layer1.Properties)
-		friends[i] = entity.NewFriend(raw.Uin, raw.Uid, properties[20002], properties[103], properties[102])
+		friends[i] = &entity.Friend{
+			Uin:          raw.Uin,
+			Uid:          interner.Intern(raw.Uid),
+			Nickname:     interner.Intern(properties[20002]),
+			Remarks:      interner.Intern(properties[103]),
+			PersonalSign: interner.Intern(properties[102]),
+			Avatar:       interner.Intern(entity.FriendAvatar(raw.Uin)),
+		}
 	}
 	return friends, nil
 }

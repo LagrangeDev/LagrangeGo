@@ -4,6 +4,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 func BuildFetchMembersReq(groupUin uint32, token string) (*OidbPacket, error) {
@@ -30,18 +31,24 @@ func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
+	interner := utils.NewStringInterner()
 	members := make([]*entity.GroupMember, len(resp.Members))
 	for i, member := range resp.Members {
 		// 由于protobuf的优化策略，默认值不会被编码进实际的二进制流中
-		if member.Level == nil {
-			members[i] = entity.NewGroupMember(member.Uin.Uin, member.Uin.Uid, entity.GroupMemberPermission(member.Permission),
-				0, member.MemberCard.MemberCard.Unwrap(), member.MemberName,
-				member.JoinTimestamp, member.LastMsgTimestamp)
-			continue
+		m := &entity.GroupMember{
+			Uin:         member.Uin.Uin,
+			Uid:         interner.Intern(member.Uin.Uid),
+			Permission:  entity.GroupMemberPermission(member.Permission),
+			MemberCard:  interner.Intern(member.MemberCard.MemberCard.Unwrap()),
+			MemberName:  interner.Intern(member.MemberName),
+			JoinTime:    member.JoinTimestamp,
+			LastMsgTime: member.LastMsgTimestamp,
+			Avatar:      interner.Intern(entity.FriendAvatar(member.Uin.Uin)),
 		}
-		members[i] = entity.NewGroupMember(member.Uin.Uin, member.Uin.Uid, entity.GroupMemberPermission(member.Permission),
-			member.Level.Level, member.MemberCard.MemberCard.Unwrap(), member.MemberName,
-			member.JoinTimestamp, member.LastMsgTimestamp)
+		if member.Level != nil {
+			m.GroupLevel = member.Level.Level
+		}
+		members[i] = m
 	}
 	return members, resp.Token.Unwrap(), nil
 }

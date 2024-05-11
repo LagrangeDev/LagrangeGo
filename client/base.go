@@ -19,15 +19,15 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/client/sign"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 // NewClient 创建一个新的 QQ Client
 func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
 	client := &QQClient{
 		Uin:          uin,
-		signProvider: utils.SignProvider(signUrl),
+		signProvider: sign.NewProviderURL(signUrl),
 		oicq:         oicq.NewCodec(int64(uin)),
 		highwaySession: highway.Session{
 			AppID:    uint32(appInfo.AppID),
@@ -46,7 +46,7 @@ func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
 
 type QQClient struct {
 	Uin          uint32
-	signProvider func(string, uint32, []byte) map[string]string
+	signProvider sign.Provider
 
 	stat Statistics
 	once sync.Once

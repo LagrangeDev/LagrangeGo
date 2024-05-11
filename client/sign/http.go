@@ -1,4 +1,4 @@
-package utils
+package sign
 
 import (
 	"context"
@@ -11,10 +11,11 @@ import (
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/http2"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 var (
-	signLogger = GetLogger("sign")
+	signLogger = utils.GetLogger("sign")
 
 	signMap = map[string]struct{}{} // 只在启动时初始化, 无并发问题
 )
@@ -69,7 +70,7 @@ func containSignPKG(cmd string) bool {
 	return ok
 }
 
-func SignProvider(rawUrl string) func(string, uint32, []byte) map[string]string {
+func NewProviderURL(rawUrl string) func(string, uint32, []byte) map[string]string {
 	if rawUrl == "" {
 		return nil
 	}
