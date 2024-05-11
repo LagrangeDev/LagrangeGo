@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/packets/tlv"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/qrcodeState"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodeState"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -131,7 +131,7 @@ func (c *QQClient) FecthQRCode() ([]byte, string, error) {
 		WriteU16(0).
 		WriteU64(0).
 		WriteU8(0).
-		WriteTlv(
+		WriteTLV(
 			tlv.T16(c.version().AppID, c.version().SubAppID,
 				utils.MustParseHexStr(c.Device().Guid), c.version().PTVersion, c.version().PackageName),
 			tlv.T1b(),
@@ -287,7 +287,7 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 		"wtlogin.login",
 		c.buildLoginPacket(c.Uin, "wtlogin.login", binary.NewBuilder(nil).
 			WriteU16(0x09).
-			WriteTlv(
+			WriteTLV(
 				binary.NewBuilder(nil).WriteBytes(c.t106).Pack(0x106),
 				tlv.T144(c.transport.Sig.Tgtgt, app, device),
 				tlv.T116(app.SubSigmap),

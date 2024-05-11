@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/client/network"
-	"github.com/LagrangeDev/LagrangeGo/client/oicq"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/pkg/errors"
 )

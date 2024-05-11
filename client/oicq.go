@@ -3,9 +3,9 @@ package client
 import (
 	"fmt"
 
-	"github.com/LagrangeDev/LagrangeGo/client/oicq"
-	"github.com/LagrangeDev/LagrangeGo/info"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb"
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -53,7 +53,7 @@ func (c *QQClient) buildLoginPacket(uin uint32, cmd string, body []byte) []byte 
 	})
 }
 
-func (c *QQClient) decodeLoginResponse(buf []byte, sig *info.SigInfo) error {
+func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
 	reader := binary.NewReader(buf)
 	reader.SkipBytes(2)
 	typ := reader.ReadU8()

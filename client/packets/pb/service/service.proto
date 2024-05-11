@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service";
+
+message InfoPushGroup {
+  uint32 GroupUin = 1;
+  uint32 Sequence1 = 2;
+  uint32 Sequence2 = 3;
+  uint32 Field4 = 4;
+  uint32 LastMsgTime = 8;
+  string GroupName = 9;
+  uint32 Sequence3 = 10;
+  uint64 Random = 11;
+  uint32 Field13 = 13;
+}

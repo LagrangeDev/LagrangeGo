@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
-	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
@@ -15,8 +15,8 @@ import (
 var mainLogger = utils.GetLogger("main")
 
 func main() {
-	appInfo := info.AppList["linux"]
-	deviceInfo := &info.DeviceInfo{
+	appInfo := auth.AppList["linux"]
+	deviceInfo := &auth.DeviceInfo{
 		Guid:          "cfcd208495d565ef66e7dff9f98764da",
 		DeviceName:    "Lagrange-DCFCD07E",
 		SystemKernel:  "Windows 10.0.22631",
@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		mainLogger.Warnln("read sig error:", err)
 	} else {
-		sig, err := info.UnmarshalSigInfo(data, true)
+		sig, err := auth.UnmarshalSigInfo(data, true)
 		if err != nil {
 			mainLogger.Warnln("load sig error:", err)
 		} else {

@@ -5,14 +5,14 @@ import (
 	"encoding/hex"
 	"errors"
 
-	highway2 "github.com/LagrangeDev/LagrangeGo/client/highway"
+	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	message2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
-	message2 "github.com/LagrangeDev/LagrangeGo/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
-	oidb2 "github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {

@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/entity"
+	"github.com/LagrangeDev/LagrangeGo/client/entity"
 )
 
 // GetUid 获取缓存中对应uin的uid

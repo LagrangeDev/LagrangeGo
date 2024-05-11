@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 )
 
-func AesGCMEncrypt(data []byte, key []byte) ([]byte, error) {
+func AESGCMEncrypt(data []byte, key []byte) ([]byte, error) {
 	nonce := make([]byte, 12)
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func AesGCMEncrypt(data []byte, key []byte) ([]byte, error) {
 	return append(nonce, ciphertext...), nil
 }
 
-func AesGCMDecrypt(data []byte, key []byte) ([]byte, error) {
+func AESGCMDecrypt(data []byte, key []byte) ([]byte, error) {
 	nonce := data[:12]
 	ciphertext := data[12:]
 

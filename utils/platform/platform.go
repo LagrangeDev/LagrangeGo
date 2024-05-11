@@ -2,10 +2,10 @@ package platform
 
 import "runtime"
 
-func GetSystem() string {
+func System() string {
 	return runtime.GOOS
 }
 
-func GetVersion() string {
+func Version() string {
 	return runtime.GOARCH
 }

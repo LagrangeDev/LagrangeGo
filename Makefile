@@ -2,9 +2,9 @@
 .PHONY: protoc-gen-golite-version clean install-protoc-plugin proto
 .DEFAULT_GOAL := proto
 
-PROTO_DIR=packets/pb
-PROTO_OUTPUT_PATH=packets
-PROTO_IMPORT_PATH=packets
+PROTO_DIR=client/packets/pb
+PROTO_OUTPUT_PATH=client/packets
+PROTO_IMPORT_PATH=client/packets
 
 
 PROTO_FILES := \
@@ -32,7 +32,7 @@ install-protoc-plugin: protoc-gen-golite-version
 	go install github.com/RomiChan/protobuf/cmd/protoc-gen-golite@$(PROTOC_GEN_GOLITE_VERSION)
 
 proto: install-protoc-plugin
-	protoc --golite_out=$(PROTO_OUTPUT_PATH) --golite_opt=paths=source_relative -I=$(PROTO_IMPORT_PATH) $(PROTO_FILES)
+	protoc --plugin=`go env GOPATH`/bin/protoc-gen-golite --golite_out=$(PROTO_OUTPUT_PATH) --golite_opt=paths=source_relative -I=$(PROTO_IMPORT_PATH) $(PROTO_FILES)
 
 fmt:
 	go vet -stdmethods=false ./...

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// Upload Offline File
+message OidbSvcTrpcTcp0xE37_1700 {
+  uint32 Command = 1; // 1700
+  int32 Seq = 2;  // 0
+  ApplyUploadReqV3 Upload = 19;
+  int32 BusinessId = 101; // 3
+  int32 ClientType = 102; // 1
+  int32 FlagSupportMediaPlatform = 200; // 1
+}
+
+message ApplyUploadReqV3 {
+  string SenderUid = 10;
+  string ReceiverUid = 20;
+  uint32 FileSize = 30;
+  string FileName = 40;
+  bytes Md510MCheckSum = 50;
+  bytes Sha1CheckSum = 60;
+  string LocalPath = 70;
+  bytes Md5CheckSum = 110;
+  bytes Sha3CheckSum = 120;
+}
