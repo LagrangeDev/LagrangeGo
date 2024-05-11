@@ -6,9 +6,9 @@ import (
 	tea "github.com/fumiama/gofastTEA"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 // Transport is a network transport.

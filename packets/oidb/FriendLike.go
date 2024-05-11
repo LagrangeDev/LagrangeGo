@@ -1,8 +1,8 @@
 package oidb
 
 import (
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 func BuildFriendLikeReq(uid string, count uint32) (*OidbPacket, error) {

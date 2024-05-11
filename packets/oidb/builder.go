@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 // var oidbLogger = utils.GetLogger("oidb")

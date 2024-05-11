@@ -3,8 +3,8 @@ package client
 import (
 	"errors"
 
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 
 	"github.com/LagrangeDev/LagrangeGo/entity"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"

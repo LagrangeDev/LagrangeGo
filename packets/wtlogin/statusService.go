@@ -6,9 +6,9 @@ import (
 	"unicode"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/system"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 // BuildRegisterRequest trpc.qq_new_tech.status_svc.StatusService.Register

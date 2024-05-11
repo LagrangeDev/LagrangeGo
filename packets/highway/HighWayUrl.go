@@ -3,7 +3,7 @@ package highway
 import (
 	"encoding/hex"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/action"
 )

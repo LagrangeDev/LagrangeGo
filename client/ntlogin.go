@@ -12,8 +12,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	"github.com/LagrangeDev/LagrangeGo/info"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 var loginLogger = utils.GetLogger("login")

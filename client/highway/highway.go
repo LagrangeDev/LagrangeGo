@@ -13,9 +13,9 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 // see com/tencent/mobileqq/highway/utils/BaseConstants.java#L120-L121

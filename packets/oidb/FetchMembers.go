@@ -2,8 +2,8 @@ package oidb
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/entity"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/oidb"
-	"github.com/LagrangeDev/LagrangeGo/utils/proto"
 )
 
 func BuildFetchMembersReq(groupUin uint32, token string) (*OidbPacket, error) {
