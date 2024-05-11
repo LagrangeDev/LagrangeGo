@@ -140,7 +140,7 @@ func (b *Builder) Write(p []byte) (n int, err error) {
 }
 
 func (b *Builder) EncryptAndWrite(key []byte, data []byte) *Builder {
-	b.Write(ftea.NewTeaCipher(key).Encrypt(data))
+	_, _ = b.Write(ftea.NewTeaCipher(key).Encrypt(data))
 	return b
 }
 
