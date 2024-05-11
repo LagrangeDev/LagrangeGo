@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// FileDownload
+message OidbSvcTrpcTcp0xE37_1200 {
+  uint32 SubCommand = 1; // 1200
+  int32 Field2 = 2; // 1
+  OidbSvcTrpcTcp0xE37_1200Body Body = 14;
+  int32 Field101 = 101; // 3
+  int32 Field102 = 102; // 103
+  int32 Field200 = 200; // 1
+  bytes Field99999 = 99999; // 0xc0, 0x85, 0x2c, 0x01
+  // Actually it is a sub-proto 90200: 1, but we it would be more easy to just hardcode it
+}
+
+message OidbSvcTrpcTcp0xE37_1200Body {
+  string ReceiverUid = 10;
+  string FileUuid = 20;
+  int32 Type = 30; // 2
+  string FileHash = 60;
+  int32 T2 = 601; // 0
+}
+
+message OidbSvcTrpcTcp0xE37_1200Response {
+  uint32 Command = 1;
+  uint32 SubCommand = 2;
+  OidbSvcTrpcTcp0xE37_1200ResponseBody Body = 14;
+  uint32 Field50 = 50;
+}
+
+message OidbSvcTrpcTcp0xE37_1200ResponseBody {
+  uint32 Field10 = 10;
+  string State = 20;
+  OidbSvcTrpcTcp0xE37_1200Result Result = 30;
+  OidbSvcTrpcTcp0xE37_1200Metadata Metadata = 40;
+}
+
+message OidbSvcTrpcTcp0xE37_1200Result {
+  string Server = 20;
+  uint32 Port = 40;
+  string Url = 50;
+  repeated string AdditionalServer = 60;
+  uint32 SsoPort = 80;
+  string SsoUrl = 90;
+  bytes Extra = 120;
+}
+
+message OidbSvcTrpcTcp0xE37_1200Metadata {
+  uint32 Uin = 1;
+  uint32 Field2 = 2;
+  uint32 Field3 = 3;
+  uint32 Size = 4;
+  uint32 Timestamp = 5;
+  string FileUuid = 6;
+  string FileName = 7;
+  bytes Field100 = 100;
+  bytes Field101 = 101;
+  uint32 Field110 = 110;
+  uint32 Timestamp1 = 130;
+  string FileHash = 140;
+  bytes Field141 = 141;
+  bytes Field142 = 142;
+}

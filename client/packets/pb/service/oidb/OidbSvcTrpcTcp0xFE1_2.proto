@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// Fetch Avatar
+message OidbSvcTrpcTcp0xFE1_2 {
+  optional string Uid = 1;
+  uint32 Field2 = 2;
+  repeated OidbSvcTrpcTcp0xFE1_2Key Keys = 3;
+}
+
+message OidbSvcTrpcTcp0xFE1_2Key {
+  uint32 Key = 1;
+}
+
+message OidbSvcTrpcTcp0xFE1_2Response {
+  OidbSvcTrpcTcp0xFE1_2ResponseBody Body = 1;
+}
+
+message OidbSvcTrpcTcp0xFE1_2ResponseBody {
+  string Uid = 1;
+  uint32 Uin = 3;
+}

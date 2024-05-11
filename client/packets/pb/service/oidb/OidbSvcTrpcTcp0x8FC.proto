@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// Rename Group Member
+message OidbSvcTrpcTcp0x8FC {
+  uint32 GroupUin = 1;
+  OidbSvcTrpcTcp0x8FCBody Body = 3;
+}
+
+message OidbSvcTrpcTcp0x8FCBody {
+  string TargetUid = 1;
+  string SpecialTitle = 5;
+  int32 SpecialTitleExpireTime = 6;
+  string UinName = 7;
+  string TargetName = 8;
+}
+
+message OidbSvcTrpcTcp0x8FC_3Response {
+  uint32 GroupUin = 1;
+}

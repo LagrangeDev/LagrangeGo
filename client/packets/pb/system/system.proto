@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/system";
+
+message NTDeviceSign {
+  string Trace = 15;
+  optional string Uid = 16;
+  optional Sign Sign = 24;
+}
+
+message Sign {
+  optional bytes Signature = 1;
+  optional string Token = 2;
+  optional Software S = 3;
+}
+
+message Software {
+  string Ver = 2;
+  optional string Token = 3;
+}
+
+message NTOS {
+  string OS = 1;
+  string Name = 2;
+}
+
+message NTPacketUid {
+  optional string Uid = 16;
+}
+
+message NTSsoHeartBeat {
+  int32 Type = 1;
+}
+
+message NTSysEvent {
+  string IP = 1;
+  int64 Sid = 2;
+  NTSysEventSub Sub = 3;
+}
+
+message NTSysEventSub {
+  int64 State = 2;
+  int32 Field3 = 3;
+  int64 Field4 = 4;
+  int64 Uin = 5;
+  int32 Flag = 6;
+  int32 On = 7;
+  uint32 GroupUin = 8;
+}
+
+message OnlineOsInfo {
+  string User = 1;
+  string OS = 2;
+  string OSVer = 3;
+  optional string VendorName = 4;
+  string OSLower = 5;
+}
+
+message ServiceKickNTResponse {
+  uint32 Uin = 1;
+  string Tips = 3;
+  string Title = 4;
+  int32 Field5 = 5;
+  int32 Field6 = 6;
+  int32 Field8 = 8;
+}
+
+message ServiceRegister {
+  optional string Guid = 1;
+  optional int32 Type = 2;
+  optional string CurrentVersion = 3;
+  optional int32 Field4 = 4;
+  optional int32 LocaleId = 5; // 2052
+  optional OnlineOsInfo Online = 6;
+  optional int32 SetMute = 7;
+  optional int32 RegisterVendorType = 8;
+  optional int32 RegType = 9;
+}
+
+message ServiceRegisterResponse {
+  optional string Message = 2;
+  uint32 Timestamp = 3;
+  int32 Field4 = 4;
+  int32 Field5 = 5;
+}

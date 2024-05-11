@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// Friend Likes
+message OidbSvcTrpcTcp0x7E5_104 {
+  optional string TargetUid = 11;
+  uint32 Field2 = 12; // 71
+  uint32 Field3 = 13; // 1
+}

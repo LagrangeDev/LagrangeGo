@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/action";
+
+import "pb/message/message.proto";
+
+message FaceRoamRequest {
+  optional PlatInfo Comm = 1;
+  uint32 SelfUin = 2;
+  uint32 SubCmd = 3; // 1
+  uint32 Field6 = 6; // 1
+}
+
+message PlatInfo {
+  uint32 ImPlat = 1;
+  optional string OSVersion = 2;
+  optional string QVersion = 3;
+}
+
+message FaceRoamResponse {
+  uint32 RetCode = 1;
+  string ErrMsg = 2;
+  uint32 SubCmd = 3;
+  FaceRoamUserInfo UserInfo = 6;
+}
+
+message FaceRoamUserInfo {
+  repeated string FileName = 1;
+  repeated string DeleteFile = 2;
+  string Bid = 3;
+  uint32 MaxRoamSize = 4;
+  repeated uint32 EmojiType = 5;
+}
+
+message SendMessageRequest {
+  int32 State = 1;
+  int32 SizeCache = 2;
+  bytes UnknownFields = 3;
+  RoutingHead RoutingHead = 4;
+  ContentHead ContentHead = 5;
+  MessageBody MessageBody = 6;
+  int32 MsgSeq = 7;
+  int32 MsgRand = 8;
+  bytes SyncCookie = 9;
+  int32 MsgVia = 10;
+  int32 DataStatist = 11;
+  MessageControl MessageControl = 12;
+  int32 MultiSendSeq = 13;
+}
+
+message SendMessageResponse {
+  int32 Result = 1;
+  optional string ErrMsg = 2;
+  uint32 Timestamp1 = 3;
+  uint32 Field10 = 10;
+  optional uint32 GroupSequence = 11;
+  uint32 Timestamp2 = 12;
+  uint32 PrivateSequence = 14;
+}
+
+message SetStatus {
+  uint32 Field1 = 1;
+  uint32 Status = 2;
+  uint32 ExtStatus = 3;
+  optional SetStatusCustomExt CustomExt = 4;
+}
+
+message SetStatusCustomExt {
+  uint32 FaceId = 1;
+  optional string Text = 2;
+  uint32 Field3 = 3;
+}
+
+message SetStatusResponse {
+  string Message = 2;
+}
+
+// http conn start
+
+message HttpConn {
+  int32 Field1 = 1; // 0
+  int32 Field2 = 2; // 0
+  int32 Field3 = 3; // 16
+  int32 Field4 = 4; // 1
+  string Tgt = 5; // tgt lower hex
+  int32 Field6 = 6; // 3
+  repeated int32 ServiceTypes = 7; // 1, 5, 10, 21 for image
+  int32 Field9 = 9; // 2
+  int32 Field10 = 10; // 9
+  int32 Field11 = 11; // 8
+  string Ver = 15; // 1.0.1
+}
+
+message HttpConn0x6ff_501 {
+  HttpConn HttpConn = 0x501;
+}
+
+message HttpConn0x6ff_501Response {
+  HttpConnResponse HttpConn = 0x501;
+}
+
+message HttpConnResponse {
+  bytes SigSession = 1;
+  bytes SessionKey = 2;
+  repeated ServerInfo ServerInfos = 3;
+}
+
+message ServerAddr {
+  uint32 Type = 1;
+  fixed32 IP = 2;
+  uint32 Port = 3;
+  uint32 Area = 4;
+}
+
+message ServerInfo {
+  uint32 ServiceType = 1;
+  repeated ServerAddr ServerAddrs = 2;
+}

@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginState"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/login"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin/loginState"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )

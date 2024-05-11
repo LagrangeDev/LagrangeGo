@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/login";
+
+message SsoKeyExchange {
+  bytes PubKey = 1;
+  int32 Type = 2;
+  bytes GcmCalc1 = 3;
+  uint32 Timestamp = 4;
+  bytes GcmCalc2 = 5;
+}
+
+message SsoKeyExchangeResponse {
+  bytes GcmEncrypted = 1;
+  bytes Body = 2;
+  bytes PublicKey = 3;
+}
+
+message SsoKeyExchangeDecrypted {
+  bytes GcmKey = 1;
+  bytes Sign = 2;
+  uint32 Expiration = 3;
+}
+
+message SsoKeyExchangePlain {
+  optional uint32 Uin = 1;
+  optional bytes Guid = 2;
+}

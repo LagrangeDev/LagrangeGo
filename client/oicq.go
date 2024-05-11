@@ -5,7 +5,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"

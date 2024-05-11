@@ -3,11 +3,11 @@ package client
 import (
 	"errors"
 
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 )
 
 // FetchFriends 获取好友列表信息

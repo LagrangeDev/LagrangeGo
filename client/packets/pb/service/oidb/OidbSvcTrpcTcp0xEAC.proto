@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// RemoveEssenceMessage
+message OidbSvcTrpcTcp0xEAC {
+  uint32 GroupUin = 1;
+  uint32 Sequence = 2;
+  uint32 Random = 3;
+}

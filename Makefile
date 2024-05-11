@@ -2,9 +2,9 @@
 .PHONY: protoc-gen-golite-version clean install-protoc-plugin proto
 .DEFAULT_GOAL := proto
 
-PROTO_DIR=packets/pb
-PROTO_OUTPUT_PATH=packets
-PROTO_IMPORT_PATH=packets
+PROTO_DIR=client/packets/pb
+PROTO_OUTPUT_PATH=client/packets
+PROTO_IMPORT_PATH=client/packets
 
 
 PROTO_FILES := \

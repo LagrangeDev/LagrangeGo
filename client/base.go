@@ -17,9 +17,9 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/packets/oidb"
-	"github.com/LagrangeDev/LagrangeGo/packets/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 

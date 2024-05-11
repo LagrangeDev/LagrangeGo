@@ -2,7 +2,7 @@ package event
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 )
 
 func ParseSelfRenameEvent(event *message.SelfRenameMsg, sig *auth.SigInfo) *Rename {

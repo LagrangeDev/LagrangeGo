@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// // Fetch Client Key lwx: 我也觉得抽象 可是他真的是空的
+message OidbSvcTrpcTcp0x102A_1 {
+
+}
+
+message OidbSvcTrpcTcp0x102A_1Response {
+  uint32 Field1 = 2;
+  string ClientKey = 3;
+  uint32 Expiration = 4;
+}

@@ -13,8 +13,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// GroupSetAdmin
+message OidbSvcTrpcTcp0x1096_1 {
+  uint32 GroupUin = 1;
+  string Uid = 2;
+  bool IsAdmin = 3;
+}
+
+message OidbSvcTrpcTcp0x1096_1Response {
+  optional string Success = 1;
+}

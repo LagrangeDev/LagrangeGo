@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// Rename Group Title
+message OidbSvcTrpcTcp0x89A_15 {
+  uint32 GroupUin = 1;
+    OidbSvcTrpcTcp0x89A_15Body Body = 2;
+}
+
+message OidbSvcTrpcTcp0x89A_15Body {
+  string TargetName = 3;
+}

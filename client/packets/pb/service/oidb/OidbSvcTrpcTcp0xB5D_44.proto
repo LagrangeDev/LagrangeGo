@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// Set Friend Request
+message OidbSvcTrpcTcp0xB5D_44 {
+  uint32 Accept = 1; // 3 for accept, 5 for reject
+  string TargetUid = 2;
+}
