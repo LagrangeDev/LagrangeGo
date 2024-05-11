@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/LagrangeDev/LagrangeGo/entity"
+	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/RomiChan/syncx"
 )

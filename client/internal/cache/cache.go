@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/LagrangeDev/LagrangeGo/entity"
+import "github.com/LagrangeDev/LagrangeGo/client/entity"
 
 // GetUid 根据uin获取uid
 func (c *Cache) GetUid(uin uint32, groupUin ...uint32) string {
