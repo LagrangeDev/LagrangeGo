@@ -1,5 +1,7 @@
 package oicq
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/client/internal/oicq/oicq.go
+
 import (
 	"crypto/rand"
 	goBinary "encoding/binary"

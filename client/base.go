@@ -13,8 +13,8 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/cache"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/highway"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/client/network"
-	"github.com/LagrangeDev/LagrangeGo/client/oicq"
 	"github.com/LagrangeDev/LagrangeGo/event"
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/message"

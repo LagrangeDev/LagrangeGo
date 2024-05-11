@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/LagrangeDev/LagrangeGo/client/oicq"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/info"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
