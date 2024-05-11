@@ -1,5 +1,7 @@
 package network
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/client/internal/network/packet.go
+
 type Packet struct {
 	SequenceId  uint32
 	CommandName string

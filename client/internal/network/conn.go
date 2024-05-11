@@ -1,5 +1,7 @@
 package network
 
+// from https://github.com/Mrs4s/MiraiGo/blob/master/client/internal/network/conn.go
+
 import (
 	"encoding/binary"
 	"io"
