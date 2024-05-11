@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strconv"
 
-	hw "github.com/LagrangeDev/LagrangeGo/client/highway"
+	hw "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	highway2 "github.com/LagrangeDev/LagrangeGo/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"

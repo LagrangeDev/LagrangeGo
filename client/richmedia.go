@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 
-	highway2 "github.com/LagrangeDev/LagrangeGo/client/highway"
+	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/packets/oidb"

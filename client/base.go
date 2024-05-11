@@ -12,7 +12,7 @@ import (
 	"github.com/RomiChan/syncx"
 
 	"github.com/LagrangeDev/LagrangeGo/cache"
-	"github.com/LagrangeDev/LagrangeGo/client/highway"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/network"
 	"github.com/LagrangeDev/LagrangeGo/client/oicq"
 	"github.com/LagrangeDev/LagrangeGo/event"
