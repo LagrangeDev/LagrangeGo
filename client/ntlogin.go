@@ -57,7 +57,7 @@ func buildNtloginRequest(uin uint32, app *info.AppInfo, device *info.DeviceInfo,
 		body[2].(proto.DynamicMessage)[2] = buildNtloginCaptchaSubmit(sig.CaptchaInfo[0], sig.CaptchaInfo[1], sig.CaptchaInfo[2])
 	}
 
-	data, err := crypto.AesGCMEncrypt(body.Encode(), sig.ExchangeKey)
+	data, err := crypto.AESGCMEncrypt(body.Encode(), sig.ExchangeKey)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func ParseNtloginResponse(response []byte, sig *info.SigInfo) (loginState.State,
 	}
 
 	var base login.SsoNTLoginBase
-	data, err := crypto.AesGCMDecrypt(frame.GcmCalc, sig.ExchangeKey)
+	data, err := crypto.AESGCMDecrypt(frame.GcmCalc, sig.ExchangeKey)
 	if err != nil {
 		return -1, err
 	}

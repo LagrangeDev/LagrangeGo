@@ -23,8 +23,8 @@ func NewDeviceInfo(uin int) *DeviceInfo {
 	return &DeviceInfo{
 		Guid:          fmt.Sprintf("%X", crypto.MD5Digest(utils.S2B(strconv.Itoa(uin)))),
 		DeviceName:    fmt.Sprintf("Lagrange-%X", crypto.MD5Digest(utils.S2B(strconv.Itoa(uin)))[0:4]),
-		SystemKernel:  fmt.Sprintf("%s %s", platform.GetSystem(), platform.GetVersion()),
-		KernelVersion: platform.GetVersion(),
+		SystemKernel:  fmt.Sprintf("%s %s", platform.System(), platform.Version()),
+		KernelVersion: platform.Version(),
 	}
 }
 

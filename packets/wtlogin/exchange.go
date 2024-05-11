@@ -15,7 +15,7 @@ var encKey, _ = hex.DecodeString("e2733bf403149913cbf80c7a95168bd4ca6935ee53cd39
 var keyExangeLogger = utils.GetLogger("KeyExchange")
 
 func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
-	encl, err := crypto.AesGCMEncrypt(proto.DynamicMessage{
+	encl, err := crypto.AESGCMEncrypt(proto.DynamicMessage{
 		1: uin,
 		2: guid,
 	}.Encode(), ecdh.P256().SharedKey())
@@ -32,7 +32,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 			WriteU32(uint32(utils.TimeStamp())).
 			ToBytes(),
 	)
-	encP2Hash, err := crypto.AesGCMEncrypt(p2Hash, encKey)
+	encP2Hash, err := crypto.AESGCMEncrypt(p2Hash, encKey)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func ParseKeyExchangeResponse(response []byte) (key, sign []byte, err error) {
 	}
 
 	var decPb login.SsoKeyExchangeDecrypted
-	data, err := crypto.AesGCMDecrypt(p.GcmEncrypted, shareKey)
+	data, err := crypto.AESGCMDecrypt(p.GcmEncrypted, shareKey)
 	if err != nil {
 		keyExangeLogger.Errorln(err)
 		return
