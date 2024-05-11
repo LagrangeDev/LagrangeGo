@@ -11,7 +11,7 @@ import (
 
 	"github.com/RomiChan/syncx"
 
-	"github.com/LagrangeDev/LagrangeGo/cache"
+	"github.com/LagrangeDev/LagrangeGo/client/internal/cache"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
