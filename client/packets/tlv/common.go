@@ -38,8 +38,12 @@ func T100(ssoVersion, appID, subAppID, appClientVersion, sigmap, dbBufVer int) [
 // T106 抄的时候注意参数顺序
 func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
 	// password_md5 + bytes(4) + write_u32(uin).pack()
-	key := crypto.MD5Digest(append(passwordMd5, append(make([]byte, 4),
-		binary.NewBuilder(nil).WriteU32(uint32(uin)).ToBytes()...)...))
+	key := crypto.MD5Digest(binary.NewBuilder(nil).
+		WriteBytes(passwordMd5).
+		WriteU32(0).
+		WriteU32(uint32(uin)).
+		ToBytes(),
+	)
 
 	body := binary.NewBuilder(nil).
 		WriteStruct(uint16(4), //  tgtgt version
