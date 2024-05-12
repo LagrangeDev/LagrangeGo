@@ -19,12 +19,9 @@ const (
 	colorWhite  = "\x1b[37m"
 )
 
-//var logger *logrus.Logger
-
 var logger = logrus.New()
 
 func init() {
-	//logger = logrus.New()
 	logger.SetLevel(logrus.TraceLevel)
 	logger.SetFormatter(&ColoredFormatter{})
 	logger.SetOutput(colorable.NewColorableStdout())

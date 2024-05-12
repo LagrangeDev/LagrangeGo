@@ -39,7 +39,7 @@ func (c *QQClient) ensureHighwayServers() error {
 				continue
 			}
 			for _, addr := range info.ServerAddrs {
-				networkLogger.Debugln("add highway server", binary.UInt32ToIPV4Address(addr.IP), "port", addr.Port)
+				c.debugln("add highway server", binary.UInt32ToIPV4Address(addr.IP), "port", addr.Port)
 				c.highwaySession.AppendAddr(addr.IP, addr.Port)
 			}
 		}
@@ -106,7 +106,7 @@ func (c *QQClient) highwayUploadBlock(trans *hw.Transaction, server string, offs
 	if err != nil {
 		return fmt.Errorf("parse highway packet: %v", err)
 	}
-	networkLogger.Debugf("Highway Block Result: %d | %d | %x | %v",
+	c.debug("Highway Block Result: %d | %d | %x | %v",
 		resphead.ErrorCode, resphead.MsgSegHead.RetCode.Unwrap(), resphead.BytesRspExtendInfo, respbody)
 	if resphead.ErrorCode != 0 {
 		return errors.New("highway error code: " + strconv.Itoa(int(resphead.ErrorCode)))
@@ -163,8 +163,6 @@ func postHighwayContent(content io.Reader, serverURL string, end bool) (io.ReadC
 		return nil, err
 	}
 
-	// Create request
-	networkLogger.Debugln("post content to highway url:", server)
 	req, err := http.NewRequest("POST", server.String(), content)
 	if err != nil {
 		return nil, err

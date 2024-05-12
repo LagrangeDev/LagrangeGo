@@ -30,8 +30,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	typ := pkg.ContentHead.Type
 	defer func() {
 		if r := recover(); r != nil {
-			networkLogger.Errorf("recovered from panic: %v\n%s", r, debug.Stack())
-			networkLogger.Errorf("protobuf data: %x", pkt.Payload)
+			c.error("recovered from panic: %v\n%s", r, debug.Stack())
+			c.error("protobuf data: %x", pkt.Payload)
 		}
 	}()
 	if pkg.Body == nil {
@@ -117,7 +117,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.FriendRecallEvent.dispatch(c, eventConverter.ParseFriendRecallEvent(&pb))
 			return nil, nil
 		case 39: // friend rename
-			networkLogger.Debugln("friend rename")
+			c.debugln("friend rename")
 			pb := message.FriendRenameMsg{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
@@ -126,7 +126,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.RenameEvent.dispatch(c, eventConverter.ParseFriendRenameEvent(&pb, c.cache.GetUin(pb.Body.Data.Uid)))
 			return nil, nil
 		case 29:
-			networkLogger.Debugln("self rename")
+			c.debugln("self rename")
 			pb := message.SelfRenameMsg{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
@@ -135,7 +135,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.RenameEvent.dispatch(c, eventConverter.ParseSelfRenameEvent(&pb, &c.transport.Sig))
 			return nil, nil
 		default:
-			networkLogger.Warningf("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
+			c.warning("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	case 0x2DC: // grp event, 732
 		subType := pkg.ContentHead.SubType.Unwrap()
@@ -162,10 +162,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.GroupMuteEvent.dispatch(c, eventConverter.ParseGroupMuteEvent(&pb))
 			return nil, nil
 		default:
-			networkLogger.Warningf("Unsupported group event, subType: %v", subType)
+			c.warning("Unsupported group event, subType: %v", subType)
 		}
 	default:
-		networkLogger.Warningf("Unsupported message type: %v", typ)
+		c.warning("Unsupported message type: %v", typ)
 	}
 
 	return nil, nil

@@ -79,7 +79,7 @@ func (c *QQClient) connect() error {
 	c.initServerOnce.Do(c.initServers)
 
 	addr := c.servers[c.currServerIndex].String()
-	networkLogger.Infof("connect to server: %v", addr)
+	c.info("connect to server: %v", addr)
 	err := c.TCP.Connect(addr)
 	c.currServerIndex++
 	if c.currServerIndex == len(c.servers) {
@@ -90,7 +90,7 @@ func (c *QQClient) connect() error {
 		if c.retryTimes > len(c.servers) {
 			return errors.New("All servers are unreachable")
 		}
-		networkLogger.Errorf("connect server error: %v", err)
+		c.error("connect server error: %v", err)
 		return err
 	}
 	c.once.Do(func() {
@@ -121,12 +121,12 @@ func (c *QQClient) quickReconnect() {
 	c.Disconnect()
 	time.Sleep(time.Millisecond * 200)
 	if err := c.connect(); err != nil {
-		networkLogger.Errorf("connect server error: %v", err)
+		c.error("connect server error: %v", err)
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "quick reconnect failed"})
 		return
 	}
 	if err := c.init(); err != nil {
-		networkLogger.Errorf("register client failed: %v", err)
+		c.error("register client failed: %v", err)
 		c.Disconnect()
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "register error"})
 		return
@@ -254,23 +254,23 @@ func (c *QQClient) SendSsoPacket(cmd string, body []byte) ([]byte, error) {
 
 // plannedDisconnect 计划中断线事件
 func (c *QQClient) plannedDisconnect(_ *network.TCPClient) {
-	networkLogger.Debugln("planned disconnect.")
+	c.debugln("planned disconnect.")
 	c.stat.DisconnectTimes.Add(1)
 	c.Online.Store(false)
 }
 
 // unexpectedDisconnect 非预期断线事件
 func (c *QQClient) unexpectedDisconnect(_ *network.TCPClient, e error) {
-	networkLogger.Errorf("unexpected disconnect: %v", e)
+	c.error("unexpected disconnect: %v", e)
 	c.stat.DisconnectTimes.Add(1)
 	c.Online.Store(false)
 	if err := c.connect(); err != nil {
-		networkLogger.Errorf("connect server error: %v", err)
+		c.error("connect server error: %v", err)
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "connection dropped by server."})
 		return
 	}
 	if err := c.init(); err != nil {
-		networkLogger.Errorf("register client failed: %v", err)
+		c.error("register client failed: %v", err)
 		c.Disconnect()
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "register error"})
 		return
@@ -287,7 +287,7 @@ func (c *QQClient) netLoop() {
 			continue
 		}
 		if l < 4 || l > 1024*1024*10 { // max 10MB
-			networkLogger.Errorf("parse incoming packet error: invalid packet length %v", l)
+			c.error("parse incoming packet error: invalid packet length %v", l)
 			errCount++
 			if errCount > 2 {
 				go c.quickReconnect()
@@ -298,7 +298,7 @@ func (c *QQClient) netLoop() {
 		resp, err := c.transport.ReadResponse(data)
 		// pkt, err := packets.ParseIncomingPacket(data, c.sig.D2Key)
 		if err != nil {
-			networkLogger.Errorf("parse incoming packet error: %v", err)
+			c.error("parse incoming packet error: %v", err)
 			if errors.Is(err, network.ErrSessionExpired) || errors.Is(err, network.ErrPacketDropped) {
 				c.Disconnect()
 				go c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "session expired"})
@@ -313,7 +313,7 @@ func (c *QQClient) netLoop() {
 		if resp.EncryptType == network.EncryptTypeEmptyKey {
 			m, err := c.oicq.Unmarshal(resp.Body)
 			if err != nil {
-				networkLogger.Errorf("decrypt payload error: %v", err)
+				c.error("decrypt payload error: %v", err)
 				if errors.Is(err, oicq.ErrUnknownFlag) {
 					go c.quickReconnect()
 				}
@@ -322,7 +322,7 @@ func (c *QQClient) netLoop() {
 			resp.Body = m.Body
 		}
 		errCount = 0
-		networkLogger.Debugf("rev pkt: %v seq: %v", resp.CommandName, resp.SequenceID)
+		c.debug("rev pkt: %v seq: %v", resp.CommandName, resp.SequenceID)
 		c.stat.PacketReceived.Add(1)
 		pkt := &network.Packet{
 			SequenceId:  uint32(resp.SequenceID),
@@ -332,7 +332,7 @@ func (c *QQClient) netLoop() {
 		go func(pkt *network.Packet) {
 			defer func() {
 				if pan := recover(); pan != nil {
-					networkLogger.Errorf("panic on decoder %v : %v\n%s", pkt.CommandName, pan, debug.Stack())
+					c.error("panic on decoder %v : %v\n%s", pkt.CommandName, pan, debug.Stack())
 					// c.dump("packet decode error: %v - %v", pkt.Payload, pkt.CommandName, pan)
 				}
 			}()
@@ -346,7 +346,7 @@ func (c *QQClient) netLoop() {
 					pkt.Params = info.getParams()
 					decoded, err = decoder(c, pkt)
 					if err != nil {
-						networkLogger.Debugf("decode pkt %v error: %+v", pkt.CommandName, err)
+						c.debug("decode pkt %v error: %+v", pkt.CommandName, err)
 					}
 				}
 				if ok {
@@ -358,7 +358,7 @@ func (c *QQClient) netLoop() {
 				// does not need decoder
 				f.fun(pkt.Payload, nil)
 			} else {
-				networkLogger.Debugf("Unhandled Command: %s\nSeq: %d\nThis message can be ignored.", pkt.CommandName, pkt.SequenceId)
+				c.debug("Unhandled Command: %s\nSeq: %d\nThis message can be ignored.", pkt.CommandName, pkt.SequenceId)
 			}
 		}(pkt)
 	}

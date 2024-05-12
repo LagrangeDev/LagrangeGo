@@ -60,6 +60,7 @@ type QQClient struct {
 	ConnectTime    time.Time
 	transport      network.Transport
 	oicq           *oicq.Codec
+	logger         Logger
 	highwaySession highway.Session
 
 	// internal state
@@ -155,13 +156,13 @@ func (c *QQClient) doHeartbeat() {
 			continue
 		}
 		if err != nil {
-			networkLogger.Errorf("heartbeat err %s", err)
+			c.error("heartbeat err %s", err)
 		} else {
-			networkLogger.Debugf("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
+			c.debug("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
 			//TODO: times
 		}
 	}
-	networkLogger.Debug("heartbeat task stoped")
+	c.debugln("heartbeat task stoped")
 }
 
 // setOnline 设置qq已经上线

@@ -15,8 +15,6 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-var networkLogger = utils.GetLogger("network")
-
 func (c *QQClient) Login(password, qrcodePath string) error {
 	// prefer session login
 	if len(c.transport.Sig.D2) != 0 && c.transport.Sig.Uin != 0 {
@@ -201,8 +199,8 @@ func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
 		c.t106 = t[0x18]
 		c.t16a = t[0x19]
 		c.transport.Sig.Tgtgt = t[0x1e]
-		networkLogger.Debugln("len(c.t106) =", len(c.t106), "len(c.t16a) =", len(c.t16a))
-		networkLogger.Debugln("len(c.transport.Sig.Tgtgt) =", len(c.transport.Sig.Tgtgt))
+		c.debugln("len(c.t106) =", len(c.t106), "len(c.t16a) =", len(c.t16a))
+		c.debugln("len(c.transport.Sig.Tgtgt) =", len(c.transport.Sig.Tgtgt))
 	}
 
 	return retCode, nil
@@ -218,7 +216,7 @@ func (c *QQClient) keyExchange() error {
 		data,
 	)
 	if err != nil {
-		networkLogger.Errorln(err)
+		c.errorln(err)
 		return err
 	}
 	c.transport.Sig.ExchangeKey, c.transport.Sig.KeySig, err = wtlogin.ParseKeyExchangeResponse(packet)
@@ -306,7 +304,7 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 			).ToBytes()))
 
 	if err != nil {
-		networkLogger.Error(err)
+		c.errorln(err)
 		return err
 	}
 
@@ -319,18 +317,18 @@ func (c *QQClient) init() error {
 		wtlogin.BuildRegisterRequest(c.version(), c.Device()))
 
 	if err != nil {
-		networkLogger.Errorln(err)
+		c.errorln(err)
 		return err
 	}
 
 	err = wtlogin.ParseRegisterResponse(response)
 	if err != nil {
-		networkLogger.Errorln("Register failed:", err)
+		c.errorln("register failed:", err)
 		return err
 	}
 	c.transport.Sig.Uin = c.Uin
 	c.setOnline()
 	go c.doHeartbeat()
-	networkLogger.Info("Register succeeded")
+	c.infoln("register succeeded")
 	return nil
 }
