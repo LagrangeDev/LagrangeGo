@@ -11,12 +11,9 @@ import (
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/http2"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 var (
-	signLogger = utils.GetLogger("sign")
-
 	signMap = map[string]struct{}{} // 只在启动时初始化, 无并发问题
 )
 
@@ -70,7 +67,7 @@ func containSignPKG(cmd string) bool {
 	return ok
 }
 
-func NewProviderURL(rawUrl string) func(string, uint32, []byte) map[string]string {
+func NewProviderURL(rawUrl string, log func(msg string)) func(string, uint32, []byte) map[string]string {
 	if rawUrl == "" {
 		return nil
 	}
@@ -86,12 +83,12 @@ func NewProviderURL(rawUrl string) func(string, uint32, []byte) map[string]strin
 			"src": fmt.Sprintf("%x", buf),
 		}, 8*time.Second, &resp)
 		if err != nil {
-			signLogger.Error(err)
+			log(err.Error())
 			return nil
 		}
 
-		signLogger.Debugf("signed for [%s:%d](%dms)",
-			cmd, seq, time.Now().UnixMilli()-startTime)
+		log(fmt.Sprintf("signed for [%s:%d](%dms)",
+			cmd, seq, time.Now().UnixMilli()-startTime))
 
 		return map[string]string{
 			"sign":  resp.Value.Sign,

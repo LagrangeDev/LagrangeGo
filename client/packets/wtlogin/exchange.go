@@ -12,7 +12,6 @@ import (
 )
 
 var encKey, _ = hex.DecodeString("e2733bf403149913cbf80c7a95168bd4ca6935ee53cd39764beebe2e007e3aee")
-var keyExangeLogger = utils.GetLogger("KeyExchange")
 
 func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 	encl, err := crypto.AESGCMEncrypt(proto.DynamicMessage{
@@ -47,30 +46,24 @@ func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 }
 
 func ParseKeyExchangeResponse(response []byte) (key, sign []byte, err error) {
-	keyExangeLogger.Debugf("keyexchange proto data: %x", response)
-
 	var p login.SsoKeyExchangeResponse
 	err = proto.Unmarshal(response, &p)
 	if err != nil {
-		keyExangeLogger.Errorln(err)
 		return
 	}
 
 	shareKey, err := ecdh.P256().Exange(p.PublicKey)
 	if err != nil {
-		keyExangeLogger.Errorln(err)
 		return
 	}
 
 	var decPb login.SsoKeyExchangeDecrypted
 	data, err := crypto.AESGCMDecrypt(p.GcmEncrypted, shareKey)
 	if err != nil {
-		keyExangeLogger.Errorln(err)
 		return
 	}
 	err = proto.Unmarshal(data, &decPb)
 	if err != nil {
-		keyExangeLogger.Errorln(err)
 		return
 	}
 

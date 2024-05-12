@@ -5,11 +5,7 @@ package client
 import (
 	"runtime/debug"
 	"sync"
-
-	"github.com/LagrangeDev/LagrangeGo/utils"
 )
-
-var eventLogger = utils.GetLogger("event")
 
 // protected all EventHandle, since write is very rare, use
 // only one lock to save memory
@@ -35,7 +31,7 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 	defer func() {
 		eventMu.RUnlock()
 		if pan := recover(); pan != nil {
-			eventLogger.Errorf("event error: %v\n%s", pan, debug.Stack())
+			client.error("event error: %v\n%s", pan, debug.Stack())
 		}
 	}()
 	for _, handler := range handle.handlers {

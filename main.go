@@ -36,11 +36,11 @@ func main() {
 	qqclient.UseDevice(deviceInfo)
 	data, err := os.ReadFile("sig.bin")
 	if err != nil {
-		logger.Warnln("read sig error:", err)
+		logrus.Warnln("read sig error:", err)
 	} else {
 		sig, err := auth.UnmarshalSigInfo(data, true)
 		if err != nil {
-			logger.Warnln("load sig error:", err)
+			logrus.Warnln("load sig error:", err)
 		} else {
 			qqclient.UseSig(sig)
 		}
@@ -66,7 +66,7 @@ func main() {
 
 	err = qqclient.Login("", "qrcode.png")
 	if err != nil {
-		logger.Errorln("login err:", err)
+		logrus.Errorln("login err:", err)
 		return
 	}
 
@@ -75,15 +75,15 @@ func main() {
 	defer func() {
 		data, err = qqclient.Sig().Marshal()
 		if err != nil {
-			logger.Errorln("marshal sig.bin err:", err)
+			logrus.Errorln("marshal sig.bin err:", err)
 			return
 		}
 		err = os.WriteFile("sig.bin", data, 0644)
 		if err != nil {
-			logger.Errorln("write sig.bin err:", err)
+			logrus.Errorln("write sig.bin err:", err)
 			return
 		}
-		logger.Infoln("sig saved into sig.bin")
+		logrus.Infoln("sig saved into sig.bin")
 	}()
 
 	// setup the main stop channel
@@ -99,7 +99,7 @@ func main() {
 
 type protocolLogger struct{}
 
-const fromProtocol = "\tLgr -> "
+const fromProtocol = "Lgr -> "
 
 func (p protocolLogger) Info(format string, arg ...any) {
 	logger.Infof(fromProtocol+format, arg...)

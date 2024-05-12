@@ -129,7 +129,7 @@ func (c *QQClient) GetFriendsData() (map[uint32]*entity.Friend, error) {
 	for _, friend := range friends {
 		friendsData[friend.Uin] = friend
 	}
-	loginLogger.Infof("获取%d个好友", len(friendsData))
+	c.info("获取%d个好友", len(friendsData))
 	return friendsData, err
 }
 
@@ -169,7 +169,7 @@ func (c *QQClient) GetAllGroupsMembersData() (map[uint32]map[uint32]*entity.Grou
 		}
 		groupsData[group.GroupUin] = groupMembersData
 	}
-	loginLogger.Infof("获取%d个群的成员信息", len(groupsData))
+	c.info("获取%d个群的成员信息", len(groupsData))
 	return groupsData, err
 }
 
@@ -182,6 +182,6 @@ func (c *QQClient) GetAllGroupsInfo() (map[uint32]*entity.Group, error) {
 	for _, group := range groupsInfo {
 		groupsData[group.GroupUin] = group
 	}
-	loginLogger.Infof("获取%d个群信息", len(groupsData))
+	c.info("获取%d个群信息", len(groupsData))
 	return groupsData, err
 }

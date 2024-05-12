@@ -5,11 +5,8 @@ import (
 	"unsafe"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/RomiChan/syncx"
 )
-
-var cacheLogger = utils.GetLogger("cache")
 
 type cacheType uint32
 
@@ -51,7 +48,6 @@ func refreshAllCacheOf[T any](c *Cache, newcache map[uint32]*T) {
 	if typ == 0 {
 		return
 	}
-	cacheLogger.Debugln("refresh all cache of", typstr)
 	c.refreshed.Store(typ, struct{}{})
 	key := uint64(typ) << 32
 	dellst := make([]uint64, 0, 64)
@@ -79,7 +75,6 @@ func setCacheOf[T any](c *Cache, k uint32, v *T) {
 	}
 	key := uint64(typ)<<32 | uint64(k)
 	c.m.Store(key, unsafe.Pointer(v))
-	cacheLogger.Debugln("set cache of", typstr, k, "=", v)
 }
 
 func getCacheOf[T any](c *Cache, k uint32) (v *T, ok bool) {
@@ -93,7 +88,6 @@ func getCacheOf[T any](c *Cache, k uint32) (v *T, ok bool) {
 	if ok {
 		v = (*T)(unsafev)
 	}
-	cacheLogger.Debugln("get cache of", typstr, k, "=", v)
 	return
 }
 

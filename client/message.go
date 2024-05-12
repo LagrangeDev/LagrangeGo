@@ -45,7 +45,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 
 func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
 	elements = c.preprocessGroupMessage(groupUin, elements)
-	body := message2.BuildMessageElements(elements)
+	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
 	}
@@ -54,7 +54,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 
 func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
 	elements = c.preprocessPrivateMessage(uin, elements)
-	body := message2.BuildMessageElements(elements)
+	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
 			Uid: proto.Some(c.GetUid(uin)),
@@ -64,7 +64,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 }
 
 func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	body := message2.BuildMessageElements(elements)
+	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		GrpTmp: &message.GrpTmp{
 			GroupUin: proto.Some(groupID),

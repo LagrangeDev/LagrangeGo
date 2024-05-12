@@ -18,7 +18,7 @@ import (
 func (c *QQClient) Login(password, qrcodePath string) error {
 	// prefer session login
 	if len(c.transport.Sig.D2) != 0 && c.transport.Sig.Uin != 0 {
-		loginLogger.Infoln("Session found, try to login with session")
+		c.infoln("Session found, try to login with session")
 		c.Uin = c.transport.Sig.Uin
 		if c.Online.Load() {
 			return ErrAlreadyOnline
@@ -30,7 +30,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 		err = c.init()
 		if err != nil {
 			err = fmt.Errorf("failed to register session: %v", err)
-			loginLogger.Errorln(err)
+			c.errorln(err)
 			return err
 		}
 		return nil
@@ -53,7 +53,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 	}
 
 	if password != "" {
-		loginLogger.Infoln("login with password")
+		c.infoln("login with password")
 		err := c.keyExchange()
 		if err != nil {
 			return err
@@ -68,16 +68,16 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 			case ret.Successful():
 				return c.init()
 			case ret == loginState.CaptchaVerify:
-				loginLogger.Warningln("captcha verification required")
+				c.warningln("captcha verification required")
 				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine("ticket?->")
 				c.transport.Sig.CaptchaInfo[1] = utils.ReadLine("rand_str?->")
 			default:
-				loginLogger.Errorf("Unhandled exception raised: %s", ret.Name())
+				c.error("Unhandled exception raised: %s", ret.Name())
 			}
 		}
 		// panic("unreachable")
 	}
-	loginLogger.Infoln("login with qrcode")
+	c.infoln("login with qrcode")
 	png, _, err := c.FecthQRCode()
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 	if err != nil {
 		return err
 	}
-	loginLogger.Infof("qrcode saved to %s", qrcodePath)
+	c.info("qrcode saved to %s", qrcodePath)
 	err = c.QRCodeLogin(3)
 	if err != nil {
 		return err
@@ -113,7 +113,7 @@ func (c *QQClient) TokenLogin() (loginState.State, error) {
 	if err != nil {
 		return -999, err
 	}
-	return ParseNtloginResponse(packet, &c.transport.Sig)
+	return parseNtloginResponse(packet, &c.transport.Sig)
 }
 
 func (c *QQClient) FecthQRCode() ([]byte, string, error) {
@@ -165,7 +165,7 @@ func (c *QQClient) FecthQRCode() ([]byte, string, error) {
 }
 
 func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
-	loginLogger.Tracef("get qrcode result")
+	c.infoln("get qrcode result")
 	if c.transport.Sig.Qrsig == nil {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
 	}
@@ -219,6 +219,7 @@ func (c *QQClient) keyExchange() error {
 		c.errorln(err)
 		return err
 	}
+	c.debug("keyexchange proto data: %x", packet)
 	c.transport.Sig.ExchangeKey, c.transport.Sig.KeySig, err = wtlogin.ParseKeyExchangeResponse(packet)
 	return err
 }
@@ -255,7 +256,7 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 	if err != nil {
 		return -999, err
 	}
-	return ParseNtloginResponse(packet, &c.transport.Sig)
+	return parseNtloginResponse(packet, &c.transport.Sig)
 }
 
 func (c *QQClient) QRCodeLogin(refreshInterval int) error {
@@ -266,7 +267,7 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 	for {
 		retCode, err := c.GetQRCodeResult()
 		if err != nil {
-			loginLogger.Error(err)
+			c.errorln(err)
 			return err
 		}
 		if retCode.Waitable() {
