@@ -333,7 +333,7 @@ func (c *QQClient) netLoop() {
 			defer func() {
 				if pan := recover(); pan != nil {
 					c.error("panic on decoder %v : %v\n%s", pkt.CommandName, pan, debug.Stack())
-					// c.dump("packet decode error: %v - %v", pkt.Payload, pkt.CommandName, pan)
+					c.dump("packet decode error: %v - %v", pkt.Payload, pkt.CommandName, pan)
 				}
 			}()
 
