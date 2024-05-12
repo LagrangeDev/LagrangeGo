@@ -97,6 +97,7 @@ func main() {
 	}
 }
 
+// protocolLogger from https://github.com/Mrs4s/go-cqhttp/blob/a5923f179b360331786a6509eb33481e775a7bd1/cmd/gocq/main.go#L501
 type protocolLogger struct{}
 
 const fromProtocol = "Lgr -> "
