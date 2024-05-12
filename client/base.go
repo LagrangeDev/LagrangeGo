@@ -26,15 +26,17 @@ import (
 // NewClient 创建一个新的 QQ Client
 func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
 	client := &QQClient{
-		Uin:          uin,
-		signProvider: sign.NewProviderURL(signUrl),
-		oicq:         oicq.NewCodec(int64(uin)),
+		Uin:  uin,
+		oicq: oicq.NewCodec(int64(uin)),
 		highwaySession: highway.Session{
 			AppID:    uint32(appInfo.AppID),
 			SubAppID: uint32(appInfo.SubAppID),
 		},
 		alive: true,
 	}
+	client.signProvider = sign.NewProviderURL(signUrl, func(msg string) {
+		client.debugln(msg)
+	})
 	client.transport.Version = appInfo
 	client.transport.Sig.D2Key = make([]byte, 0, 16)
 	client.highwaySession.Uin = &client.transport.Sig.Uin
@@ -60,6 +62,7 @@ type QQClient struct {
 	ConnectTime    time.Time
 	transport      network.Transport
 	oicq           *oicq.Codec
+	logger         Logger
 	highwaySession highway.Session
 
 	// internal state
@@ -155,13 +158,13 @@ func (c *QQClient) doHeartbeat() {
 			continue
 		}
 		if err != nil {
-			networkLogger.Errorf("heartbeat err %s", err)
+			c.error("heartbeat err %s", err)
 		} else {
-			networkLogger.Debugf("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
+			c.debug("heartbeat %dms to server", time.Now().UnixMilli()-startTime)
 			//TODO: times
 		}
 	}
-	networkLogger.Debug("heartbeat task stoped")
+	c.debugln("heartbeat task stoped")
 }
 
 // setOnline 设置qq已经上线

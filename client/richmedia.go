@@ -15,7 +15,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-func ConvertNTHighwayNetWork(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
+func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 	hwipv4s := make([]*highway.NTHighwayIPv4, len(ipv4s))
 	for i, ip := range ipv4s {
 		hwipv4s[i] = &highway.NTHighwayIPv4{
@@ -47,7 +47,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 		return nil, err
 	}
 	ukey := uploadResp.Upload.UKey.Unwrap()
-	networkLogger.Debugln("private image upload ukey:", ukey)
+	c.debugln("private image upload ukey:", ukey)
 	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
 		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
@@ -58,7 +58,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 			FileUuid: index.FileUuid,
 			UKey:     ukey,
 			Network: &highway.NTHighwayNetwork{
-				IPv4S: ConvertNTHighwayNetWork(uploadResp.Upload.IPv4S),
+				IPv4S: oidbIPv4ToNTHighwayIPv4(uploadResp.Upload.IPv4S),
 			},
 			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
 			BlockSize:   uint32(highway2.BlockSize),
@@ -110,7 +110,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		return nil, err
 	}
 	ukey := uploadResp.Upload.UKey.Unwrap()
-	networkLogger.Debugln("private image upload ukey:", ukey)
+	c.debugln("private image upload ukey:", ukey)
 	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
 		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
@@ -121,7 +121,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 			FileUuid: index.FileUuid,
 			UKey:     ukey,
 			Network: &highway.NTHighwayNetwork{
-				IPv4S: ConvertNTHighwayNetWork(uploadResp.Upload.IPv4S),
+				IPv4S: oidbIPv4ToNTHighwayIPv4(uploadResp.Upload.IPv4S),
 			},
 			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
 			BlockSize:   uint32(highway2.BlockSize),

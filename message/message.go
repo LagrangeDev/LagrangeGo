@@ -280,6 +280,7 @@ func (msg *GroupMessage) ToString() (res string) {
 	res = strBuilder.String()
 	return
 }
+
 func ToReadableString(m []IMessageElement) string {
 	sb := new(strings.Builder)
 	for _, elem := range m {
@@ -327,30 +328,17 @@ func (msg *SendingMessage) FirstOrNil(f func(element IMessageElement) bool) IMes
 	return nil
 }
 
-func BuildMessageElements(msgElems []IMessageElement) (msgBody *message.MessageBody) {
+func PackElementsToBody(msgElems []IMessageElement) (msgBody *message.MessageBody) {
 	if len(msgElems) == 0 {
 		return
 	}
 	elems := make([]*message.Elem, 0, len(msgElems))
 	for _, elem := range msgElems {
-		var pb []*message.Elem
-		switch e := elem.(type) {
-		case *TextElement:
-			pb = e.BuildElement()
-		case *AtElement:
-			pb = e.BuildElement()
-		case *ReplyElement:
-			pb = e.BuildElement()
-		case *FaceElement:
-			pb = e.BuildElement()
-		case *GroupImageElement:
-			pb = e.BuildElement()
-		case *FriendImageElement:
-			pb = e.BuildElement()
-		default:
+		bd, ok := elem.(ElementBuilder)
+		if !ok {
 			continue
 		}
-		elems = append(elems, pb...)
+		elems = append(elems, bd.BuildElement()...)
 	}
 	msgBody = &message.MessageBody{
 		RichText: &message.RichText{Elems: elems},

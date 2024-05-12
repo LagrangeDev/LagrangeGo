@@ -74,7 +74,7 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
 			sig.D2Key = d2Key
 		}
 		if tlv11a, ok := tlv[0x11A]; ok {
-			loginLogger.Debugf("tlv11a data: %x", tlv11a)
+			c.debug("tlv11a data: %x", tlv11a)
 			tlvReader := binary.NewReader(tlv11a)
 			tlvReader.ReadU16()
 			sig.Age = tlvReader.ReadU8()
@@ -88,12 +88,12 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
 		err := proto.Unmarshal(tlv[0x543], &resp)
 		if err != nil {
 			err = fmt.Errorf("parsing login response error: %s", err)
-			loginLogger.Errorln(err)
+			c.errorln(err)
 			return err
 		}
 		sig.Uid = resp.Layer1.Layer2.Uid
 
-		loginLogger.Debugln("SigInfo got")
+		c.debugln("SigInfo got")
 
 		return nil
 	} else if errData, ok := tlv[0x146]; ok {
@@ -112,6 +112,6 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
 	}
 
 	err := fmt.Errorf("login fail on oicq (0x%02x): [%s]>[%s]", typ, title, content)
-	loginLogger.Errorln(err)
+	c.errorln(err)
 	return err
 }
