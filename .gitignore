@@ -5,6 +5,11 @@
 .idea/
 .out/
 
+# vitepress
+node_modules/
+docs/.vitepress/dist
+docs/.vitepress/cache
+
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
