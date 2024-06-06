@@ -29,7 +29,7 @@ go get -u github.com/LagrangeDev/LagrangeGo
 - [x] 文本
 - [x] 图片
 - [ ] 语音
-- [ ] 表情
+- [x] 表情
 - [x] At
 - [ ] 回复
 - [ ] 长消息(仅群聊/私聊)
