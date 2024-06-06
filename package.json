@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "vitepress": "^1.2.2"
+    "vitepress": "^1.2.2",
+    "vitepress-plugin-google-analytics": "^1.0.2"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
