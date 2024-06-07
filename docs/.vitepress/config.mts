@@ -32,10 +32,21 @@ export default defineConfig({
         text: '示例',
         collapsed: false,
         items: [
+          {text: '使用项目示例', link: '/examples'},
           {text: '创建bot实例', link: '/examples/createClient'},
           {text: '登录', link: '/examples/login'},
+          {text: '事件', link: '/examples/event'},
         ]
       },
+      {
+        text: 'api',
+        collapsed: true,
+        items: [
+          {text: 'AppInfo', link: '/api/appInfo'},
+          {text: 'DeviceInfo', link: '/api/deviceInfo'},
+          {text: 'SigInfo', link: '/api/sigInfo'},
+        ]
+      }
     ],
 
     socialLinks: [
