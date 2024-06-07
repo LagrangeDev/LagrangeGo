@@ -1,4 +1,5 @@
 import {defineConfig} from 'vitepress'
+import taskLists from 'markdown-it-task-lists'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -7,6 +8,11 @@ export default defineConfig({
   base: "/LagrangeGo/",
   cleanUrls: true,
   lang: "zh-cn",
+  markdown: {
+    config: (md) => {
+      md.use(taskLists)
+    }
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
