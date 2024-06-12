@@ -44,7 +44,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 }
 
 func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	elements = c.preprocessGroupMessage(groupUin, elements)
+	elements = c.preProcessGroupMessage(groupUin, elements)
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
@@ -53,7 +53,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 }
 
 func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	elements = c.preprocessPrivateMessage(uin, elements)
+	elements = c.preProcessPrivateMessage(uin, elements)
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
@@ -74,7 +74,7 @@ func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []messag
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) preprocessGroupMessage(groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
+func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
 	for _, element := range elements {
 		switch elem := element.(type) {
 		case *message2.AtElement:
@@ -102,7 +102,7 @@ func (c *QQClient) preprocessGroupMessage(groupUin uint32, elements []message2.I
 	return elements
 }
 
-func (c *QQClient) preprocessPrivateMessage(targetUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
+func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
 	for _, element := range elements {
 		switch elem := element.(type) {
 		case *message2.FriendImageElement:
