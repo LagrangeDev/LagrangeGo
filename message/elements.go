@@ -5,6 +5,8 @@ package message
 import (
 	"os"
 	"strconv"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
 type (
@@ -33,10 +35,13 @@ type (
 	}
 
 	VoiceElement struct {
-		Name string
-		Md5  []byte
-		Size uint32
-		Url  string
+		Name    string
+		Md5     []byte
+		Size    uint32
+		Url     string
+		IsGroup bool
+		Sha1    []byte
+		Node    *oidb.IndexNode
 
 		// --- sending ---
 		Data []byte

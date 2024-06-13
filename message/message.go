@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -96,7 +98,7 @@ func (s *Sender) IsAnonymous() bool {
 }
 
 func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
-	return &PrivateMessage{
+	prvMsg := &PrivateMessage{
 		Id:     int32(msg.Message.ContentHead.Sequence.Unwrap()),
 		Self:   int64(msg.Message.ResponseHead.ToUin),
 		Target: int64(msg.Message.ResponseHead.FromUin),
@@ -108,10 +110,15 @@ func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 		Time:     int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
 		Elements: parseMessageElements(msg.Message.Body.RichText.Elems),
 	}
+	if msg.Message != nil && msg.Message.Body != nil {
+		prvMsg.Elements = append(prvMsg.Elements, ParseMessageBody(msg.Message.Body, false)...)
+	}
+
+	return prvMsg
 }
 
 func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
-	return &GroupMessage{
+	grpMsg := &GroupMessage{
 		Id:        int32(msg.Message.ContentHead.Sequence.Unwrap()),
 		GroupCode: msg.Message.ResponseHead.Grp.GroupUin,
 		GroupName: msg.Message.ResponseHead.Grp.GroupName,
@@ -126,6 +133,10 @@ func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
 		Elements:       parseMessageElements(msg.Message.Body.RichText.Elems),
 		OriginalObject: msg.Message,
 	}
+	if msg.Message != nil && msg.Message.Body != nil {
+		grpMsg.Elements = append(grpMsg.Elements, ParseMessageBody(msg.Message.Body, true)...)
+	}
+	return grpMsg
 }
 
 func ParseTempMessage(msg *message.PushMsg) *TempMessage {
@@ -252,6 +263,34 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 	return res
 }
 
+func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement {
+	var res []IMessageElement
+	if body != nil {
+		if body.RichText != nil && body.RichText.Ptt != nil {
+			ptt := body.RichText.Ptt
+			switch {
+			case isGroup && ptt.FileId != 0:
+				res = append(res, &VoiceElement{
+					Name:    ptt.FileName,
+					IsGroup: true,
+					Node: &oidb2.IndexNode{
+						FileUuid: ptt.GroupFileKey,
+					},
+				})
+			case !isGroup:
+				res = append(res, &VoiceElement{
+					Name:    ptt.FileName,
+					IsGroup: false,
+					Node: &oidb2.IndexNode{
+						FileUuid: ptt.FileUuid,
+					},
+				})
+			}
+		}
+	}
+	return res
+}
+
 func (msg *GroupMessage) ToString() (res string) {
 	var strBuilder strings.Builder
 	for _, elem := range msg.Elements {
@@ -275,6 +314,10 @@ func (msg *GroupMessage) ToString() (res string) {
 				strBuilder.WriteString(", isLargeFace: true]")
 			}
 			strBuilder.WriteString("]")
+		case *VoiceElement:
+			strBuilder.WriteString("[Record: ")
+			strBuilder.WriteString(e.Url)
+			strBuilder.WriteString("]")
 		}
 	}
 	res = strBuilder.String()
@@ -296,6 +339,10 @@ func ToReadableString(m []IMessageElement) string {
 		case *FaceElement:
 			sb.WriteString("[表情:")
 			sb.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
+			sb.WriteString("]")
+		case *VoiceElement:
+			sb.WriteString("[语音:")
+			sb.WriteString(e.Url)
 			sb.WriteString("]")
 		}
 	}

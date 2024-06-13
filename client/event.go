@@ -5,6 +5,8 @@ package client
 import (
 	"runtime/debug"
 	"sync"
+
+	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
 // protected all EventHandle, since write is very rare, use
@@ -35,6 +37,10 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 		}
 	}()
 	for _, handler := range handle.handlers {
+		switch v := any(event).(type) {
+		case *message.GroupMessage:
+			_ = client.PreProcessGroupMessageEvent(v)
+		}
 		handler(client, event)
 	}
 }
@@ -54,4 +60,32 @@ func (c *QQClient) onGroupMessageReceipt(id string, f ...func(*QQClient, *groupM
 		return
 	}
 	c.eventHandlers.groupMessageReceiptHandlers.LoadOrStore(id, f[0])
+}
+
+func (c *QQClient) PreProcessGroupMessageEvent(msg *message.GroupMessage) error {
+	for _, elem := range msg.Elements {
+		switch e := elem.(type) {
+		case *message.VoiceElement:
+			url, err := c.GetGroupRecordUrl(msg.GroupCode, e.Node)
+			if err != nil {
+				return err
+			}
+			e.Url = url
+		}
+	}
+	return nil
+}
+
+func (c *QQClient) PostProcess(msg *message.GroupMessage) error {
+	for _, elem := range msg.Elements {
+		switch e := elem.(type) {
+		case *message.VoiceElement:
+			url, err := c.GetGroupRecordUrl(msg.GroupCode, e.Node)
+			if err != nil {
+				return err
+			}
+			e.Url = url
+		}
+	}
+	return nil
 }
