@@ -39,7 +39,7 @@ func BuildGroupRecordDownloadReq(grpUin uint32, node *oidb.IndexNode) (*OidbPack
 	return BuildOidbPacket(0x126E, 200, &body, false, true)
 }
 
-func ParseRecordGroupDownloadResp(data []byte) (string, error) {
+func ParseGroupRecordDownloadResp(data []byte) (string, error) {
 	var resp oidb.NTV2RichMediaResp
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
 		return "", err

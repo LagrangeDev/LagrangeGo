@@ -278,5 +278,5 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 	if err != nil {
 		return "", err
 	}
-	return oidb2.ParseRecordGroupDownloadResp(resp)
+	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
