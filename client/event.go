@@ -36,11 +36,15 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 			client.error("event error: %v\n%s", pan, debug.Stack())
 		}
 	}()
+
+	switch v := any(event).(type) {
+	case *message.GroupMessage:
+		_ = client.PreProcessGroupMessageEvent(v)
+	case *message.PrivateMessage:
+		_ = client.PreProcessPrivateMessageEvent(v)
+	}
+
 	for _, handler := range handle.handlers {
-		switch v := any(event).(type) {
-		case *message.GroupMessage:
-			_ = client.PreProcessGroupMessageEvent(v)
-		}
 		handler(client, event)
 	}
 }
@@ -76,11 +80,11 @@ func (c *QQClient) PreProcessGroupMessageEvent(msg *message.GroupMessage) error 
 	return nil
 }
 
-func (c *QQClient) PostProcess(msg *message.GroupMessage) error {
+func (c *QQClient) PreProcessPrivateMessageEvent(msg *message.PrivateMessage) error {
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *message.VoiceElement:
-			url, err := c.GetGroupRecordUrl(msg.GroupCode, e.Node)
+			url, err := c.GetRecordUrl(e.Node)
 			if err != nil {
 				return err
 			}

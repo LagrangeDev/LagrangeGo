@@ -38,7 +38,7 @@ func BuildRecordDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, 
 		},
 	}
 
-	return BuildOidbPacket(0x126D, 200, body, false, true)
+	return BuildOidbPacket(0x126D, 200, &body, false, true)
 }
 
 func ParseRecordDownloadResp(data []byte) (string, error) {

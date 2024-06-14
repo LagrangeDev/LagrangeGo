@@ -39,7 +39,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	}
 
 	switch typ {
-	case 166: // private msg
+	case 166, 208: // 166 for private msg, 208 for private record
 		c.PrivateMessageEvent.dispatch(c, msgConverter.ParsePrivateMessage(&msg))
 		return nil, nil
 	case 82: // group msg

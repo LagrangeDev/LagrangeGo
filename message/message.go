@@ -316,7 +316,7 @@ func (msg *GroupMessage) ToString() (res string) {
 			strBuilder.WriteString("]")
 		case *VoiceElement:
 			strBuilder.WriteString("[Record: ")
-			strBuilder.WriteString(e.Url)
+			strBuilder.WriteString(e.Name)
 			strBuilder.WriteString("]")
 		}
 	}
@@ -342,7 +342,7 @@ func ToReadableString(m []IMessageElement) string {
 			sb.WriteString("]")
 		case *VoiceElement:
 			sb.WriteString("[语音:")
-			sb.WriteString(e.Url)
+			sb.WriteString(e.Name)
 			sb.WriteString("]")
 		}
 	}
