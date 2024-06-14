@@ -13,6 +13,9 @@ import (
 
 func BuildGroupImageUploadReq(groupUin uint32, data []byte) (*OidbPacket, error) {
 	// OidbSvcTrpcTcp.0x11c4_100
+	if data == nil {
+		return nil, errors.New("image data is null")
+	}
 	md5Hash := crypto.MD5Digest(data)
 	sha1Hash := crypto.SHA1Digest(data)
 	format, size, err := utils.ImageResolve(data)
