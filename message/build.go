@@ -100,7 +100,17 @@ func (e *ReplyElement) BuildElement() []*message.Elem {
 }
 
 func (e *VoiceElement) BuildElement() []*message.Elem {
-	return nil
+	common, err := proto.Marshal(e.MsgInfo)
+	if err != nil {
+		return nil
+	}
+	return []*message.Elem{{
+		CommonElem: &message.CommonElem{
+			ServiceType:  48,
+			PbElem:       common,
+			BusinessType: 22,
+		},
+	}}
 }
 
 func (e *ShortVideoElement) BuildElement() []*message.Elem {

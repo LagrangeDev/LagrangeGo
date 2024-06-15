@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
@@ -35,16 +37,18 @@ type (
 	}
 
 	VoiceElement struct {
-		Name    string
-		Md5     []byte
-		Size    uint32
-		Url     string
-		IsGroup bool
-		Sha1    []byte
-		Node    *oidb.IndexNode
+		Name string
+		Size uint32
+		Url  string
+		Md5  []byte
+		Sha1 []byte
+		Node *oidb.IndexNode
 
 		// --- sending ---
-		Data []byte
+		MsgInfo  *oidb.MsgInfo
+		Compat   []byte
+		Duration uint32
+		Data     []byte
 	}
 	ShortVideoElement struct {
 		Name      string
@@ -95,6 +99,16 @@ func NewGroupImageByFile(path string) (*GroupImageElement, error) {
 	return &GroupImageElement{
 		Stream: data,
 	}, nil
+}
+
+func NewRecord(data []byte, duration uint32) *VoiceElement {
+	return &VoiceElement{
+		Size:     uint32(len(data)),
+		Md5:      crypto.MD5Digest(data),
+		Sha1:     crypto.SHA1Digest(data),
+		Data:     data,
+		Duration: duration,
+	}
 }
 
 func (e *TextElement) Type() ElementType {

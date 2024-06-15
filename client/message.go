@@ -96,6 +96,15 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 				c.errorln("ImageUploadGroup failed")
 				continue
 			}
+		case *message2.VoiceElement:
+			_, err := c.RecordUploadGroup(groupUin, elem)
+			if err != nil {
+				c.errorln(err)
+			}
+			if elem.MsgInfo == nil {
+				c.errorln("RecordUploadGroup failed")
+				continue
+			}
 		default:
 		}
 	}
@@ -114,6 +123,15 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo == nil {
 				c.errorln("ImageUploadPrivate failed")
 				continue
+			}
+		case *message2.VoiceElement:
+			targetUid := c.GetUid(targetUin)
+			_, err := c.RecordUploadPrivate(targetUid, elem)
+			if err != nil {
+				c.errorln(err)
+			}
+			if elem.MsgInfo == nil {
+				c.errorln("RecordUploadPrivate failed")
 			}
 		default:
 		}

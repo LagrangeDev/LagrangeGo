@@ -271,16 +271,14 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 			switch {
 			case isGroup && ptt.FileId != 0:
 				res = append(res, &VoiceElement{
-					Name:    ptt.FileName,
-					IsGroup: true,
+					Name: ptt.FileName,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.GroupFileKey,
 					},
 				})
 			case !isGroup:
 				res = append(res, &VoiceElement{
-					Name:    ptt.FileName,
-					IsGroup: false,
+					Name: ptt.FileName,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.FileUuid,
 					},
