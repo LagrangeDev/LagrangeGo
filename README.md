@@ -19,7 +19,7 @@ go get -u github.com/LagrangeDev/LagrangeGo
   <summary>已完成功能/开发计划列表</summary>
 
 **登录**
-- [ ] 账号密码登录
+- ~~[x] 账号密码登录~~
 - [x] 二维码登录
 - [ ] 验证码提交
 - [ ] 设备锁验证
@@ -28,7 +28,7 @@ go get -u github.com/LagrangeDev/LagrangeGo
 **消息类型**
 - [x] 文本
 - [x] 图片
-- [ ] 语音
+- [x] 语音
 - [x] 表情
 - [x] At
 - [ ] 回复
