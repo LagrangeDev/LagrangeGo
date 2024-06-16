@@ -228,12 +228,12 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 				url = "http://gchat.qpic.cn" + elem.CustomFace.OrigUrl
 			}
 
-			res = append(res, &GroupImageElement{
+			res = append(res, &ImageElement{
 				FileId:  int64(elem.CustomFace.FileId),
 				ImageId: elem.CustomFace.FilePath,
 				Size:    elem.CustomFace.Size,
-				Width:   elem.CustomFace.Width,
-				Height:  elem.CustomFace.Height,
+				Width:   uint32(elem.CustomFace.Width),
+				Height:  uint32(elem.CustomFace.Height),
 				Url:     url,
 				Md5:     elem.CustomFace.Md5,
 			})
@@ -251,7 +251,7 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 				url = "http://gchat.qpic.cn" + elem.NotOnlineImage.OrigUrl
 			}
 
-			res = append(res, &FriendImageElement{
+			res = append(res, &ImageElement{
 				ImageId: elem.NotOnlineImage.FilePath,
 				Size:    elem.NotOnlineImage.FileLen,
 				Url:     url,
@@ -289,13 +289,13 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 	return res
 }
 
-func (msg *GroupMessage) ToString() (res string) {
+func (msg *GroupMessage) ToString() string {
 	var strBuilder strings.Builder
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *TextElement:
 			strBuilder.WriteString(e.Content)
-		case *GroupImageElement:
+		case *ImageElement:
 			strBuilder.WriteString("[Image: ")
 			strBuilder.WriteString(e.ImageId)
 			strBuilder.WriteString("]")
@@ -318,8 +318,11 @@ func (msg *GroupMessage) ToString() (res string) {
 			strBuilder.WriteString("]")
 		}
 	}
-	res = strBuilder.String()
-	return
+	return strBuilder.String()
+}
+
+func (msg *PrivateMessage) ToString() string {
+	return ToReadableString(msg.Elements)
 }
 
 func ToReadableString(m []IMessageElement) string {
@@ -328,7 +331,7 @@ func ToReadableString(m []IMessageElement) string {
 		switch e := elem.(type) {
 		case *TextElement:
 			sb.WriteString(e.Content)
-		case *GroupImageElement, *FriendImageElement:
+		case *ImageElement:
 			sb.WriteString("[图片]")
 		case *AtElement:
 			sb.WriteString(e.Display)

@@ -48,8 +48,8 @@ func main() {
 
 	qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 		if event.ToString() == "114514" {
-			img, _ := os.ReadFile("testgroup.png")
-			_, err := client.SendGroupMessage(event.GroupCode, []message.IMessageElement{&message.GroupImageElement{Stream: img}})
+			img, _ := message.NewImageByFile("testgroup.png")
+			_, err := client.SendGroupMessage(event.GroupCode, []message.IMessageElement{img})
 			if err != nil {
 				return
 			}
@@ -57,8 +57,8 @@ func main() {
 	})
 
 	qqclient.PrivateMessageEvent.Subscribe(func(client *client.QQClient, event *message.PrivateMessage) {
-		img, _ := os.ReadFile("testprivate.png")
-		_, err := client.SendPrivateMessage(event.Sender.Uin, []message.IMessageElement{&message.FriendImageElement{Stream: img}})
+		img, _ := message.NewImageByFile("testprivate.png")
+		_, err := client.SendPrivateMessage(event.Sender.Uin, []message.IMessageElement{img})
 		if err != nil {
 			return
 		}

@@ -87,7 +87,7 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 					elem.Display = "@" + member.MemberName
 				}
 			}
-		case *message2.GroupImageElement:
+		case *message2.ImageElement:
 			_, err := c.ImageUploadGroup(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
@@ -114,7 +114,7 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
 	for _, element := range elements {
 		switch elem := element.(type) {
-		case *message2.FriendImageElement:
+		case *message2.ImageElement:
 			targetUid := c.GetUid(targetUin)
 			_, err := c.ImageUploadPrivate(targetUid, elem)
 			if err != nil {

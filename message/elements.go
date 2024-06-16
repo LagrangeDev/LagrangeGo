@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
@@ -50,6 +52,31 @@ type (
 		Duration uint32
 		Data     []byte
 	}
+
+	ImageElement struct {
+		ImageId   string
+		FileId    int64
+		ImageType int32
+		Size      uint32
+		Width     uint32
+		Height    uint32
+		Url       string
+
+		// EffectID show pic effect id.
+		EffectID int32
+		Flash    bool
+
+		// send
+		Summary     string
+		Ext         string
+		Md5         []byte
+		Sha1        []byte
+		MsgInfo     *oidb.MsgInfo
+		Stream      []byte
+		CompatFace  *message.CustomFace     // GroupImage
+		CompatImage *message.NotOnlineImage // FriendImage
+	}
+
 	ShortVideoElement struct {
 		Name      string
 		Uuid      []byte
@@ -85,22 +112,6 @@ func NewAt(target uint32, display ...string) *AtElement {
 	}
 }
 
-func NewGroupImage(data []byte) *GroupImageElement {
-	return &GroupImageElement{
-		Stream: data,
-	}
-}
-
-func NewGroupImageByFile(path string) (*GroupImageElement, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return &GroupImageElement{
-		Stream: data,
-	}, nil
-}
-
 func NewRecord(data []byte, duration uint32) *VoiceElement {
 	return &VoiceElement{
 		Size:     uint32(len(data)),
@@ -109,6 +120,28 @@ func NewRecord(data []byte, duration uint32) *VoiceElement {
 		Data:     data,
 		Duration: duration,
 	}
+}
+
+func NewImage(data []byte, Summary ...string) *ImageElement {
+	var summary string
+	if len(Summary) != 0 {
+		summary = Summary[0]
+	}
+	return &ImageElement{
+		Size:    uint32(len(data)),
+		Summary: summary,
+		Stream:  data,
+		Md5:     crypto.MD5Digest(data),
+		Sha1:    crypto.SHA1Digest(data),
+	}
+}
+
+func NewImageByFile(path string, Summary ...string) (*ImageElement, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return NewImage(data, Summary...), nil
 }
 
 func (e *TextElement) Type() ElementType {
@@ -123,20 +156,16 @@ func (e *FaceElement) Type() ElementType {
 	return Face
 }
 
-func (e *GroupImageElement) Type() ElementType {
-	return Image
-}
-
-func (e *FriendImageElement) Type() ElementType {
-	return Image
-}
-
 func (e *ReplyElement) Type() ElementType {
 	return Reply
 }
 
 func (e *VoiceElement) Type() ElementType {
 	return Voice
+}
+
+func (e *ImageElement) Type() ElementType {
+	return Image
 }
 
 func (e *ShortVideoElement) Type() ElementType {

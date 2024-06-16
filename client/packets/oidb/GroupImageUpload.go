@@ -3,22 +3,21 @@ package oidb
 import (
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"math/rand"
+
+	"github.com/LagrangeDev/LagrangeGo/message"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-func BuildGroupImageUploadReq(groupUin uint32, data []byte) (*OidbPacket, error) {
+func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*OidbPacket, error) {
 	// OidbSvcTrpcTcp.0x11c4_100
-	if data == nil {
+	if image.Stream == nil {
 		return nil, errors.New("image data is null")
 	}
-	md5Hash := crypto.MD5Digest(data)
-	sha1Hash := crypto.SHA1Digest(data)
-	format, size, err := utils.ImageResolve(data)
+
+	format, size, err := utils.ImageResolve(image.Stream)
 	if err != nil {
 		return nil, err
 	}
@@ -52,10 +51,10 @@ func BuildGroupImageUploadReq(groupUin uint32, data []byte) (*OidbPacket, error)
 			UploadInfo: []*oidb.UploadInfo{
 				{
 					FileInfo: &oidb.FileInfo{
-						FileSize: uint32(len(data)),
-						FileHash: fmt.Sprintf("%x", md5Hash),
-						FileSha1: fmt.Sprintf("%x", sha1Hash),
-						FileName: fmt.Sprintf("%x.%s", md5Hash, imageExt),
+						FileSize: image.Size,
+						FileHash: hex.EncodeToString(image.Md5),
+						FileSha1: hex.EncodeToString(image.Sha1),
+						FileName: hex.EncodeToString(image.Md5) + "." + imageExt,
 						Type: &oidb.FileType{
 							Type:        1,
 							PicFormat:   uint32(format),
@@ -77,6 +76,7 @@ func BuildGroupImageUploadReq(groupUin uint32, data []byte) (*OidbPacket, error)
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
 					BytesPbReserveTroop: bytesPbReserveTroop,
+					TextSummary:         image.Summary,
 				},
 				Video: &oidb.VideoExtBizInfo{
 					BytesPbReserve: []byte{},

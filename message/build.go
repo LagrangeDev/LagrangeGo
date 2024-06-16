@@ -59,39 +59,24 @@ func (e *FaceElement) BuildElement() []*message.Elem {
 	}
 }
 
-func (e *GroupImageElement) BuildElement() []*message.Elem {
+func (e *ImageElement) BuildElement() []*message.Elem {
 	common, err := proto.Marshal(e.MsgInfo)
 	if err != nil {
 		return nil
 	}
-	msg := []*message.Elem{{
+	msg := []*message.Elem{{}, {
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
 			BusinessType: 10,
 		},
 	}}
-	return msg
-}
-
-func (e *FriendImageElement) BuildElement() []*message.Elem {
-	common, err := proto.Marshal(e.MsgInfo)
-	if err != nil {
-		return nil
+	if e.CompatFace != nil {
+		msg[0].CustomFace = e.CompatFace
 	}
-	var msg []*message.Elem
 	if e.CompatImage != nil {
-		msg = []*message.Elem{{
-			NotOnlineImage: e.CompatImage,
-		}}
+		msg[0].NotOnlineImage = e.CompatImage
 	}
-	msg = append(msg, &message.Elem{
-		CommonElem: &message.CommonElem{
-			ServiceType:  48,
-			PbElem:       common,
-			BusinessType: 10,
-		},
-	})
 	return msg
 }
 

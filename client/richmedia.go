@@ -29,12 +29,12 @@ func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 	return hwipv4s
 }
 
-func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessageElement) (*message.FriendImageElement, error) {
-	image, ok := element.(*message.FriendImageElement)
+func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessageElement) (*message.ImageElement, error) {
+	image, ok := element.(*message.ImageElement)
 	if !ok {
 		return nil, errors.New("element type is not friend image")
 	}
-	req, err := oidb.BuildImageUploadReq(targetUid, image.Stream)
+	req, err := oidb.BuildPrivateImageUploadReq(targetUid, image)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 	if err != nil {
 		return nil, err
 	}
-	uploadResp, err := oidb.ParseImageUploadResp(resp)
+	uploadResp, err := oidb.ParsePrivateImageUploadResp(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -92,12 +92,12 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 	return image, nil
 }
 
-func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageElement) (*message.GroupImageElement, error) {
-	image, ok := element.(*message.GroupImageElement)
+func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageElement) (*message.ImageElement, error) {
+	image, ok := element.(*message.ImageElement)
 	if !ok {
 		return nil, errors.New("element type is not group image")
 	}
-	req, err := oidb.BuildGroupImageUploadReq(groupUin, image.Stream)
+	req, err := oidb.BuildGroupImageUploadReq(groupUin, image)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		return nil, err
 	}
 	ukey := uploadResp.Upload.UKey.Unwrap()
-	c.debugln("private image upload ukey:", ukey)
+	c.debugln("group image upload ukey:", ukey)
 	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
 		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
@@ -146,7 +146,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo
-	image.CompatFace = uploadResp.Upload.CompatQMsg
+	_ = proto.Unmarshal(uploadResp.Upload.CompatQMsg, image.CompatFace)
 	return image, nil
 }
 
