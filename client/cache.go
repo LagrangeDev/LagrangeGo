@@ -39,6 +39,16 @@ func (c *QQClient) GetCachedFriendInfo(uin uint32) (*entity.Friend, error) {
 	return c.cache.GetFriend(uin), nil
 }
 
+// GetCachedAllFriendsInfo 获取所有好友信息(缓存)
+func (c *QQClient) GetCachedAllFriendsInfo() (map[uint32]*entity.Friend, error) {
+	if c.cache.FriendCacheIsEmpty() {
+		if err := c.RefreshFriendCache(); err != nil {
+			return nil, err
+		}
+	}
+	return c.cache.GetAllFriends(), nil
+}
+
 // GetCachedGroupInfo 获取群信息(缓存)
 func (c *QQClient) GetCachedGroupInfo(groupUin uint32) (*entity.Group, error) {
 	if c.cache.GroupInfoCacheIsEmpty() {
