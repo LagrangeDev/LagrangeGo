@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"os"
 	"time"
 
@@ -310,6 +311,27 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 	}
 
 	return c.decodeLoginResponse(response, &c.transport.Sig)
+}
+
+func (c *QQClient) FastLogin(sig *auth.SigInfo) error {
+	if sig != nil {
+		c.UseSig(*sig)
+	}
+	c.Uin = c.transport.Sig.Uin
+	if c.Online.Load() {
+		return ErrAlreadyOnline
+	}
+	err := c.connect()
+	if err != nil {
+		return err
+	}
+	err = c.init()
+	if err != nil {
+		err = fmt.Errorf("failed to register session: %v", err)
+		c.errorln(err)
+		return err
+	}
+	return nil
 }
 
 func (c *QQClient) init() error {
