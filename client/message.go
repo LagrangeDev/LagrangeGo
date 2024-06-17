@@ -49,14 +49,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
 	}
-	resp, err = c.SendRawMessage(route, body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.GroupSequence.IsNone() {
-		return resp, utils.GrpSendFailed
-	}
-	return resp, nil
+	return c.SendRawMessage(route, body)
 }
 
 func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
@@ -67,14 +60,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 			Uid: proto.Some(c.GetUid(uin)),
 		},
 	}
-	resp, err = c.SendRawMessage(route, body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.PrivateSequence == 0 {
-		return resp, utils.PrvSendFailed
-	}
-	return resp, nil
+	return c.SendRawMessage(route, body)
 }
 
 func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
