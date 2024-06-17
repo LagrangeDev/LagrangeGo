@@ -51,7 +51,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 	}
 	resp, err = c.SendRawMessage(route, body)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 	if resp.GroupSequence.IsNone() {
 		return resp, utils.GrpSendFailed
@@ -69,7 +69,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 	}
 	resp, err = c.SendRawMessage(route, body)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 	if resp.PrivateSequence == 0 {
 		return resp, utils.PrvSendFailed
