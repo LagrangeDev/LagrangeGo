@@ -43,8 +43,11 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 	return
 }
 
-func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	elements = c.preProcessGroupMessage(groupUin, elements)
+// SendGroupMessage 发送群聊消息，默认会对消息进行预处理
+func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (resp *action.SendMessageResponse, err error) {
+	if needPreprocess == nil || needPreprocess[0] {
+		elements = c.preProcessGroupMessage(groupUin, elements)
+	}
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
@@ -52,8 +55,11 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
-	elements = c.preProcessPrivateMessage(uin, elements)
+// SendPrivateMessage 发送群聊消息，默认会对消息进行预处理
+func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (resp *action.SendMessageResponse, err error) {
+	if needPreprocess == nil || needPreprocess[0] {
+		elements = c.preProcessPrivateMessage(uin, elements)
+	}
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
