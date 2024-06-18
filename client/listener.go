@@ -40,13 +40,28 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 
 	switch typ {
 	case 166, 208: // 166 for private msg, 208 for private record
-		c.PrivateMessageEvent.dispatch(c, msgConverter.ParsePrivateMessage(&msg))
+		prvMsg := msgConverter.ParsePrivateMessage(&msg)
+		if prvMsg.Sender.Uin != c.Uin {
+			c.PrivateMessageEvent.dispatch(c, prvMsg)
+		} else {
+			c.SelfPrivateMessageEvent.dispatch(c, prvMsg)
+		}
 		return nil, nil
 	case 82: // group msg
-		c.GroupMessageEvent.dispatch(c, msgConverter.ParseGroupMessage(&msg))
+		grpMsg := msgConverter.ParseGroupMessage(&msg)
+		if grpMsg.Sender.Uin != c.Uin {
+			c.GroupMessageEvent.dispatch(c, grpMsg)
+		} else {
+			c.SelfGroupMessageEvent.dispatch(c, grpMsg)
+		}
 		return nil, nil
 	case 141: // temp msg
-		c.TempMessageEvent.dispatch(c, msgConverter.ParseTempMessage(&msg))
+		tempMsg := msgConverter.ParseTempMessage(&msg)
+		if tempMsg.Sender.Uin != c.Uin {
+			c.TempMessageEvent.dispatch(c, tempMsg)
+		} else {
+			c.SelfTempMessageEvent.dispatch(c, tempMsg)
+		}
 		return nil, nil
 	case 33: // member increase
 		pb := message.GroupChange{}

@@ -81,6 +81,10 @@ type QQClient struct {
 	PrivateMessageEvent EventHandle[*message.PrivateMessage]
 	TempMessageEvent    EventHandle[*message.TempMessage]
 
+	SelfGroupMessageEvent   EventHandle[*message.GroupMessage]
+	SelfPrivateMessageEvent EventHandle[*message.PrivateMessage]
+	SelfTempMessageEvent    EventHandle[*message.TempMessage]
+
 	GroupInvitedEvent           EventHandle[*event.GroupInvite]            // 邀请入群
 	GroupMemberJoinRequestEvent EventHandle[*event.GroupMemberJoinRequest] // 加群申请
 	GroupMemberJoinEvent        EventHandle[*event.GroupMemberIncrease]    // 成员入群
