@@ -11,7 +11,7 @@ import (
 )
 
 func BuildGroupRecordUploadReq(groupCode uint32, record *message.VoiceElement) (*OidbPacket, error) {
-	if record.Data == nil {
+	if record.Stream == nil {
 		return nil, errors.New("audio data is nil")
 	}
 
@@ -60,7 +60,7 @@ func BuildGroupRecordUploadReq(groupCode uint32, record *message.VoiceElement) (
 			CompatQMsgSceneType:    2,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
-					TextSummary: "",
+					TextSummary: record.Summary,
 				},
 				Video: &oidb.VideoExtBizInfo{
 					BytesPbReserve: make([]byte, 0),

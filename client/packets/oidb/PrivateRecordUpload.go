@@ -10,7 +10,7 @@ import (
 )
 
 func BuildPrivateRecordUploadReq(targetUid string, record *message.VoiceElement) (*OidbPacket, error) {
-	if record.Data == nil {
+	if record.Stream == nil {
 		return nil, errors.New("record data is nil")
 	}
 	md5 := hex.EncodeToString(record.Md5)
@@ -60,7 +60,7 @@ func BuildPrivateRecordUploadReq(targetUid string, record *message.VoiceElement)
 			CompatQMsgSceneType:    1,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
-					TextSummary: "",
+					TextSummary: record.Summary,
 				},
 				Ptt: &oidb.PttExtBizInfo{
 					BytesReserve:      []byte{0x08, 0x00, 0x38, 0x00},

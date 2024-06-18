@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -27,4 +28,10 @@ func Bool2Int(v bool) int {
 		return 1
 	}
 	return 0
+}
+
+func CloseIO(reader io.Reader) {
+	if closer, ok := reader.(io.Closer); ok {
+		_ = closer.Close()
+	}
 }

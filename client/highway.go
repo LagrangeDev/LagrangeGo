@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils"
+
 	hw "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
@@ -51,6 +53,8 @@ func (c *QQClient) ensureHighwayServers() error {
 }
 
 func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
+	// 能close的io就close
+	defer utils.CloseIO(r)
 	err := c.ensureHighwayServers()
 	if err != nil {
 		return err

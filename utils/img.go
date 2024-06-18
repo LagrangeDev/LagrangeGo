@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"bytes"
 	"errors"
+	"io"
 
 	"github.com/fumiama/imgsz"
 )
@@ -51,13 +51,16 @@ func (format ImageFormat) String() string {
 	}
 }
 
-func ImageResolve(image []byte) (format ImageFormat, size imgsz.Size, err error) {
-	if len(image) < 10 { // 最小长度检查
+func ImageResolve(image io.ReadSeeker) (format ImageFormat, size imgsz.Size, err error) {
+	defer func(image io.ReadSeeker, offset int64, whence int) {
+		_, _ = image.Seek(offset, whence)
+	}(image, 0, io.SeekStart)
+	if _, err = image.Seek(10, io.SeekStart); err != nil { // 最小长度检查
 		err = ErrImageDataTooShort
 		return
 	}
-
-	sz, fmts, err := imgsz.DecodeSize(bytes.NewReader(image))
+	_, _ = image.Seek(0, io.SeekStart)
+	sz, fmts, err := imgsz.DecodeSize(image)
 	if err != nil {
 		return
 	}

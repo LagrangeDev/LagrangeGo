@@ -3,6 +3,8 @@ package message
 // from https://github.com/Mrs4s/MiraiGo/blob/master/message/elements.go
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"strconv"
 
@@ -50,7 +52,8 @@ type (
 		MsgInfo  *oidb.MsgInfo
 		Compat   []byte
 		Duration uint32
-		Data     []byte
+		Stream   io.ReadSeeker
+		Summary  string
 	}
 
 	ImageElement struct {
@@ -72,7 +75,7 @@ type (
 		Md5         []byte
 		Sha1        []byte
 		MsgInfo     *oidb.MsgInfo
-		Stream      []byte
+		Stream      io.ReadSeeker
 		CompatFace  *message.CustomFace     // GroupImage
 		CompatImage *message.NotOnlineImage // FriendImage
 	}
@@ -112,36 +115,59 @@ func NewAt(target uint32, display ...string) *AtElement {
 	}
 }
 
-func NewRecord(data []byte, duration uint32) *VoiceElement {
-	return &VoiceElement{
-		Size:     uint32(len(data)),
-		Md5:      crypto.MD5Digest(data),
-		Sha1:     crypto.SHA1Digest(data),
-		Data:     data,
-		Duration: duration,
-	}
+func NewRecord(data []byte, Summary ...string) *VoiceElement {
+	return NewStreamRecord(bytes.NewReader(data), Summary...)
 }
 
-func NewImage(data []byte, Summary ...string) *ImageElement {
+func NewStreamRecord(r io.ReadSeeker, Summary ...string) *VoiceElement {
 	var summary string
 	if len(Summary) != 0 {
 		summary = Summary[0]
 	}
-	return &ImageElement{
-		Size:    uint32(len(data)),
-		Summary: summary,
-		Stream:  data,
-		Md5:     crypto.MD5Digest(data),
-		Sha1:    crypto.SHA1Digest(data),
+	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
+	return &VoiceElement{
+		Size:     uint32(length),
+		Summary:  summary,
+		Stream:   r,
+		Md5:      md5,
+		Sha1:     sha1,
+		Duration: uint32(length),
 	}
 }
 
-func NewImageByFile(path string, Summary ...string) (*ImageElement, error) {
-	data, err := os.ReadFile(path)
+func NewFileRecord(path string, Summary ...string) (*ImageElement, error) {
+	voice, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewImage(data, Summary...), nil
+	return NewStreamImage(voice, Summary...), nil
+}
+
+func NewImage(data []byte, Summary ...string) *ImageElement {
+	return NewStreamImage(bytes.NewReader(data), Summary...)
+}
+
+func NewStreamImage(r io.ReadSeeker, Summary ...string) *ImageElement {
+	var summary string
+	if len(Summary) != 0 {
+		summary = Summary[0]
+	}
+	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
+	return &ImageElement{
+		Size:    uint32(length),
+		Summary: summary,
+		Stream:  r,
+		Md5:     md5,
+		Sha1:    sha1,
+	}
+}
+
+func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
+	img, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	return NewStreamImage(img, Summary...), nil
 }
 
 func (e *TextElement) Type() ElementType {

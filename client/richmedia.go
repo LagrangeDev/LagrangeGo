@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"encoding/hex"
 	"errors"
 
@@ -29,10 +28,9 @@ func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 	return hwipv4s
 }
 
-func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessageElement) (*message.ImageElement, error) {
-	image, ok := element.(*message.ImageElement)
-	if !ok {
-		return nil, errors.New("element type is not friend image")
+func (c *QQClient) ImageUploadPrivate(targetUid string, image *message.ImageElement) (*message.ImageElement, error) {
+	if image == nil || image.Stream == nil {
+		return nil, errors.New("image is nil")
 	}
 	req, err := oidb.BuildPrivateImageUploadReq(targetUid, image)
 	if err != nil {
@@ -75,7 +73,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 			return nil, err
 		}
 		err = c.highwayUpload(1003,
-			bytes.NewReader(image.Stream), uint64(len(image.Stream)),
+			image.Stream, uint64(image.Size),
 			md5hash, extStream,
 		)
 		if err != nil {
@@ -92,9 +90,8 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, element message.IMessage
 	return image, nil
 }
 
-func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageElement) (*message.ImageElement, error) {
-	image, ok := element.(*message.ImageElement)
-	if !ok {
+func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement) (*message.ImageElement, error) {
+	if image == nil || image.Stream == nil {
 		return nil, errors.New("element type is not group image")
 	}
 	req, err := oidb.BuildGroupImageUploadReq(groupUin, image)
@@ -138,7 +135,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 			return nil, err
 		}
 		err = c.highwayUpload(1004,
-			bytes.NewReader(image.Stream), uint64(len(image.Stream)),
+			image.Stream, uint64(image.Size),
 			md5hash, extStream,
 		)
 		if err != nil {
@@ -150,9 +147,8 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, element message.IMessageEle
 	return image, nil
 }
 
-func (c *QQClient) RecordUploadPrivate(targetUid string, element message.IMessageElement) (*message.VoiceElement, error) {
-	record, ok := element.(*message.VoiceElement)
-	if !ok {
+func (c *QQClient) RecordUploadPrivate(targetUid string, record *message.VoiceElement) (*message.VoiceElement, error) {
+	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not friend record")
 	}
 	req, err := oidb.BuildPrivateRecordUploadReq(targetUid, record)
@@ -196,7 +192,7 @@ func (c *QQClient) RecordUploadPrivate(targetUid string, element message.IMessag
 			return nil, err
 		}
 		err = c.highwayUpload(1007,
-			bytes.NewReader(record.Data), uint64(len(record.Data)),
+			record.Stream, uint64(record.Size),
 			md5hash, extStream,
 		)
 		if err != nil {
@@ -208,9 +204,8 @@ func (c *QQClient) RecordUploadPrivate(targetUid string, element message.IMessag
 	return record, nil
 }
 
-func (c *QQClient) RecordUploadGroup(groupUin uint32, element message.IMessageElement) (*message.VoiceElement, error) {
-	record, ok := element.(*message.VoiceElement)
-	if !ok {
+func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceElement) (*message.VoiceElement, error) {
+	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not voice record")
 	}
 	req, err := oidb.BuildGroupRecordUploadReq(groupUin, record)
@@ -254,7 +249,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, element message.IMessageEl
 			return nil, err
 		}
 		err = c.highwayUpload(1008,
-			bytes.NewReader(record.Data), uint64(len(record.Data)),
+			record.Stream, uint64(record.Size),
 			md5hash, extStream,
 		)
 		if err != nil {
