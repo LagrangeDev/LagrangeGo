@@ -30,63 +30,63 @@ func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
 }
 
 // GetCachedFriendInfo 获取好友信息(缓存)
-func (c *QQClient) GetCachedFriendInfo(uin uint32) (*entity.Friend, error) {
+func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.Friend {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return c.cache.GetFriend(uin), nil
+	return c.cache.GetFriend(uin)
 }
 
 // GetCachedAllFriendsInfo 获取所有好友信息(缓存)
-func (c *QQClient) GetCachedAllFriendsInfo() (map[uint32]*entity.Friend, error) {
+func (c *QQClient) GetCachedAllFriendsInfo() map[uint32]*entity.Friend {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return c.cache.GetAllFriends(), nil
+	return c.cache.GetAllFriends()
 }
 
 // GetCachedGroupInfo 获取群信息(缓存)
-func (c *QQClient) GetCachedGroupInfo(groupUin uint32) (*entity.Group, error) {
+func (c *QQClient) GetCachedGroupInfo(groupUin uint32) *entity.Group {
 	if c.cache.GroupInfoCacheIsEmpty() {
 		if err := c.RefreshAllGroupsInfo(); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return c.cache.GetGroupInfo(groupUin), nil
+	return c.cache.GetGroupInfo(groupUin)
 }
 
 // GetCachedAllGroupsInfo 获取所有群信息(缓存)
-func (c *QQClient) GetCachedAllGroupsInfo() (map[uint32]*entity.Group, error) {
+func (c *QQClient) GetCachedAllGroupsInfo() map[uint32]*entity.Group {
 	if c.cache.GroupInfoCacheIsEmpty() {
 		if err := c.RefreshAllGroupsInfo(); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return c.cache.GetAllGroupsInfo(), nil
+	return c.cache.GetAllGroupsInfo()
 }
 
 // GetCachedMemberInfo 获取群成员信息(缓存)
-func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) (*entity.GroupMember, error) {
+func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) *entity.GroupMember {
 	if c.cache.GroupMemberCacheIsEmpty(groupUin) {
 		if err := c.RefreshGroupMembersCache(groupUin); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return c.cache.GetGroupMember(uin, groupUin), nil
+	return c.cache.GetGroupMember(uin, groupUin)
 }
 
 // GetCachedMembersInfo 获取指定群所有群成员信息(缓存)
-func (c *QQClient) GetCachedMembersInfo(groupUin uint32) (map[uint32]*entity.GroupMember, error) {
+func (c *QQClient) GetCachedMembersInfo(groupUin uint32) map[uint32]*entity.GroupMember {
 	if c.cache.GroupMemberCacheIsEmpty(groupUin) {
 		if err := c.RefreshGroupMembersCache(groupUin); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return c.cache.GetGroupMembers(groupUin), nil
+	return c.cache.GetGroupMembers(groupUin)
 }
 
 // RefreshFriendCache 刷新好友缓存
