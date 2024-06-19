@@ -144,7 +144,7 @@ func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
 	if err != nil {
 		return err
 	}
-	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
+	if m := c.GetCachedMemberInfo(uin, groupID); m != nil {
 		m.Permission = entity.Admin
 		c.cache.RefreshGroupMember(groupID, m)
 	}
@@ -169,7 +169,7 @@ func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	if m, _ := c.GetCachedMemberInfo(uin, groupID); m != nil {
+	if m := c.GetCachedMemberInfo(uin, groupID); m != nil {
 		m.MemberCard = name
 		c.cache.RefreshGroupMember(groupID, m)
 	}

@@ -84,7 +84,7 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 	for _, element := range elements {
 		switch elem := element.(type) {
 		case *message2.AtElement:
-			member, _ := c.GetCachedMemberInfo(elem.Target, groupUin)
+			member := c.GetCachedMemberInfo(elem.Target, groupUin)
 			if member != nil {
 				elem.UID = member.Uid
 				if member.MemberCard != "" {
