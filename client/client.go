@@ -3,9 +3,10 @@ package client
 import (
 	"errors"
 	"fmt"
-	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"os"
 	"time"
+
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
@@ -28,7 +29,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 		if err != nil {
 			return err
 		}
-		err = c.init()
+		err = c.Register()
 		if err != nil {
 			err = fmt.Errorf("failed to register session: %v", err)
 			c.errorln(err)
@@ -49,7 +50,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 		}
 
 		if ret.Successful() {
-			return c.init()
+			return c.Register()
 		}
 	}
 
@@ -67,7 +68,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 			}
 			switch {
 			case ret.Successful():
-				return c.init()
+				return c.Register()
 			case ret == loginState.CaptchaVerify:
 				c.warningln("captcha verification required")
 				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine("ticket?->")
@@ -92,7 +93,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 	if err != nil {
 		return err
 	}
-	return c.init()
+	return c.Register()
 }
 
 func (c *QQClient) TokenLogin() (loginState.State, error) {
@@ -325,7 +326,7 @@ func (c *QQClient) FastLogin(sig *auth.SigInfo) error {
 	if err != nil {
 		return err
 	}
-	err = c.init()
+	err = c.Register()
 	if err != nil {
 		err = fmt.Errorf("failed to register session: %v", err)
 		c.errorln(err)
@@ -334,7 +335,7 @@ func (c *QQClient) FastLogin(sig *auth.SigInfo) error {
 	return nil
 }
 
-func (c *QQClient) init() error {
+func (c *QQClient) Register() error {
 	response, err := c.sendUniPacketAndWait(
 		"trpc.qq_new_tech.status_svc.StatusService.Register",
 		wtlogin.BuildRegisterRequest(c.version(), c.Device()))

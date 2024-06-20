@@ -125,7 +125,7 @@ func (c *QQClient) quickReconnect() {
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "quick reconnect failed"})
 		return
 	}
-	if err := c.init(); err != nil {
+	if err := c.Register(); err != nil {
 		c.error("register client failed: %v", err)
 		c.Disconnect()
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "register error"})
@@ -269,7 +269,7 @@ func (c *QQClient) unexpectedDisconnect(_ *network.TCPClient, e error) {
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "connection dropped by server."})
 		return
 	}
-	if err := c.init(); err != nil {
+	if err := c.Register(); err != nil {
 		c.error("register client failed: %v", err)
 		c.Disconnect()
 		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "register error"})
