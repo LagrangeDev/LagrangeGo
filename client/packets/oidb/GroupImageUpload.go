@@ -95,14 +95,5 @@ func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Oi
 }
 
 func ParseGroupImageUploadResp(data []byte) (*oidb.NTV2RichMediaResp, error) { // TODO: return proper response
-	var resp oidb.NTV2RichMediaResp
-	baseResp, err := ParseOidbPacket(data, &resp)
-	if err != nil {
-		return nil, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return nil, errors.New(baseResp.ErrorMsg)
-	}
-
-	return &resp, nil
+	return ParseTypedError[oidb.NTV2RichMediaResp](data)
 }
