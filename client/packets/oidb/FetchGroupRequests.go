@@ -1,8 +1,6 @@
 package oidb
 
 import (
-	"errors"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
@@ -15,13 +13,5 @@ func BuildFetchGroupRequestsReq() (*OidbPacket, error) {
 }
 
 func ParseFetchGroupRequestsReq(data []byte) (*oidb.OidbSvcTrpcTcp0X10C0_1Response, error) {
-	var resp oidb.OidbSvcTrpcTcp0X10C0_1Response
-	baseResp, err := ParseOidbPacket(data, &resp)
-	if err != nil {
-		return nil, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return nil, errors.New(baseResp.ErrorMsg)
-	}
-	return &resp, nil
+	return ParseTypedError[oidb.OidbSvcTrpcTcp0X10C0_1Response](data)
 }

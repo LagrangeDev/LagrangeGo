@@ -77,3 +77,15 @@ func CheckTypedError[T any](data []byte) error {
 	}
 	return nil
 }
+
+func ParseTypedError[T any](data []byte) (*T, error) {
+	var resp T
+	baseResp, err := ParseOidbPacket(data, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if baseResp.ErrorCode != 0 {
+		return nil, errors.New(baseResp.ErrorMsg)
+	}
+	return &resp, nil
+}

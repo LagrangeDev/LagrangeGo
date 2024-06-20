@@ -75,14 +75,5 @@ func BuildPrivateRecordUploadReq(targetUid string, record *message.VoiceElement)
 }
 
 func ParsePrivateRecordUploadResp(data []byte) (*oidb.NTV2RichMediaResp, error) {
-	var resp oidb.NTV2RichMediaResp
-	baseResp, err := ParseOidbPacket(data, &resp)
-	if err != nil {
-		return nil, err
-	}
-	if baseResp.ErrorCode != 0 {
-		return nil, errors.New(baseResp.ErrorMsg)
-	}
-
-	return &resp, nil
+	return ParseTypedError[oidb.NTV2RichMediaResp](data)
 }
