@@ -36,14 +36,6 @@ func (handle *EventHandle[T]) dispatch(client *QQClient, event T) {
 			client.error("event error: %v\n%s", pan, debug.Stack())
 		}
 	}()
-
-	switch v := any(event).(type) {
-	case *message.GroupMessage:
-		_ = client.PreProcessGroupMessageEvent(v)
-	case *message.PrivateMessage:
-		_ = client.PreProcessPrivateMessageEvent(v)
-	}
-
 	for _, handler := range handle.handlers {
 		handler(client, event)
 	}

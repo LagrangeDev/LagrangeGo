@@ -41,6 +41,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	switch typ {
 	case 166, 208: // 166 for private msg, 208 for private record
 		prvMsg := msgConverter.ParsePrivateMessage(&msg)
+		_ = c.PreProcessPrivateMessageEvent(prvMsg)
 		if prvMsg.Sender.Uin != c.Uin {
 			c.PrivateMessageEvent.dispatch(c, prvMsg)
 		} else {
@@ -49,6 +50,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		return nil, nil
 	case 82: // group msg
 		grpMsg := msgConverter.ParseGroupMessage(&msg)
+		_ = c.PreProcessGroupMessageEvent(grpMsg)
 		if grpMsg.Sender.Uin != c.Uin {
 			c.GroupMessageEvent.dispatch(c, grpMsg)
 		} else {
