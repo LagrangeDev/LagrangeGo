@@ -38,6 +38,7 @@ func (c *Cache) GetUin(uid string, groupUin ...uint32) (uin uint32) {
 			}
 			return true
 		})
+		return uin
 	}
 	return 0
 }
