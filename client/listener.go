@@ -43,6 +43,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		prvMsg := msgConverter.ParsePrivateMessage(&msg)
 		_ = c.PreProcessPrivateMessageEvent(prvMsg)
 		if prvMsg.Sender.Uin != c.Uin {
+			prvMsg.Sender.Nickname = c.cache.GetFriend(prvMsg.Sender.Uin).Nickname
 			c.PrivateMessageEvent.dispatch(c, prvMsg)
 		} else {
 			c.SelfPrivateMessageEvent.dispatch(c, prvMsg)
