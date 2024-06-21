@@ -13,14 +13,18 @@ type (
 	GroupMute struct {
 		GroupEvent
 		OperatorUid string
+		OperatorUin uint32
 		TargetUid   string // when TargetUid is empty, mute all members
+		TargetUin   uint32
 		Duration    uint32 // Duration == math.MaxUint32 when means mute all
 	}
 
 	GroupRecall struct {
 		GroupEvent
 		AuthorUid   string
+		AuthorUin   uint32
 		OperatorUid string
+		OperatorUin uint32
 		Sequence    uint64
 		Time        uint32
 		Random      uint32
@@ -29,21 +33,27 @@ type (
 	GroupMemberJoinRequest struct {
 		GroupEvent
 		TargetUid  string
+		TargetUin  uint32
 		InvitorUid string
+		InvitorUin uint32
 		Answer     string // 问题：(.*)答案：(.*)
 	}
 
 	GroupMemberIncrease struct {
 		GroupEvent
 		MemberUid  string
+		MemberUin  uint32
 		InvitorUid string
+		InvitorUin uint32
 		JoinType   uint32
 	}
 
 	GroupMemberDecrease struct {
 		GroupEvent
 		MemberUid   string
+		MemberUin   uint32
 		OperatorUid string
+		OperatorUin uint32
 		ExitType    uint32
 	}
 )
@@ -51,6 +61,11 @@ type (
 type GroupInvite struct {
 	GroupUin   uint32
 	InvitorUid string
+	InvitorUin uint32
+}
+
+func (gm *GroupMute) MuteAll() bool {
+	return gm.OperatorUid == ""
 }
 
 func (gmd *GroupMemberDecrease) IsKicked() bool {
