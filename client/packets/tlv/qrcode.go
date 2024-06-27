@@ -23,9 +23,9 @@ func T16(appid, subAppid int, guid []byte, ptVersion, packageName string) []byte
 		Pack(0x16)
 }
 
-func T1b() []byte {
+func T1b(micro, version, size, margin, dpi, ecLevel, hint uint32) []byte {
 	return binary.NewBuilder(nil).
-		WriteStruct(uint32(0), uint32(0), uint32(3), uint32(4), uint32(72), uint32(2), uint32(2), uint16(0)).
+		WriteStruct(micro, version, size, margin, dpi, ecLevel, hint, uint16(0)).
 		Pack(0x1B)
 }
 

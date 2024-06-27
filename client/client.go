@@ -80,7 +80,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 		// panic("unreachable")
 	}
 	c.infoln("login with qrcode")
-	png, _, err := c.FecthQRCode()
+	png, _, err := c.FetchQRCodeDefault()
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,11 @@ func (c *QQClient) TokenLogin() (loginState.State, error) {
 	return parseNtloginResponse(packet, &c.transport.Sig)
 }
 
-func (c *QQClient) FecthQRCode() ([]byte, string, error) {
+func (c *QQClient) FetchQRCodeDefault() ([]byte, string, error) {
+	return c.FetchQRCode(3, 4, 2)
+}
+
+func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, error) {
 	if c.Online.Load() {
 		return nil, "", ErrAlreadyOnline
 	}
@@ -134,7 +138,7 @@ func (c *QQClient) FecthQRCode() ([]byte, string, error) {
 		WriteTLV(
 			tlv.T16(c.version().AppID, c.version().SubAppID,
 				utils.MustParseHexStr(c.Device().Guid), c.version().PTVersion, c.version().PackageName),
-			tlv.T1b(),
+			tlv.T1b(0, 0, size, margin, 72, ecLevel, 2),
 			tlv.T1d(c.version().MiscBitmap),
 			tlv.T33(utils.MustParseHexStr(c.Device().Guid)),
 			tlv.T35(c.version().PTOSVersion),
