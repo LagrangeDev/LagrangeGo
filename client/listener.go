@@ -41,7 +41,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	switch typ {
 	case 166, 208: // 166 for private msg, 208 for private record
 		prvMsg := msgConverter.ParsePrivateMessage(&msg)
-		_ = c.PreProcessPrivateMessageEvent(prvMsg)
+		_ = c.PreprocessPrivateMessageEvent(prvMsg)
 		if prvMsg.Sender.Uin != c.Uin {
 			c.PrivateMessageEvent.dispatch(c, prvMsg)
 		} else {
@@ -50,7 +50,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		return nil, nil
 	case 82: // group msg
 		grpMsg := msgConverter.ParseGroupMessage(&msg)
-		_ = c.PreProcessGroupMessageEvent(grpMsg)
+		_ = c.PreprocessGroupMessageEvent(grpMsg)
 		if grpMsg.Sender.Uin != c.Uin {
 			c.GroupMessageEvent.dispatch(c, grpMsg)
 		} else {
@@ -190,4 +190,32 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 
 func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
 	return nil, nil
+}
+
+func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) error {
+	for _, elem := range msg.Elements {
+		switch e := elem.(type) {
+		case *msgConverter.VoiceElement:
+			url, err := c.GetGroupRecordUrl(msg.GroupCode, e.Node)
+			if err != nil {
+				return err
+			}
+			e.Url = url
+		}
+	}
+	return nil
+}
+
+func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessage) error {
+	for _, elem := range msg.Elements {
+		switch e := elem.(type) {
+		case *msgConverter.VoiceElement:
+			url, err := c.GetRecordUrl(e.Node)
+			if err != nil {
+				return err
+			}
+			e.Url = url
+		}
+	}
+	return nil
 }
