@@ -89,6 +89,11 @@ func (b *Builder) ToReader() io.Reader {
 	return &b.buffer
 }
 
+// Buffer GC 不安全, 确保在 Builder 被回收前使用
+func (b *Builder) Buffer() *bytes.Buffer {
+	return &b.buffer
+}
+
 // ToBytes return data with tea encryption if key is set
 //
 // GC 安全, 返回的数据在 Builder 被销毁之后仍能被正确读取,
