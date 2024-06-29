@@ -99,9 +99,10 @@ func (s *Sender) IsAnonymous() bool {
 
 func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 	prvMsg := &PrivateMessage{
-		Id:     int32(msg.Message.ContentHead.Sequence.Unwrap()),
-		Self:   int64(msg.Message.ResponseHead.ToUin),
-		Target: int64(msg.Message.ResponseHead.FromUin),
+		Id:         int32(msg.Message.ContentHead.Sequence.Unwrap()),
+		InternalId: int32(msg.Message.ContentHead.MsgId.Unwrap()),
+		Self:       int64(msg.Message.ResponseHead.ToUin),
+		Target:     int64(msg.Message.ResponseHead.FromUin),
 		Sender: &Sender{
 			Uin:      msg.Message.ResponseHead.FromUin,
 			Uid:      msg.Message.ResponseHead.FromUid.Unwrap(),
@@ -119,9 +120,10 @@ func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 
 func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
 	grpMsg := &GroupMessage{
-		Id:        int32(msg.Message.ContentHead.Sequence.Unwrap()),
-		GroupCode: msg.Message.ResponseHead.Grp.GroupUin,
-		GroupName: msg.Message.ResponseHead.Grp.GroupName,
+		Id:         int32(msg.Message.ContentHead.Sequence.Unwrap()),
+		InternalId: int32(msg.Message.ContentHead.MsgId.Unwrap()),
+		GroupCode:  msg.Message.ResponseHead.Grp.GroupUin,
+		GroupName:  msg.Message.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
 			Uin:      msg.Message.ResponseHead.FromUin,
 			Uid:      msg.Message.ResponseHead.FromUid.Unwrap(),
