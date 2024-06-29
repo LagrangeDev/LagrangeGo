@@ -64,12 +64,22 @@ type GroupInvite struct {
 	InvitorUin uint32
 }
 
-func (gm *GroupMute) MuteAll() bool {
-	return gm.OperatorUid == ""
+// CanPreprocess 实现预处理接口，对事件的uid进行转换等操作
+type CanPreprocess interface {
+	Preprocess(func(uid string) uint32)
 }
 
-func (gmd *GroupMemberDecrease) IsKicked() bool {
-	return gmd.ExitType == 131 || gmd.ExitType == 3
+func (g *GroupMute) MuteAll() bool {
+	return g.OperatorUid == ""
+}
+
+func (g *GroupMemberDecrease) IsKicked() bool {
+	return g.ExitType == 131 || g.ExitType == 3
+}
+
+func (g *GroupMemberJoinRequest) Preprocess(f func(uid string) uint32) {
+	g.InvitorUin = f(g.InvitorUid)
+	g.TargetUin = f(g.TargetUid)
 }
 
 // ParseRequestJoinNotice 主动加群
@@ -98,12 +108,21 @@ func ParseRequestInvitationNotice(event *message.GroupInvitation) *GroupMemberJo
 	return nil
 }
 
+func (g *GroupInvite) Preprocess(f func(uid string) uint32) {
+	g.InvitorUin = f(g.InvitorUid)
+}
+
 // ParseInviteNotice 被邀请加群
 func ParseInviteNotice(event *message.GroupInvite) *GroupInvite {
 	return &GroupInvite{
 		GroupUin:   event.GroupUin,
 		InvitorUid: event.InvitorUid,
 	}
+}
+
+func (g *GroupMemberIncrease) Preprocess(f func(uid string) uint32) {
+	g.InvitorUin = f(g.InvitorUid)
+	g.MemberUin = f(g.MemberUid)
 }
 
 func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
@@ -117,6 +136,11 @@ func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
 	}
 }
 
+func (g *GroupMemberDecrease) Preprocess(f func(uid string) uint32) {
+	g.OperatorUin = f(g.OperatorUid)
+	g.MemberUin = f(g.MemberUid)
+}
+
 func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
 	return &GroupMemberDecrease{
 		GroupEvent: GroupEvent{
@@ -126,6 +150,11 @@ func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
 		OperatorUid: utils.B2S(event.Operator),
 		ExitType:    event.DecreaseType,
 	}
+}
+
+func (g *GroupRecall) Preprocess(f func(uid string) uint32) {
+	g.OperatorUin = f(g.OperatorUid)
+	g.AuthorUin = f(g.AuthorUid)
 }
 
 func ParseGroupRecallEvent(event *message.NotifyMessageBody) *GroupRecall {
@@ -141,6 +170,11 @@ func ParseGroupRecallEvent(event *message.NotifyMessageBody) *GroupRecall {
 		Random:      info.Random,
 	}
 	return &result
+}
+
+func (g *GroupMute) Preprocess(f func(uid string) uint32) {
+	g.OperatorUin = f(g.OperatorUid)
+	g.TargetUin = f(g.TargetUid)
 }
 
 func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {

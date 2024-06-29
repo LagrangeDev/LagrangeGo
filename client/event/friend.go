@@ -13,6 +13,7 @@ type (
 	}
 
 	FriendRecall struct {
+		FromUin  uint32
 		FromUid  string
 		Sequence uint64
 		Time     uint32
@@ -22,6 +23,7 @@ type (
 	Rename struct {
 		SubType  uint32 // self 0 friend 1
 		Uin      uint32
+		Uid      string
 		Nickname string
 	}
 )
@@ -36,6 +38,10 @@ func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg
 	}
 }
 
+func (fe *FriendRecall) Preprocess(f func(uid string) uint32) {
+	fe.FromUin = f(fe.FromUid)
+}
+
 func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 	info := event.Info
 	return &FriendRecall{
@@ -46,10 +52,14 @@ func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 	}
 }
 
-func ParseFriendRenameEvent(event *message.FriendRenameMsg, uin uint32) *Rename {
+func (fe *Rename) Preprocess(f func(uid string) uint32) {
+	fe.Uin = f(fe.Uid)
+}
+
+func ParseFriendRenameEvent(event *message.FriendRenameMsg) *Rename {
 	return &Rename{
 		SubType:  1,
-		Uin:      uin,
+		Uid:      event.Body.Data.Uid,
 		Nickname: event.Body.Data.RenameData.NickName,
 	}
 }
