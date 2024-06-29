@@ -107,7 +107,7 @@ func (c *Codec) Unmarshal(data []byte) (*Message, error) {
 	reader.ReadU16() // version?
 	m.Command = reader.ReadU16()
 	reader.ReadU16() // 1?
-	m.Uin = uint32(reader.ReadI32())
+	m.Uin = reader.ReadU32()
 	reader.ReadU8()
 	encryptType := reader.ReadU8()
 	reader.ReadU8()
