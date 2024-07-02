@@ -176,3 +176,27 @@ type NotifyMessageBody struct {
 	Recall   *GroupRecall `protobuf:"bytes,11,opt"`
 	_        [0]func()
 }
+
+type EssenceNotify struct {
+	// uint32 GroupUin = 4; 有两个4，乐
+	Field13        uint32          `protobuf:"varint,13,opt"`
+	EssenceMessage *EssenceMessage `protobuf:"bytes,33,opt"`
+	MsgSequence    uint32          `protobuf:"varint,37,opt"`
+	Field39        uint32          `protobuf:"varint,39,opt"`
+	_              [0]func()
+}
+
+type EssenceMessage struct {
+	GroupUin     uint32 `protobuf:"varint,1,opt"`
+	MsgSequence  uint32 `protobuf:"varint,2,opt"`
+	Random       uint32 `protobuf:"varint,3,opt"`
+	SetFlag      uint32 `protobuf:"varint,4,opt"` // set 1 remove 2
+	AuthorUin    uint32 `protobuf:"varint,5,opt"`
+	OperatorUin  uint32 `protobuf:"varint,6,opt"`
+	TimeStamp    uint32 `protobuf:"varint,7,opt"`
+	MsgSequence2 uint32 `protobuf:"varint,8,opt"` // removed 0
+	OperatorName string `protobuf:"bytes,9,opt"`
+	AuthorName   string `protobuf:"bytes,10,opt"`
+	SetFlag2     uint32 `protobuf:"varint,11,opt"`
+	_            [0]func()
+}

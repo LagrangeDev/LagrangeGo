@@ -171,6 +171,14 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	case 0x2DC: // grp event, 732
 		subType := pkg.ContentHead.SubType.Unwrap()
 		switch subType {
+		case 21: // set essence
+			pb := message.EssenceNotify{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			c.GroupDigestEvent.dispatch(c, eventConverter.ParseGroupDigestEvent(&pb))
+			return nil, nil
 		case 20: // nudget(grp_id only)
 			return nil, nil
 		case 17: // recall
@@ -197,10 +205,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.GroupMuteEvent.dispatch(c, ev)
 			return nil, nil
 		default:
-			c.warning("Unsupported group event, subType: %v", subType)
+			c.warning("Unsupported group event, subType: %v, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	default:
-		c.warning("Unsupported message type: %v", typ)
+		c.warning("Unsupported message type: %v, proto data: %x", typ, pkg.Body.MsgContent)
 	}
 
 	return nil, nil

@@ -56,6 +56,19 @@ type (
 		OperatorUin uint32
 		ExitType    uint32
 	}
+
+	// GroupDigestEvent 群精华消息 from miraigo
+	GroupDigestEvent struct {
+		GroupCode         uint32
+		MessageID         uint32
+		InternalMessageID uint32
+		OperationType     uint32 // 1 -> 设置精华消息, 2 -> 移除精华消息
+		OperateTime       uint32
+		SenderUin         uint32
+		OperatorUin       uint32
+		SenderNick        string
+		OperatorNick      string
+	}
 )
 
 type GroupInvite struct {
@@ -75,6 +88,10 @@ func (g *GroupMute) MuteAll() bool {
 
 func (g *GroupMemberDecrease) IsKicked() bool {
 	return g.ExitType == 131 || g.ExitType == 3
+}
+
+func (g *GroupDigestEvent) IsSet() bool {
+	return g.OperationType == 1
 }
 
 func (g *GroupMemberJoinRequest) Preprocess(f func(uid string) uint32) {
@@ -185,5 +202,19 @@ func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {
 		OperatorUid: event.OperatorUid.Unwrap(),
 		TargetUid:   event.Data.State.TargetUid.Unwrap(),
 		Duration:    event.Data.State.Duration,
+	}
+}
+
+func ParseGroupDigestEvent(event *message.EssenceNotify) *GroupDigestEvent {
+	return &GroupDigestEvent{
+		GroupCode:         event.EssenceMessage.GroupUin,
+		MessageID:         event.EssenceMessage.MsgSequence,
+		InternalMessageID: event.EssenceMessage.Random,
+		OperationType:     event.EssenceMessage.SetFlag,
+		OperateTime:       event.EssenceMessage.TimeStamp,
+		SenderUin:         event.EssenceMessage.AuthorUin,
+		OperatorUin:       event.EssenceMessage.OperatorUin,
+		SenderNick:        event.EssenceMessage.AuthorName,
+		OperatorNick:      event.EssenceMessage.OperatorName,
 	}
 }

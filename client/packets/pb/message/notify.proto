@@ -157,3 +157,25 @@ message NotifyMessageBody {
   uint32 GroupUin = 4;
   GroupRecall Recall = 11;
 }
+
+message EssenceNotify {
+  // uint32 GroupUin = 4; 有两个4，乐
+  uint32 Field13 = 13;
+  EssenceMessage EssenceMessage = 33;
+  uint32 MsgSequence = 37;
+  uint32 Field39 = 39;
+}
+
+message EssenceMessage {
+  uint32 GroupUin = 1;
+  uint32 MsgSequence = 2;
+  uint32 Random = 3;
+  uint32 SetFlag = 4; // set 1 remove 2
+  uint32 AuthorUin = 5;
+  uint32 OperatorUin = 6;
+  uint32 TimeStamp = 7;
+  uint32 MsgSequence2 = 8; // removed 0
+  string OperatorName = 9;
+  string AuthorName = 10;
+  uint32 SetFlag2 = 11;
+}

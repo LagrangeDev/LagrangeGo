@@ -90,6 +90,7 @@ type QQClient struct {
 	GroupMemberJoinEvent        EventHandle[*event.GroupMemberIncrease]    // 成员入群
 	GroupMemberLeaveEvent       EventHandle[*event.GroupMemberDecrease]    // 成员退群
 	GroupMuteEvent              EventHandle[*event.GroupMute]
+	GroupDigestEvent            EventHandle[*event.GroupDigestEvent]
 	GroupRecallEvent            EventHandle[*event.GroupRecall]
 	FriendRequestEvent          EventHandle[*event.FriendRequest] // 好友申请
 	FriendRecallEvent           EventHandle[*event.FriendRecall]
