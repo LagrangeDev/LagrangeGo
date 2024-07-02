@@ -45,6 +45,28 @@ var AppList = map[string]*AppInfo{
 		SubSigmap:   0,
 		NTLoginType: 5,
 	},
+	"windows": {
+		OS:       "Windows",
+		Kernel:   "Windows_NT",
+		VendorOS: "win32",
+
+		CurrentVersion:   "9.9.2-15962",
+		BuildVersion:     15962,
+		MiscBitmap:       32764,
+		PTVersion:        "2.0.0",
+		PTOSVersion:      23,
+		PackageName:      "com.tencent.qq",
+		WTLoginSDK:       "nt.wtlogin.0.0.1",
+		PackageSign:      "V1_WIN_NQ_9.9.2-15962_RDM_B",
+		AppID:            1600001604,
+		SubAppID:         537138217,
+		AppIDQrcode:      537138217,
+		AppClientVersion: 13172,
+
+		MainSigmap:  169742560,
+		SubSigmap:   0,
+		NTLoginType: 5,
+	},
 }
 
 type AppInfo struct {
