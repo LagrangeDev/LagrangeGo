@@ -6,8 +6,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-// BuildRecordDownloadReq 私聊语音
-func BuildRecordDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, error) {
+// BuildPrivateRecordDownloadReq 私聊语音
+func BuildPrivateRecordDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, error) {
 	body := oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -41,7 +41,7 @@ func BuildRecordDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, 
 	return BuildOidbPacket(0x126D, 200, &body, false, true)
 }
 
-func ParseRecordDownloadResp(data []byte) (string, error) {
+func ParsePrivateRecordDownloadResp(data []byte) (string, error) {
 	var resp oidb.NTV2RichMediaResp
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
 		return "", err

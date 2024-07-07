@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	FriendRequest struct {
+	NewFriendRequest struct {
 		SourceUin uint32
 		SourceUid string
 		Msg       string
@@ -28,9 +28,9 @@ type (
 	}
 )
 
-func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg) *FriendRequest {
+func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg) *NewFriendRequest {
 	info := event.Info
-	return &FriendRequest{
+	return &NewFriendRequest{
 		SourceUin: msg.Message.ResponseHead.FromUin,
 		SourceUid: info.SourceUid,
 		Msg:       info.Message,
@@ -38,7 +38,7 @@ func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg
 	}
 }
 
-func (fe *FriendRecall) Preprocess(f func(uid string) uint32) {
+func (fe *FriendRecall) ResolveUin(f func(uid string) uint32) {
 	fe.FromUin = f(fe.FromUid)
 }
 
@@ -52,7 +52,7 @@ func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 	}
 }
 
-func (fe *Rename) Preprocess(f func(uid string) uint32) {
+func (fe *Rename) ResolveUin(f func(uid string) uint32) {
 	fe.Uin = f(fe.Uid)
 }
 

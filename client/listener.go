@@ -133,7 +133,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			c.FriendRequestEvent.dispatch(c, eventConverter.ParseFriendRequestNotice(&pb, &msg))
+			c.NewFriendRequestEvent.dispatch(c, eventConverter.ParseFriendRequestNotice(&pb, &msg))
 			return nil, nil
 		case 138: // friend recall
 			pb := message.FriendRecall{}
@@ -236,7 +236,7 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.VoiceElement:
-			url, err := c.GetRecordUrl(e.Node)
+			url, err := c.GetPrivateRecordUrl(e.Node)
 			if err != nil {
 				return err
 			}
@@ -247,7 +247,7 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 }
 
 func (c *QQClient) PreprocessOther(g eventConverter.CanPreprocess) error {
-	g.Preprocess(func(uid string) uint32 {
+	g.ResolveUin(func(uid string) uint32 {
 		return c.GetUin(uid)
 	})
 	return nil

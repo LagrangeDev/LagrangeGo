@@ -35,7 +35,7 @@ type (
 	ReplyElement struct {
 		ReplySeq int32
 		Sender   uint64
-		GroupID  uint64 // 私聊回复群聊时
+		GroupUin uint64 // 私聊回复群聊时
 		Time     int32
 		Elements []IMessageElement
 	}

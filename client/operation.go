@@ -47,8 +47,8 @@ func (c *QQClient) FetchGroups() ([]*entity.Group, error) {
 }
 
 // FetchGroupMember 获取对应群的群成员信息，使用token可以获取下一页的群成员信息
-func (c *QQClient) FetchGroupMember(groupID uint32, token string) ([]*entity.GroupMember, string, error) {
-	pkt, err := oidb2.BuildFetchMembersReq(groupID, token)
+func (c *QQClient) FetchGroupMember(groupUin uint32, token string) ([]*entity.GroupMember, string, error) {
+	pkt, err := oidb2.BuildFetchMembersReq(groupUin, token)
 	if err != nil {
 		return nil, "", err
 	}
@@ -63,8 +63,9 @@ func (c *QQClient) FetchGroupMember(groupID uint32, token string) ([]*entity.Gro
 	return members, newToken, nil
 }
 
-func (c *QQClient) GroupRemark(groupID uint32, remark string) error {
-	pkt, err := oidb2.BuildGroupRemarkReq(groupID, remark)
+// GroupRemark 设置群聊备注
+func (c *QQClient) GroupRemark(groupUin uint32, remark string) error {
+	pkt, err := oidb2.BuildGroupRemarkReq(groupUin, remark)
 	if err != nil {
 		return err
 	}
@@ -75,8 +76,9 @@ func (c *QQClient) GroupRemark(groupID uint32, remark string) error {
 	return oidb2.ParseGroupRemarkResp(resp)
 }
 
-func (c *QQClient) GroupRename(groupID uint32, name string) error {
-	pkt, err := oidb2.BuildGroupRenameReq(groupID, name)
+// GroupRename 设置群聊名称
+func (c *QQClient) GroupRename(groupUin uint32, name string) error {
+	pkt, err := oidb2.BuildGroupRenameReq(groupUin, name)
 	if err != nil {
 		return err
 	}
@@ -87,8 +89,9 @@ func (c *QQClient) GroupRename(groupID uint32, name string) error {
 	return oidb2.ParseGroupRenameResp(resp)
 }
 
-func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
-	pkt, err := oidb2.BuildGroupMuteGlobalReq(groupID, isMute)
+// GroupMuteGlobal 群全员禁言
+func (c *QQClient) GroupMuteGlobal(groupUin uint32, isMute bool) error {
+	pkt, err := oidb2.BuildGroupMuteGlobalReq(groupUin, isMute)
 	if err != nil {
 		return err
 	}
@@ -99,12 +102,13 @@ func (c *QQClient) GroupMuteGlobal(groupID uint32, isMute bool) error {
 	return oidb2.ParseGroupMuteGlobalResp(resp)
 }
 
-func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
-	uid := c.GetUid(uin, groupID)
+// GroupMuteMember 禁言群成员
+func (c *QQClient) GroupMuteMember(groupUin, uin, duration uint32) error {
+	uid := c.GetUid(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupMuteMemberReq(groupID, duration, uid)
+	pkt, err := oidb2.BuildGroupMuteMemberReq(groupUin, duration, uid)
 	if err != nil {
 		return err
 	}
@@ -115,8 +119,9 @@ func (c *QQClient) GroupMuteMember(groupID, duration, uin uint32) error {
 	return oidb2.ParseGroupMuteMemberResp(resp)
 }
 
-func (c *QQClient) GroupLeave(groupID uint32) error {
-	pkt, err := oidb2.BuildGroupLeaveReq(groupID)
+// GroupLeave 退出群聊
+func (c *QQClient) GroupLeave(groupUin uint32) error {
+	pkt, err := oidb2.BuildGroupLeaveReq(groupUin)
 	if err != nil {
 		return err
 	}
@@ -127,12 +132,13 @@ func (c *QQClient) GroupLeave(groupID uint32) error {
 	return oidb2.ParseGroupLeaveResp(resp)
 }
 
-func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
-	uid := c.GetUid(uin, groupID)
+// GroupSetAdmin 设置群管理员
+func (c *QQClient) GroupSetAdmin(groupUin, uin uint32, isAdmin bool) error {
+	uid := c.GetUid(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupSetAdminReq(groupID, uid, isAdmin)
+	pkt, err := oidb2.BuildGroupSetAdminReq(groupUin, uid, isAdmin)
 	if err != nil {
 		return err
 	}
@@ -144,20 +150,21 @@ func (c *QQClient) GroupSetAdmin(groupID, uin uint32, isAdmin bool) error {
 	if err != nil {
 		return err
 	}
-	if m := c.GetCachedMemberInfo(uin, groupID); m != nil {
+	if m := c.GetCachedMemberInfo(uin, groupUin); m != nil {
 		m.Permission = entity.Admin
-		c.cache.RefreshGroupMember(groupID, m)
+		c.cache.RefreshGroupMember(groupUin, m)
 	}
 
 	return nil
 }
 
-func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
-	uid := c.GetUid(uin, groupID)
+// GroupRenameMember 设置群成员昵称
+func (c *QQClient) GroupRenameMember(groupUin, uin uint32, name string) error {
+	uid := c.GetUid(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupRenameMemberReq(groupID, uid, name)
+	pkt, err := oidb2.BuildGroupRenameMemberReq(groupUin, uid, name)
 	if err != nil {
 		return err
 	}
@@ -169,20 +176,21 @@ func (c *QQClient) GroupRenameMember(groupID, uin uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	if m := c.GetCachedMemberInfo(uin, groupID); m != nil {
+	if m := c.GetCachedMemberInfo(uin, groupUin); m != nil {
 		m.MemberCard = name
-		c.cache.RefreshGroupMember(groupID, m)
+		c.cache.RefreshGroupMember(groupUin, m)
 	}
 
 	return nil
 }
 
-func (c *QQClient) GroupKickMember(groupID, uin uint32, rejectAddRequest bool) error {
-	uid := c.GetUid(uin, groupID)
+// GroupKickMember 踢出群成员，可选是否拒绝加群请求
+func (c *QQClient) GroupKickMember(groupUin, uin uint32, rejectAddRequest bool) error {
+	uid := c.GetUid(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupKickMemberReq(groupID, uid, rejectAddRequest)
+	pkt, err := oidb2.BuildGroupKickMemberReq(groupUin, uid, rejectAddRequest)
 	if err != nil {
 		return err
 	}
@@ -193,6 +201,7 @@ func (c *QQClient) GroupKickMember(groupID, uin uint32, rejectAddRequest bool) e
 	return oidb2.ParseGroupKickMemberResp(resp)
 }
 
+// GroupSetSpecialTitle 设置群成员专属头衔
 func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) error {
 	uid := c.GetUid(uin, groupUin)
 	if uid == "" {
@@ -209,8 +218,9 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 	return oidb2.ParseGroupSetSpecialTitleResp(resp)
 }
 
-func (c *QQClient) GroupPoke(groupID, uin uint32) error {
-	pkt, err := oidb2.BuildGroupPokeReq(groupID, uin)
+// GroupPoke 戳一戳群友
+func (c *QQClient) GroupPoke(groupUin, uin uint32) error {
+	pkt, err := oidb2.BuildGroupPokeReq(groupUin, uin)
 	if err != nil {
 		return err
 	}
@@ -221,6 +231,7 @@ func (c *QQClient) GroupPoke(groupID, uin uint32) error {
 	return oidb2.ParsePokeResp(resp)
 }
 
+// FriendPoke 戳一戳好友
 func (c *QQClient) FriendPoke(uin uint32) error {
 	pkt, err := oidb2.BuildFriendPokeReq(uin)
 	if err != nil {
@@ -233,6 +244,7 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	return oidb2.ParsePokeResp(resp)
 }
 
+// RecallGroupMessage 撤回群聊消息
 func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	packet := message.GroupRecallMsg{
 		Type:     1,
@@ -257,8 +269,9 @@ func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	return nil
 }
 
-func (c *QQClient) GetRecordUrl(node *oidb.IndexNode) (string, error) {
-	pkt, err := oidb2.BuildRecordDownloadReq(c.GetUid(c.Uin), node)
+// GetPrivateRecordUrl 获取私聊语言下载url
+func (c *QQClient) GetPrivateRecordUrl(node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildPrivateRecordDownloadReq(c.GetUid(c.Uin), node)
 	if err != nil {
 		return "", err
 	}
@@ -266,9 +279,10 @@ func (c *QQClient) GetRecordUrl(node *oidb.IndexNode) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return oidb2.ParseRecordDownloadResp(resp)
+	return oidb2.ParsePrivateRecordDownloadResp(resp)
 }
 
+// GetGroupRecordUrl 获取群聊语音下载url
 func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildGroupRecordDownloadReq(groupUin, node)
 	if err != nil {

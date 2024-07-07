@@ -69,11 +69,11 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 	return c.SendRawMessage(route, body)
 }
 
-func (c *QQClient) SendTempMessage(groupID uint32, uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		GrpTmp: &message.GrpTmp{
-			GroupUin: proto.Some(groupID),
+			GroupUin: proto.Some(groupUin),
 			ToUin:    proto.Some(uin),
 		},
 	}
