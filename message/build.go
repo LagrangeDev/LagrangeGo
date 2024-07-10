@@ -15,14 +15,14 @@ func (e *TextElement) BuildElement() []*message.Elem {
 
 func (e *AtElement) BuildElement() []*message.Elem {
 	var atAll int32 = 2
-	if e.Target == 0 {
+	if e.TargetUin == 0 {
 		atAll = 1
 	}
 	reserve := message.MentionExtra{
 		Type:   proto.Some(atAll),
 		Uin:    proto.Some(uint32(0)),
 		Field5: proto.Some(int32(0)),
-		Uid:    proto.Some(e.UID),
+		Uid:    proto.Some(e.TargetUid),
 	}
 	reserveData, _ := proto.Marshal(&reserve)
 	return []*message.Elem{{Text: &message.Text{
@@ -81,7 +81,24 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 }
 
 func (e *ReplyElement) BuildElement() []*message.Elem {
-	return nil
+	forwardReserve := message.Preserve{
+		MessageId:   uint64(e.ReplySeq),
+		ReceiverUid: e.SenderUid,
+	}
+	forwardReserveData, err := proto.Marshal(&forwardReserve)
+	if err != nil {
+		return nil
+	}
+	return []*message.Elem{{
+		SrcMsg: &message.SrcMsg{
+			OrigSeqs:  []uint32{e.ReplySeq},
+			SenderUin: uint64(e.SenderUin),
+			Time:      proto.Some(int32(e.Time)),
+			Elems:     PackElements(e.Elements),
+			PbReserve: forwardReserveData,
+			ToUin:     proto.Some(uint64(0)),
+		},
+	}}
 }
 
 func (e *VoiceElement) BuildElement() []*message.Elem {

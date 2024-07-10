@@ -153,11 +153,11 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 	for _, elem := range msg {
 		if elem.SrcMsg != nil && len(elem.SrcMsg.OrigSeqs) != 0 {
 			r := &ReplyElement{
-				ReplySeq: int32(elem.SrcMsg.OrigSeqs[0]),
-				Time:     elem.SrcMsg.Time.Unwrap(),
-				Sender:   elem.SrcMsg.SenderUin,
-				GroupUin: elem.SrcMsg.ToUin.Unwrap(),
-				Elements: parseMessageElements(elem.SrcMsg.Elems),
+				ReplySeq:  elem.SrcMsg.OrigSeqs[0],
+				Time:      uint32(elem.SrcMsg.Time.Unwrap()),
+				SenderUin: uint32(elem.SrcMsg.SenderUin),
+				GroupUin:  uint32(elem.SrcMsg.ToUin.Unwrap()),
+				Elements:  parseMessageElements(elem.SrcMsg.Elems),
 			}
 			res = append(res, r)
 		}
@@ -379,8 +379,15 @@ func (msg *SendingMessage) FirstOrNil(f func(element IMessageElement) bool) IMes
 }
 
 func PackElementsToBody(msgElems []IMessageElement) (msgBody *message.MessageBody) {
+	msgBody = &message.MessageBody{
+		RichText: &message.RichText{Elems: PackElements(msgElems)},
+	}
+	return
+}
+
+func PackElements(msgElems []IMessageElement) []*message.Elem {
 	if len(msgElems) == 0 {
-		return
+		return nil
 	}
 	elems := make([]*message.Elem, 0, len(msgElems))
 	for _, elem := range msgElems {
@@ -390,8 +397,5 @@ func PackElementsToBody(msgElems []IMessageElement) (msgBody *message.MessageBod
 		}
 		elems = append(elems, bd.BuildElement()...)
 	}
-	msgBody = &message.MessageBody{
-		RichText: &message.RichText{Elems: elems},
-	}
-	return
+	return elems
 }

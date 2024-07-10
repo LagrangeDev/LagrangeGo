@@ -21,10 +21,10 @@ type (
 	}
 
 	AtElement struct {
-		Target  uint32
-		UID     string
-		Display string
-		SubType AtType
+		TargetUin uint32
+		TargetUid string
+		Display   string
+		SubType   AtType
 	}
 
 	FaceElement struct {
@@ -33,11 +33,12 @@ type (
 	}
 
 	ReplyElement struct {
-		ReplySeq int32
-		Sender   uint64
-		GroupUin uint64 // 私聊回复群聊时
-		Time     int32
-		Elements []IMessageElement
+		ReplySeq  uint32
+		SenderUin uint32
+		SenderUid string
+		GroupUin  uint32 // 私聊回复群聊时
+		Time      uint32
+		Elements  []IMessageElement
 	}
 
 	VoiceElement struct {
@@ -110,8 +111,26 @@ func NewAt(target uint32, display ...string) *AtElement {
 		dis = display[0]
 	}
 	return &AtElement{
-		Target:  target,
-		Display: dis,
+		TargetUin: target,
+		Display:   dis,
+	}
+}
+
+func NewGroupReply(m *GroupMessage) *ReplyElement {
+	return &ReplyElement{
+		ReplySeq:  uint32(m.Id),
+		SenderUin: m.Sender.Uin,
+		Time:      uint32(m.Time),
+		Elements:  m.Elements,
+	}
+}
+
+func NewPrivateReply(m *PrivateMessage) *ReplyElement {
+	return &ReplyElement{
+		ReplySeq:  uint32(m.Id),
+		SenderUin: m.Sender.Uin,
+		Time:      uint32(m.Time),
+		Elements:  m.Elements,
 	}
 }
 
