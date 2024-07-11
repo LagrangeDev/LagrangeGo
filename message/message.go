@@ -292,35 +292,36 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 }
 
 func (msg *GroupMessage) ToString() string {
-	var strBuilder strings.Builder
-	for _, elem := range msg.Elements {
-		switch e := elem.(type) {
-		case *TextElement:
-			strBuilder.WriteString(e.Content)
-		case *ImageElement:
-			strBuilder.WriteString("[Image: ")
-			strBuilder.WriteString(e.ImageId)
-			strBuilder.WriteString("]")
-		case *AtElement:
-			strBuilder.WriteString(e.Display)
-		case *ReplyElement:
-			strBuilder.WriteString("[Reply: ")
-			strBuilder.WriteString(strconv.FormatInt(int64(e.ReplySeq), 10))
-			strBuilder.WriteString("]")
-		case *FaceElement:
-			strBuilder.WriteString("[Face: ")
-			strBuilder.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
-			if e.isLargeFace {
-				strBuilder.WriteString(", isLargeFace: true]")
-			}
-			strBuilder.WriteString("]")
-		case *VoiceElement:
-			strBuilder.WriteString("[Record: ")
-			strBuilder.WriteString(e.Name)
-			strBuilder.WriteString("]")
-		}
-	}
-	return strBuilder.String()
+	//var strBuilder strings.Builder
+	//for _, elem := range msg.Elements {
+	//	switch e := elem.(type) {
+	//	case *TextElement:
+	//		strBuilder.WriteString(e.Content)
+	//	case *ImageElement:
+	//		strBuilder.WriteString("[Image: ")
+	//		strBuilder.WriteString(e.ImageId)
+	//		strBuilder.WriteString("]")
+	//	case *AtElement:
+	//		strBuilder.WriteString(e.Display)
+	//	case *ReplyElement:
+	//		strBuilder.WriteString("[Reply: ")
+	//		strBuilder.WriteString(strconv.FormatInt(int64(e.ReplySeq), 10))
+	//		strBuilder.WriteString("]")
+	//	case *FaceElement:
+	//		strBuilder.WriteString("[Face: ")
+	//		strBuilder.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
+	//		if e.isLargeFace {
+	//			strBuilder.WriteString(", isLargeFace: true]")
+	//		}
+	//		strBuilder.WriteString("]")
+	//	case *VoiceElement:
+	//		strBuilder.WriteString("[Record: ")
+	//		strBuilder.WriteString(e.Name)
+	//		strBuilder.WriteString("]")
+	//	}
+	//}
+	//return strBuilder.String()
+	return ToReadableString(msg.Elements)
 }
 
 func (msg *PrivateMessage) ToString() string {
@@ -338,7 +339,9 @@ func ToReadableString(m []IMessageElement) string {
 		case *AtElement:
 			sb.WriteString(e.Display)
 		case *ReplyElement:
-			sb.WriteString("[回复]")
+			sb.WriteString("[回复:")
+			sb.WriteString(strconv.FormatInt(int64(e.ReplySeq), 10))
+			sb.WriteString("]")
 		case *FaceElement:
 			sb.WriteString("[表情:")
 			sb.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
