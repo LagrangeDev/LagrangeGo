@@ -3,6 +3,7 @@ package message
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 type ElementBuilder interface {
@@ -117,4 +118,12 @@ func (e *VoiceElement) BuildElement() []*message.Elem {
 
 func (e *ShortVideoElement) BuildElement() []*message.Elem {
 	return nil
+}
+
+func (e *LightAppElement) BuildElement() []*message.Elem {
+	return []*message.Elem{{
+		LightAppElem: &message.LightAppElem{
+			Data: append([]byte{0x01}, binary.ZlibCompress([]byte(e.Content))...),
+		},
+	}}
 }

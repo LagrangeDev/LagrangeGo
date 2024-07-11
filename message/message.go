@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tidwall/gjson"
+
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -260,6 +262,21 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 				Md5:     elem.NotOnlineImage.PicMd5,
 			})
 		}
+
+		if elem.LightAppElem != nil && len(elem.LightAppElem.Data) > 1 {
+			var content []byte
+			if elem.LightAppElem.Data[0] == 0 {
+				content = elem.LightAppElem.Data[1:]
+			}
+			if elem.LightAppElem.Data[0] == 1 {
+				content = binary.ZlibUncompress(elem.LightAppElem.Data[1:])
+			}
+			if len(content) > 0 && len(content) < 1024*1024*1024 { // 解析出错 or 非法内容
+				return append(res, &LightAppElement{
+					AppName: gjson.Get(utils.B2S(content), "app").Str,
+					Content: string(content)})
+			}
+		}
 	}
 
 	return res
@@ -349,6 +366,10 @@ func ToReadableString(m []IMessageElement) string {
 		case *VoiceElement:
 			sb.WriteString("[语音:")
 			sb.WriteString(e.Name)
+			sb.WriteString("]")
+		case *LightAppElement:
+			sb.WriteString("[轻应用:")
+			sb.WriteString(e.AppName)
 			sb.WriteString("]")
 		}
 	}

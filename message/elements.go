@@ -4,6 +4,7 @@ package message
 
 import (
 	"bytes"
+	"github.com/tidwall/gjson"
 	"io"
 	"os"
 	"strconv"
@@ -89,6 +90,11 @@ type (
 		Md5       []byte
 		ThumbMd5  []byte
 		Url       string
+	}
+
+	LightAppElement struct {
+		AppName string
+		Content string
 	}
 
 	AtType int
@@ -189,6 +195,13 @@ func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
 	return NewStreamImage(img, Summary...), nil
 }
 
+func NewLightApp(content string) *LightAppElement {
+	return &LightAppElement{
+		AppName: gjson.Get(content, "app").Str,
+		Content: content,
+	}
+}
+
 func (e *TextElement) Type() ElementType {
 	return Text
 }
@@ -215,4 +228,8 @@ func (e *ImageElement) Type() ElementType {
 
 func (e *ShortVideoElement) Type() ElementType {
 	return Video
+}
+
+func (e *LightAppElement) Type() ElementType {
+	return LightApp
 }
