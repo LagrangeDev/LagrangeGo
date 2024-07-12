@@ -4,7 +4,6 @@ package message
 
 import (
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -356,21 +355,13 @@ func ToReadableString(m []IMessageElement) string {
 		case *AtElement:
 			sb.WriteString(e.Display)
 		case *ReplyElement:
-			sb.WriteString("[回复:")
-			sb.WriteString(strconv.FormatInt(int64(e.ReplySeq), 10))
-			sb.WriteString("]")
+			sb.WriteString("[回复]")
 		case *FaceElement:
-			sb.WriteString("[表情:")
-			sb.WriteString(strconv.FormatInt(int64(e.FaceID), 10))
-			sb.WriteString("]")
+			sb.WriteString("[表情]")
 		case *VoiceElement:
-			sb.WriteString("[语音:")
-			sb.WriteString(e.Name)
-			sb.WriteString("]")
+			sb.WriteString("[语音]")
 		case *LightAppElement:
-			sb.WriteString("[轻应用:")
-			sb.WriteString(e.AppName)
-			sb.WriteString("]")
+			sb.WriteString("[卡片消息]")
 		}
 	}
 	return sb.String()
