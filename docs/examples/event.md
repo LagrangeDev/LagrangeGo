@@ -13,20 +13,6 @@ qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *messag
 
 这段代码会将群聊收到的消息打印出来
 
-:::warning 注意
-bot自身发送的消息也将被作为事件处理，请开发者注意消息处理逻辑的编写，防止出现发送循环
-
-例如，以下代码会导致无限循环发送消息
-
-```go
-qqclient.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
-	if event.ToString() == "114514" {
-        client.SendGroupMessage(event.GroupCode, []message.IMessageElement{NewText("114514")})
-    }
-})
-```
-:::
-
 > `QQClient`目前支持的EventHandle
 
 |                        EventHandle[T]                        |    描述    |
