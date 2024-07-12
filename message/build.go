@@ -1,8 +1,12 @@
 package message
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
@@ -126,4 +130,54 @@ func (e *LightAppElement) BuildElement() []*message.Elem {
 			Data: append([]byte{0x01}, binary.ZlibCompress([]byte(e.Content))...),
 		},
 	}}
+}
+
+func (e *ForwardMessage) BuildElement() []*message.Elem {
+	fileId := utils.NewUUID()
+	extra := MultiMsgLightAppExtra{
+		FileName: fileId,
+		Sum:      len(e.Nodes),
+	}
+	extraData, err := json.Marshal(&extra)
+	if err != nil {
+		return nil
+	}
+
+	var news []News
+	if len(e.Nodes) != 0 {
+		news = make([]News, len(e.Nodes))
+		for i, node := range e.Nodes {
+			news[i] = News{Text: fmt.Sprintf("%s: %s", node.SenderName, ToReadableString(node.Message))}
+		}
+	} else {
+		news = []News{{Text: "转发消息"}}
+	}
+
+	content := MultiMsgLightApp{
+		App: "com.tencent.multimsg",
+		Config: Config{
+			Autosize: 1,
+			Forward:  1,
+			Round:    1,
+			Type:     "normal",
+			Width:    300,
+		},
+		Desc:  "[聊天记录]",
+		Extra: utils.B2S(extraData),
+		Meta: Meta{
+			Detail: Detail{
+				News:    news,
+				Resid:   e.ResID,
+				Source:  "聊天记录",
+				Summary: fmt.Sprintf("查看%d条转发消息", len(e.Nodes)),
+				UniSeq:  fileId,
+			},
+		},
+		Prompt: "[聊天记录]",
+		Ver:    "0.0.0.5",
+		View:   "contact",
+	}
+
+	contentData, err := json.Marshal(&content)
+	return NewLightApp(utils.B2S(contentData)).BuildElement()
 }

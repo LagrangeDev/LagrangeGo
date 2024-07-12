@@ -4,10 +4,11 @@ package message
 
 import (
 	"bytes"
-	"github.com/tidwall/gjson"
 	"io"
 	"os"
 	"strconv"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 
@@ -95,6 +96,11 @@ type (
 	LightAppElement struct {
 		AppName string
 		Content string
+	}
+
+	ForwardMessage struct {
+		ResID string
+		Nodes []*ForwardNode
 	}
 
 	AtType int
@@ -202,6 +208,19 @@ func NewLightApp(content string) *LightAppElement {
 	}
 }
 
+func NewFoward(resid string) *ForwardMessage {
+	// TODO 根据resid获取node内容
+	return &ForwardMessage{
+		ResID: resid,
+	}
+}
+
+func NewNodeFoward(nodes []*ForwardNode) *ForwardMessage {
+	return &ForwardMessage{
+		Nodes: nodes,
+	}
+}
+
 func (e *TextElement) Type() ElementType {
 	return Text
 }
@@ -232,4 +251,8 @@ func (e *ShortVideoElement) Type() ElementType {
 
 func (e *LightAppElement) Type() ElementType {
 	return LightApp
+}
+
+func (e *ForwardMessage) Type() ElementType {
+	return Forward
 }

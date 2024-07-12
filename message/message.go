@@ -3,10 +3,9 @@ package message
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/message/message.go
 
 import (
+	"encoding/xml"
 	"reflect"
 	"strings"
-
-	"github.com/tidwall/gjson"
 
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
@@ -271,10 +270,15 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 				content = binary.ZlibUncompress(elem.LightAppElem.Data[1:])
 			}
 			if len(content) > 0 && len(content) < 1024*1024*1024 { // 解析出错 or 非法内容
-				return append(res, &LightAppElement{
-					AppName: gjson.Get(utils.B2S(content), "app").Str,
-					Content: string(content)})
+				res = append(res, NewLightApp(utils.B2S(content)))
+
 			}
+		}
+		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 && elem.RichMsg.Template1 != nil {
+			xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
+			multimsg := MultiMessage{}
+			_ = xml.Unmarshal(xmlData, &multimsg)
+			res = append(res, NewFoward(multimsg.ResId))
 		}
 	}
 
@@ -362,6 +366,8 @@ func ToReadableString(m []IMessageElement) string {
 			sb.WriteString("[语音]")
 		case *LightAppElement:
 			sb.WriteString("[卡片消息]")
+		case *ForwardMessage:
+			sb.WriteString("[转发消息]")
 		}
 	}
 	return sb.String()
