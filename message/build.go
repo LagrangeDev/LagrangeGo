@@ -179,5 +179,8 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 	}
 
 	contentData, err := json.Marshal(&content)
+	if err != nil {
+		return nil
+	}
 	return NewLightApp(utils.B2S(contentData)).BuildElement()
 }
