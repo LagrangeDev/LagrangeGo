@@ -19,7 +19,7 @@ go get -u github.com/LagrangeDev/LagrangeGo
   <summary>已完成功能/开发计划列表</summary>
 
 **登录**
-- ~~[x] 账号密码登录~~
+- [x] ~~账号密码登录~~
 - [x] 二维码登录
 - [ ] 验证码提交
 - [ ] 设备锁验证
@@ -31,12 +31,12 @@ go get -u github.com/LagrangeDev/LagrangeGo
 - [x] 语音
 - [x] 表情
 - [x] At
-- [ ] 回复
+- [x] 回复
 - [ ] 长消息(仅群聊/私聊)
 - [ ] 链接分享
-- [ ] 小程序(暂只支持RAW)
+- [x] 小程序(暂只支持RAW)
 - [ ] 短视频
-- [ ] 合并转发
+- [x] 合并转发
 - [ ] 群文件(上传与接收信息)
 
 **事件**
