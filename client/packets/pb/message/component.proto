@@ -174,26 +174,3 @@ message PokeExtra {
   uint32 Field7 = 7;
   uint32  Field8 = 8;
 }
-
-message PokeEvent {
-  //  sfixed64 GroupUin = 4;
-  uint32 Field13 = 13;
-  PokeEventData Data = 26;
-  uint32 Field27 = 27;
-  uint32 Field39 = 39;
-}
-
-message PokeEventData {
-  uint32 Field1 = 1;
-  uint32 Field2 = 2;
-  uint32 Field3 = 3;
-  uint32 Seq = 6;
-  repeated PokeDataExtra Extra = 7;
-  string XMLDescription = 8;
-  uint32 Random = 10;
-}
-
-message PokeDataExtra {
-  string key = 1;
-  string value = 2;
-}

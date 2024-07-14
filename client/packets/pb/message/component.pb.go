@@ -177,28 +177,3 @@ type PokeExtra struct {
 	Field8 uint32 `protobuf:"varint,8,opt"`
 	_      [0]func()
 }
-
-type PokeEvent struct {
-	// sfixed64 GroupUin = 4;
-	Field13 uint32         `protobuf:"varint,13,opt"`
-	Data    *PokeEventData `protobuf:"bytes,26,opt"`
-	Field27 uint32         `protobuf:"varint,27,opt"`
-	Field39 uint32         `protobuf:"varint,39,opt"`
-	_       [0]func()
-}
-
-type PokeEventData struct {
-	Field1         uint32           `protobuf:"varint,1,opt"`
-	Field2         uint32           `protobuf:"varint,2,opt"`
-	Field3         uint32           `protobuf:"varint,3,opt"`
-	Seq            uint32           `protobuf:"varint,6,opt"`
-	Extra          []*PokeDataExtra `protobuf:"bytes,7,rep"`
-	XMLDescription string           `protobuf:"bytes,8,opt"`
-	Random         uint32           `protobuf:"varint,10,opt"`
-}
-
-type PokeDataExtra struct {
-	Key   string `protobuf:"bytes,1,opt"`
-	Value string `protobuf:"bytes,2,opt"`
-	_     [0]func()
-}
