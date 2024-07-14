@@ -2,9 +2,10 @@ package client
 
 import (
 	"errors"
+	"reflect"
 	"runtime/debug"
 
-	"github.com/RomiChan/protobuf/proto"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 
 	eventConverter "github.com/LagrangeDev/LagrangeGo/client/event"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
@@ -37,7 +38,6 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	if pkg.Body == nil {
 		return nil, errors.New("message body is empty")
 	}
-
 	switch typ {
 	case 166, 208: // 166 for private msg, 208 for private record
 		prvMsg := msgConverter.ParsePrivateMessage(&msg)
@@ -165,6 +165,13 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			}
 			c.RenameEvent.dispatch(c, eventConverter.ParseSelfRenameEvent(&pb, &c.transport.Sig))
 			return nil, nil
+		case 290: // friend poke event
+			pb := message.PokeEventData{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			c.FriendPokeEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
 		default:
 			c.warning("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
@@ -179,7 +186,20 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			}
 			c.GroupDigestEvent.dispatch(c, eventConverter.ParseGroupDigestEvent(&pb))
 			return nil, nil
-		case 20: // nudget(grp_id only)
+		case 20: // group poke event
+			pb := message.PokeEvent{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			result, _ := proto.ReadField(4, pkg.Body.MsgContent)
+			var groupUin uint32
+			for _, r := range result {
+				if r.Type == reflect.TypeOf(int64(0)) {
+					groupUin = uint32(r.Vaule.(int64))
+				}
+			}
+			c.GroupPokeEvent.dispatch(c, eventConverter.PaeseGroupPokeEvent(&pb, groupUin))
 			return nil, nil
 		case 17: // recall
 			reader := binary.NewReader(pkg.Body.MsgContent)

@@ -69,6 +69,13 @@ type (
 		SenderNick        string
 		OperatorNick      string
 	}
+
+	// GroupPokeEvent 群戳一戳事件 from miraigo
+	GroupPokeEvent struct {
+		GroupUin uint32
+		Sender   uint32
+		Receiver uint32
+	}
 )
 
 type GroupInvite struct {
@@ -216,5 +223,14 @@ func ParseGroupDigestEvent(event *message.EssenceNotify) *GroupDigestEvent {
 		OperatorUin:       event.EssenceMessage.OperatorUin,
 		SenderNick:        event.EssenceMessage.AuthorName,
 		OperatorNick:      event.EssenceMessage.OperatorName,
+	}
+}
+
+func PaeseGroupPokeEvent(event *message.PokeEvent, groupUin uint32) *GroupPokeEvent {
+	e := ParsePokeEvent(event.Data)
+	return &GroupPokeEvent{
+		GroupUin: groupUin,
+		Sender:   e.Sender,
+		Receiver: e.Receiver,
 	}
 }

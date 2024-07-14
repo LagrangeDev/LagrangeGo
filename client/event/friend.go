@@ -1,6 +1,8 @@
 package event
 
 import (
+	"strconv"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 )
 
@@ -25,6 +27,12 @@ type (
 		Uin      uint32
 		Uid      string
 		Nickname string
+	}
+
+	// FriendPokeEvent 好友戳一戳事件 from miraigo
+	FriendPokeEvent struct {
+		Sender   uint32
+		Receiver uint32
 	}
 )
 
@@ -62,4 +70,19 @@ func ParseFriendRenameEvent(event *message.FriendRenameMsg) *Rename {
 		Uid:      event.Body.Data.Uid,
 		Nickname: event.Body.Data.RenameData.NickName,
 	}
+}
+
+func ParsePokeEvent(event *message.PokeEventData) *FriendPokeEvent {
+	e := FriendPokeEvent{}
+	for _, data := range event.Extra {
+		switch data.Key {
+		case "uin_str1":
+			sender, _ := strconv.Atoi(data.Value)
+			e.Sender = uint32(sender)
+		case "uin_str2":
+			receiver, _ := strconv.Atoi(data.Value)
+			e.Receiver = uint32(receiver)
+		}
+	}
+	return &e
 }
