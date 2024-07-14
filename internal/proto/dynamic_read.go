@@ -42,33 +42,35 @@ func readVarint(r io.Reader) (int64, error) {
 	return result, nil
 }
 
+// 无符号定长64位整数
 func readFixed64(r io.Reader) (uint64, error) {
 	var result uint64
 	err := binary.Read(r, binary.LittleEndian, &result)
 	return result, err
 }
 
-// 从字节数组读取一个定长32位整数
+// 无符号定长32位整数
 func readFixed32(r io.Reader) (uint32, error) {
 	var result uint32
 	err := binary.Read(r, binary.LittleEndian, &result)
 	return result, err
 }
 
+// 有符号定长32位整数
 func readSFixed32(r io.Reader) (int32, error) {
 	var result int32
 	err := binary.Read(r, binary.LittleEndian, &result)
 	return result, err
 }
 
-// 从字节数组读取有符号定长64位整数
+// 有符号定长64位整数
 func readSFixed64(r io.Reader) (int64, error) {
 	var result int64
 	err := binary.Read(r, binary.LittleEndian, &result)
 	return result, err
 }
 
-// 从字节数组读取字节切片
+// 字节切片
 func readBytes(r io.Reader) ([]byte, error) {
 	length, err := readVarint(r)
 	if err != nil {
@@ -99,8 +101,15 @@ func ReadField(targetField int64, data []byte) ([]*TypeValue, error) {
 			value, err = readBytes(r)
 		case WireFixed32:
 			value, err = readFixed32(r)
+		case WireSFixed32:
+			value, err = readSFixed32(r)
+		case WireSFixed64:
+			value, err = readSFixed64(r)
 		default:
 			return nil, fmt.Errorf("unsupported wire type: %d", wireType)
+		}
+		if err != nil {
+			return nil, err
 		}
 		if field == targetField {
 			result = append(result, &TypeValue{
