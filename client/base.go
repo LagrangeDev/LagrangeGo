@@ -95,8 +95,8 @@ type QQClient struct {
 	NewFriendRequestEvent       EventHandle[*event.NewFriendRequest] // 好友申请
 	FriendRecallEvent           EventHandle[*event.FriendRecall]
 	RenameEvent                 EventHandle[*event.Rename]
-	FriendPokeEvent             EventHandle[*event.FriendPokeEvent]
-	GroupPokeEvent              EventHandle[*event.GroupPokeEvent]
+	FriendNotifyEvent           EventHandle[*event.INotifyEvent]
+	GroupNotifyEvent            EventHandle[*event.INotifyEvent]
 
 	// client event handles
 	eventHandlers     eventHandlers

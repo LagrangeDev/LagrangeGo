@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -85,4 +86,12 @@ func ParsePokeEvent(event *message.PokeEventData) *FriendPokeEvent {
 		}
 	}
 	return &e
+}
+
+func (g *FriendPokeEvent) From() uint32 {
+	return g.Sender
+}
+
+func (g *FriendPokeEvent) Content() string {
+	return fmt.Sprintf("%d戳了戳%d", g.Sender, g.Receiver)
 }

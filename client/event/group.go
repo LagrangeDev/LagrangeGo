@@ -1,6 +1,8 @@
 package event
 
 import (
+	"fmt"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
@@ -233,4 +235,13 @@ func PaeseGroupPokeEvent(event *message.PokeEvent, groupUin uint32) *GroupPokeEv
 		Sender:   e.Sender,
 		Receiver: e.Receiver,
 	}
+}
+
+func (g *GroupPokeEvent) From() uint32 {
+	return g.GroupUin
+}
+
+func (g *GroupPokeEvent) Content() string {
+	// todo 戳，拍，捏...
+	return fmt.Sprintf("%d戳了戳%d", g.Sender, g.Receiver)
 }
