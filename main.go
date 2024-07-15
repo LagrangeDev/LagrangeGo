@@ -23,7 +23,7 @@ var (
 )
 
 func main() {
-	appInfo := auth.AppList["linux"]
+	appInfo := auth.AppList["linux"]["3.1.2-13107"]
 	deviceInfo := &auth.DeviceInfo{
 		Guid:          "cfcd208495d565ef66e7dff9f98764da",
 		DeviceName:    "Lagrange-DCFCD07E",
