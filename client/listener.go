@@ -171,7 +171,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			c.FriendPokeEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
+			c.FriendNotifyEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
 		default:
 			c.warning("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
@@ -199,7 +199,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 					groupUin = uint32(r.Vaule.(int64))
 				}
 			}
-			c.GroupPokeEvent.dispatch(c, eventConverter.PaeseGroupPokeEvent(&pb, groupUin))
+			c.GroupNotifyEvent.dispatch(c, eventConverter.PaeseGroupPokeEvent(&pb, groupUin))
 			return nil, nil
 		case 17: // recall
 			reader := binary.NewReader(pkg.Body.MsgContent)
