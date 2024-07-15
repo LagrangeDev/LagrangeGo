@@ -91,6 +91,9 @@ func ReadField(targetField int64, data []byte) ([]*TypeValue, error) {
 		}
 		field := key >> 3
 		wireType := key & 0x7
+		if field > targetField {
+			return result, nil
+		}
 		var value any
 		switch wireType {
 		case WireVarint:
