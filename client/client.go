@@ -171,7 +171,7 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 }
 
 func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
-	c.infoln("get qrcode result")
+	c.debugln("get qrcode result")
 	if c.transport.Sig.Qrsig == nil {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
 	}
