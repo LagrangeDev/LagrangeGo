@@ -253,6 +253,9 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) e
 }
 
 func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessage) error {
+	if friend := c.GetCachedFriendInfo(msg.Sender.Uin); friend != nil {
+		msg.Sender.Nickname = friend.Nickname
+	}
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.VoiceElement:
