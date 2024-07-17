@@ -46,8 +46,25 @@ func (c *QQClient) FetchGroups() ([]*entity.Group, error) {
 	return groups, nil
 }
 
-// FetchGroupMember 获取对应群的群成员信息，使用token可以获取下一页的群成员信息
-func (c *QQClient) FetchGroupMember(groupUin uint32, token string) ([]*entity.GroupMember, string, error) {
+// FetchGroupMember 获取对应群的群成员信息
+func (c *QQClient) FetchGroupMember(groupUin, memberUin uint32) (*entity.GroupMember, error) {
+	pkt, err := oidb2.BuildFetchMemberReq(groupUin, c.GetUid(memberUin, groupUin))
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	members, err := oidb2.ParseFetchMemberResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	return members, nil
+}
+
+// FetchGroupMembers 获取对应群的所有群成员信息，使用token可以获取下一页的群成员信息
+func (c *QQClient) FetchGroupMembers(groupUin uint32, token string) ([]*entity.GroupMember, string, error) {
 	pkt, err := oidb2.BuildFetchMembersReq(groupUin, token)
 	if err != nil {
 		return nil, "", err

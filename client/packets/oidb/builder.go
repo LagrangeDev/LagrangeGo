@@ -48,6 +48,9 @@ func ParseOidbPacket(b []byte, pkt any) (oidbBaseResp oidb.OidbSvcTrpcTcpBase, e
 	if err != nil {
 		return
 	}
+	if oidbBaseResp.ErrorCode != 0 {
+		return oidbBaseResp, errors.New(oidbBaseResp.ErrorMsg)
+	}
 	if pkt == nil {
 		return
 	}

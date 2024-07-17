@@ -60,3 +60,21 @@ message OidbSvcTrpcTcp0xFE7_2Level {
   repeated uint32 Infos = 1;
   uint32 Level = 2;
 }
+
+message OidbSvcTrpcTcp0xFE7_4 {
+  uint32 GroupUin = 1;
+  uint32 Field2 = 2;
+  uint32 Field3 = 3;
+  OidbSvcTrpcScp0xFE7_3Body Body = 4;
+  OidbSvcTrpcScp0xFE7_4Params Params = 5;
+}
+
+message OidbSvcTrpcScp0xFE7_4Params {
+  string Uid = 2;
+}
+
+message OidbSvcTrpcTcp0xFE7_4Response {
+  uint32 GroupUin = 1;
+  OidbSvcTrpcTcp0xFE7_2Member Member = 2;
+  uint32 Field3 = 3;
+}

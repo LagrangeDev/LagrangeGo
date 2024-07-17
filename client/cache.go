@@ -150,7 +150,7 @@ func (c *QQClient) GetFriendsData() (map[uint32]*entity.Friend, error) {
 // GetGroupMembersData 获取指定群所有成员信息
 func (c *QQClient) GetGroupMembersData(groupUin uint32) (map[uint32]*entity.GroupMember, error) {
 	groupMembers := make(map[uint32]*entity.GroupMember)
-	members, token, err := c.FetchGroupMember(groupUin, "")
+	members, token, err := c.FetchGroupMembers(groupUin, "")
 	if err != nil {
 		return groupMembers, err
 	}
@@ -158,7 +158,7 @@ func (c *QQClient) GetGroupMembersData(groupUin uint32) (map[uint32]*entity.Grou
 		groupMembers[member.Uin] = member
 	}
 	for token != "" {
-		members, token, err = c.FetchGroupMember(groupUin, token)
+		members, token, err = c.FetchGroupMembers(groupUin, token)
 		if err != nil {
 			return groupMembers, err
 		}

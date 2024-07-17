@@ -70,3 +70,24 @@ type OidbSvcTrpcTcp0XFE7_2Level struct {
 	Infos []uint32 `protobuf:"varint,1,rep"`
 	Level uint32   `protobuf:"varint,2,opt"`
 }
+
+type OidbSvcTrpcTcp0XFE7_4 struct {
+	GroupUin uint32                       `protobuf:"varint,1,opt"`
+	Field2   uint32                       `protobuf:"varint,2,opt"`
+	Field3   uint32                       `protobuf:"varint,3,opt"`
+	Body     *OidbSvcTrpcScp0XFE7_3Body   `protobuf:"bytes,4,opt"`
+	Params   *OidbSvcTrpcScp0XFE7_4Params `protobuf:"bytes,5,opt"`
+	_        [0]func()
+}
+
+type OidbSvcTrpcScp0XFE7_4Params struct {
+	Uid string `protobuf:"bytes,2,opt"`
+	_   [0]func()
+}
+
+type OidbSvcTrpcTcp0XFE7_4Response struct {
+	GroupUin uint32                       `protobuf:"varint,1,opt"`
+	Member   *OidbSvcTrpcTcp0XFE7_2Member `protobuf:"bytes,2,opt"`
+	Field3   uint32                       `protobuf:"varint,3,opt"`
+	_        [0]func()
+}
