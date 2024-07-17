@@ -6,6 +6,7 @@ PROTO_DIR=client/packets/pb
 PROTO_OUTPUT_PATH=client/packets
 PROTO_IMPORT_PATH=client/packets
 
+TARGET ?= default
 
 PROTO_FILES := \
 	$(PROTO_DIR)/action/*.proto \
@@ -33,6 +34,9 @@ install-protoc-plugin: protoc-gen-golite-version
 
 proto: install-protoc-plugin
 	protoc --golite_out=$(PROTO_OUTPUT_PATH) --golite_opt=paths=source_relative -I=$(PROTO_IMPORT_PATH) $(PROTO_FILES)
+
+protoFiles:
+	protoc --golite_out=$(PROTO_OUTPUT_PATH) --golite_opt=paths=source_relative -I=$(PROTO_IMPORT_PATH) $(PROTO_DIR)/$(TARGET)
 
 fmt:
 	go vet -stdmethods=false ./...
