@@ -1,14 +1,19 @@
 package sign
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 var (
@@ -75,14 +80,21 @@ func NewProviderURL(rawUrl string, log func(msg string)) func(string, uint32, []
 		}
 		startTime := time.Now().UnixMilli()
 		resp := signResponse{}
-		err := httpGet(rawUrl, map[string]string{
-			"cmd": cmd,
-			"seq": strconv.Itoa(int(seq)),
-			"src": fmt.Sprintf("%x", buf),
-		}, 8*time.Second, &resp)
+		sb := strings.Builder{}
+		sb.WriteString(`{"cmd":"` + cmd + `",`)
+		sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
+		sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
+		err := httpPost(rawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
 		if err != nil {
-			log(err.Error())
-			return nil
+			err := httpGet(rawUrl, map[string]string{
+				"cmd": cmd,
+				"seq": strconv.Itoa(int(seq)),
+				"src": fmt.Sprintf("%x", buf),
+			}, 8*time.Second, &resp)
+			if err != nil {
+				log(err.Error())
+				return nil
+			}
 		}
 
 		log(fmt.Sprintf("signed for [%s:%d](%dms)",
@@ -127,6 +139,46 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 				return fmt.Errorf("request timed out")
 			}
 			return fmt.Errorf("failed to perform GET request: %w", err)
+		}
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
+		return fmt.Errorf("failed to unmarshal JSON response: %w", err)
+	}
+
+	return nil
+}
+
+func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target interface{}) error {
+	u, err := url.Parse(rawUrl)
+	if err != nil {
+		return fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), body)
+	if err != nil {
+		return fmt.Errorf("failed to create POST request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			return fmt.Errorf("request timed out")
+		}
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				return fmt.Errorf("request timed out")
+			}
+			return fmt.Errorf("failed to perform POST request: %w", err)
 		}
 	}
 	defer resp.Body.Close()
