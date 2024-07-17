@@ -61,7 +61,7 @@ type (
 
 	// GroupDigestEvent 群精华消息 from miraigo
 	GroupDigestEvent struct {
-		GroupCode         uint32
+		GroupUin          uint32
 		MessageID         uint32
 		InternalMessageID uint32
 		OperationType     uint32 // 1 -> 设置精华消息, 2 -> 移除精华消息
@@ -216,7 +216,7 @@ func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {
 
 func ParseGroupDigestEvent(event *message.EssenceNotify) *GroupDigestEvent {
 	return &GroupDigestEvent{
-		GroupCode:         event.EssenceMessage.GroupUin,
+		GroupUin:          event.EssenceMessage.GroupUin,
 		MessageID:         event.EssenceMessage.MsgSequence,
 		InternalMessageID: event.EssenceMessage.Random,
 		OperationType:     event.EssenceMessage.SetFlag,

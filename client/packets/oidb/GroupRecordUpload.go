@@ -10,7 +10,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-func BuildGroupRecordUploadReq(groupCode uint32, record *message.VoiceElement) (*OidbPacket, error) {
+func BuildGroupRecordUploadReq(groupUin uint32, record *message.VoiceElement) (*OidbPacket, error) {
 	if record.Stream == nil {
 		return nil, errors.New("audio data is nil")
 	}
@@ -26,7 +26,7 @@ func BuildGroupRecordUploadReq(groupCode uint32, record *message.VoiceElement) (
 				BusinessType: 3,
 				SceneType:    2,
 				Group: &oidb.NTGroupInfo{
-					GroupUin: groupCode,
+					GroupUin: groupUin,
 				},
 			},
 			Client: &oidb.ClientMeta{

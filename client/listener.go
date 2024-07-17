@@ -242,7 +242,7 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) e
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.VoiceElement:
-			url, err := c.GetGroupRecordUrl(msg.GroupCode, e.Node)
+			url, err := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
 			if err != nil {
 				return err
 			}

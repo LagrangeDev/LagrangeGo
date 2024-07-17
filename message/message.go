@@ -50,7 +50,7 @@ type (
 
 	TempMessage struct {
 		Id        int32
-		GroupCode uint32
+		GroupUin  uint32
 		GroupName string
 		Self      uint32
 		Sender    *Sender
@@ -60,7 +60,7 @@ type (
 	GroupMessage struct {
 		Id             int32
 		InternalId     int32
-		GroupCode      uint32
+		GroupUin       uint32
 		GroupName      string
 		Sender         *Sender
 		Time           uint64
@@ -122,7 +122,7 @@ func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
 	grpMsg := &GroupMessage{
 		Id:         int32(msg.Message.ContentHead.Sequence.Unwrap()),
 		InternalId: int32(msg.Message.ContentHead.MsgId.Unwrap()),
-		GroupCode:  msg.Message.ResponseHead.Grp.GroupUin,
+		GroupUin:   msg.Message.ResponseHead.Grp.GroupUin,
 		GroupName:  msg.Message.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
 			Uin:      msg.Message.ResponseHead.FromUin,
