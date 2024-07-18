@@ -265,7 +265,7 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 		if elem.CommonElem != nil && elem.CommonElem.ServiceType == 48 && elem.CommonElem.BusinessType == 20 {
 			pb := message.CommonElemImagePb{}
 			err := proto.Unmarshal(elem.CommonElem.PbElem, &pb)
-			if err == nil {
+			if err != nil {
 				continue
 			}
 			res = append(res, &ImageElement{
