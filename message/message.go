@@ -261,10 +261,12 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			})
 		}
 
+		// new protocol image
 		if elem.CommonElem != nil && elem.CommonElem.ServiceType == 48 && elem.CommonElem.BusinessType == 20 {
 			pb := message.CommonElemImagePb{}
 			err := proto.Unmarshal(elem.CommonElem.PbElem, &pb)
 			if err == nil {
+				continue
 			}
 			res = append(res, &ImageElement{
 				ImageId: pb.Field1.Extra.FileUuid,
