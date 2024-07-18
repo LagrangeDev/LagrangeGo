@@ -85,7 +85,7 @@ func NewProviderURL(rawUrl string, log func(msg string)) func(string, uint32, []
 		sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
 		sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
 		err := httpPost(rawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
-		if err != nil {
+		if err != nil || resp.Value.Sign == "" {
 			err := httpGet(rawUrl, map[string]string{
 				"cmd": cmd,
 				"seq": strconv.Itoa(int(seq)),
