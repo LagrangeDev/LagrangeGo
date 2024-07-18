@@ -261,6 +261,19 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			})
 		}
 
+		if elem.CommonElem != nil && elem.CommonElem.ServiceType == 48 && elem.CommonElem.BusinessType == 20 {
+			pb := message.CommonElemImagePb{}
+			err := proto.Unmarshal(elem.CommonElem.PbElem, &pb)
+			if err == nil {
+			}
+			res = append(res, &ImageElement{
+				ImageId: pb.Field1.Extra.FileUuid,
+				Size:    pb.Field1.Extra.Info.Size,
+				Url:     "https://multimedia.nt.qq.com.cn" + pb.Field2.DownloadInfo.Info.PathWithRkey,
+				Md5:     utils.MustParseHexStr(pb.Field1.Extra.Info.Md5),
+			})
+		}
+
 		if elem.LightAppElem != nil && len(elem.LightAppElem.Data) > 1 {
 			var content []byte
 			if elem.LightAppElem.Data[0] == 0 {
@@ -271,7 +284,6 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			}
 			if len(content) > 0 && len(content) < 1024*1024*1024 { // 解析出错 or 非法内容
 				res = append(res, NewLightApp(utils.B2S(content)))
-
 			}
 		}
 		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 && elem.RichMsg.Template1 != nil {
