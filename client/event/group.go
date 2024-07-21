@@ -77,6 +77,8 @@ type (
 		GroupUin uint32
 		Sender   uint32
 		Receiver uint32
+		Suffix   string
+		Action   string
 	}
 )
 
@@ -228,12 +230,14 @@ func ParseGroupDigestEvent(event *message.EssenceNotify) *GroupDigestEvent {
 	}
 }
 
-func PaeseGroupPokeEvent(event *message.PokeEvent, groupUin uint32) *GroupPokeEvent {
-	e := ParsePokeEvent(event.Data)
+func PaeseGroupPokeEvent(event *message.NotifyMessageBody, groupUin uint32) *GroupPokeEvent {
+	e := ParsePokeEvent(event.GrayTipInfo)
 	return &GroupPokeEvent{
 		GroupUin: groupUin,
 		Sender:   e.Sender,
 		Receiver: e.Receiver,
+		Suffix:   e.Suffix,
+		Action:   e.Action,
 	}
 }
 
@@ -242,6 +246,9 @@ func (g *GroupPokeEvent) From() uint32 {
 }
 
 func (g *GroupPokeEvent) Content() string {
-	// todo 戳，拍，捏...
-	return fmt.Sprintf("%d戳了戳%d", g.Sender, g.Receiver)
+	if g.Suffix != "" {
+		return fmt.Sprintf("%d%s%d的%s", g.Sender, g.Action, g.Receiver, g.Suffix)
+	} else {
+		return fmt.Sprintf("%d%s%d", g.Sender, g.Action, g.Receiver)
+	}
 }

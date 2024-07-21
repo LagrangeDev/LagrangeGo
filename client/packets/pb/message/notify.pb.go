@@ -171,10 +171,11 @@ type RecallMessage struct {
 }
 
 type NotifyMessageBody struct {
-	Type     uint32       `protobuf:"varint,1,opt"`
-	GroupUin uint32       `protobuf:"varint,4,opt"`
-	Recall   *GroupRecall `protobuf:"bytes,11,opt"`
-	_        [0]func()
+	Type        uint32              `protobuf:"varint,1,opt"`
+	GroupUin    uint32              `protobuf:"varint,4,opt"`
+	Recall      *GroupRecall        `protobuf:"bytes,11,opt"`
+	GrayTipInfo *GeneralGrayTipInfo `protobuf:"bytes,26,opt"`
+	_           [0]func()
 }
 
 type EssenceNotify struct {
@@ -201,26 +202,19 @@ type EssenceMessage struct {
 	_            [0]func()
 }
 
-type PokeEvent struct {
-	// sfixed64 GroupUin = 4;
-	Field13 uint32         `protobuf:"varint,13,opt"`
-	Data    *PokeEventData `protobuf:"bytes,26,opt"`
-	Field27 uint32         `protobuf:"varint,27,opt"`
-	Field39 uint32         `protobuf:"varint,39,opt"`
-	_       [0]func()
+type GeneralGrayTipInfo struct {
+	BusiType      uint64        `protobuf:"varint,1,opt"`
+	BusiId        uint64        `protobuf:"varint,2,opt"`
+	CtrlFlag      uint32        `protobuf:"varint,3,opt"`
+	C2CType       uint32        `protobuf:"varint,4,opt"`
+	ServiceType   uint32        `protobuf:"varint,5,opt"`
+	TemplId       uint64        `protobuf:"varint,6,opt"`
+	MsgTemplParam []*TemplParam `protobuf:"bytes,7,rep"`
+	Content       string        `protobuf:"bytes,8,opt"`
+	Random        uint32        `protobuf:"varint,10,opt"`
 }
 
-type PokeEventData struct {
-	Field1         uint32           `protobuf:"varint,1,opt"`
-	Field2         uint32           `protobuf:"varint,2,opt"`
-	Field3         uint32           `protobuf:"varint,3,opt"`
-	Seq            uint32           `protobuf:"varint,6,opt"`
-	Extra          []*PokeDataExtra `protobuf:"bytes,7,rep"`
-	XMLDescription string           `protobuf:"bytes,8,opt"`
-	Random         uint32           `protobuf:"varint,10,opt"`
-}
-
-type PokeDataExtra struct {
+type TemplParam struct {
 	Key   string `protobuf:"bytes,1,opt"`
 	Value string `protobuf:"bytes,2,opt"`
 	_     [0]func()

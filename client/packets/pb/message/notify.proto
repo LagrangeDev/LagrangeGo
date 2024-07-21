@@ -156,6 +156,7 @@ message NotifyMessageBody {
   uint32 Type = 1;
   uint32 GroupUin = 4;
   GroupRecall Recall = 11;
+  GeneralGrayTipInfo GrayTipInfo = 26;
 }
 
 message EssenceNotify {
@@ -180,25 +181,19 @@ message EssenceMessage {
   uint32 SetFlag2 = 11;
 }
 
-message PokeEvent {
-  //  sfixed64 GroupUin = 4;
-  uint32 Field13 = 13;
-  PokeEventData Data = 26;
-  uint32 Field27 = 27;
-  uint32 Field39 = 39;
-}
-
-message PokeEventData {
-  uint32 Field1 = 1;
-  uint32 Field2 = 2;
-  uint32 Field3 = 3;
-  uint32 Seq = 6;
-  repeated PokeDataExtra Extra = 7;
-  string XMLDescription = 8;
+message GeneralGrayTipInfo {
+  uint64 BusiType = 1;
+  uint64 BusiId = 2;
+  uint32 CtrlFlag = 3;
+  uint32 C2CType = 4;
+  uint32 ServiceType = 5;
+  uint64 TemplId = 6;
+  repeated TemplParam MsgTemplParam = 7;
+  string Content = 8;
   uint32 Random = 10;
 }
 
-message PokeDataExtra {
+message TemplParam {
   string key = 1;
   string value = 2;
 }

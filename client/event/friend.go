@@ -34,6 +34,8 @@ type (
 	FriendPokeEvent struct {
 		Sender   uint32
 		Receiver uint32
+		Suffix   string
+		Action   string
 	}
 )
 
@@ -73,9 +75,10 @@ func ParseFriendRenameEvent(event *message.FriendRenameMsg) *Rename {
 	}
 }
 
-func ParsePokeEvent(event *message.PokeEventData) *FriendPokeEvent {
+func ParsePokeEvent(event *message.GeneralGrayTipInfo) *FriendPokeEvent {
 	e := FriendPokeEvent{}
-	for _, data := range event.Extra {
+	e.Action = "戳了戳"
+	for _, data := range event.MsgTemplParam {
 		switch data.Key {
 		case "uin_str1":
 			sender, _ := strconv.Atoi(data.Value)
@@ -83,6 +86,10 @@ func ParsePokeEvent(event *message.PokeEventData) *FriendPokeEvent {
 		case "uin_str2":
 			receiver, _ := strconv.Atoi(data.Value)
 			e.Receiver = uint32(receiver)
+		case "suffix_str":
+			e.Suffix = data.Value
+		case "alt_str1":
+			e.Action = data.Value
 		}
 	}
 	return &e
@@ -93,5 +100,9 @@ func (g *FriendPokeEvent) From() uint32 {
 }
 
 func (g *FriendPokeEvent) Content() string {
-	return fmt.Sprintf("%d戳了戳%d", g.Sender, g.Receiver)
+	if g.Suffix != "" {
+		return fmt.Sprintf("%d%s%d的%s", g.Sender, g.Action, g.Receiver, g.Suffix)
+	} else {
+		return fmt.Sprintf("%d%s%d", g.Sender, g.Action, g.Receiver)
+	}
 }

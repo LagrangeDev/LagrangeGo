@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"reflect"
 	"runtime/debug"
 
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
@@ -166,7 +165,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.RenameEvent.dispatch(c, eventConverter.ParseSelfRenameEvent(&pb, &c.transport.Sig))
 			return nil, nil
 		case 290: // friend poke event
-			pb := message.PokeEventData{}
+			pb := message.GeneralGrayTipInfo{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
 				return nil, err
@@ -187,17 +186,13 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.GroupDigestEvent.dispatch(c, eventConverter.ParseGroupDigestEvent(&pb))
 			return nil, nil
 		case 20: // group poke event
-			pb := message.PokeEvent{}
-			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			reader := binary.NewReader(pkg.Body.MsgContent)
+			groupUin := reader.ReadU32() // group uin
+			reader.SkipBytes(1)          // unknown byte
+			pb := message.NotifyMessageBody{}
+			err = proto.Unmarshal(reader.ReadBytesWithLength("u16", false), &pb)
 			if err != nil {
 				return nil, err
-			}
-			result, _ := proto.ReadField(4, pkg.Body.MsgContent)
-			var groupUin uint32
-			for _, r := range result {
-				if r.Type == reflect.TypeOf(int64(0)) {
-					groupUin = uint32(r.Vaule.(int64))
-				}
 			}
 			c.GroupNotifyEvent.dispatch(c, eventConverter.PaeseGroupPokeEvent(&pb, groupUin))
 			return nil, nil
