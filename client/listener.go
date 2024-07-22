@@ -178,8 +178,11 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		subType := pkg.ContentHead.SubType.Unwrap()
 		switch subType {
 		case 21: // set essence
-			pb := message.EssenceNotify{}
-			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			reader := binary.NewReader(pkg.Body.MsgContent)
+			_ = reader.ReadU32() // group uin
+			reader.SkipBytes(1)  // unknown byte
+			pb := message.NotifyMessageBody{}
+			err = proto.Unmarshal(reader.ReadBytesWithLength("u16", false), &pb)
 			if err != nil {
 				return nil, err
 			}

@@ -216,7 +216,7 @@ func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {
 	}
 }
 
-func ParseGroupDigestEvent(event *message.EssenceNotify) *GroupDigestEvent {
+func ParseGroupDigestEvent(event *message.NotifyMessageBody) *GroupDigestEvent {
 	return &GroupDigestEvent{
 		GroupUin:          event.EssenceMessage.GroupUin,
 		MessageID:         event.EssenceMessage.MsgSequence,

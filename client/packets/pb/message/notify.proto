@@ -156,12 +156,8 @@ message NotifyMessageBody {
   uint32 Type = 1;
   uint32 GroupUin = 4;
   GroupRecall Recall = 11;
-  GeneralGrayTipInfo GrayTipInfo = 26;
-}
-
-message EssenceNotify {
-  // uint32 GroupUin = 4; 有两个4，乐
   uint32 Field13 = 13;
+  GeneralGrayTipInfo GrayTipInfo = 26;
   EssenceMessage EssenceMessage = 33;
   uint32 MsgSequence = 37;
   uint32 Field39 = 39;
