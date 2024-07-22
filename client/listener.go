@@ -72,7 +72,12 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseMemberIncreaseEvent(&pb)
 		_ = c.PreprocessOther(ev)
-		c.GroupMemberJoinEvent.dispatch(c, ev)
+		if ev.MemberUin == c.Uin { // bot 进群
+			_ = c.RefreshAllGroupsInfo()
+			c.GroupJoinEvent.dispatch(c, c.GetCachedGroupInfo(ev.GroupUin))
+		} else {
+			c.GroupMemberJoinEvent.dispatch(c, ev)
+		}
 		return nil, nil
 	case 34: // member decrease
 		pb := message.GroupChange{}
@@ -91,7 +96,11 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseMemberDecreaseEvent(&pb)
 		_ = c.PreprocessOther(ev)
-		c.GroupMemberLeaveEvent.dispatch(c, ev)
+		if ev.MemberUin == c.Uin {
+			c.GroupLeaveEvent.dispatch(c, ev)
+		} else {
+			c.GroupMemberLeaveEvent.dispatch(c, ev)
+		}
 		return nil, nil
 	case 44: // group admin changed
 		pb := message.GroupAdmin{}

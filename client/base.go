@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/client/entity"
+
 	"github.com/RomiChan/syncx"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
@@ -84,6 +86,9 @@ type QQClient struct {
 	SelfGroupMessageEvent   EventHandle[*message.GroupMessage]
 	SelfPrivateMessageEvent EventHandle[*message.PrivateMessage]
 	SelfTempMessageEvent    EventHandle[*message.TempMessage]
+
+	GroupJoinEvent  EventHandle[*entity.Group]              // bot进群
+	GroupLeaveEvent EventHandle[*event.GroupMemberDecrease] // bot 退群
 
 	GroupInvitedEvent                 EventHandle[*event.GroupInvite]            // 被邀请入群
 	GroupMemberJoinRequestEvent       EventHandle[*event.GroupMemberJoinRequest] // 加群申请
