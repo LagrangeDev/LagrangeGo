@@ -173,13 +173,15 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			}
 			c.RenameEvent.dispatch(c, eventConverter.ParseSelfRenameEvent(&pb, &c.transport.Sig))
 			return nil, nil
-		case 290: // friend poke event
+		case 290: // greyTip
 			pb := message.GeneralGrayTipInfo{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
 				return nil, err
 			}
-			c.FriendNotifyEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
+			if pb.BusiType == 12 {
+				c.FriendNotifyEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
+			}
 		default:
 			c.warning("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
@@ -197,7 +199,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			}
 			c.GroupDigestEvent.dispatch(c, eventConverter.ParseGroupDigestEvent(&pb))
 			return nil, nil
-		case 20: // group poke event
+		case 20: // group greyTip
 			reader := binary.NewReader(pkg.Body.MsgContent)
 			groupUin := reader.ReadU32() // group uin
 			reader.SkipBytes(1)          // unknown byte
@@ -206,7 +208,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			c.GroupNotifyEvent.dispatch(c, eventConverter.PaeseGroupPokeEvent(&pb, groupUin))
+			if pb.GrayTipInfo.BusiType == 12 { // poke
+				c.GroupNotifyEvent.dispatch(c, eventConverter.PaeseGroupPokeEvent(&pb, groupUin))
+			}
 			return nil, nil
 		case 17: // recall
 			reader := binary.NewReader(pkg.Body.MsgContent)
