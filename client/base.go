@@ -98,6 +98,8 @@ type QQClient struct {
 	GroupDigestEvent                  EventHandle[*event.GroupDigestEvent] // 精华消息
 	GroupRecallEvent                  EventHandle[*event.GroupRecall]
 	GroupMemberPermissionChangedEvent EventHandle[*event.GroupMemberPermissionChanged]
+	GroupNameUpdatedEvent             EventHandle[*event.GroupNameUpdated]
+	MemberSpecialTitleUpdatedEvent    EventHandle[*event.MemberSpecialTitleUpdated]
 	NewFriendRequestEvent             EventHandle[*event.NewFriendRequest] // 好友申请
 	FriendRecallEvent                 EventHandle[*event.FriendRecall]
 	RenameEvent                       EventHandle[*event.Rename]

@@ -1,7 +1,9 @@
 package event
 
 import (
+	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
@@ -17,6 +19,13 @@ type (
 		TargetUin uint32
 		TargetUid string
 		IsAdmin   bool
+	}
+
+	GroupNameUpdated struct {
+		GroupUin    uint32
+		NewName     string
+		OperatorUin uint32
+		OperatorUid string
 	}
 
 	GroupMute struct {
@@ -87,12 +96,26 @@ type (
 		Suffix   string
 		Action   string
 	}
+
+	// MemberSpecialTitleUpdated 群成员头衔更新事件 from miraigo
+	MemberSpecialTitleUpdated struct {
+		GroupUin uint32
+		Uin      uint32
+		NewTitle string
+	}
 )
 
 type GroupInvite struct {
 	GroupUin   uint32
 	InvitorUid string
 	InvitorUin uint32
+}
+
+type JsonParam struct {
+	Cmd  int    `json:"cmd"`
+	Data string `json:"data"`
+	Text string `json:"text"`
+	Url  string `json:"url"`
 }
 
 // CanPreprocess 实现预处理接口，对事件的uid进行转换等操作
@@ -132,6 +155,18 @@ func ParseGroupMemberPermissionChanged(event *message.GroupAdmin) *GroupMemberPe
 		},
 		TargetUid: uid,
 		IsAdmin:   isAdmin,
+	}
+}
+
+func (g *GroupNameUpdated) ResolveUin(f func(uid string) uint32) {
+	g.OperatorUin = f(g.OperatorUid)
+}
+
+func ParseGroupNameUpdatedEvent(event *message.NotifyMessageBody, groupName string) *GroupNameUpdated {
+	return &GroupNameUpdated{
+		GroupUin:    event.GroupUin,
+		NewName:     groupName,
+		OperatorUid: event.OperatorUid,
 	}
 }
 
@@ -268,6 +303,24 @@ func PaeseGroupPokeEvent(event *message.NotifyMessageBody, groupUin uint32) *Gro
 		Receiver: e.Receiver,
 		Suffix:   e.Suffix,
 		Action:   e.Action,
+	}
+}
+
+func ParseGroupMemberSpecialTitleUpdatedEvent(event *message.GroupSpecialTitle, groupUin uint32) *MemberSpecialTitleUpdated {
+	re := regexp.MustCompile(`<({.*?})>`)
+	matches := re.FindAllStringSubmatch(event.Content, -1)
+	if len(matches) != 2 {
+		return nil
+	}
+	var medalData JsonParam
+	err := json.Unmarshal([]byte(matches[1][1]), &medalData)
+	if err != nil {
+		return nil
+	}
+	return &MemberSpecialTitleUpdated{
+		GroupUin: groupUin,
+		Uin:      event.TargetUin,
+		NewTitle: medalData.Text,
 	}
 }
 

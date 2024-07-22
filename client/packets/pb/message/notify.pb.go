@@ -173,13 +173,14 @@ type RecallMessage struct {
 type NotifyMessageBody struct {
 	Type           uint32              `protobuf:"varint,1,opt"`
 	GroupUin       uint32              `protobuf:"varint,4,opt"`
+	EventParam     []byte              `protobuf:"bytes,5,opt"`
 	Recall         *GroupRecall        `protobuf:"bytes,11,opt"`
 	Field13        uint32              `protobuf:"varint,13,opt"`
+	OperatorUid    string              `protobuf:"bytes,21,opt"`
 	GrayTipInfo    *GeneralGrayTipInfo `protobuf:"bytes,26,opt"`
 	EssenceMessage *EssenceMessage     `protobuf:"bytes,33,opt"`
 	MsgSequence    uint32              `protobuf:"varint,37,opt"`
 	Field39        uint32              `protobuf:"varint,39,opt"`
-	_              [0]func()
 }
 
 type EssenceMessage struct {
@@ -213,4 +214,11 @@ type TemplParam struct {
 	Key   string `protobuf:"bytes,1,opt"`
 	Value string `protobuf:"bytes,2,opt"`
 	_     [0]func()
+}
+
+type GroupSpecialTitle struct {
+	Content   string `protobuf:"bytes,2,opt"`
+	Field3    uint32 `protobuf:"varint,3,opt"`
+	TargetUin uint32 `protobuf:"varint,5,opt"`
+	_         [0]func()
 }

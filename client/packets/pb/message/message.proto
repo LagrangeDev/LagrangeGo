@@ -129,7 +129,7 @@ message FriendRenameMsg {
 }
 
 message FriendRenameMsgBody {
-  uint32 Field1 = 2; // 20
+  uint32 Field2 = 2; // 20
   FriendRenameMsgData Data = 8;
 }
 
