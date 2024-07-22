@@ -145,7 +145,7 @@ type FriendRenameMsg struct {
 }
 
 type FriendRenameMsgBody struct {
-	Field1 uint32               `protobuf:"varint,2,opt"` // 20
+	Field2 uint32               `protobuf:"varint,2,opt"` // 20
 	Data   *FriendRenameMsgData `protobuf:"bytes,8,opt"`
 	_      [0]func()
 }

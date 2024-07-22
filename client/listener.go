@@ -163,18 +163,19 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.FriendRecallEvent.dispatch(c, ev)
 			return nil, nil
 		case 39: // friend rename
-			c.debugln("friend rename")
 			pb := message.FriendRenameMsg{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
 				return nil, err
 			}
-			ev := eventConverter.ParseFriendRenameEvent(&pb)
-			_ = c.PreprocessOther(ev)
-			c.RenameEvent.dispatch(c, ev)
+			if pb.Body.Field2 == 20 { // friend name update
+				ev := eventConverter.ParseFriendRenameEvent(&pb)
+				_ = c.PreprocessOther(ev)
+				c.RenameEvent.dispatch(c, ev)
+			} // 40 grp name
+
 			return nil, nil
 		case 29:
-			c.debugln("self rename")
 			pb := message.SelfRenameMsg{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
 			if err != nil {
@@ -234,6 +235,29 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			_ = c.PreprocessOther(ev)
 			c.GroupRecallEvent.dispatch(c, ev)
 			return nil, nil
+		case 16: // groupname update & member special title update
+			reader := binary.NewReader(pkg.Body.MsgContent)
+			groupUin := reader.ReadU32()
+			reader.SkipBytes(1)
+			pb := message.NotifyMessageBody{}
+			err = proto.Unmarshal(reader.ReadBytesWithLength("u16", false), &pb)
+			if err != nil {
+				return nil, err
+			}
+			if pb.Field13 == 6 { // GroupMemberSpecialTitle
+				epb := message.GroupSpecialTitle{}
+				err = proto.Unmarshal(pb.EventParam, &epb)
+				if err != nil {
+					return nil, err
+				}
+				c.MemberSpecialTitleUpdatedEvent.dispatch(c, eventConverter.ParseGroupMemberSpecialTitleUpdatedEvent(&epb, groupUin))
+			} else if pb.Field13 == 12 { // groupname update
+				r := binary.NewReader(pb.EventParam)
+				r.SkipBytes(3)
+				ev := eventConverter.ParseGroupNameUpdatedEvent(&pb, string(r.ReadBytesWithLength("u8", false)))
+				_ = c.PreprocessOther(ev)
+				c.GroupNameUpdatedEvent.dispatch(c, ev)
+			}
 		case 12: // mute
 			pb := message.GroupMute{}
 			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
