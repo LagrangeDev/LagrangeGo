@@ -96,6 +96,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	case 44: // group admin changed
 		pb := message.GroupAdmin{}
 		err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+		if err != nil {
+			return nil, err
+		}
 		ev := eventConverter.ParseGroupMemberPermissionChanged(&pb)
 		_ = c.PreprocessOther(ev)
 		c.GroupMemberPermissionChangedEvent.dispatch(c, ev)
