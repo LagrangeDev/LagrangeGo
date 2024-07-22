@@ -12,6 +12,13 @@ type (
 		GroupUin uint32
 	}
 
+	GroupMemberPermissionChanged struct {
+		GroupEvent
+		TargetUin uint32
+		TargetUid string
+		IsAdmin   bool
+	}
+
 	GroupMute struct {
 		GroupEvent
 		OperatorUid string
@@ -103,6 +110,29 @@ func (g *GroupMemberDecrease) IsKicked() bool {
 
 func (g *GroupDigestEvent) IsSet() bool {
 	return g.OperationType == 1
+}
+
+func (g *GroupMemberPermissionChanged) ResolveUin(f func(uid string) uint32) {
+	g.TargetUin = f(g.TargetUid)
+}
+
+func ParseGroupMemberPermissionChanged(event *message.GroupAdmin) *GroupMemberPermissionChanged {
+	var isAdmin bool
+	var uid string
+	if event.Body.ExtraEnable != nil {
+		isAdmin = true
+		uid = event.Body.ExtraEnable.AdminUid
+	} else if event.Body.ExtraDisable != nil {
+		isAdmin = false
+		uid = event.Body.ExtraDisable.AdminUid
+	}
+	return &GroupMemberPermissionChanged{
+		GroupEvent: GroupEvent{
+			GroupUin: event.GroupUin,
+		},
+		TargetUid: uid,
+		IsAdmin:   isAdmin,
+	}
 }
 
 func (g *GroupMemberJoinRequest) ResolveUin(f func(uid string) uint32) {

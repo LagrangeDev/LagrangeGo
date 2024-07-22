@@ -93,6 +93,12 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		_ = c.PreprocessOther(ev)
 		c.GroupMemberLeaveEvent.dispatch(c, ev)
 		return nil, nil
+	case 44: // group admin changed
+		pb := message.GroupAdmin{}
+		err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+		ev := eventConverter.ParseGroupMemberPermissionChanged(&pb)
+		_ = c.PreprocessOther(ev)
+		c.GroupMemberPermissionChangedEvent.dispatch(c, ev)
 	case 84: // group request join notice
 		pb := message.GroupJoin{}
 		err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
