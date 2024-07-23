@@ -9,7 +9,7 @@ import (
 	"github.com/RomiChan/protobuf/proto"
 )
 
-func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.MessageBody) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.MessageBody, random uint32) (*action.SendMessageResponse, error) {
 	msg := &message.Message{
 		RoutingHead: route,
 		ContentHead: &message.ContentHead{
@@ -19,7 +19,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 		},
 		Body: body,
 		Seq:  proto.Some(c.getSequence()),
-		Rand: proto.Some(crypto.RandU32()),
+		Rand: proto.Some(random),
 	}
 	// grp_id not null
 	if (route.Grp != nil && route.Grp.GroupCode.IsSome()) || (route.GrpTmp != nil && route.GrpTmp.GroupUin.IsSome()) {
@@ -28,23 +28,22 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 
 	data, err := proto.Marshal(msg)
 	if err != nil {
-		return
+		return nil, err
 	}
-
 	packet, err := c.sendUniPacketAndWait("MessageSvc.PbSendMsg", data)
 	if err != nil {
-		return
+		return nil, err
 	}
-	resp = &action.SendMessageResponse{}
+	resp := &action.SendMessageResponse{}
 	err = proto.Unmarshal(packet, resp)
 	if err != nil {
-		return
+		return nil, err
 	}
-	return
+	return resp, err
 }
 
 // SendGroupMessage 发送群聊消息，默认会对消息进行预处理
-func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (*message2.GroupMessage, error) {
 	if needPreprocess == nil || needPreprocess[0] {
 		elements = c.preProcessGroupMessage(groupUin, elements)
 	}
@@ -52,11 +51,35 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 	route := &message.RoutingHead{
 		Grp: &message.Grp{GroupCode: proto.Some(groupUin)},
 	}
-	return c.SendRawMessage(route, body)
+	mr := crypto.RandU32()
+	ret, err := c.SendRawMessage(route, body, mr)
+	if err != nil || ret.GroupSequence.IsNone() {
+		return nil, err
+	}
+	group := c.GetCachedGroupInfo(groupUin)
+	minfo := c.GetCachedMemberInfo(c.Uin, groupUin)
+	resp := &message2.GroupMessage{
+		Id:         int32(ret.GroupSequence.Unwrap()),
+		InternalId: int32(mr),
+		GroupUin:   groupUin,
+		GroupName:  group.GroupName,
+		Sender: &message2.Sender{
+			Uin:           c.Uin,
+			Uid:           c.GetUid(c.Uin),
+			Nickname:      c.NickName(),
+			CardName:      minfo.MemberCard,
+			AnonymousInfo: nil,
+			IsFriend:      true,
+		},
+		Time:           uint64(ret.Timestamp1),
+		Elements:       elements,
+		OriginalObject: nil,
+	}
+	return resp, nil
 }
 
 // SendPrivateMessage 发送群聊消息，默认会对消息进行预处理
-func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (*message2.PrivateMessage, error) {
 	if needPreprocess == nil || needPreprocess[0] {
 		elements = c.preProcessPrivateMessage(uin, elements)
 	}
@@ -66,10 +89,30 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 			Uid: proto.Some(c.GetUid(uin)),
 		},
 	}
-	return c.SendRawMessage(route, body)
+	mr := crypto.RandU32()
+	ret, err := c.SendRawMessage(route, body, mr)
+	if err != nil || ret.PrivateSequence == 0 {
+		return nil, err
+	}
+	resp := &message2.PrivateMessage{
+		Id:         int32(ret.PrivateSequence),
+		InternalId: int32(mr),
+		Self:       int64(c.Uin),
+		Target:     int64(uin),
+		Time:       int32(ret.Timestamp1),
+		Sender: &message2.Sender{
+			Uin:           c.Uin,
+			Uid:           c.GetUid(c.Uin),
+			Nickname:      c.NickName(),
+			AnonymousInfo: nil,
+			IsFriend:      true,
+		},
+		Elements: nil,
+	}
+	return resp, nil
 }
 
-func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []message2.IMessageElement) (resp *action.SendMessageResponse, err error) {
+func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []message2.IMessageElement) (*message2.TempMessage, error) {
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		GrpTmp: &message.GrpTmp{
@@ -77,7 +120,27 @@ func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []messa
 			ToUin:    proto.Some(uin),
 		},
 	}
-	return c.SendRawMessage(route, body)
+	mr := crypto.RandU32()
+	ret, err := c.SendRawMessage(route, body, mr)
+	if err != nil || ret.PrivateSequence == 0 {
+		return nil, err
+	}
+	group := c.GetCachedGroupInfo(groupUin)
+	resp := &message2.TempMessage{
+		Id:        int32(ret.PrivateSequence),
+		GroupUin:  groupUin,
+		GroupName: group.GroupName,
+		Self:      c.Uin,
+		Sender: &message2.Sender{
+			Uin:           c.Uin,
+			Uid:           c.GetUid(c.Uin),
+			Nickname:      c.NickName(),
+			AnonymousInfo: nil,
+			IsFriend:      true,
+		},
+		Elements: elements,
+	}
+	return resp, nil
 }
 
 func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {
