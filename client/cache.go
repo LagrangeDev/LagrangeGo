@@ -103,7 +103,17 @@ func (c *QQClient) RefreshFriendCache() error {
 	return nil
 }
 
-// RefreshGroupMembersCache 刷新指定群的群成员员缓存
+// RefreshGroupMemberCache 刷新一个群的指定群成员缓存
+func (c *QQClient) RefreshGroupMemberCache(groupUin, memberUin uint32) error {
+	member, err := c.FetchGroupMember(groupUin, memberUin)
+	if err != nil {
+		return err
+	}
+	c.cache.RefreshGroupMember(groupUin, member)
+	return nil
+}
+
+// RefreshGroupMembersCache 刷新指定群的所有群成员缓存
 func (c *QQClient) RefreshGroupMembersCache(groupUin uint32) error {
 	groupData, err := c.GetGroupMembersData(groupUin)
 	if err != nil {
