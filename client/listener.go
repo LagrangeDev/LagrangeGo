@@ -76,6 +76,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			_ = c.RefreshAllGroupsInfo()
 			c.GroupJoinEvent.dispatch(c, c.GetCachedGroupInfo(ev.GroupUin))
 		} else {
+			_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.MemberUin)
 			c.GroupMemberJoinEvent.dispatch(c, ev)
 		}
 		return nil, nil
@@ -110,6 +111,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseGroupMemberPermissionChanged(&pb)
 		_ = c.PreprocessOther(ev)
+		_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.TargetUin)
 		c.GroupMemberPermissionChangedEvent.dispatch(c, ev)
 	case 84: // group request join notice
 		pb := message.GroupJoin{}
