@@ -21,7 +21,8 @@ message OidbSvcTrpcTcp0x10C0_1ResponseRequests {
   uint64 Sequence = 1;
   uint32 EventType = 2;
   uint32 State = 3;
-  OidbSvcTrpcTcp0x10C0_1ResponseGroup Group = 5;
+  OidbSvcTrpcTcp0x10C0_1ResponseGroup Group = 4;
+  OidbSvcTrpcTcp0x10C0_1ResponseUser Target = 5;
   optional OidbSvcTrpcTcp0x10C0_1ResponseUser Invitor = 6;
   optional OidbSvcTrpcTcp0x10C0_1ResponseUser Operator = 7;
   string Field9 = 9;

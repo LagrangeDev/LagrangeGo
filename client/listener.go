@@ -121,7 +121,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FectchUserInfo(ev.TargetUid)
+		user, _ := c.FetchUserInfo(ev.TargetUid)
 		if user != nil {
 			ev.TargetUin = user.Uin
 		}
@@ -135,7 +135,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FectchUserInfo(ev.TargetUid)
+		user, _ := c.FetchUserInfo(ev.TargetUid)
 		if user != nil {
 			ev.TargetUin = user.Uin
 		}
@@ -149,7 +149,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseInviteNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FectchUserInfo(ev.InvitorUid)
+		user, _ := c.FetchUserInfo(ev.InvitorUid)
 		if user != nil {
 			ev.InvitorUin = user.Uin
 		}

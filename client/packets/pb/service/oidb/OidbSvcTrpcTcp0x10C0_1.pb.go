@@ -23,7 +23,8 @@ type OidbSvcTrpcTcp0X10C0_1ResponseRequests struct {
 	Sequence  uint64                               `protobuf:"varint,1,opt"`
 	EventType uint32                               `protobuf:"varint,2,opt"`
 	State     uint32                               `protobuf:"varint,3,opt"`
-	Group     *OidbSvcTrpcTcp0X10C0_1ResponseGroup `protobuf:"bytes,5,opt"`
+	Group     *OidbSvcTrpcTcp0X10C0_1ResponseGroup `protobuf:"bytes,4,opt"`
+	Target    *OidbSvcTrpcTcp0X10C0_1ResponseUser  `protobuf:"bytes,5,opt"`
 	Invitor   *OidbSvcTrpcTcp0X10C0_1ResponseUser  `protobuf:"bytes,6,opt"`
 	Operator  *OidbSvcTrpcTcp0X10C0_1ResponseUser  `protobuf:"bytes,7,opt"`
 	Field9    string                               `protobuf:"bytes,9,opt"`

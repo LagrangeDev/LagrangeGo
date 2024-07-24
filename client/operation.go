@@ -312,8 +312,8 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
-// FectchUserInfo 获取用户信息
-func (c *QQClient) FectchUserInfo(uid string) (*entity.Friend, error) {
+// FetchUserInfo 获取用户信息
+func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uid)
 	if err != nil {
 		return nil, err
@@ -323,4 +323,17 @@ func (c *QQClient) FectchUserInfo(uid string) (*entity.Friend, error) {
 		return nil, err
 	}
 	return oidb2.ParseFetchUserInfoResp(resp)
+}
+
+// GetGroupSystemMessages 获取加群请求信息
+func (c *QQClient) GetGroupSystemMessages(groupUin ...uint32) ([]*entity.GroupJoinRequest, error) {
+	pkt, err := oidb2.BuildFetchGroupSystemMessagesReq(20)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseFetchGroupSystemMessagesReq(resp, groupUin...)
 }
