@@ -163,6 +163,14 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			ev.InvitorUin = user.Uin
 			ev.InvitorNick = user.Nickname
 		}
+		requests, err := c.GetGroupSystemMessages(ev.GroupUin)
+		if err == nil {
+			for _, request := range requests {
+				if request.TargetUid == c.GetUid(c.Uin) && !request.Checked() {
+					ev.RequestSeq = request.Sequence
+				}
+			}
+		}
 		c.GroupInvitedEvent.dispatch(c, ev)
 		return nil, nil
 	case 0x210: // friend event, 528

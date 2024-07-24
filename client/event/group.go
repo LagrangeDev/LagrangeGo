@@ -111,6 +111,7 @@ type GroupInvite struct {
 	InvitorUid  string
 	InvitorUin  uint32
 	InvitorNick string
+	RequestSeq  uint64
 }
 
 type JsonParam struct {
