@@ -14,6 +14,8 @@ func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte) {
 		for _, signProvider := range c.signProvider {
 			if sign = signProvider(command, seq, body); sign == nil {
 				continue
+			} else {
+				break
 			}
 		}
 
