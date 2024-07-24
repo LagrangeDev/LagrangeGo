@@ -25,7 +25,13 @@ type OidbSvcTrpcTcp0XFE1_2Response struct {
 }
 
 type OidbSvcTrpcTcp0XFE1_2ResponseBody struct {
-	Uid string `protobuf:"bytes,1,opt"`
-	Uin uint32 `protobuf:"varint,3,opt"`
-	_   [0]func()
+	Uid        string                                 `protobuf:"bytes,1,opt"`
+	Properties *OidbSvcTrpcTcp0XFE1_2ResponseProperty `protobuf:"bytes,2,opt"`
+	Uin        uint32                                 `protobuf:"varint,3,opt"`
+	_          [0]func()
+}
+
+type OidbSvcTrpcTcp0XFE1_2ResponseProperty struct {
+	NumberProperties []*OidbTwoNumber      `protobuf:"bytes,1,rep"`
+	StringProperties []*OidbFriendProperty `protobuf:"bytes,2,rep"`
 }

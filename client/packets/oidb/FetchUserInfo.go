@@ -26,8 +26,17 @@ func ParseFetchUserInfoResp(data []byte) (*entity.Friend, error) {
 	if err != nil {
 		return nil, err
 	}
+	nickName := func() string {
+		for _, property := range resp.Body.Properties.StringProperties {
+			if property.Code == 20002 {
+				return property.Value
+			}
+		}
+		return ""
+	}()
 	return &entity.Friend{
-		Uin: resp.Body.Uin,
-		Uid: resp.Body.Uid,
+		Uin:      resp.Body.Uin,
+		Uid:      resp.Body.Uid,
+		Nickname: nickName,
 	}, nil
 }
