@@ -121,6 +121,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
 		_ = c.PreprocessOther(ev)
+		user, _ := c.FectchUserInfo(ev.TargetUid)
+		if user != nil {
+			ev.TargetUin = user.Uin
+		}
 		c.GroupMemberJoinRequestEvent.dispatch(c, ev)
 		return nil, nil
 	case 525: // group request invitation notice
@@ -131,6 +135,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
 		_ = c.PreprocessOther(ev)
+		user, _ := c.FectchUserInfo(ev.TargetUid)
+		if user != nil {
+			ev.TargetUin = user.Uin
+		}
 		c.GroupMemberJoinRequestEvent.dispatch(c, ev)
 		return nil, nil
 	case 87: // group invite notice
@@ -141,6 +149,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseInviteNotice(&pb)
 		_ = c.PreprocessOther(ev)
+		user, _ := c.FectchUserInfo(ev.InvitorUid)
+		if user != nil {
+			ev.InvitorUin = user.Uin
+		}
 		c.GroupInvitedEvent.dispatch(c, ev)
 		return nil, nil
 	case 0x210: // friend event, 528
