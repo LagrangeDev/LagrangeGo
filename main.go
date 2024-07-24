@@ -31,7 +31,7 @@ func main() {
 		KernelVersion: "10.0.22631",
 	}
 
-	qqclient := client.NewClient(0, "https://sign.lagrangecore.org/api/sign", appInfo)
+	qqclient := client.NewClient(0, appInfo, "https://sign.lagrangecore.org/api/sign")
 	qqclient.SetLogger(protocolLogger{})
 	qqclient.UseDevice(deviceInfo)
 	data, err := os.ReadFile("sig.bin")

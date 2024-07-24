@@ -26,7 +26,7 @@ import (
 )
 
 // NewClient 创建一个新的 QQ Client
-func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
+func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
 	client := &QQClient{
 		Uin:  uin,
 		oicq: oicq.NewCodec(int64(uin)),
@@ -36,9 +36,9 @@ func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
 		},
 		alive: true,
 	}
-	client.signProvider = sign.NewProviderURL(signUrl, func(msg string) {
+	client.signProvider = sign.NewProviderURL(func(msg string) {
 		client.debugln(msg)
-	})
+	}, signUrl...)
 	client.transport.Version = appInfo
 	client.transport.Sig.D2Key = make([]byte, 0, 16)
 	client.highwaySession.Uin = &client.transport.Sig.Uin
@@ -50,7 +50,7 @@ func NewClient(uin uint32, signUrl string, appInfo *auth.AppInfo) *QQClient {
 
 type QQClient struct {
 	Uin          uint32
-	signProvider sign.Provider
+	signProvider []sign.Provider
 
 	stat Statistics
 	once sync.Once

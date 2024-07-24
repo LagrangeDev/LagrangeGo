@@ -70,42 +70,46 @@ func containSignPKG(cmd string) bool {
 	return ok
 }
 
-func NewProviderURL(rawUrl string, log func(msg string)) func(string, uint32, []byte) map[string]string {
-	if rawUrl == "" {
+func NewProviderURL(log func(msg string), rawUrls ...string) []Provider {
+	if len(rawUrls) == 0 {
 		return nil
 	}
-	return func(cmd string, seq uint32, buf []byte) map[string]string {
-		if !containSignPKG(cmd) {
-			return nil
-		}
-		startTime := time.Now().UnixMilli()
-		resp := signResponse{}
-		sb := strings.Builder{}
-		sb.WriteString(`{"cmd":"` + cmd + `",`)
-		sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
-		sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
-		err := httpPost(rawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
-		if err != nil || resp.Value.Sign == "" {
-			err := httpGet(rawUrl, map[string]string{
-				"cmd": cmd,
-				"seq": strconv.Itoa(int(seq)),
-				"src": fmt.Sprintf("%x", buf),
-			}, 8*time.Second, &resp)
-			if err != nil {
-				log(err.Error())
+	providers := make([]Provider, len(rawUrls))
+	for i, rawUrl := range rawUrls {
+		providers[i] = func(cmd string, seq uint32, buf []byte) map[string]string {
+			if !containSignPKG(cmd) {
 				return nil
 			}
-		}
+			startTime := time.Now().UnixMilli()
+			resp := signResponse{}
+			sb := strings.Builder{}
+			sb.WriteString(`{"cmd":"` + cmd + `",`)
+			sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
+			sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
+			err := httpPost(rawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
+			if err != nil || resp.Value.Sign == "" {
+				err := httpGet(rawUrl, map[string]string{
+					"cmd": cmd,
+					"seq": strconv.Itoa(int(seq)),
+					"src": fmt.Sprintf("%x", buf),
+				}, 8*time.Second, &resp)
+				if err != nil {
+					log(err.Error())
+					return nil
+				}
+			}
 
-		log(fmt.Sprintf("signed for [%s:%d](%dms)",
-			cmd, seq, time.Now().UnixMilli()-startTime))
+			log(fmt.Sprintf("signed for [%s:%d](%dms)",
+				cmd, seq, time.Now().UnixMilli()-startTime))
 
-		return map[string]string{
-			"sign":  resp.Value.Sign,
-			"extra": resp.Value.Extra,
-			"token": resp.Value.Token,
+			return map[string]string{
+				"sign":  resp.Value.Sign,
+				"extra": resp.Value.Extra,
+				"token": resp.Value.Token,
+			}
 		}
 	}
+	return providers
 }
 
 func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration, target interface{}) error {
