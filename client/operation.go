@@ -337,3 +337,16 @@ func (c *QQClient) GetGroupSystemMessages(groupUin ...uint32) ([]*entity.GroupJo
 	}
 	return oidb2.ParseFetchGroupSystemMessagesReq(resp, groupUin...)
 }
+
+// SetGroupRequest 处理加群请求
+func (c *QQClient) SetGroupRequest(accept bool, sequence uint64, typ uint32, groupUin uint32, message string) error {
+	pkt, err := oidb2.BuildSetGroupRequestReq(accept, sequence, typ, groupUin, message)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseSetGroupRequestResp(resp)
+}
