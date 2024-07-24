@@ -2,18 +2,13 @@ package oidb
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/RomiChan/protobuf/proto"
 )
 
 func BuildSetGroupRequestReq(accept bool, sequence uint64, typ uint32, groupUin uint32, message string) (*OidbPacket, error) {
-	var acceptInt uint32
-	if accept {
-		acceptInt = 1
-	} else {
-		acceptInt = 2
-	}
 	body := oidb.OidbSvcTrpcTcp0X10C8_1{
-		Accept: acceptInt,
+		Accept: uint32(utils.Bool2Int(!accept) + 1),
 		Body: &oidb.OidbSvcTrpcTcp0X10C8_1Body{
 			Sequence:  sequence,
 			EventType: typ,
