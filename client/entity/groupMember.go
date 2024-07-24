@@ -19,3 +19,10 @@ type GroupMember struct {
 	LastMsgTime uint32
 	Avatar      string
 }
+
+func (m *GroupMember) DisplayName() string {
+	if m.MemberCard != "" {
+		return m.MemberCard
+	}
+	return m.MemberName
+}
