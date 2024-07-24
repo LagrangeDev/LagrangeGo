@@ -74,7 +74,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		_ = c.PreprocessOther(ev)
 		if ev.MemberUin == c.Uin { // bot 进群
 			_ = c.RefreshAllGroupsInfo()
-			c.GroupJoinEvent.dispatch(c, c.GetCachedGroupInfo(ev.GroupUin))
+			c.GroupJoinEvent.dispatch(c, ev)
 		} else {
 			_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.MemberUin)
 			c.GroupMemberJoinEvent.dispatch(c, ev)
@@ -147,6 +147,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		ev := eventConverter.ParseInviteNotice(&pb)
 		_ = c.PreprocessOther(ev)
 		user, _ := c.FetchUserInfo(ev.InvitorUid)
