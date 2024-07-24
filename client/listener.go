@@ -124,6 +124,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		user, _ := c.FetchUserInfo(ev.TargetUid)
 		if user != nil {
 			ev.TargetUin = user.Uin
+			ev.TargetNick = user.Nickname
 		}
 		requests, err := c.GetGroupSystemMessages(ev.GroupUin)
 		if err == nil {
@@ -147,6 +148,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		user, _ := c.FetchUserInfo(ev.TargetUid)
 		if user != nil {
 			ev.TargetUin = user.Uin
+			ev.TargetNick = user.Nickname
 		}
 		c.GroupMemberJoinRequestEvent.dispatch(c, ev)
 		return nil, nil

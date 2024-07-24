@@ -52,6 +52,7 @@ type (
 		GroupEvent
 		TargetUid  string
 		TargetUin  uint32
+		TargetNick string
 		InvitorUid string
 		InvitorUin uint32
 		Answer     string // 问题：(.*)答案：(.*)
