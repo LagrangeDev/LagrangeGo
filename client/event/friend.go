@@ -49,7 +49,7 @@ func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg
 	}
 }
 
-func (fe *FriendRecall) ResolveUin(f func(uid string) uint32) {
+func (fe *FriendRecall) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
 	fe.FromUin = f(fe.FromUid)
 }
 
@@ -63,7 +63,7 @@ func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 	}
 }
 
-func (fe *Rename) ResolveUin(f func(uid string) uint32) {
+func (fe *Rename) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
 	fe.Uin = f(fe.Uid)
 }
 

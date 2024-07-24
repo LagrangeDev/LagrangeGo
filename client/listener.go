@@ -315,8 +315,8 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 }
 
 func (c *QQClient) PreprocessOther(g eventConverter.CanPreprocess) error {
-	g.ResolveUin(func(uid string) uint32 {
-		return c.GetUin(uid)
+	g.ResolveUin(func(uid string, groupUin ...uint32) uint32 {
+		return c.GetUin(uid, groupUin...)
 	})
 	return nil
 }
