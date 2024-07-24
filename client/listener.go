@@ -125,6 +125,15 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if user != nil {
 			ev.TargetUin = user.Uin
 		}
+		requests, err := c.GetGroupSystemMessages(ev.GroupUin)
+		if err == nil {
+			for _, request := range requests {
+				if request.TargetUid == ev.TargetUid && !request.Checked() {
+					ev.RequestSeq = request.Sequence
+					ev.Answer = request.Comment
+				}
+			}
+		}
 		c.GroupMemberJoinRequestEvent.dispatch(c, ev)
 		return nil, nil
 	case 525: // group request invitation notice
@@ -147,12 +156,12 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		ev := eventConverter.ParseInviteNotice(&pb)
 		_ = c.PreprocessOther(ev)
 		user, _ := c.FetchUserInfo(ev.InvitorUid)
 		if user != nil {
 			ev.InvitorUin = user.Uin
+			ev.InvitorNick = user.Nickname
 		}
 		c.GroupInvitedEvent.dispatch(c, ev)
 		return nil, nil

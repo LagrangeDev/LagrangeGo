@@ -55,6 +55,7 @@ type (
 		InvitorUid string
 		InvitorUin uint32
 		Answer     string // 问题：(.*)答案：(.*)
+		RequestSeq uint64
 	}
 
 	GroupMemberIncrease struct {
@@ -106,9 +107,10 @@ type (
 )
 
 type GroupInvite struct {
-	GroupUin   uint32
-	InvitorUid string
-	InvitorUin uint32
+	GroupUin    uint32
+	InvitorUid  string
+	InvitorUin  uint32
+	InvitorNick string
 }
 
 type JsonParam struct {
