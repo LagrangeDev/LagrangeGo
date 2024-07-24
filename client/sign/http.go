@@ -76,9 +76,10 @@ func NewProviderURL(log func(msg string), rawUrls ...string) []Provider {
 	}
 	providers := make([]Provider, len(rawUrls))
 	for i, rawUrl := range rawUrls {
-		providers[i] = func(cmd string, seq uint32, buf []byte) map[string]string {
+		localRawUrl := rawUrl
+		providers[i] = func(cmd string, seq uint32, buf []byte) (map[string]string, error) {
 			if !containSignPKG(cmd) {
-				return nil
+				return nil, nil
 			}
 			startTime := time.Now().UnixMilli()
 			resp := signResponse{}
@@ -86,16 +87,16 @@ func NewProviderURL(log func(msg string), rawUrls ...string) []Provider {
 			sb.WriteString(`{"cmd":"` + cmd + `",`)
 			sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
 			sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
-			err := httpPost(rawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
+			err := httpPost(localRawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
 			if err != nil || resp.Value.Sign == "" {
-				err := httpGet(rawUrl, map[string]string{
+				err := httpGet(localRawUrl, map[string]string{
 					"cmd": cmd,
 					"seq": strconv.Itoa(int(seq)),
 					"src": fmt.Sprintf("%x", buf),
 				}, 8*time.Second, &resp)
 				if err != nil {
 					log(err.Error())
-					return nil
+					return nil, err
 				}
 			}
 
@@ -106,7 +107,7 @@ func NewProviderURL(log func(msg string), rawUrls ...string) []Provider {
 				"sign":  resp.Value.Sign,
 				"extra": resp.Value.Extra,
 				"token": resp.Value.Token,
-			}
+			}, nil
 		}
 	}
 	return providers

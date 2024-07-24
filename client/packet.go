@@ -9,10 +9,12 @@ import (
 func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte) {
 	seq := c.getAndIncreaseSequence()
 	var sign map[string]string
+	var err error
 	// todo: 实现自动选择sign
 	if len(c.signProvider) != 0 {
 		for _, signProvider := range c.signProvider {
-			if sign = signProvider(command, seq, body); sign == nil {
+			sign, err = signProvider(command, seq, body)
+			if err != nil {
 				continue
 			} else {
 				break
