@@ -75,5 +75,6 @@ func Decode(r io.ReadSeeker) (*AudioInfo, error) {
 	defer func() {
 		_, _ = r.Seek(0, io.SeekStart)
 	}()
+	_, _ = r.Seek(0, io.SeekStart)
 	return decode(r, false)
 }

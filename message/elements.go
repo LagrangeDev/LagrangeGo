@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/audio"
+
 	"github.com/tidwall/gjson"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -156,13 +158,24 @@ func NewStreamRecord(r io.ReadSeeker, Summary ...string) *VoiceElement {
 		summary = Summary[0]
 	}
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
+	info, err := audio.Decode(r)
+	if err != nil {
+		return &VoiceElement{
+			Size:     uint32(length),
+			Summary:  summary,
+			Stream:   r,
+			Md5:      md5,
+			Sha1:     sha1,
+			Duration: uint32(length),
+		}
+	}
 	return &VoiceElement{
 		Size:     uint32(length),
 		Summary:  summary,
 		Stream:   r,
 		Md5:      md5,
 		Sha1:     sha1,
-		Duration: uint32(length),
+		Duration: uint32(info.Time),
 	}
 }
 
