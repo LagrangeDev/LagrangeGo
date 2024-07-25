@@ -10,7 +10,7 @@ func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
 		if err := c.RefreshFriendCache(); err != nil {
 			return ""
 		}
-	} else if c.cache.GroupMemberCacheIsEmpty(groupUin[0]) {
+	} else if len(groupUin) != 0 && c.cache.GroupMemberCacheIsEmpty(groupUin[0]) {
 		if err := c.RefreshGroupMembersCache(groupUin[0]); err != nil {
 			return ""
 		}
