@@ -4,7 +4,7 @@
 
 位于`github.com/LagrangeDev/LagrangeGo/client`
 
-> 创建一个QQClient，参数分别是qq号，[sign地址](/guide/sign)，[appinfo](/api/appInfo)
+> 创建一个QQClient，参数分别是qq号，[appinfo](/api/appInfo)，[sign地址](/guide/sign)
 
 ```go
 qqclient := client.NewClient(0, "https://sign.lagrangecore.org/api/sign", appInfo)
