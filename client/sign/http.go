@@ -87,7 +87,9 @@ func NewProviderURL(log func(msg string), rawUrls ...string) []Provider {
 			sb.WriteString(`{"cmd":"` + cmd + `",`)
 			sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
 			sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
-			err := httpPost(localRawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp)
+			err := httpPost(localRawUrl, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp, map[string]string{
+				"Content-Type": "application/json",
+			})
 			if err != nil || resp.Value.Sign == "" {
 				err := httpGet(localRawUrl, map[string]string{
 					"cmd": cmd,
@@ -159,7 +161,7 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 	return nil
 }
 
-func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target interface{}) error {
+func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target interface{}, header map[string]string) error {
 	u, err := url.Parse(rawUrl)
 	if err != nil {
 		return fmt.Errorf("failed to parse URL: %w", err)
@@ -172,7 +174,9 @@ func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target inter
 	if err != nil {
 		return fmt.Errorf("failed to create POST request: %w", err)
 	}
-
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
