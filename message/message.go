@@ -262,17 +262,19 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 		}
 
 		// new protocol image
-		if elem.CommonElem != nil && elem.CommonElem.ServiceType == 48 && elem.CommonElem.BusinessType == 20 {
-			pb := message.CommonElemImagePb{}
-			err := proto.Unmarshal(elem.CommonElem.PbElem, &pb)
+		if elem.CommonElem != nil && (elem.CommonElem.BusinessType == 20 || elem.CommonElem.BusinessType == 10) {
+			extra := &oidb2.MsgInfo{}
+			err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
 			if err != nil {
 				continue
 			}
+			index := extra.MsgInfoBody[0].Index
 			res = append(res, &ImageElement{
-				ImageId: pb.Field1.Extra.FileUuid,
-				Size:    pb.Field1.Extra.Info.Size,
-				Url:     "https://multimedia.nt.qq.com.cn" + pb.Field2.DownloadInfo.Info.PathWithRkey,
-				Md5:     utils.MustParseHexStr(pb.Field1.Extra.Info.Md5),
+				Width:   index.Info.Width,
+				Height:  index.Info.Height,
+				ImageId: index.Info.FileName,
+				Size:    index.Info.FileSize,
+				MsgInfo: extra,
 			})
 		}
 

@@ -286,7 +286,33 @@ func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	return nil
 }
 
-// GetPrivateRecordUrl 获取私聊语言下载url
+// GetPrivateImageUrl 获取私聊图片下载url
+func (c *QQClient) GetPrivateImageUrl(node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildPrivateImageDownloadReq(c.GetUid(c.Uin), node)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParsePrivateImageDownloadResp(resp)
+}
+
+// GetGroupImageUrl 获取群聊图片下载url
+func (c *QQClient) GetGroupImageUrl(groupUin uint32, node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildGroupImageDownloadReq(groupUin, node)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParseGroupImageDownloadResp(resp)
+}
+
+// GetPrivateRecordUrl 获取私聊语音下载url
 func (c *QQClient) GetPrivateRecordUrl(node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildPrivateRecordDownloadReq(c.GetUid(c.Uin), node)
 	if err != nil {

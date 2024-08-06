@@ -318,11 +318,14 @@ func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
 func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) error {
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
-		case *msgConverter.VoiceElement:
-			url, err := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
-			if err != nil {
-				return err
+		case *msgConverter.ImageElement:
+			if e.Url != "" {
+				continue
 			}
+			url, _ := c.GetGroupImageUrl(msg.GroupUin, e.MsgInfo.MsgInfoBody[0].Index)
+			e.Url = url
+		case *msgConverter.VoiceElement:
+			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
 			e.Url = url
 		}
 	}
@@ -335,6 +338,12 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 	}
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
+		case *msgConverter.ImageElement:
+			if e.Url != "" {
+				continue
+			}
+			url, _ := c.GetPrivateImageUrl(e.MsgInfo.MsgInfoBody[0].Index)
+			e.Url = url
 		case *msgConverter.VoiceElement:
 			url, err := c.GetPrivateRecordUrl(e.Node)
 			if err != nil {
