@@ -31,6 +31,13 @@ func Bool2Int(v bool) int {
 	return 0
 }
 
+func Bool2Uint32(b bool, trueVal, falseVal uint32) uint32 {
+	if b {
+		return trueVal
+	}
+	return falseVal
+}
+
 func CloseIO(reader io.Reader) {
 	if closer, ok := reader.(io.Closer); ok {
 		_ = closer.Close()

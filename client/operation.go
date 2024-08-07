@@ -376,3 +376,17 @@ func (c *QQClient) SetGroupRequest(accept bool, sequence uint64, typ uint32, gro
 	}
 	return oidb2.ParseSetGroupRequestResp(resp)
 }
+
+// HandleFriendRequest 处理好友请求
+func (c *QQClient) setFriendRequest(accept bool, targetUid string) error {
+	// 构造好友请求处理的数据包
+	pkt, err := oidb2.BuildSetFriendRequest(accept, targetUid)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseSetGroupRequestResp(resp)
+}
