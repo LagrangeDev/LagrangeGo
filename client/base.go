@@ -33,6 +33,7 @@ func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
 			SubAppID: uint32(appInfo.SubAppID),
 		},
 		alive: true,
+		UA:    "LagrangeGo qq/" + appInfo.PackageSign,
 	}
 	client.signProvider = sign.NewProviderURL(func(msg string) {
 		client.debugln(msg)
@@ -57,6 +58,8 @@ type QQClient struct {
 
 	t106 []byte
 	t16a []byte
+
+	UA string
 
 	TCP            network.TCPClient // todo: combine other protocol state into one struct
 	ConnectTime    time.Time

@@ -13,7 +13,9 @@ func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte) {
 	// todo: 实现自动选择sign
 	if len(c.signProvider) != 0 {
 		for _, signProvider := range c.signProvider {
-			sign, err = signProvider(command, seq, body)
+			sign, err = signProvider(command, seq, body, map[string]string{
+				"User-Agent": c.UA,
+			})
 			if err != nil {
 				continue
 			} else {
