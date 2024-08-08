@@ -19,7 +19,6 @@ export default defineConfig({
             { text: '简介', link: '/guide' },
             { text: '示例', link: '/examples' }
         ],
-
         sidebar: [
             {
                 text: '简介',
@@ -32,7 +31,6 @@ export default defineConfig({
                 text: '快速开始',
                 collapsed: false,
                 link: '/quickstart'
-
             },
             {
                 text: '示例',
@@ -41,7 +39,7 @@ export default defineConfig({
                     { text: '使用项目示例', link: '/examples' },
                     { text: '创建bot实例', link: '/examples/createClient' },
                     { text: '登录', link: '/examples/login' },
-                    { text: '事件', link: '/examples/event' },
+                    { text: '事件', link: '/examples/event' }
                 ]
             },
             {
@@ -50,11 +48,10 @@ export default defineConfig({
                 items: [
                     { text: 'AppInfo', link: '/api/appInfo' },
                     { text: 'DeviceInfo', link: '/api/deviceInfo' },
-                    { text: 'SigInfo', link: '/api/sigInfo' },
+                    { text: 'SigInfo', link: '/api/sigInfo' }
                 ]
             }
         ],
-
         socialLinks: [
             { icon: 'github', link: 'https://github.com/LagrangeDev/LagrangeGo' }
         ],
