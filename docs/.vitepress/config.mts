@@ -1,4 +1,4 @@
-import {defineConfig} from 'vitepress'
+import { defineConfig } from 'vitepress'
 import taskLists from 'markdown-it-task-lists'
 
 // https://vitepress.dev/reference/site-config
@@ -16,41 +16,44 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      {text: '简介', link: '/guide'},
-      {text: '示例', link: '/examples'}
+      { text: '简介', link: '/guide' },
+      { text: '示例', link: '/examples' }
     ],
-
     sidebar: [
       {
         text: '简介',
         collapsed: false,
         items: [
-          {text: 'LagrangeGo', link: '/guide'}
+          { text: 'LagrangeGo', link: '/guide' }
         ]
+      },
+      {
+        text: '快速开始',
+        collapsed: false,
+        link: '/quickstart'
       },
       {
         text: '示例',
         collapsed: false,
         items: [
-          {text: '使用项目示例', link: '/examples'},
-          {text: '创建bot实例', link: '/examples/createClient'},
-          {text: '登录', link: '/examples/login'},
-          {text: '事件', link: '/examples/event'},
+          { text: '使用项目示例', link: '/examples' },
+          { text: '创建bot实例', link: '/examples/createClient' },
+          { text: '登录', link: '/examples/login' },
+          { text: '事件', link: '/examples/event' }
         ]
       },
       {
         text: 'api',
         collapsed: true,
         items: [
-          {text: 'AppInfo', link: '/api/appInfo'},
-          {text: 'DeviceInfo', link: '/api/deviceInfo'},
-          {text: 'SigInfo', link: '/api/sigInfo'},
+          { text: 'AppInfo', link: '/api/appInfo' },
+          { text: 'DeviceInfo', link: '/api/deviceInfo' },
+          { text: 'SigInfo', link: '/api/sigInfo' }
         ]
       }
     ],
-
     socialLinks: [
-      {icon: 'github', link: 'https://github.com/LagrangeDev/LagrangeGo'}
+      { icon: 'github', link: 'https://github.com/LagrangeDev/LagrangeGo' }
     ],
     outline: {
       label: '目录'
