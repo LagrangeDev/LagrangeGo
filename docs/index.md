@@ -15,8 +15,8 @@ hero:
       link: /guide
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: 简介
+    details: LagrangeGo 是一个实现 NTQQ 协议的 Go 语言 SDK。该项目基于 Lagrange.Core、lagrange-python 和 MiraiGo 进行移植，旨在提供一个高效稳定的 NTQQ 协议实现。
   - title: Feature B
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
   - title: Feature C
