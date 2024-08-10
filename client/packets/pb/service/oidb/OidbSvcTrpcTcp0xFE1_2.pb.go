@@ -14,6 +14,12 @@ type OidbSvcTrpcTcp0XFE1_2 struct {
 	Keys   []*OidbSvcTrpcTcp0XFE1_2Key `protobuf:"bytes,3,rep"`
 }
 
+type OidbSvcTrpcTcp0XFE1_2Uin struct {
+	Uin    uint32                      `protobuf:"varint,1,opt"`
+	Field2 uint32                      `protobuf:"varint,2,opt"`
+	Keys   []*OidbSvcTrpcTcp0XFE1_2Key `protobuf:"bytes,3,rep"`
+}
+
 type OidbSvcTrpcTcp0XFE1_2Key struct {
 	Key uint32 `protobuf:"varint,1,opt"`
 	_   [0]func()
@@ -25,7 +31,7 @@ type OidbSvcTrpcTcp0XFE1_2Response struct {
 }
 
 type OidbSvcTrpcTcp0XFE1_2ResponseBody struct {
-	Uid        string                                 `protobuf:"bytes,1,opt"`
+	// string Uid = 1;
 	Properties *OidbSvcTrpcTcp0XFE1_2ResponseProperty `protobuf:"bytes,2,opt"`
 	Uin        uint32                                 `protobuf:"varint,3,opt"`
 	_          [0]func()

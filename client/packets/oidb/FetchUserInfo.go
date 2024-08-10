@@ -6,18 +6,29 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 )
 
-func BuildFetchUserInfoReq(uid string) (*OidbPacket, error) {
+func BuildFetchUserInfoReq[T ~string | ~uint32](value T) (*OidbPacket, error) {
 	keys := []uint32{20002, 27394, 20009, 20031, 101, 103, 102, 20022, 20023, 20024, 24002, 27037, 27049, 20011, 20016, 20021, 20003, 20004, 20005, 20006, 20020, 20026, 24007, 104, 105, 42432, 42362, 41756, 41757, 42257, 27372, 42315, 107, 45160, 45161, 27406, 62026, 20037}
 	keyList := make([]*oidb.OidbSvcTrpcTcp0XFE1_2Key, len(keys))
 	for i, key := range keys {
 		keyList[i] = &oidb.OidbSvcTrpcTcp0XFE1_2Key{Key: key}
 	}
-	body := oidb.OidbSvcTrpcTcp0XFE1_2{
-		Uid:    proto.Some(uid),
-		Field2: 0,
-		Keys:   keyList,
+	var body any
+	if v, ok := any(value).(string); ok {
+		body = &oidb.OidbSvcTrpcTcp0XFE1_2{
+			Uid:    proto.Some(v),
+			Field2: 0,
+			Keys:   keyList,
+		}
+		return BuildOidbPacket(0xFE1, 2, body.(*oidb.OidbSvcTrpcTcp0XFE1_2), false, false)
+	} else if v, ok := any(value).(uint32); ok {
+		body = &oidb.OidbSvcTrpcTcp0XFE1_2Uin{
+			Uin:    v,
+			Field2: 0,
+			Keys:   keyList,
+		}
+		return BuildOidbPacket(0xFE1, 2, body.(*oidb.OidbSvcTrpcTcp0XFE1_2Uin), false, true)
 	}
-	return BuildOidbPacket(0xFE1, 2, &body, false, false)
+	return nil, nil
 }
 
 func ParseFetchUserInfoResp(data []byte) (*entity.Friend, error) {
@@ -35,8 +46,8 @@ func ParseFetchUserInfoResp(data []byte) (*entity.Friend, error) {
 		return ""
 	}()
 	return &entity.Friend{
-		Uin:      resp.Body.Uin,
-		Uid:      resp.Body.Uid,
+		Uin: resp.Body.Uin,
+		//Uid:      resp.Body.Uid,
 		Nickname: nickName,
 	}, nil
 }

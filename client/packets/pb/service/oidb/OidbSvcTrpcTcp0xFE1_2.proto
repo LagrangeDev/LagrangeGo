@@ -11,6 +11,12 @@ message OidbSvcTrpcTcp0xFE1_2 {
   repeated OidbSvcTrpcTcp0xFE1_2Key Keys = 3;
 }
 
+message OidbSvcTrpcTcp0xFE1_2Uin {
+  uint32 Uin = 1;
+  uint32 Field2 = 2;
+  repeated OidbSvcTrpcTcp0xFE1_2Key Keys = 3;
+}
+
 message OidbSvcTrpcTcp0xFE1_2Key {
   uint32 Key = 1;
 }
@@ -20,7 +26,7 @@ message OidbSvcTrpcTcp0xFE1_2Response {
 }
 
 message OidbSvcTrpcTcp0xFE1_2ResponseBody {
-  string Uid = 1;
+  //  string Uid = 1;
   OidbSvcTrpcTcp0xFE1_2ResponseProperty Properties = 2;
   uint32 Uin = 3;
 }
