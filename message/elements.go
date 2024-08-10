@@ -179,12 +179,12 @@ func NewStreamRecord(r io.ReadSeeker, Summary ...string) *VoiceElement {
 	}
 }
 
-func NewFileRecord(path string, Summary ...string) (*ImageElement, error) {
+func NewFileRecord(path string, Summary ...string) (*VoiceElement, error) {
 	voice, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamImage(voice, Summary...), nil
+	return NewStreamRecord(voice, Summary...), nil
 }
 
 func NewImage(data []byte, Summary ...string) *ImageElement {
