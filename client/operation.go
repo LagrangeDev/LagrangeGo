@@ -351,6 +351,7 @@ func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
 	return oidb2.ParseFetchUserInfoResp(resp)
 }
 
+// FetchUserInfoUin 通过uin获取用户信息
 func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uin)
 	if err != nil {
@@ -391,7 +392,6 @@ func (c *QQClient) SetGroupRequest(accept bool, sequence uint64, typ uint32, gro
 
 // SetFriendRequest 处理好友请求
 func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
-	// 构造好友请求处理的数据包
 	pkt, err := oidb2.BuildSetFriendRequest(accept, targetUid)
 	if err != nil {
 		return err
@@ -400,5 +400,5 @@ func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseSetGroupRequestResp(resp)
+	return oidb2.ParseSetFriendRequestResp(resp)
 }
