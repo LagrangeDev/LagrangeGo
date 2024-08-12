@@ -269,12 +269,18 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 				continue
 			}
 			index := extra.MsgInfoBody[0].Index
+			summary := "[图片]"
+			if extra.ExtBizInfo.Pic.TextSummary != "" {
+				summary = extra.ExtBizInfo.Pic.TextSummary
+			}
 			res = append(res, &ImageElement{
-				Width:   index.Info.Width,
-				Height:  index.Info.Height,
-				ImageId: index.Info.FileName,
-				Size:    index.Info.FileSize,
-				MsgInfo: extra,
+				ImageType: int32(extra.ExtBizInfo.Pic.BizType),
+				Summary:   summary,
+				Width:     index.Info.Width,
+				Height:    index.Info.Height,
+				ImageId:   index.Info.FileName,
+				Size:      index.Info.FileSize,
+				MsgInfo:   extra,
 			})
 		}
 
