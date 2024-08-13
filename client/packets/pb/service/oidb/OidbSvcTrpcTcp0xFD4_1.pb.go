@@ -5,12 +5,18 @@ package oidb
 
 // Fetch Friends List
 type OidbSvcTrpcTcp0XFD4_1 struct {
-	Field2     uint32                       `protobuf:"varint,2,opt"` // 300
+	Field2     uint32                       `protobuf:"varint,2,opt"` // page count, 300
 	Field4     uint32                       `protobuf:"varint,4,opt"` // 0
+	NextUin    *OidbSvcTrpcTcp0XFD4_1Uin    `protobuf:"bytes,5,opt"`
 	Field6     uint32                       `protobuf:"varint,6,opt"` // 1
 	Body       []*OidbSvcTrpcTcp0XFD4_1Body `protobuf:"bytes,10001,rep"`
 	Field10002 []uint32                     `protobuf:"varint,10002,rep"` // [13578, 13579, 13573, 13572, 13568]
 	Field10003 uint32                       `protobuf:"varint,10003,opt"`
+}
+
+type OidbSvcTrpcTcp0XFD4_1Uin struct {
+	Uin uint32 `protobuf:"varint,1,opt"`
+	_   [0]func()
 }
 
 type OidbSvcTrpcTcp0XFD4_1Body struct {
@@ -20,8 +26,9 @@ type OidbSvcTrpcTcp0XFD4_1Body struct {
 }
 
 type OidbSvcTrpcTcp0XFD4_1Response struct {
-	DisplayFriendCount uint32        `protobuf:"varint,3,opt"`
-	Timestamp          uint32        `protobuf:"varint,6,opt"`
-	SelfUin            uint32        `protobuf:"varint,7,opt"`
-	Friends            []*OidbFriend `protobuf:"bytes,101,rep"`
+	Next               *OidbSvcTrpcTcp0XFD4_1Uin `protobuf:"bytes,2,opt"`
+	DisplayFriendCount uint32                    `protobuf:"varint,3,opt"`
+	Timestamp          uint32                    `protobuf:"varint,6,opt"`
+	SelfUin            uint32                    `protobuf:"varint,7,opt"`
+	Friends            []*OidbFriend             `protobuf:"bytes,101,rep"`
 }
