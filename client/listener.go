@@ -184,7 +184,13 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			c.NewFriendRequestEvent.dispatch(c, eventConverter.ParseFriendRequestNotice(&pb, &msg))
+			ev := eventConverter.ParseFriendRequestNotice(&pb)
+			user, _ := c.FetchUserInfo(ev.SourceUid)
+			if user != nil {
+				ev.SourceUin = user.Uin
+				ev.SourceNick = user.Nickname
+			}
+			c.NewFriendRequestEvent.dispatch(c, ev)
 			return nil, nil
 		case 138: // friend recall
 			pb := message.FriendRecall{}

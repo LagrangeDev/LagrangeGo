@@ -9,10 +9,11 @@ import (
 
 type (
 	NewFriendRequest struct {
-		SourceUin uint32
-		SourceUid string
-		Msg       string
-		Source    string
+		SourceUin  uint32
+		SourceUid  string
+		SourceNick string
+		Msg        string
+		Source     string
 	}
 
 	FriendRecall struct {
@@ -39,10 +40,9 @@ type (
 	}
 )
 
-func ParseFriendRequestNotice(event *message.FriendRequest, msg *message.PushMsg) *NewFriendRequest {
+func ParseFriendRequestNotice(event *message.FriendRequest) *NewFriendRequest {
 	info := event.Info
 	return &NewFriendRequest{
-		SourceUin: msg.Message.ResponseHead.FromUin,
 		SourceUid: info.SourceUid,
 		Msg:       info.Message,
 		Source:    info.Source,
