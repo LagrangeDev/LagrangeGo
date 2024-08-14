@@ -284,6 +284,22 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 			})
 		}
 
+		if elem.TransElem != nil && elem.TransElem.ElemType == 24 {
+			payload := binary.NewReader(elem.TransElem.ElemValue)
+			payload.SkipBytes(1)
+			data := payload.ReadBytesWithLength("u16", false)
+			extra := message.GroupFileExtra{}
+			if err := proto.Unmarshal(data, &extra); err != nil {
+				continue
+			}
+			res = append(res, &FileElement{
+				FileSize: extra.Inner.Info.FileSize,
+				FileMd5:  []byte(extra.Inner.Info.FileMd5),
+				FileId:   extra.Inner.Info.FileId,
+				FileName: extra.Inner.Info.FileName,
+			})
+		}
+
 		if elem.LightAppElem != nil && len(elem.LightAppElem.Data) > 1 {
 			var content []byte
 			if elem.LightAppElem.Data[0] == 0 {

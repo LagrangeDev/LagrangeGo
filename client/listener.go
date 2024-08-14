@@ -333,6 +333,9 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) e
 		case *msgConverter.VoiceElement:
 			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
 			e.Url = url
+		case *msgConverter.FileElement:
+			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileId)
+			e.FileUrl = url
 		}
 	}
 	return nil
