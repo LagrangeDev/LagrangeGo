@@ -7,14 +7,17 @@ import (
 )
 
 // BuildFetchFriendsReq OidbSvcTrpcTcp.0xfd4_1
-func BuildFetchFriendsReq() (*OidbPacket, error) {
+func BuildFetchFriendsReq(token uint32) (*OidbPacket, error) {
 	body := oidb.OidbSvcTrpcTcp0XFD4_1{
 		Field2: 300,
 		Field4: 0,
+		NextUin: &oidb.OidbSvcTrpcTcp0XFD4_1Uin{
+			Uin: token,
+		},
 		Field6: 1,
 		Body: []*oidb.OidbSvcTrpcTcp0XFD4_1Body{{
 			Type:   1,
-			Number: &oidb.OidbNumber{Numbers: []uint32{103, 102, 20002}},
+			Number: &oidb.OidbNumber{Numbers: []uint32{103, 102, 20002, 27394}},
 		}, {
 			Type:   4,
 			Number: &oidb.OidbNumber{Numbers: []uint32{100, 101, 102}},
@@ -31,10 +34,16 @@ func BuildFetchFriendsReq() (*OidbPacket, error) {
 	return BuildOidbPacket(0xFD4, 1, &body, false, false)
 }
 
-func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
+func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, uint32, error) {
 	var resp oidb.OidbSvcTrpcTcp0XFD4_1Response
+	var next uint32
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+	if resp.Next == nil {
+		next = 0
+	} else {
+		next = resp.Next.Uin
 	}
 	friends := make([]*entity.Friend, len(resp.Friends))
 	interner := utils.NewStringInterner()
@@ -50,7 +59,7 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, error) {
 			Avatar:       interner.Intern(entity.FriendAvatar(raw.Uin)),
 		}
 	}
-	return friends, nil
+	return friends, next, nil
 }
 
 func getFirstFriendAdditionalTypeEqualTo1(additionals []*oidb.OidbFriendAdditional) *oidb.OidbFriendAdditional {

@@ -6,12 +6,17 @@ import "pb/service/oidb/generics.proto";
 
 // Fetch Friends List
 message OidbSvcTrpcTcp0xFD4_1 {
-  uint32 Field2 = 2; // 300
+  uint32 Field2 = 2; // page count, 300
   uint32 Field4 = 4; // 0
+  OidbSvcTrpcTcp0xFD4_1Uin NextUin = 5;
   uint32 Field6 = 6; // 1
   repeated OidbSvcTrpcTcp0xFD4_1Body Body = 10001;
   repeated uint32 Field10002 = 10002; // [13578, 13579, 13573, 13572, 13568]
   uint32 Field10003 = 10003;
+}
+
+message OidbSvcTrpcTcp0xFD4_1Uin {
+  uint32 Uin = 1;
 }
 
 message OidbSvcTrpcTcp0xFD4_1Body {
@@ -20,6 +25,7 @@ message OidbSvcTrpcTcp0xFD4_1Body {
 }
 
 message OidbSvcTrpcTcp0xFD4_1Response {
+  OidbSvcTrpcTcp0xFD4_1Uin Next = 2;
   uint32 DisplayFriendCount = 3;
   uint32 Timestamp = 6;
   uint32 SelfUin = 7;

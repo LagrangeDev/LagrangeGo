@@ -12,21 +12,21 @@ import (
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 )
 
-// FetchFriends 获取好友列表信息
-func (c *QQClient) FetchFriends() ([]*entity.Friend, error) {
-	pkt, err := oidb2.BuildFetchFriendsReq()
+// FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
+func (c *QQClient) FetchFriends(token uint32) ([]*entity.Friend, uint32, error) {
+	pkt, err := oidb2.BuildFetchFriendsReq(token)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	friends, err := oidb2.ParseFetchFriendsResp(resp)
+	friends, token, err := oidb2.ParseFetchFriendsResp(resp)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return friends, nil
+	return friends, token, nil
 }
 
 // FetchGroups 获取所有已加入的群的信息
