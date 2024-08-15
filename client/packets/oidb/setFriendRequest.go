@@ -6,12 +6,11 @@ import (
 )
 
 func BuildSetFriendRequest(accept bool, targetUid string) (*OidbPacket, error) {
-	result := utils.Ternary[uint32](accept, 3, 5)
-	packet := oidb.OidbSvcTrpcTcp0XB5D_44{
-		Accept:    result, //utils.Bool2Uint32(accept, 3, 5),
+	body := oidb.OidbSvcTrpcTcp0XB5D_44{
+		Accept:    utils.Ternary[uint32](accept, 3, 5),
 		TargetUid: targetUid,
 	}
-	return BuildOidbPacket(0xb5d, 44, packet, false, false)
+	return BuildOidbPacket(0xb5d, 44, &body, false, false)
 }
 
 func ParseSetFriendRequestResp(data []byte) error {
