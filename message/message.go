@@ -345,6 +345,21 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 				})
 			}
 		}
+		if body.MsgContent != nil {
+			extra := message.FileExtra{}
+			if err := proto.Unmarshal(body.MsgContent, &extra); err != nil {
+				return res
+			}
+			if extra.File.FileSize.IsSome() && extra.File.FileName.IsSome() && extra.File.FileMd5 != nil && extra.File.FileUuid.IsSome() && extra.File.FileHash.IsSome() {
+				res = append(res, &FileElement{
+					FileSize: uint64(extra.File.FileSize.Unwrap()),
+					FileName: extra.File.FileName.Unwrap(),
+					FileMd5:  extra.File.FileMd5,
+					FileUUID: extra.File.FileUuid.Unwrap(),
+					FileHash: extra.File.FileHash.Unwrap(),
+				})
+			}
+		}
 	}
 	return res
 }
