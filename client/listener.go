@@ -38,7 +38,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		return nil, errors.New("message body is empty")
 	}
 	switch typ {
-	case 166, 208: // 166 for private msg, 208 for private record
+	case 166, 208, 529: // 166 for private msg, 208 for private record, 529 for private file
 		prvMsg := msgConverter.ParsePrivateMessage(&msg)
 		_ = c.PreprocessPrivateMessageEvent(prvMsg)
 		if prvMsg.Sender.Uin != c.Uin {
@@ -333,6 +333,9 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) e
 		case *msgConverter.VoiceElement:
 			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
 			e.Url = url
+		case *msgConverter.FileElement:
+			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileId)
+			e.FileUrl = url
 		}
 	}
 	return nil
@@ -356,6 +359,12 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 				return err
 			}
 			e.Url = url
+		case *msgConverter.FileElement:
+			url, err := c.GetPrivateFileUrl(e.FileUUID, e.FileHash)
+			if err != nil {
+				return err
+			}
+			e.FileUrl = url
 		}
 	}
 	return nil

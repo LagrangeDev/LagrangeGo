@@ -85,6 +85,20 @@ type (
 		CompatImage *message.NotOnlineImage // FriendImage
 	}
 
+	FileElement struct {
+		FileSize uint64
+		FileName string
+		FileMd5  []byte
+		FileUrl  string
+		FileId   string
+		FileUUID string
+		FileHash string
+
+		// send
+		FileStream io.ReadSeeker
+		FileSha1   []byte
+	}
+
 	ShortVideoElement struct {
 		Name      string
 		Uuid      []byte
@@ -257,6 +271,8 @@ func (e *VoiceElement) Type() ElementType {
 func (e *ImageElement) Type() ElementType {
 	return Image
 }
+
+func (e *FileElement) Type() ElementType { return File }
 
 func (e *ShortVideoElement) Type() ElementType {
 	return Video

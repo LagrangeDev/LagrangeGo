@@ -338,6 +338,30 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
+func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, error) {
+	pkt, err := oidb2.BuildGroupFSDownloadReq(groupUin, fileID)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParseGroupFSDownloadResp(resp)
+}
+
+func (c *QQClient) GetPrivateFileUrl(fileUUID string, fileHash string) (string, error) {
+	pkt, err := oidb2.BuildPrivateFileDownloadReq(c.GetUid(c.Uin), fileUUID, fileHash)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParsePrivateFileDownloadResp(resp)
+}
+
 // FetchUserInfo 获取用户信息
 func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uid)
