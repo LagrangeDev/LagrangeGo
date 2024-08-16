@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/hex"
 	"errors"
-	"fmt"
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 	message2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -269,7 +268,6 @@ func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf(hex.EncodeToString(req.Data))
 	resp, err := c.sendOidbPacketAndWait(req)
 	if err != nil {
 		return nil, err
