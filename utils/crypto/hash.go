@@ -37,6 +37,17 @@ func ComputeMd5AndLength(r io.ReadSeeker) ([]byte, uint32) {
 	return h.Sum(nil), uint32(length)
 }
 
+func ComputeMd5AndLengthWithLimit(r io.ReadSeeker, limit int64) ([]byte, uint32) {
+	_, _ = r.Seek(0, io.SeekStart)
+	defer func(r io.ReadSeeker, offset int64, whence int) {
+		_, _ = r.Seek(offset, whence)
+	}(r, 0, io.SeekStart)
+	h := md5.New()
+	lr := io.LimitedReader{R: r, N: limit}
+	length, _ := io.Copy(h, &lr)
+	return h.Sum(nil), uint32(length)
+}
+
 func ComputeSha1AndLength(r io.ReadSeeker) ([]byte, uint32) {
 	_, _ = r.Seek(0, io.SeekStart)
 	defer func(r io.ReadSeeker, offset int64, whence int) {

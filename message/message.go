@@ -4,10 +4,9 @@ package message
 
 import (
 	"encoding/xml"
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"reflect"
 	"strings"
-
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
@@ -452,9 +451,25 @@ func (msg *SendingMessage) FirstOrNil(f func(element IMessageElement) bool) IMes
 	return nil
 }
 
+func ElementsHasType(elems []IMessageElement, t ElementType) bool {
+	for _, elem := range elems {
+		if elem.Type() == t {
+			return true
+		}
+	}
+	return false
+}
+
 func PackElementsToBody(msgElems []IMessageElement) (msgBody *message.MessageBody) {
 	msgBody = &message.MessageBody{
 		RichText: &message.RichText{Elems: PackElements(msgElems)},
+	}
+	for _, elem := range msgElems {
+		bd, ok := elem.(MsgContentBuilder)
+		if !ok {
+			continue
+		}
+		msgBody.MsgContent = bd.BuildContent()
 	}
 	return
 }

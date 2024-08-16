@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/LagrangeDev/LagrangeGo/utils/audio"
@@ -90,8 +91,8 @@ type (
 		FileName string
 		FileMd5  []byte
 		FileUrl  string
-		FileId   string
-		FileUUID string
+		FileId   string // group
+		FileUUID string // private
 		FileHash string
 
 		// send
@@ -226,6 +227,29 @@ func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
 		return nil, err
 	}
 	return NewStreamImage(img, Summary...), nil
+}
+
+func NewFile(data []byte, fileName string) *FileElement {
+	return NewStreamFile(bytes.NewReader(data), fileName)
+}
+
+func NewStreamFile(r io.ReadSeeker, fileName string) *FileElement {
+	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
+	return &FileElement{
+		FileName:   fileName,
+		FileSize:   length,
+		FileStream: r,
+		FileMd5:    md5,
+		FileSha1:   sha1,
+	}
+}
+
+func NewLocalFile(path string) *FileElement {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	return NewStreamFile(file, filepath.Base(file.Name()))
 }
 
 func NewLightApp(content string) *LightAppElement {

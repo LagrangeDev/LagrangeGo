@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"errors"
-
+	"fmt"
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 	message2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -259,4 +259,75 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	record.MsgInfo = uploadResp.Upload.MsgInfo
 	record.Compat = uploadResp.Upload.CompatQMsg
 	return record, nil
+}
+
+func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement) (*message.FileElement, error) {
+	if file == nil || file.FileStream == nil {
+		return nil, errors.New("element type is not file")
+	}
+	req, err := oidb.BuildPrivateFileUploadReq(c.GetUid(c.Uin), targetUid, file)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf(hex.EncodeToString(req.Data))
+	resp, err := c.sendOidbPacketAndWait(req)
+	if err != nil {
+		return nil, err
+	}
+	uploadResp, err := oidb.ParsePrivateFileUploadResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	if !uploadResp.Upload.BoolFileExist {
+		ext := &highway.FileUploadExt{
+			Unknown1: 100,
+			Unknown2: 1,
+			Entry: &highway.FileUploadEntry{
+				BusiBuff: &highway.ExcitingBusiInfo{
+					SenderUin: uint64(c.Uin),
+				},
+				FileEntry: &highway.ExcitingFileEntry{
+					FileSize:  file.FileSize,
+					Md5:       file.FileMd5,
+					CheckKey:  file.FileSha1,
+					Md5S2:     file.FileMd5,
+					FileId:    uploadResp.Upload.Uuid,
+					UploadKey: uploadResp.Upload.MediaPlatformUploadKey,
+				},
+				ClientInfo: &highway.ExcitingClientInfo{
+					ClientType:   3,
+					AppId:        "100",
+					TerminalType: 3,
+					ClientVer:    "1.1.1",
+					Unknown:      4,
+				},
+				FileNameInfo: &highway.ExcitingFileNameInfo{
+					FileName: file.FileName,
+				},
+				Host: &highway.ExcitingHostConfig{
+					Hosts: []*highway.ExcitingHostInfo{
+						{
+							Url: &highway.ExcitingUrlInfo{
+								Unknown: 1,
+								Host:    uploadResp.Upload.UploadIp,
+							},
+							Port: uploadResp.Upload.UploadPort,
+						},
+					},
+				},
+			},
+			Unknown200: 1,
+			Unknown3:   0,
+		}
+		extStream, err := proto.Marshal(ext)
+		if err != nil {
+			return nil, err
+		}
+		if err = c.highwayUpload(95, file.FileStream, file.FileSize, file.FileMd5, extStream); err != nil {
+			return nil, err
+		}
+		file.FileHash = uploadResp.Upload.FileAddon
+		file.FileUUID = uploadResp.Upload.Uuid
+	}
+	return file, nil
 }
