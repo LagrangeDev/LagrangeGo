@@ -324,9 +324,9 @@ func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement
 		if err = c.highwayUpload(95, file.FileStream, file.FileSize, file.FileMd5, extStream); err != nil {
 			return nil, err
 		}
-		file.FileHash = uploadResp.Upload.FileAddon
-		file.FileUUID = uploadResp.Upload.Uuid
 	}
+	file.FileHash = uploadResp.Upload.FileAddon
+	file.FileUUID = uploadResp.Upload.Uuid
 	return file, nil
 }
 
@@ -395,17 +395,17 @@ func (c *QQClient) FileUploadGroup(groupUin uint32, file *message.FileElement) (
 		if err = c.highwayUpload(71, file.FileStream, file.FileSize, file.FileMd5, extStream); err != nil {
 			return nil, err
 		}
-		req, err := oidb.BuildGroupSendFileReq(groupUin, uploadResp.Upload.FileId)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.sendOidbPacketAndWait(req)
-		if err != nil {
-			return nil, err
-		}
-		if _, err = oidb.ParseGroupSendFileResp(resp); err != nil {
-			return nil, err
-		}
+	}
+	req, err = oidb.BuildGroupSendFileReq(groupUin, uploadResp.Upload.FileId)
+	if err != nil {
+		return nil, err
+	}
+	resp, err = c.sendOidbPacketAndWait(req)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = oidb.ParseGroupSendFileResp(resp); err != nil {
+		return nil, err
 	}
 	return file, nil
 }

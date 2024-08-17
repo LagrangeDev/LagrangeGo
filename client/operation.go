@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	message2 "github.com/LagrangeDev/LagrangeGo/message"
 )
 
 // FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
@@ -425,4 +427,41 @@ func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
 		return err
 	}
 	return oidb2.ParseSetFriendRequestResp(resp)
+}
+
+// UploadPrivateFile 上传私聊文件
+func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) error {
+	fileElement, err := message2.NewLocalFile(localFilePath)
+	if err != nil {
+		return err
+	}
+	uploadedFileElement, err := c.FileUploadPrivate(c.GetUid(targetUin), fileElement)
+	if err != nil {
+		return err
+	}
+	route := &message.RoutingHead{
+		Trans0X211: &message.Trans0X211{
+			CcCmd: proto.Uint32(4),
+			Uid:   proto.String(c.GetUid(targetUin)),
+		},
+	}
+	body := message2.PackElementsToBody([]message2.IMessageElement{uploadedFileElement})
+	mr := crypto.RandU32()
+	ret, err := c.SendRawMessage(route, body, mr)
+	if err != nil || ret.PrivateSequence == 0 {
+		return err
+	}
+	return nil
+}
+
+// UploadGroupFile 上传群文件
+func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error {
+	fileElement, err := message2.NewLocalFile(localFilePath)
+	if err != nil {
+		return err
+	}
+	if _, err = c.FileUploadGroup(groupUin, fileElement); err != nil {
+		return err
+	}
+	return nil
 }

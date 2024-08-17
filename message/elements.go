@@ -244,12 +244,12 @@ func NewStreamFile(r io.ReadSeeker, fileName string) *FileElement {
 	}
 }
 
-func NewLocalFile(path string) *FileElement {
+func NewLocalFile(path string) (*FileElement, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return NewStreamFile(file, filepath.Base(file.Name()))
+	return NewStreamFile(file, filepath.Base(file.Name())), nil
 }
 
 func NewLightApp(content string) *LightAppElement {

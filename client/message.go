@@ -22,7 +22,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 		Rand: proto.Some(random),
 	}
 	// grp_id not null
-	if !(route.Grp != nil && route.Grp.GroupCode.IsSome()) || (route.GrpTmp != nil && route.GrpTmp.GroupUin.IsSome()) {
+	if (route.Grp != nil && route.Grp.GroupCode.IsSome()) || (route.GrpTmp != nil && route.GrpTmp.GroupUin.IsSome()) {
 		msg.Ctrl = &message.MessageControl{MsgFlag: int32(utils.TimeStamp())}
 	}
 
@@ -84,16 +84,10 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 		elements = c.preProcessPrivateMessage(uin, elements)
 	}
 	body := message2.PackElementsToBody(elements)
-	route := &message.RoutingHead{}
-	if message2.ElementsHasType(elements, message2.File) {
-		route.Trans0X211 = &message.Trans0X211{
-			CcCmd: proto.Uint32(4),
-			Uid:   proto.String(c.GetUid(uin)),
-		}
-	} else {
-		route.C2C = &message.C2C{
+	route := &message.RoutingHead{
+		C2C: &message.C2C{
 			Uid: proto.Some(c.GetUid(uin)),
-		}
+		},
 	}
 	mr := crypto.RandU32()
 	ret, err := c.SendRawMessage(route, body, mr)
@@ -207,15 +201,6 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			}
 			if elem.MsgInfo == nil {
 				c.errorln("RecordUploadPrivate failed")
-			}
-		case *message2.FileElement:
-			targetUid := c.GetUid(targetUin)
-			_, err := c.FileUploadPrivate(targetUid, elem)
-			if err != nil {
-				c.errorln(err)
-			}
-			if elem.FileHash == "" && elem.FileUUID == "" {
-				c.errorln("FileUploadPrivate failed")
 			}
 		default:
 		}
