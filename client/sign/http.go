@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/client/http2"
+
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
@@ -142,7 +144,7 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 		req.Header.Set(k, v)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http2.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return fmt.Errorf("request timed out")
@@ -184,7 +186,7 @@ func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target inter
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http2.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return fmt.Errorf("request timed out")
