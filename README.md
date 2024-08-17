@@ -37,7 +37,7 @@ go get -u github.com/LagrangeDev/LagrangeGo
 - [x] 小程序(暂只支持RAW)
 - [ ] 短视频
 - [x] 合并转发
-- [ ] 群文件(上传与接收信息)
+- [x] 私聊文件&群文件(上传与接收信息)
 
 **事件**
 - [x] 好友消息
