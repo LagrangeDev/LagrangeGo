@@ -441,3 +441,16 @@ func (c *QQClient) FetchClientKey() (string, error) {
 	}
 	return oidb2.ParseFetchClientKeyResp(resp)
 }
+
+// FetchCookies 获取cooikes
+func (c *QQClient) FetchCookies(domains []string) ([]string, error) {
+	pkt, err := oidb2.BuildFetchCookieReq(domains)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseFetchCookieResp(resp)
+}
