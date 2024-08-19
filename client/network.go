@@ -248,7 +248,10 @@ func (c *QQClient) sendAndWaitDynamic(seq uint32, pkt []byte) ([]byte, error) {
 // SendSsoPacket
 // 发送签名回调包给服务器并获取返回结果供提交
 func (c *QQClient) SendSsoPacket(cmd string, body []byte) ([]byte, error) {
-	seq, data := c.uniPacket(cmd, body)
+	seq, data, err := c.uniPacket(cmd, body)
+	if err != nil {
+		return nil, err
+	}
 	return c.sendAndWaitDynamic(seq, data)
 }
 

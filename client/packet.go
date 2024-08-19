@@ -6,23 +6,11 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 )
 
-func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte) {
+func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte, error) {
 	seq := c.getAndIncreaseSequence()
-	var sign map[string]string
-	var err error
-	// todo: 实现自动选择sign
-	if len(c.signProvider) != 0 {
-		for _, signProvider := range c.signProvider {
-			sign, err = signProvider(command, seq, body, map[string]string{
-				"User-Agent": c.UA,
-			})
-			if err != nil {
-				continue
-			} else {
-				break
-			}
-		}
-
+	sign, err := c.signProvider.Sign(command, seq, body)
+	if err != nil {
+		return 0, nil, err
 	}
 	req := network.Request{
 		SequenceID:  seq,
@@ -31,5 +19,5 @@ func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte) {
 		CommandName: command,
 		Body:        body,
 	}
-	return seq, c.transport.PackPacket(&req)
+	return seq, c.transport.PackPacket(&req), nil
 }

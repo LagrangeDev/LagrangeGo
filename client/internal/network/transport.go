@@ -28,10 +28,11 @@ func (t *Transport) PackPacket(req *Request) []byte {
 	}
 
 	if req.Sign != nil {
+		sign := req.Sign.Value
 		head[24] = proto.DynamicMessage{
-			1: utils.MustParseHexStr(req.Sign["sign"]),
-			2: utils.MustParseHexStr(req.Sign["token"]),
-			3: utils.MustParseHexStr(req.Sign["extra"]),
+			1: utils.MustParseHexStr(sign.Sign),
+			2: utils.MustParseHexStr(sign.Token),
+			3: utils.MustParseHexStr(sign.Extra),
 		}
 	}
 

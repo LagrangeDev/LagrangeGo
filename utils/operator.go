@@ -51,3 +51,18 @@ func NewUUID() string {
 
 	return fmt.Sprintf("%08x-%04x-%04x-%04x-%12x", u[0:4], u[4:6], u[6:8], u[8:10], u[10:])
 }
+
+func Ternary[T any](condition bool, trueValue, falseValue T) T {
+	if condition {
+		return trueValue
+	}
+	return falseValue
+}
+
+func Map[T any, U any](list []T, mapper func(T) U) []U {
+	result := make([]U, len(list))
+	for i, v := range list {
+		result[i] = mapper(v)
+	}
+	return result
+}
