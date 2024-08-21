@@ -6,6 +6,7 @@ option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service
 message OidbSvcTrpcTcp0x6D6 {
   optional OidbSvcTrpcTcp0x6D6Upload File = 1;
   optional OidbSvcTrpcTcp0x6D6Download Download = 3;
+  optional OidbSvcTrpcTcp0x6D6Delete Delete = 4;
   optional OidbSvcTrpcTcp0x6D6Move Move = 6;
 }
 
@@ -29,6 +30,12 @@ message OidbSvcTrpcTcp0x6D6Download {
   uint32 AppId = 2; // 7
   uint32 BusId = 3; // 102
   string FileId = 4;
+}
+
+message OidbSvcTrpcTcp0x6D6Delete {
+  uint32 GroupUin = 1;
+  uint32 BusId = 3;
+  string FileId = 5;
 }
 
 message OidbSvcTrpcTcp0x6D6Move {

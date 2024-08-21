@@ -491,3 +491,15 @@ func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error 
 	}
 	return nil
 }
+
+func (c *QQClient) DeleteGroupFile(groupUin uint32, fileID string) error {
+	pkt, err := oidb2.BuildGroupFileDeleteReq(groupUin, fileID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFileDeleteResp(resp)
+}

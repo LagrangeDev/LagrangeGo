@@ -7,6 +7,7 @@ package oidb
 type OidbSvcTrpcTcp0X6D6 struct {
 	File     *OidbSvcTrpcTcp0X6D6Upload   `protobuf:"bytes,1,opt"`
 	Download *OidbSvcTrpcTcp0X6D6Download `protobuf:"bytes,3,opt"`
+	Delete   *OidbSvcTrpcTcp0X6D6Delete   `protobuf:"bytes,4,opt"`
 	Move     *OidbSvcTrpcTcp0X6D6Move     `protobuf:"bytes,6,opt"`
 	_        [0]func()
 }
@@ -31,6 +32,13 @@ type OidbSvcTrpcTcp0X6D6Download struct {
 	AppId    uint32 `protobuf:"varint,2,opt"` // 7
 	BusId    uint32 `protobuf:"varint,3,opt"` // 102
 	FileId   string `protobuf:"bytes,4,opt"`
+	_        [0]func()
+}
+
+type OidbSvcTrpcTcp0X6D6Delete struct {
+	GroupUin uint32 `protobuf:"varint,1,opt"`
+	BusId    uint32 `protobuf:"varint,3,opt"`
+	FileId   string `protobuf:"bytes,5,opt"`
 	_        [0]func()
 }
 
