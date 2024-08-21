@@ -41,7 +41,7 @@ func (c *QQClient) ensureHighwayServers() error {
 				continue
 			}
 			for _, addr := range info.ServerAddrs {
-				c.debugln("add highway server", binary.UInt32ToIPV4Address(addr.IP), "port", addr.Port)
+				c.debugln(fmt.Sprintf("add highway server %s:%d", binary.UInt32ToIPV4Address(addr.IP), addr.Port))
 				c.highwaySession.AppendAddr(addr.IP, addr.Port)
 			}
 		}

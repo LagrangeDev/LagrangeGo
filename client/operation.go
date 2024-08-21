@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	message2 "github.com/LagrangeDev/LagrangeGo/message"
 )
 
 // FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
@@ -338,7 +340,6 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
-// GetGroupFileUrl 获取群聊文件下载url
 func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, error) {
 	pkt, err := oidb2.BuildGroupFSDownloadReq(groupUin, fileID)
 	if err != nil {
@@ -351,7 +352,6 @@ func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, erro
 	return oidb2.ParseGroupFSDownloadResp(resp)
 }
 
-// GetPrivateFileUrl 获取私聊文件下载url
 func (c *QQClient) GetPrivateFileUrl(fileUUID string, fileHash string) (string, error) {
 	pkt, err := oidb2.BuildPrivateFileDownloadReq(c.GetUid(c.Uin), fileUUID, fileHash)
 	if err != nil {
@@ -453,4 +453,41 @@ func (c *QQClient) FetchCookies(domains []string) ([]string, error) {
 		return nil, err
 	}
 	return oidb2.ParseFetchCookieResp(resp)
+}
+
+// UploadPrivateFile 上传私聊文件
+func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) error {
+	fileElement, err := message2.NewLocalFile(localFilePath)
+	if err != nil {
+		return err
+	}
+	uploadedFileElement, err := c.FileUploadPrivate(c.GetUid(targetUin), fileElement)
+	if err != nil {
+		return err
+	}
+	route := &message.RoutingHead{
+		Trans0X211: &message.Trans0X211{
+			CcCmd: proto.Uint32(4),
+			Uid:   proto.String(c.GetUid(targetUin)),
+		},
+	}
+	body := message2.PackElementsToBody([]message2.IMessageElement{uploadedFileElement})
+	mr := crypto.RandU32()
+	ret, err := c.SendRawMessage(route, body, mr)
+	if err != nil || ret.PrivateSequence == 0 {
+		return err
+	}
+	return nil
+}
+
+// UploadGroupFile 上传群文件
+func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error {
+	fileElement, err := message2.NewLocalFile(localFilePath)
+	if err != nil {
+		return err
+	}
+	if _, err = c.FileUploadGroup(groupUin, fileElement); err != nil {
+		return err
+	}
+	return nil
 }

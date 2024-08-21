@@ -3,6 +3,7 @@ package message
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
@@ -183,4 +184,26 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 		return nil
 	}
 	return NewLightApp(utils.B2S(contentData)).BuildElement()
+}
+
+type MsgContentBuilder interface {
+	BuildContent() []byte
+}
+
+func (e *FileElement) BuildContent() []byte {
+	content, _ := proto.Marshal(
+		&message.FileExtra{
+			File: &message.NotOnlineFile{
+				FileSize:   proto.Int64(int64(e.FileSize)),
+				FileType:   proto.Int32(0),
+				FileUuid:   proto.String(e.FileUUID),
+				FileMd5:    e.FileMd5,
+				FileName:   proto.String(e.FileName),
+				Subcmd:     proto.Int32(1),
+				DangerEvel: proto.Int32(0),
+				ExpireTime: proto.Int32(int32(time.Now().Add(7 * 24 * time.Hour).Unix())),
+				FileHash:   proto.String(e.FileHash),
+			},
+		})
+	return content
 }
