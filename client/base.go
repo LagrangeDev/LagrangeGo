@@ -35,8 +35,8 @@ func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
 		alive: true,
 		UA:    "LagrangeGo qq/" + appInfo.PackageSign,
 	}
-	client.signProvider = sign.NewProviderURL(func(msg string) {
-		client.debugln(msg)
+	client.signProvider = sign.NewSignClient(appInfo, func(s string) {
+		client.debug(s)
 	}, signUrl...)
 	client.transport.Version = appInfo
 	client.transport.Sig.D2Key = make([]byte, 0, 16)
@@ -49,7 +49,7 @@ func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
 
 type QQClient struct {
 	Uin          uint32
-	signProvider []sign.Provider
+	signProvider sign.Provider
 
 	stat Statistics
 	once sync.Once
@@ -148,7 +148,10 @@ func (c *QQClient) sendOidbPacketAndWait(pkt *oidb.OidbPacket) ([]byte, error) {
 }
 
 func (c *QQClient) sendUniPacketAndWait(cmd string, buf []byte) ([]byte, error) {
-	seq, packet := c.uniPacket(cmd, buf)
+	seq, packet, err := c.uniPacket(cmd, buf)
+	if err != nil {
+		return nil, err
+	}
 	pkt, err := c.sendAndWait(seq, packet)
 	if err != nil {
 		return nil, err

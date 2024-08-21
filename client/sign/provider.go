@@ -1,3 +1,5 @@
 package sign
 
-type Provider func(string, uint32, []byte, map[string]string) (map[string]string, error)
+type Provider interface {
+	Sign(cmd string, seq uint32, data []byte) (*Response, error)
+}

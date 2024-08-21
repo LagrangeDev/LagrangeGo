@@ -429,6 +429,32 @@ func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
 	return oidb2.ParseSetFriendRequestResp(resp)
 }
 
+// FetchClientKey 获取ClientKey
+func (c *QQClient) FetchClientKey() (string, error) {
+	pkt, err := oidb2.BuildFetchClientKeyReq()
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParseFetchClientKeyResp(resp)
+}
+
+// FetchCookies 获取cooikes
+func (c *QQClient) FetchCookies(domains []string) ([]string, error) {
+	pkt, err := oidb2.BuildFetchCookieReq(domains)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseFetchCookieResp(resp)
+}
+
 // UploadPrivateFile 上传私聊文件
 func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) error {
 	fileElement, err := message2.NewLocalFile(localFilePath)

@@ -184,6 +184,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
+			if pb.Info == nil {
+				break
+			}
 			ev := eventConverter.ParseFriendRequestNotice(&pb)
 			user, _ := c.FetchUserInfo(ev.SourceUid)
 			if user != nil {

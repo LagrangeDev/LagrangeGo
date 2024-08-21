@@ -1,5 +1,7 @@
 package network
 
+import "github.com/LagrangeDev/LagrangeGo/client/sign"
+
 // from https://github.com/Mrs4s/MiraiGo/blob/master/client/internal/network/request.go
 
 type RequestType uint32
@@ -21,7 +23,7 @@ const (
 type Request struct {
 	SequenceID  uint32
 	Uin         int64
-	Sign        map[string]string
+	Sign        *sign.Response
 	CommandName string
 	Body        []byte
 }
