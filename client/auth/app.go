@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/hex"
+	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 )
@@ -126,13 +127,15 @@ type AppInfo struct {
 	SubSigmap        int    `json:"sub_sigmap"`
 	NTLoginType      int    `json:"nt_login_type"`
 
-	SignExtraHex string `json:"sign_extra_hex"`
+	SignExtraHexLower string `json:"sign_extra_hex_lower"`
+	SignExtraHexUpper string `json:"sign_extra_hex_upper"`
 }
 
 func init() {
 	for _, appOs := range AppList {
 		for _, app := range appOs {
-			app.SignExtraHex = hex.EncodeToString(proto.DynamicMessage{2: app.PackageSign}.Encode())
+			app.SignExtraHexLower = hex.EncodeToString(proto.DynamicMessage{2: app.PackageSign}.Encode())
+			app.SignExtraHexUpper = strings.ToUpper(app.SignExtraHexLower)
 		}
 	}
 }
