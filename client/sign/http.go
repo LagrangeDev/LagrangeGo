@@ -137,6 +137,7 @@ func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target inter
 			req.Header.Add(k, v)
 		}
 	}
+	req.Header.Add("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
