@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/log"
+
 	"github.com/RomiChan/syncx"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
@@ -65,7 +67,7 @@ type QQClient struct {
 	ConnectTime    time.Time
 	transport      network.Transport
 	oicq           *oicq.Codec
-	logger         Logger
+	logger         log.Logger
 	highwaySession highway.Session
 
 	// internal state
