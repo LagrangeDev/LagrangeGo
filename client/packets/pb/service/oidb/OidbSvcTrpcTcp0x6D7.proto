@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+message OidbSvcTrpcTcp0x6D7 {
+  optional OidbSvcTrpcTcp0x6D7Delete Delete = 2;
+}
+
+message OidbSvcTrpcTcp0x6D7Delete {
+  uint32 GroupUin = 1;
+  string FolderId = 3;
+}
+
+message OidbSvcTrpcTcp0x6D7Response {
+  OidbSvcTrpcTcp0x6D7_1Response Delete = 2;
+}
+
+message OidbSvcTrpcTcp0x6D7_1Response {
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
+}

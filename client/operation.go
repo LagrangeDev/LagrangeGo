@@ -503,3 +503,15 @@ func (c *QQClient) DeleteGroupFile(groupUin uint32, fileID string) error {
 	}
 	return oidb2.ParseGroupFileDeleteResp(resp)
 }
+
+func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
+	pkt, err := oidb2.BuildGroupFolderDeleteReq(groupUin, folderID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFolderDeleteResp(resp)
+}
