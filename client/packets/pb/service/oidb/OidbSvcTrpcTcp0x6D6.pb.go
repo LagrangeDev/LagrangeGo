@@ -55,6 +55,7 @@ type OidbSvcTrpcTcp0X6D6Move struct {
 type OidbSvcTrpcTcp0X6D6Response struct {
 	Upload   *OidbSvcTrpcTcp0X6D6_0Response `protobuf:"bytes,1,opt"`
 	Download *OidbSvcTrpcTcp0X6D6_2Response `protobuf:"bytes,3,opt"`
+	Delete   *OidbSvcTrpcTcp0X6D6_3Response `protobuf:"bytes,4,opt"`
 	_        [0]func()
 }
 
@@ -87,4 +88,11 @@ type OidbSvcTrpcTcp0X6D6_2Response struct {
 	CookieVal     []byte `protobuf:"bytes,10,opt"`
 	SaveFileName  string `protobuf:"bytes,11,opt"`
 	PreviewPort   uint32 `protobuf:"varint,12,opt"`
+}
+
+type OidbSvcTrpcTcp0X6D6_3Response struct {
+	RetCode       int32  `protobuf:"varint,1,opt"`
+	RetMsg        string `protobuf:"bytes,2,opt"`
+	ClientWording string `protobuf:"bytes,3,opt"`
+	_             [0]func()
 }

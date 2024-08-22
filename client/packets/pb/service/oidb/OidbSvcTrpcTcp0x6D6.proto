@@ -50,6 +50,7 @@ message OidbSvcTrpcTcp0x6D6Move {
 message OidbSvcTrpcTcp0x6D6Response {
   OidbSvcTrpcTcp0x6D6_0Response Upload = 1;
   OidbSvcTrpcTcp0x6D6_2Response Download = 3;
+  OidbSvcTrpcTcp0x6D6_3Response Delete = 4;
 }
 
 message OidbSvcTrpcTcp0x6D6_0Response {
@@ -81,4 +82,10 @@ message OidbSvcTrpcTcp0x6D6_2Response {
   bytes CookieVal = 10;
   string SaveFileName = 11;
   uint32 PreviewPort = 12;
+}
+
+message OidbSvcTrpcTcp0x6D6_3Response{
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
 }

@@ -1,6 +1,9 @@
 package oidb
 
-import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+import (
+	"errors"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+)
 
 func BuildGroupFileDeleteReq(groupUin uint32, fileID string) (*OidbPacket, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
@@ -14,5 +17,12 @@ func BuildGroupFileDeleteReq(groupUin uint32, fileID string) (*OidbPacket, error
 }
 
 func ParseGroupFileDeleteResp(data []byte) error {
-	return CheckError(data)
+	var resp oidb.OidbSvcTrpcTcp0X6D6Response
+	if _, err := ParseOidbPacket(data, &resp); err != nil {
+		return err
+	}
+	if resp.Delete.RetCode != 0 {
+		return errors.New(resp.Delete.ClientWording)
+	}
+	return nil
 }
