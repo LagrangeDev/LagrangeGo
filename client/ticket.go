@@ -3,11 +3,8 @@ package client
 import (
 	"fmt"
 	"net/http"
-	"net/http/cookiejar"
 	"net/url"
 	"time"
-
-	"golang.org/x/net/publicsuffix"
 
 	"github.com/RomiChan/syncx"
 )
@@ -21,27 +18,24 @@ type (
 	TicketService struct {
 		client *http.Client
 		psKeys syncx.Map[string, *keyInfo]
+		sKey   *keyInfo
+	}
+
+	Cookies struct {
+		uin   uint32
+		SKey  string
+		PsKey string
 	}
 )
 
-var (
-	sKey               = keyInfo{}
-	cookieContainer, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
-	ticketService      = &TicketService{
-		client: &http.Client{
-			Jar: cookieContainer,
-		},
-	}
-)
-
-func SendRequest(request *http.Request) (*http.Response, error) {
+func (c *QQClient) SendRequestWithCookie(request *http.Request) (*http.Response, error) {
 	// 应该不需要考虑cookie的问题
-	return ticketService.client.Do(request)
+	return c.ticket.client.Do(request)
 }
 
 func (c *QQClient) GetSkey() (string, error) {
-	if time.Now().Before(sKey.expireTime) {
-		return sKey.key, nil
+	if time.Now().Before(c.ticket.sKey.expireTime) {
+		return c.ticket.sKey.key, nil
 	}
 	clientKey, err := c.FetchClientKey()
 	if err != nil {
@@ -50,18 +44,18 @@ func (c *QQClient) GetSkey() (string, error) {
 	jump := "https%3A%2F%2Fh5.qzone.qq.com%2Fqqnt%2Fqzoneinpcqq%2Ffriend%3Frefresh%3D0%26clientuin%3D0%26darkMode%3D0&keyindex=19&random=2599"
 	u, _ := url.Parse(fmt.Sprintf("https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=%d&clientkey=%s&u1=%s",
 		c.Uin, clientKey, jump))
-	_, err = ticketService.client.Get(u.String())
+	_, err = c.ticket.client.Get(u.String())
 	if err != nil {
 		return "", err
 	}
-	for _, cookie := range cookieContainer.Cookies(u) {
+	for _, cookie := range c.ticket.client.Jar.Cookies(u) {
 		if cookie.Name == "skey" {
-			sKey.key = cookie.Value
-			sKey.expireTime = time.Now().Add(24 * time.Hour)
+			c.ticket.sKey.key = cookie.Value
+			c.ticket.sKey.expireTime = time.Now().Add(24 * time.Hour)
 			break
 		}
 	}
-	return sKey.key, nil
+	return c.ticket.sKey.key, nil
 }
 
 func (c *QQClient) GetCsrfToken() (int, error) {
@@ -77,20 +71,20 @@ func (c *QQClient) GetCsrfToken() (int, error) {
 	return hash & 2147483647, nil
 }
 
-func (c *QQClient) GetCookies(domain string) (string, error) {
+func (c *QQClient) GetCookies(domain string) (*Cookies, error) {
 	skey, err := c.GetSkey()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var token string
-	if tokenTime, ok := ticketService.psKeys.Load(domain); ok {
+	if tokenTime, ok := c.ticket.psKeys.Load(domain); ok {
 		if time.Now().Before(tokenTime.expireTime) {
 			cookies, err := c.FetchCookies([]string{domain})
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 			token = cookies[0]
-			ticketService.psKeys.Store(domain, &keyInfo{
+			c.ticket.psKeys.Store(domain, &keyInfo{
 				key:        token,
 				expireTime: time.Now().Add(24 * time.Hour),
 			})
@@ -100,13 +94,17 @@ func (c *QQClient) GetCookies(domain string) (string, error) {
 	} else {
 		cookies, err := c.FetchCookies([]string{domain})
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		token = cookies[0]
-		ticketService.psKeys.Store(domain, &keyInfo{
+		c.ticket.psKeys.Store(domain, &keyInfo{
 			key:        token,
 			expireTime: time.Now().Add(24 * time.Hour),
 		})
 	}
-	return fmt.Sprintf("p_uin=o%d; p_skey=%s; skey=%s; uin=o%d", c.Uin, token, skey, c.Uin), nil
+	return &Cookies{
+		uin:   c.Uin,
+		SKey:  skey,
+		PsKey: token,
+	}, nil
 }
