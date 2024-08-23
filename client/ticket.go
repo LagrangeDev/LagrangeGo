@@ -108,3 +108,12 @@ func (c *QQClient) GetCookies(domain string) (*Cookies, error) {
 		PsKey: token,
 	}, nil
 }
+
+func GTK(s string) int {
+	hash := 5381
+	for _, ch := range s {
+		hash += (hash<<5)&2147483647 + int(ch)&2147483647
+		hash &= 2147483647
+	}
+	return hash
+}
