@@ -505,6 +505,19 @@ func (c *QQClient) RenameGroupFile(groupUin uint32, fileID string, parentFolder 
 	return oidb2.ParseGroupFileRenameResp(resp)
 }
 
+// MoveGroupFile 移动群文件
+func (c *QQClient) MoveGroupFile(groupUin uint32, fileID string, parentFolder string, targetFolderID string) error {
+	pkt, err := oidb2.BuildGroupFileMoveReq(groupUin, fileID, parentFolder, targetFolderID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFileMoveResp(resp)
+}
+
 // DeleteGroupFile 删除群文件
 func (c *QQClient) DeleteGroupFile(groupUin uint32, fileID string) error {
 	pkt, err := oidb2.BuildGroupFileDeleteReq(groupUin, fileID)

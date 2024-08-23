@@ -59,8 +59,9 @@ message OidbSvcTrpcTcp0x6D6Move {
 message OidbSvcTrpcTcp0x6D6Response {
   OidbSvcTrpcTcp0x6D6_0Response Upload = 1;
   OidbSvcTrpcTcp0x6D6_2Response Download = 3;
-  OidbSvcTrpcTcp0x6D6_3_4Response Delete = 4;
-  OidbSvcTrpcTcp0x6D6_3_4Response Rename = 5;
+  OidbSvcTrpcTcp0x6D6_3_4_5Response Delete = 4;
+  OidbSvcTrpcTcp0x6D6_3_4_5Response Rename = 5;
+  OidbSvcTrpcTcp0x6D6_3_4_5Response Move = 6;
 }
 
 message OidbSvcTrpcTcp0x6D6_0Response {
@@ -94,7 +95,7 @@ message OidbSvcTrpcTcp0x6D6_2Response {
   uint32 PreviewPort = 12;
 }
 
-message OidbSvcTrpcTcp0x6D6_3_4Response{
+message OidbSvcTrpcTcp0x6D6_3_4_5Response{
   int32 RetCode = 1;
   string RetMsg = 2;
   string ClientWording = 3;
