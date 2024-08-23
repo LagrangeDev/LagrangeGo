@@ -492,6 +492,66 @@ func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error 
 	return nil
 }
 
+// ListGroupFilesByFolder 获取群目录指定文件夹列表
+func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory string) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
+	var startIndex uint32 = 0
+	var fileCount uint32 = 20
+	var files []*entity.GroupFile
+	var folders []*entity.GroupFolder
+	for {
+		pkt, err := oidb2.BuildGroupFileListReq(groupUin, targetDirectory, startIndex, fileCount)
+		if err != nil {
+			return files, folders, err
+		}
+		p, err := c.sendOidbPacketAndWait(pkt)
+		if err != nil {
+			return files, folders, err
+		}
+		res, err := oidb2.ParseGroupFileListResp(p)
+		if err != nil {
+			return files, folders, err
+		}
+		if res.List.IsEnd {
+			break
+		}
+		for _, fe := range res.List.Items {
+			if fe.FileInfo != nil {
+				files = append(files, &entity.GroupFile{
+					GroupUin:      groupUin,
+					FileId:        fe.FileInfo.FileId,
+					FileName:      fe.FileInfo.FileName,
+					BusId:         fe.FileInfo.BusId,
+					FileSize:      fe.FileInfo.FileSize,
+					UploadTime:    fe.FileInfo.UploadedTime,
+					DeadTime:      fe.FileInfo.ExpireTime,
+					ModifyTime:    fe.FileInfo.ModifiedTime,
+					DownloadTimes: fe.FileInfo.DownloadedTimes,
+					Uploader:      fe.FileInfo.UploaderUin,
+					UploaderName:  fe.FileInfo.UploaderName,
+				})
+			}
+			if fe.FolderInfo != nil {
+				folders = append(folders, &entity.GroupFolder{
+					GroupUin:       groupUin,
+					FolderId:       fe.FolderInfo.FolderId,
+					FolderName:     fe.FolderInfo.FolderName,
+					CreateTime:     fe.FolderInfo.CreateTime,
+					Creator:        fe.FolderInfo.CreatorUin,
+					CreatorName:    fe.FolderInfo.CreatorName,
+					TotalFileCount: fe.FolderInfo.TotalFileCount,
+				})
+			}
+		}
+		startIndex += fileCount
+	}
+	return files, folders, nil
+}
+
+// ListGroupRootFiles 获取群根目录文件列表
+func (c *QQClient) ListGroupRootFiles(groupUin uint32) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
+	return c.ListGroupFilesByFolder(groupUin, "/")
+}
+
 // RenameGroupFile 重命名群文件
 func (c *QQClient) RenameGroupFile(groupUin uint32, fileID string, parentFolder string, newFileName string) error {
 	pkt, err := oidb2.BuildGroupFileRenameReq(groupUin, fileID, parentFolder, newFileName)
