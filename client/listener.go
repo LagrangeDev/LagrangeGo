@@ -170,6 +170,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			for _, request := range requests {
 				if request.TargetUid == c.GetUid(c.Uin) && !request.Checked() {
 					ev.RequestSeq = request.Sequence
+					break
 				}
 			}
 		}
