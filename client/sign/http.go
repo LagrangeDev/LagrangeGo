@@ -165,7 +165,9 @@ func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target inter
 }
 
 type Response struct {
-	Value struct {
+	Platform string `json:"platform"`
+	Version  string `json:"version"`
+	Value    struct {
 		Sign  string `json:"sign"`
 		Extra string `json:"extra"`
 		Token string `json:"token"`
