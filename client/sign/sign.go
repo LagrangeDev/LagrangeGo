@@ -118,7 +118,7 @@ func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
 			if err != nil {
 				sign.status.Store(uint32(Down))
 				continue
-			} else if resp.Version != c.app.CurrentVersion || resp.Value.Extra != c.app.SignExtraHexLower || resp.Value.Extra != c.app.SignExtraHexUpper {
+			} else if resp.Version != c.app.CurrentVersion && resp.Value.Extra != c.app.SignExtraHexLower && resp.Value.Extra != c.app.SignExtraHexUpper {
 				return nil, VersionMismatchError
 			}
 			c.log(fmt.Sprintf("signed for [%s:%d](%dms)",
