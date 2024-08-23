@@ -16,7 +16,7 @@ func BuildSetGroupRequestReq(accept bool, sequence uint64, typ uint32, groupUin 
 			Message:   proto.Some(message),
 		},
 	}
-	return BuildOidbPacket(0x10C8, 1, body, false, false)
+	return BuildOidbPacket(0x10C8, 1, &body, false, false)
 }
 
 func ParseSetGroupRequestResp(data []byte) error {
