@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+message OidbSvcTrpcTcp0x6D7 {
+  optional OidbSvcTrpcTcp0x6D7Create Create = 1;
+  optional OidbSvcTrpcTcp0x6D7Delete Delete = 2;
+  optional OidbSvcTrpcTcp0x6D7Rename Rename = 3;
+}
+
+message OidbSvcTrpcTcp0x6D7Create{
+  uint32 GroupUin = 1;
+  string TargetDirectory = 3;
+  string FolderName = 4;
+}
+
+message OidbSvcTrpcTcp0x6D7Delete {
+  uint32 GroupUin = 1;
+  string FolderId = 3;
+}
+
+message OidbSvcTrpcTcp0x6D7Rename {
+  uint32 GroupUin = 1;
+  string FolderId = 3;
+  string NewFolderName = 4;
+}
+
+message OidbSvcTrpcTcp0x6D7Response {
+  OidbSvcTrpcTcp0x6D7_0Response Create = 1;
+  OidbSvcTrpcTcp0x6D7_1_2Response Delete = 2;
+  OidbSvcTrpcTcp0x6D7_1_2Response Rename = 3;
+}
+
+message OidbSvcTrpcTcp0x6D7_1_2Response {
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
+}
+
+message OidbSvcTrpcTcp0x6D7_0Response {
+  int32 RetCode = 1;
+  string RetMsg = 2;
+  string ClientWording = 3;
+  OidbSvcTrpcTcp0x6D7_0ResponseFolderInfo FolderInfo = 4;
+}
+
+message OidbSvcTrpcTcp0x6D7_0ResponseFolderInfo {
+  string FolderId = 1;
+  string FolderPath = 2;
+  string FolderName = 3;
+  uint32 Timestamp4 = 4;
+  uint32 Timestamp5 = 5;
+  uint32 OperatorUin6 = 6;
+  uint32 OperatorUin9 = 9;
+}

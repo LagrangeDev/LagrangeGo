@@ -7,6 +7,8 @@ package oidb
 type OidbSvcTrpcTcp0X6D6 struct {
 	File     *OidbSvcTrpcTcp0X6D6Upload   `protobuf:"bytes,1,opt"`
 	Download *OidbSvcTrpcTcp0X6D6Download `protobuf:"bytes,3,opt"`
+	Delete   *OidbSvcTrpcTcp0X6D6Delete   `protobuf:"bytes,4,opt"`
+	Rename   *OidbSvcTrpcTcp0X6D6Rename   `protobuf:"bytes,5,opt"`
 	Move     *OidbSvcTrpcTcp0X6D6Move     `protobuf:"bytes,6,opt"`
 	_        [0]func()
 }
@@ -34,6 +36,22 @@ type OidbSvcTrpcTcp0X6D6Download struct {
 	_        [0]func()
 }
 
+type OidbSvcTrpcTcp0X6D6Delete struct {
+	GroupUin uint32 `protobuf:"varint,1,opt"`
+	BusId    uint32 `protobuf:"varint,3,opt"`
+	FileId   string `protobuf:"bytes,5,opt"`
+	_        [0]func()
+}
+
+type OidbSvcTrpcTcp0X6D6Rename struct {
+	GroupUin     uint32 `protobuf:"varint,1,opt"`
+	BusId        uint32 `protobuf:"varint,3,opt"` // 102
+	FileId       string `protobuf:"bytes,4,opt"`
+	ParentFolder string `protobuf:"bytes,5,opt"`
+	NewFileName  string `protobuf:"bytes,6,opt"`
+	_            [0]func()
+}
+
 type OidbSvcTrpcTcp0X6D6Move struct {
 	GroupUin        uint32 `protobuf:"varint,1,opt"`
 	AppId           uint32 `protobuf:"varint,2,opt"` // 7
@@ -45,8 +63,11 @@ type OidbSvcTrpcTcp0X6D6Move struct {
 }
 
 type OidbSvcTrpcTcp0X6D6Response struct {
-	Upload   *OidbSvcTrpcTcp0X6D6_0Response `protobuf:"bytes,1,opt"`
-	Download *OidbSvcTrpcTcp0X6D6_2Response `protobuf:"bytes,3,opt"`
+	Upload   *OidbSvcTrpcTcp0X6D6_0Response     `protobuf:"bytes,1,opt"`
+	Download *OidbSvcTrpcTcp0X6D6_2Response     `protobuf:"bytes,3,opt"`
+	Delete   *OidbSvcTrpcTcp0X6D6_3_4_5Response `protobuf:"bytes,4,opt"`
+	Rename   *OidbSvcTrpcTcp0X6D6_3_4_5Response `protobuf:"bytes,5,opt"`
+	Move     *OidbSvcTrpcTcp0X6D6_3_4_5Response `protobuf:"bytes,6,opt"`
 	_        [0]func()
 }
 
@@ -79,4 +100,11 @@ type OidbSvcTrpcTcp0X6D6_2Response struct {
 	CookieVal     []byte `protobuf:"bytes,10,opt"`
 	SaveFileName  string `protobuf:"bytes,11,opt"`
 	PreviewPort   uint32 `protobuf:"varint,12,opt"`
+}
+
+type OidbSvcTrpcTcp0X6D6_3_4_5Response struct {
+	RetCode       int32  `protobuf:"varint,1,opt"`
+	RetMsg        string `protobuf:"bytes,2,opt"`
+	ClientWording string `protobuf:"bytes,3,opt"`
+	_             [0]func()
 }

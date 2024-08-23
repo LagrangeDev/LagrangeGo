@@ -491,3 +491,176 @@ func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error 
 	}
 	return nil
 }
+
+// GetGroupFileSystemInfo 获取群文件系统信息
+func (c *QQClient) GetGroupFileSystemInfo(groupUin uint32) (*entity.GroupFileSystemInfo, error) {
+	pkt, err := oidb2.BuildGroupFileCountReq(groupUin)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	fileCount, limitCount, err := oidb2.ParseGroupFileCountResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	pkt, err = oidb2.BuildGroupFileSpaceReq(groupUin)
+	if err != nil {
+		return nil, err
+	}
+	resp, err = c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	totalSpace, usedSpace, err := oidb2.ParseGroupFileSpaceResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &entity.GroupFileSystemInfo{
+		GroupUin:   groupUin,
+		FileCount:  fileCount,
+		LimitCount: limitCount,
+		TotalSpace: totalSpace,
+		UsedSpace:  usedSpace,
+	}, nil
+}
+
+// ListGroupFilesByFolder 获取群目录指定文件夹列表
+func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory string) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
+	var startIndex uint32 = 0
+	var fileCount uint32 = 20
+	var files []*entity.GroupFile
+	var folders []*entity.GroupFolder
+	for {
+		pkt, err := oidb2.BuildGroupFileListReq(groupUin, targetDirectory, startIndex, fileCount)
+		if err != nil {
+			return files, folders, err
+		}
+		p, err := c.sendOidbPacketAndWait(pkt)
+		if err != nil {
+			return files, folders, err
+		}
+		res, err := oidb2.ParseGroupFileListResp(p)
+		if err != nil {
+			return files, folders, err
+		}
+		if res.List.IsEnd {
+			break
+		}
+		for _, fe := range res.List.Items {
+			if fe.FileInfo != nil {
+				files = append(files, &entity.GroupFile{
+					GroupUin:      groupUin,
+					FileId:        fe.FileInfo.FileId,
+					FileName:      fe.FileInfo.FileName,
+					BusId:         fe.FileInfo.BusId,
+					FileSize:      fe.FileInfo.FileSize,
+					UploadTime:    fe.FileInfo.UploadedTime,
+					DeadTime:      fe.FileInfo.ExpireTime,
+					ModifyTime:    fe.FileInfo.ModifiedTime,
+					DownloadTimes: fe.FileInfo.DownloadedTimes,
+					Uploader:      fe.FileInfo.UploaderUin,
+					UploaderName:  fe.FileInfo.UploaderName,
+				})
+			}
+			if fe.FolderInfo != nil {
+				folders = append(folders, &entity.GroupFolder{
+					GroupUin:       groupUin,
+					FolderId:       fe.FolderInfo.FolderId,
+					FolderName:     fe.FolderInfo.FolderName,
+					CreateTime:     fe.FolderInfo.CreateTime,
+					Creator:        fe.FolderInfo.CreatorUin,
+					CreatorName:    fe.FolderInfo.CreatorName,
+					TotalFileCount: fe.FolderInfo.TotalFileCount,
+				})
+			}
+		}
+		startIndex += fileCount
+	}
+	return files, folders, nil
+}
+
+// ListGroupRootFiles 获取群根目录文件列表
+func (c *QQClient) ListGroupRootFiles(groupUin uint32) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
+	return c.ListGroupFilesByFolder(groupUin, "/")
+}
+
+// RenameGroupFile 重命名群文件
+func (c *QQClient) RenameGroupFile(groupUin uint32, fileID string, parentFolder string, newFileName string) error {
+	pkt, err := oidb2.BuildGroupFileRenameReq(groupUin, fileID, parentFolder, newFileName)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFileRenameResp(resp)
+}
+
+// MoveGroupFile 移动群文件
+func (c *QQClient) MoveGroupFile(groupUin uint32, fileID string, parentFolder string, targetFolderID string) error {
+	pkt, err := oidb2.BuildGroupFileMoveReq(groupUin, fileID, parentFolder, targetFolderID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFileMoveResp(resp)
+}
+
+// DeleteGroupFile 删除群文件
+func (c *QQClient) DeleteGroupFile(groupUin uint32, fileID string) error {
+	pkt, err := oidb2.BuildGroupFileDeleteReq(groupUin, fileID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFileDeleteResp(resp)
+}
+
+// CreateGroupFolder 创建群文件夹
+func (c *QQClient) CreateGroupFolder(groupUin uint32, targetDirectory string, folderName string) error {
+	pkt, err := oidb2.BuildGroupFolderCreateReq(groupUin, targetDirectory, folderName)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFolderCreateResp(resp)
+}
+
+// RenameGroupFolder 重命名群文件夹
+func (c *QQClient) RenameGroupFolder(groupUin uint32, folderID string, newFolderName string) error {
+	pkt, err := oidb2.BuildGroupFolderRenameReq(groupUin, folderID, newFolderName)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFolderRenameResp(resp)
+}
+
+// DeleteGroupFolder 删除群文件夹
+func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
+	pkt, err := oidb2.BuildGroupFolderDeleteReq(groupUin, folderID)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFolderDeleteResp(resp)
+}
