@@ -6,6 +6,7 @@ package oidb
 type OidbSvcTrpcTcp0X6D7 struct {
 	Create *OidbSvcTrpcTcp0X6D7Create `protobuf:"bytes,1,opt"`
 	Delete *OidbSvcTrpcTcp0X6D7Delete `protobuf:"bytes,2,opt"`
+	Rename *OidbSvcTrpcTcp0X6D7Rename `protobuf:"bytes,3,opt"`
 	_      [0]func()
 }
 
@@ -22,13 +23,21 @@ type OidbSvcTrpcTcp0X6D7Delete struct {
 	_        [0]func()
 }
 
+type OidbSvcTrpcTcp0X6D7Rename struct {
+	GroupUin      uint32 `protobuf:"varint,1,opt"`
+	FolderId      string `protobuf:"bytes,3,opt"`
+	NewFolderName string `protobuf:"bytes,4,opt"`
+	_             [0]func()
+}
+
 type OidbSvcTrpcTcp0X6D7Response struct {
-	Create *OidbSvcTrpcTcp0X6D7_0Response `protobuf:"bytes,1,opt"`
-	Delete *OidbSvcTrpcTcp0X6D7_1Response `protobuf:"bytes,2,opt"`
+	Create *OidbSvcTrpcTcp0X6D7_0Response   `protobuf:"bytes,1,opt"`
+	Delete *OidbSvcTrpcTcp0X6D7_1_2Response `protobuf:"bytes,2,opt"`
+	Rename *OidbSvcTrpcTcp0X6D7_1_2Response `protobuf:"bytes,3,opt"`
 	_      [0]func()
 }
 
-type OidbSvcTrpcTcp0X6D7_1Response struct {
+type OidbSvcTrpcTcp0X6D7_1_2Response struct {
 	RetCode       int32  `protobuf:"varint,1,opt"`
 	RetMsg        string `protobuf:"bytes,2,opt"`
 	ClientWording string `protobuf:"bytes,3,opt"`

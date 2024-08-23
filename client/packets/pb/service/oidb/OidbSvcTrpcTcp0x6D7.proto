@@ -5,6 +5,7 @@ option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service
 message OidbSvcTrpcTcp0x6D7 {
   optional OidbSvcTrpcTcp0x6D7Create Create = 1;
   optional OidbSvcTrpcTcp0x6D7Delete Delete = 2;
+  optional OidbSvcTrpcTcp0x6D7Rename Rename = 3;
 }
 
 message OidbSvcTrpcTcp0x6D7Create{
@@ -18,12 +19,19 @@ message OidbSvcTrpcTcp0x6D7Delete {
   string FolderId = 3;
 }
 
-message OidbSvcTrpcTcp0x6D7Response {
-  OidbSvcTrpcTcp0x6D7_0Response Create = 1;
-  OidbSvcTrpcTcp0x6D7_1Response Delete = 2;
+message OidbSvcTrpcTcp0x6D7Rename {
+  uint32 GroupUin = 1;
+  string FolderId = 3;
+  string NewFolderName = 4;
 }
 
-message OidbSvcTrpcTcp0x6D7_1Response {
+message OidbSvcTrpcTcp0x6D7Response {
+  OidbSvcTrpcTcp0x6D7_0Response Create = 1;
+  OidbSvcTrpcTcp0x6D7_1_2Response Delete = 2;
+  OidbSvcTrpcTcp0x6D7_1_2Response Rename = 3;
+}
+
+message OidbSvcTrpcTcp0x6D7_1_2Response {
   int32 RetCode = 1;
   string RetMsg = 2;
   string ClientWording = 3;

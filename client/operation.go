@@ -531,6 +531,19 @@ func (c *QQClient) CreateGroupFolder(groupUin uint32, targetDirectory string, fo
 	return oidb2.ParseGroupFolderCreateResp(resp)
 }
 
+// RenameGroupFolder 重命名群文件夹
+func (c *QQClient) RenameGroupFolder(groupUin uint32, folderID string, newFolderName string) error {
+	pkt, err := oidb2.BuildGroupFolderRenameReq(groupUin, folderID, newFolderName)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFolderRenameResp(resp)
+}
+
 // DeleteGroupFolder 删除群文件夹
 func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
 	pkt, err := oidb2.BuildGroupFolderDeleteReq(groupUin, folderID)
