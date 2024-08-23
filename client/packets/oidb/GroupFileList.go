@@ -21,13 +21,13 @@ func BuildGroupFileListReq(groupUin uint32, targetDirectory string, startIndex u
 	return BuildOidbPacket(0x6D8, 1, body, false, true)
 }
 
-func ParseGroupFileListResp(data []byte) (oidb.OidbSvcTrpcTcp0X6D8_1Response, error) {
+func ParseGroupFileListResp(data []byte) (*oidb.OidbSvcTrpcTcp0X6D8_1Response, error) {
 	var resp oidb.OidbSvcTrpcTcp0X6D8_1Response
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
-		return resp, err
+		return &resp, err
 	}
 	if resp.List.RetCode != 0 {
-		return resp, errors.New(resp.List.ClientWording)
+		return &resp, errors.New(resp.List.ClientWording)
 	}
-	return resp, nil
+	return &resp, nil
 }
