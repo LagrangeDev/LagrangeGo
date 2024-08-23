@@ -1,5 +1,13 @@
 package entity
 
+type GroupFileSystemInfo struct {
+	GroupUin   uint32
+	FileCount  uint32
+	LimitCount uint32
+	UsedSpace  uint64
+	TotalSpace uint64
+}
+
 type GroupFile struct {
 	GroupUin      uint32
 	FileId        string

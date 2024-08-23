@@ -492,6 +492,41 @@ func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error 
 	return nil
 }
 
+// GetGroupFileSystemInfo 获取群文件系统信息
+func (c *QQClient) GetGroupFileSystemInfo(groupUin uint32) (*entity.GroupFileSystemInfo, error) {
+	pkt, err := oidb2.BuildGroupFileCountReq(groupUin)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	fileCount, limitCount, err := oidb2.ParseGroupFileCountResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	pkt, err = oidb2.BuildGroupFileSpaceReq(groupUin)
+	if err != nil {
+		return nil, err
+	}
+	resp, err = c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	totalSpace, usedSpace, err := oidb2.ParseGroupFileSpaceResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &entity.GroupFileSystemInfo{
+		GroupUin:   groupUin,
+		FileCount:  fileCount,
+		LimitCount: limitCount,
+		TotalSpace: totalSpace,
+		UsedSpace:  usedSpace,
+	}, nil
+}
+
 // ListGroupFilesByFolder 获取群目录指定文件夹列表
 func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory string) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
 	var startIndex uint32 = 0
