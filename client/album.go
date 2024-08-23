@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/utils"
+
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	"github.com/tidwall/gjson"
@@ -198,6 +200,7 @@ func (c *QQClient) UploadGroupAlbum(parms *GroupAlbumUploadParm) (*GroupPhoto, e
 	if parms == nil {
 		return nil, errors.New("upload parms is nil")
 	}
+	defer utils.CloseIO(parms.File)
 	cookie, err := c.GetCookies("qzone.qq.com")
 	if err != nil {
 		return nil, err
