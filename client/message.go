@@ -188,6 +188,7 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			_, err := c.ImageUploadPrivate(targetUid, elem)
 			if err != nil {
 				c.errorln(err)
+				continue
 			}
 			if elem.MsgInfo == nil {
 				c.errorln("ImageUploadPrivate failed")
@@ -198,9 +199,11 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			_, err := c.RecordUploadPrivate(targetUid, elem)
 			if err != nil {
 				c.errorln(err)
+				continue
 			}
 			if elem.MsgInfo == nil {
 				c.errorln("RecordUploadPrivate failed")
+				continue
 			}
 		default:
 		}
