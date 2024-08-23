@@ -7,6 +7,7 @@ message OidbSvcTrpcTcp0x6D6 {
   optional OidbSvcTrpcTcp0x6D6Upload File = 1;
   optional OidbSvcTrpcTcp0x6D6Download Download = 3;
   optional OidbSvcTrpcTcp0x6D6Delete Delete = 4;
+  optional OidbSvcTrpcTcp0x6D6Rename Rename = 5;
   optional OidbSvcTrpcTcp0x6D6Move Move = 6;
 }
 
@@ -38,6 +39,14 @@ message OidbSvcTrpcTcp0x6D6Delete {
   string FileId = 5;
 }
 
+message OidbSvcTrpcTcp0x6D6Rename {
+  uint32 GroupUin = 1;
+  uint32 BusId = 3; // 102
+  string FileId = 4;
+  string ParentFolder = 5;
+  string NewFileName = 6;
+}
+
 message OidbSvcTrpcTcp0x6D6Move {
   uint32 GroupUin = 1;
   uint32 AppId = 2; // 7
@@ -50,7 +59,8 @@ message OidbSvcTrpcTcp0x6D6Move {
 message OidbSvcTrpcTcp0x6D6Response {
   OidbSvcTrpcTcp0x6D6_0Response Upload = 1;
   OidbSvcTrpcTcp0x6D6_2Response Download = 3;
-  OidbSvcTrpcTcp0x6D6_3Response Delete = 4;
+  OidbSvcTrpcTcp0x6D6_3_4Response Delete = 4;
+  OidbSvcTrpcTcp0x6D6_3_4Response Rename = 5;
 }
 
 message OidbSvcTrpcTcp0x6D6_0Response {
@@ -84,7 +94,7 @@ message OidbSvcTrpcTcp0x6D6_2Response {
   uint32 PreviewPort = 12;
 }
 
-message OidbSvcTrpcTcp0x6D6_3Response{
+message OidbSvcTrpcTcp0x6D6_3_4Response{
   int32 RetCode = 1;
   string RetMsg = 2;
   string ClientWording = 3;

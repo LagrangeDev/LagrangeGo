@@ -492,6 +492,20 @@ func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error 
 	return nil
 }
 
+// RenameGroupFile 重命名群文件
+func (c *QQClient) RenameGroupFile(groupUin uint32, fileID string, parentFolder string, newFileName string) error {
+	pkt, err := oidb2.BuildGroupFileRenameReq(groupUin, fileID, parentFolder, newFileName)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupFileRenameResp(resp)
+}
+
+// DeleteGroupFile 删除群文件
 func (c *QQClient) DeleteGroupFile(groupUin uint32, fileID string) error {
 	pkt, err := oidb2.BuildGroupFileDeleteReq(groupUin, fileID)
 	if err != nil {
@@ -504,6 +518,7 @@ func (c *QQClient) DeleteGroupFile(groupUin uint32, fileID string) error {
 	return oidb2.ParseGroupFileDeleteResp(resp)
 }
 
+// CreateGroupFolder 创建群文件夹
 func (c *QQClient) CreateGroupFolder(groupUin uint32, targetDirectory string, folderName string) error {
 	pkt, err := oidb2.BuildGroupFolderCreateReq(groupUin, targetDirectory, folderName)
 	if err != nil {
@@ -516,6 +531,7 @@ func (c *QQClient) CreateGroupFolder(groupUin uint32, targetDirectory string, fo
 	return oidb2.ParseGroupFolderCreateResp(resp)
 }
 
+// DeleteGroupFolder 删除群文件夹
 func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
 	pkt, err := oidb2.BuildGroupFolderDeleteReq(groupUin, folderID)
 	if err != nil {
