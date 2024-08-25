@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -30,7 +31,7 @@ func decode(r io.ReadSeeker, _f bool) (*AudioInfo, error) {
 		buf = append(buf, reader.ReadBytes(5)...)
 	}
 
-	if string(buf) != "#!AMR\n" {
+	if strings.HasPrefix(string(buf), "#!AMR\n") {
 		return &AudioInfo{
 			Type: amr,
 			Time: float32(len(reader.ReadAll())) / 1607.0,

@@ -1,8 +1,8 @@
 package oidb
 
 import (
+	"encoding/hex"
 	"errors"
-	"fmt"
 
 	"github.com/LagrangeDev/LagrangeGo/message"
 
@@ -14,7 +14,8 @@ func BuildGroupRecordUploadReq(groupUin uint32, record *message.VoiceElement) (*
 	if record.Stream == nil {
 		return nil, errors.New("audio data is nil")
 	}
-
+	md5 := hex.EncodeToString(record.Md5)
+	sha1 := hex.EncodeToString(record.Sha1)
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -38,8 +39,9 @@ func BuildGroupRecordUploadReq(groupUin uint32, record *message.VoiceElement) (*
 				{
 					FileInfo: &oidb.FileInfo{
 						FileSize: record.Size,
-						FileHash: fmt.Sprintf("%x", record.Md5),
-						FileSha1: fmt.Sprintf("%x", record.Sha1),
+						FileHash: md5,
+						FileSha1: sha1,
+						FileName: md5 + ".amr",
 						Type: &oidb.FileType{
 							Type:        3,
 							PicFormat:   0,

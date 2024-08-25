@@ -40,7 +40,7 @@ func BuildPrivateRecordUploadReq(targetUid string, record *message.VoiceElement)
 					FileSize: record.Size,
 					FileHash: md5,
 					FileSha1: sha1,
-					FileName: md5 + "amr",
+					FileName: md5 + ".amr",
 					Type: &oidb.FileType{
 						Type:        3,
 						PicFormat:   0,

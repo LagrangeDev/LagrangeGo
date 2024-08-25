@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"errors"
+
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 	message2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -166,7 +167,7 @@ func (c *QQClient) RecordUploadPrivate(targetUid string, record *message.VoiceEl
 	c.debugln("private record upload ukey:", ukey)
 	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
-		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
+		sha1, err := hex.DecodeString(index.Info.FileSha1)
 		if err != nil {
 			return nil, err
 		}
@@ -179,21 +180,18 @@ func (c *QQClient) RecordUploadPrivate(targetUid string, record *message.VoiceEl
 			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
 			BlockSize:   uint32(highway2.BlockSize),
 			Hash: &highway.NTHighwayHash{
-				FileSha1: [][]byte{sha1hash},
+				FileSha1: [][]byte{sha1},
 			},
 		}
 		extStream, err := proto.Marshal(extend)
 		if err != nil {
 			return nil, err
 		}
-		md5hash, err := hex.DecodeString(index.Info.FileHash)
+		md5, err := hex.DecodeString(index.Info.FileHash)
 		if err != nil {
 			return nil, err
 		}
-		err = c.highwayUpload(1007,
-			record.Stream, uint64(record.Size),
-			md5hash, extStream,
-		)
+		err = c.highwayUpload(1007, record.Stream, uint64(record.Size), md5, extStream)
 		if err != nil {
 			return nil, err
 		}
@@ -223,7 +221,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	c.debugln("group record upload ukey:", ukey)
 	if ukey != "" {
 		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
-		sha1hash, err := hex.DecodeString(index.Info.FileSha1)
+		sha1, err := hex.DecodeString(index.Info.FileSha1)
 		if err != nil {
 			return nil, err
 		}
@@ -236,21 +234,18 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
 			BlockSize:   uint32(highway2.BlockSize),
 			Hash: &highway.NTHighwayHash{
-				FileSha1: [][]byte{sha1hash},
+				FileSha1: [][]byte{sha1},
 			},
 		}
 		extStream, err := proto.Marshal(extend)
 		if err != nil {
 			return nil, err
 		}
-		md5hash, err := hex.DecodeString(index.Info.FileHash)
+		hash, err := hex.DecodeString(index.Info.FileHash)
 		if err != nil {
 			return nil, err
 		}
-		err = c.highwayUpload(1008,
-			record.Stream, uint64(record.Size),
-			md5hash, extStream,
-		)
+		err = c.highwayUpload(1008, record.Stream, uint64(record.Size), hash, extStream)
 		if err != nil {
 			return nil, err
 		}
