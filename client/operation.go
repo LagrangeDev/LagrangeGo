@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
@@ -633,6 +634,9 @@ func (c *QQClient) CreateGroupFolder(groupUin uint32, targetDirectory string, fo
 		return err
 	}
 	resp, err := c.sendOidbPacketAndWait(pkt)
+	if strings.Contains(string(resp), "安全检查未通过") {
+		err = errors.New("安全检查未通过")
+	}
 	if err != nil {
 		return err
 	}
