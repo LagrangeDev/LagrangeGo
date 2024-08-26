@@ -3,6 +3,7 @@ package oidb
 import (
 	"encoding/hex"
 	"errors"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 

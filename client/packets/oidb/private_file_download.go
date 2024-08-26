@@ -2,6 +2,7 @@ package oidb
 
 import (
 	"fmt"
+
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
