@@ -62,11 +62,10 @@ func ComputeMd5AndSha1AndLength(r io.ReadSeeker) ([]byte, []byte, uint64) {
 	defer func(r io.ReadSeeker, offset int64, whence int) {
 		_, _ = r.Seek(offset, whence)
 	}(r, 0, io.SeekStart)
+	_, _ = r.Seek(0, io.SeekStart)
 	md5r := md5.New()
 	sha1r := sha1.New()
-	_, _ = r.Seek(0, io.SeekStart)
-	length, _ := io.Copy(md5r, r)
-	_, _ = r.Seek(0, io.SeekStart)
-	_, _ = io.Copy(sha1r, r)
+	mr := io.MultiWriter(md5r, sha1r)
+	length, _ := io.Copy(mr, r)
 	return md5r.Sum(nil), sha1r.Sum(nil), uint64(length)
 }
