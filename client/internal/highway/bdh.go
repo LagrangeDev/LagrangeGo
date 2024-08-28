@@ -18,7 +18,9 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-const BlockSize = 256 * 1024
+// 视频必须是1024*1024
+
+const BlockSize = 1024 * 1024
 
 type Transaction struct {
 	CommandID uint32

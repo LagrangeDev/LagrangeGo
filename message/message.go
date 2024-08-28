@@ -4,9 +4,10 @@ package message
 
 import (
 	"encoding/xml"
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"reflect"
 	"strings"
+
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
@@ -209,8 +210,8 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 				&ShortVideoElement{
 					Name:      elem.VideoFile.FileName,
 					Uuid:      utils.S2B(elem.VideoFile.FileUuid),
-					Size:      elem.VideoFile.FileSize,
-					ThumbSize: elem.VideoFile.ThumbFileSize,
+					Size:      uint32(elem.VideoFile.FileSize),
+					ThumbSize: uint32(elem.VideoFile.ThumbFileSize),
 					Md5:       elem.VideoFile.FileMd5,
 					ThumbMd5:  elem.VideoFile.ThumbFileMd5,
 				},
