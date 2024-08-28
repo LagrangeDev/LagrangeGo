@@ -1,8 +1,11 @@
 package client
 
 import (
+	"bytes"
 	"encoding/hex"
 	"errors"
+
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
@@ -253,6 +256,180 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	record.MsgInfo = uploadResp.Upload.MsgInfo
 	record.Compat = uploadResp.Upload.CompatQMsg
 	return record, nil
+}
+
+func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
+	if video == nil || video.Stream == nil {
+		return nil, errors.New("video is nil")
+	}
+	req, err := oidb.BuildPrivateVideoUploadReq(targetUid, video)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(req)
+	if err != nil {
+		return nil, err
+	}
+	uploadResp, err := oidb.ParsePrivateVideoUploadResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	ukey := uploadResp.Upload.UKey.Unwrap()
+	// video
+	if ukey != "" {
+		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
+		extend := &highway.NTV2RichMediaHighwayExt{
+			FileUuid: index.FileUuid,
+			UKey:     ukey,
+			Network: &highway.NTHighwayNetwork{
+				IPv4S: oidbIPv4ToNTHighwayIPv4(uploadResp.Upload.IPv4S),
+			},
+			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
+			BlockSize:   uint32(highway2.BlockSize),
+			Hash: &highway.NTHighwayHash{
+				FileSha1: crypto.ComputeBlockSha1(video.Stream, highway2.BlockSize),
+			},
+		}
+		extStream, err := proto.Marshal(extend)
+		if err != nil {
+			return nil, err
+		}
+		md5, err := hex.DecodeString(index.Info.FileHash)
+		if err != nil {
+			return nil, err
+		}
+		err = c.highwayUpload(1005, video.Stream, uint64(video.Size), md5, extStream)
+		if err != nil {
+			return nil, err
+
+		}
+	}
+	// thumb
+	subFile := uploadResp.Upload.SubFileInfos[0]
+	if subFile.UKey != "" {
+		index := uploadResp.Upload.MsgInfo.MsgInfoBody[1].Index
+		sha1, err := hex.DecodeString(index.Info.FileSha1)
+		if err != nil {
+			return nil, err
+		}
+		extend := &highway.NTV2RichMediaHighwayExt{
+			FileUuid: index.FileUuid,
+			UKey:     subFile.UKey,
+			Network: &highway.NTHighwayNetwork{
+				IPv4S: oidbIPv4ToNTHighwayIPv4(subFile.IPv4S),
+			},
+			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
+			BlockSize:   uint32(highway2.BlockSize),
+			Hash: &highway.NTHighwayHash{
+				FileSha1: [][]byte{sha1},
+			},
+		}
+		extStream, err := proto.Marshal(extend)
+		if err != nil {
+			return nil, err
+		}
+		md5, err := hex.DecodeString(index.Info.FileHash)
+		if err != nil {
+			return nil, err
+		}
+		err = c.highwayUpload(1006, bytes.NewReader(video.Thumb), uint64(video.ThumbSize), md5, extStream)
+		if err != nil {
+			return nil, err
+		}
+	}
+	video.MsgInfo = uploadResp.Upload.MsgInfo
+	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, video.Compat)
+	if err != nil {
+		return nil, err
+	}
+	return video, nil
+}
+
+func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
+	if video == nil || video.Stream == nil {
+		return nil, errors.New("video is nil")
+	}
+	req, err := oidb.BuildGroupVideoUploadReq(groupUin, video)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(req)
+	if err != nil {
+		return nil, err
+	}
+	uploadResp, err := oidb.ParseGroupVideoUploadResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	ukey := uploadResp.Upload.UKey.Unwrap()
+	// video
+	if ukey != "" {
+		index := uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index
+		extend := &highway.NTV2RichMediaHighwayExt{
+			FileUuid: index.FileUuid,
+			UKey:     ukey,
+			Network: &highway.NTHighwayNetwork{
+				IPv4S: oidbIPv4ToNTHighwayIPv4(uploadResp.Upload.IPv4S),
+			},
+			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
+			BlockSize:   uint32(highway2.BlockSize),
+			Hash: &highway.NTHighwayHash{
+				FileSha1: crypto.ComputeBlockSha1(video.Stream, highway2.BlockSize),
+			},
+		}
+		extStream, err := proto.Marshal(extend)
+		if err != nil {
+			return nil, err
+		}
+		md5, err := hex.DecodeString(index.Info.FileHash)
+		if err != nil {
+			return nil, err
+		}
+		err = c.highwayUpload(1005, video.Stream, uint64(video.Size), md5, extStream)
+		if err != nil {
+			return nil, err
+
+		}
+	}
+	// thumb
+	subFile := uploadResp.Upload.SubFileInfos[0]
+	if subFile.UKey != "" {
+		index := uploadResp.Upload.MsgInfo.MsgInfoBody[1].Index
+		sha1, err := hex.DecodeString(index.Info.FileSha1)
+		if err != nil {
+			return nil, err
+		}
+		extend := &highway.NTV2RichMediaHighwayExt{
+			FileUuid: index.FileUuid,
+			UKey:     subFile.UKey,
+			Network: &highway.NTHighwayNetwork{
+				IPv4S: oidbIPv4ToNTHighwayIPv4(subFile.IPv4S),
+			},
+			MsgInfoBody: uploadResp.Upload.MsgInfo.MsgInfoBody,
+			BlockSize:   uint32(highway2.BlockSize),
+			Hash: &highway.NTHighwayHash{
+				FileSha1: [][]byte{sha1},
+			},
+		}
+		extStream, err := proto.Marshal(extend)
+		if err != nil {
+			return nil, err
+		}
+		md5, err := hex.DecodeString(index.Info.FileHash)
+		if err != nil {
+			return nil, err
+		}
+		err = c.highwayUpload(1006, bytes.NewReader(video.Thumb), uint64(video.ThumbSize), md5, extStream)
+		if err != nil {
+			return nil, err
+		}
+	}
+	video.MsgInfo = uploadResp.Upload.MsgInfo
+	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, video.Compat)
+	if err != nil {
+		return nil, err
+	}
+	return video, nil
 }
 
 func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement) (*message.FileElement, error) {
