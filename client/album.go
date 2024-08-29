@@ -169,10 +169,7 @@ func (c *QQClient) buildUploadSessionReq(param *uploadSessionParam) (*groupAlbum
 }
 
 func (c *QQClient) getGroupAlbumUploadSession(param *uploadSessionParam) (*uploadOptions, int64, error) {
-	var reqBody interface{}
-	var err error
-	var timeStamp int64 = 0
-	reqBody, timeStamp, err = c.buildUploadSessionReq(param)
+	reqBody, timeStamp, err := c.buildUploadSessionReq(param)
 	if err != nil {
 		return nil, timeStamp, err
 	}
