@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
@@ -338,6 +339,18 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 		return "", err
 	}
 	return oidb2.ParseGroupRecordDownloadResp(resp)
+}
+
+func (c *QQClient) GetVideoUrl(isGroup bool, video *message2.ShortVideoElement) (string, error) {
+	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().Uid, string(video.Uuid), video.Name, isGroup, video.Md5, video.Sha1)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParseVideoDownloadResp(resp)
 }
 
 func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, error) {
