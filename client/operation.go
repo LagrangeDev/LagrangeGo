@@ -481,12 +481,12 @@ func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) err
 }
 
 // UploadGroupFile 上传群文件
-func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string) error {
+func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string, targetDirectory string) error {
 	fileElement, err := message2.NewLocalFile(localFilePath)
 	if err != nil {
 		return err
 	}
-	if _, err = c.FileUploadGroup(groupUin, fileElement); err != nil {
+	if _, err = c.FileUploadGroup(groupUin, fileElement, targetDirectory); err != nil {
 		return err
 	}
 	return nil

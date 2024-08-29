@@ -529,11 +529,11 @@ func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement
 	return file, nil
 }
 
-func (c *QQClient) FileUploadGroup(groupUin uint32, file *message.FileElement) (*message.FileElement, error) {
+func (c *QQClient) FileUploadGroup(groupUin uint32, file *message.FileElement, targetDirectory string) (*message.FileElement, error) {
 	if file == nil || file.FileStream == nil {
 		return nil, errors.New("element type is not group file")
 	}
-	req, err := oidb.BuildGroupFileUploadReq(groupUin, file)
+	req, err := oidb.BuildGroupFileUploadReq(groupUin, file, targetDirectory)
 	if err != nil {
 		return nil, err
 	}

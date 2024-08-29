@@ -5,14 +5,14 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
-func BuildGroupFileUploadReq(groupUin uint32, file *message.FileElement) (*OidbPacket, error) {
+func BuildGroupFileUploadReq(groupUin uint32, file *message.FileElement, targetDirectory string) (*OidbPacket, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
 		File: &oidb.OidbSvcTrpcTcp0X6D6Upload{
 			GroupUin:        groupUin,
 			AppId:           4,
 			BusId:           102,
 			Entrance:        6,
-			TargetDirectory: "/",
+			TargetDirectory: targetDirectory,
 			FileName:        file.FileName,
 			LocalDirectory:  "/" + file.FileName,
 			FileSize:        file.FileSize,
