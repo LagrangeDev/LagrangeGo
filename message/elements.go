@@ -112,7 +112,7 @@ type (
 		Duration  uint32
 
 		// send
-		Thumb     []byte
+		Thumb     io.ReadSeeker
 		Summary   string
 		Md5       []byte
 		Sha1      []byte
@@ -243,16 +243,16 @@ func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
 }
 
 func NewVideo(data, thumb []byte, Summary ...string) *ShortVideoElement {
-	return NewSteramVideo(bytes.NewReader(data), thumb, Summary...)
+	return NewSteramVideo(bytes.NewReader(data), bytes.NewReader(thumb), Summary...)
 }
 
-func NewSteramVideo(r io.ReadSeeker, thumb []byte, Summary ...string) *ShortVideoElement {
+func NewSteramVideo(r io.ReadSeeker, thumb io.ReadSeeker, Summary ...string) *ShortVideoElement {
 	var summary string
 	if len(Summary) != 0 {
 		summary = Summary[0]
 	}
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
-	thumbMd5, thumbSha1, thumbSize := crypto.ComputeMd5AndSha1AndLength(bytes.NewReader(thumb))
+	thumbMd5, thumbSha1, thumbSize := crypto.ComputeMd5AndSha1AndLength(thumb)
 	return &ShortVideoElement{
 		Size:      uint32(length),
 		ThumbSize: uint32(thumbSize),
@@ -272,7 +272,7 @@ func NewFileVideo(path string, thumb []byte, Summary ...string) (*ShortVideoElem
 	if err != nil {
 		return nil, err
 	}
-	return NewSteramVideo(file, thumb, Summary...), nil
+	return NewSteramVideo(file, bytes.NewReader(thumb), Summary...), nil
 }
 
 func NewFile(data []byte, fileName string) *FileElement {
