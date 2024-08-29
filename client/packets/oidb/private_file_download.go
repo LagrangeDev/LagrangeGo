@@ -3,14 +3,14 @@ package oidb
 import (
 	"fmt"
 
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
 func BuildPrivateFileDownloadReq(selfUid string, fileUUID string, fileHash string) (*OidbPacket, error) {
-	body := &oidb2.OidbSvcTrpcTcp0XE37_1200{
+	body := &oidb.OidbSvcTrpcTcp0XE37_1200{
 		SubCommand: 1200,
 		Field2:     1,
-		Body: &oidb2.OidbSvcTrpcTcp0XE37_1200Body{
+		Body: &oidb.OidbSvcTrpcTcp0XE37_1200Body{
 			ReceiverUid: selfUid,
 			FileUuid:    fileUUID,
 			Type:        2,
@@ -26,7 +26,7 @@ func BuildPrivateFileDownloadReq(selfUid string, fileUUID string, fileHash strin
 }
 
 func ParsePrivateFileDownloadResp(data []byte) (string, error) {
-	resp := new(oidb2.OidbSvcTrpcTcp0XE37_1200Response)
+	resp := new(oidb.OidbSvcTrpcTcp0XE37_1200Response)
 	if _, err := ParseOidbPacket(data, resp); err != nil {
 		return "", err
 	}

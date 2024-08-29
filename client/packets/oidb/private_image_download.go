@@ -3,31 +3,31 @@ package oidb
 import (
 	"fmt"
 
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildPrivateImageDownloadReq(selfUid string, node *oidb2.IndexNode) (*OidbPacket, error) {
-	body := &oidb2.NTV2RichMediaReq{
-		ReqHead: &oidb2.MultiMediaReqHead{
-			Common: &oidb2.CommonHead{
+func BuildPrivateImageDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, error) {
+	body := &oidb.NTV2RichMediaReq{
+		ReqHead: &oidb.MultiMediaReqHead{
+			Common: &oidb.CommonHead{
 				RequestId: 1,
 				Command:   200,
 			},
-			Scene: &oidb2.SceneInfo{
+			Scene: &oidb.SceneInfo{
 				RequestType:  2,
 				BusinessType: 1,
 				SceneType:    1,
-				C2C: &oidb2.C2CUserInfo{
+				C2C: &oidb.C2CUserInfo{
 					AccountType: 2,
 					TargetUid:   selfUid,
 				},
 			},
-			Client: &oidb2.ClientMeta{AgentType: 2},
+			Client: &oidb.ClientMeta{AgentType: 2},
 		},
-		Download: &oidb2.DownloadReq{
+		Download: &oidb.DownloadReq{
 			Node: node,
-			Download: &oidb2.DownloadExt{
-				Video: &oidb2.VideoDownloadExt{
+			Download: &oidb.DownloadExt{
+				Video: &oidb.VideoDownloadExt{
 					BusiType:  0,
 					SceneType: 0,
 				},
@@ -38,7 +38,7 @@ func BuildPrivateImageDownloadReq(selfUid string, node *oidb2.IndexNode) (*OidbP
 }
 
 func ParsePrivateImageDownloadResp(data []byte) (string, error) {
-	resp, err := ParseTypedError[oidb2.NTV2RichMediaResp](data)
+	resp, err := ParseTypedError[oidb.NTV2RichMediaResp](data)
 	if err != nil {
 		return "", err
 	}
