@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
@@ -62,6 +63,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, image *message.ImageElem
 	if image == nil || image.Stream == nil {
 		return nil, errors.New("image is nil")
 	}
+	defer utils.CloseIO(image.Stream)
 	req, err := oidb.BuildPrivateImageUploadReq(targetUid, image)
 	if err != nil {
 		return nil, err
@@ -124,6 +126,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement
 	if image == nil || image.Stream == nil {
 		return nil, errors.New("element type is not group image")
 	}
+	defer utils.CloseIO(image.Stream)
 	req, err := oidb.BuildGroupImageUploadReq(groupUin, image)
 	if err != nil {
 		return nil, err
@@ -181,6 +184,7 @@ func (c *QQClient) RecordUploadPrivate(targetUid string, record *message.VoiceEl
 	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not friend record")
 	}
+	defer utils.CloseIO(record.Stream)
 	req, err := oidb.BuildPrivateRecordUploadReq(targetUid, record)
 	if err != nil {
 		return nil, err
@@ -235,6 +239,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not voice record")
 	}
+	defer utils.CloseIO(record.Stream)
 	req, err := oidb.BuildGroupRecordUploadReq(groupUin, record)
 	if err != nil {
 		return nil, err
@@ -289,6 +294,11 @@ func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVide
 	if video == nil || video.Stream == nil {
 		return nil, errors.New("video is nil")
 	}
+	if video.Thumb == nil || video.Thumb.Stream == nil {
+		return nil, errors.New("video thumb is nil")
+	}
+	defer utils.CloseIO(video.Stream)
+	defer utils.CloseIO(video.Thumb.Stream)
 	req, err := oidb.BuildPrivateVideoUploadReq(targetUid, video)
 	if err != nil {
 		return nil, err
@@ -376,6 +386,11 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 	if video == nil || video.Stream == nil {
 		return nil, errors.New("video is nil")
 	}
+	if video.Thumb == nil || video.Thumb.Stream == nil {
+		return nil, errors.New("video thumb is nil")
+	}
+	defer utils.CloseIO(video.Stream)
+	defer utils.CloseIO(video.Thumb.Stream)
 	req, err := oidb.BuildGroupVideoUploadReq(groupUin, video)
 	if err != nil {
 		return nil, err
