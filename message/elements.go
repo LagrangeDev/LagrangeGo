@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils"
+
 	"github.com/LagrangeDev/LagrangeGo/utils/audio"
 
 	"github.com/tidwall/gjson"
@@ -104,23 +106,29 @@ type (
 	}
 
 	ShortVideoElement struct {
-		Name      string
-		Uuid      []byte
-		Size      uint32
-		ThumbSize uint32
-		Url       string
-		Duration  uint32
+		Name     string
+		Uuid     []byte
+		Size     uint32
+		Url      string
+		Duration uint32
 
 		// send
-		Thumb     io.ReadSeeker
-		Summary   string
-		Md5       []byte
-		Sha1      []byte
-		ThumbMd5  []byte
-		ThumbSha1 []byte
-		Stream    io.ReadSeeker
-		MsgInfo   *oidb.MsgInfo
-		Compat    *message.VideoFile
+		Thumb   *VideoThumb
+		Summary string
+		Md5     []byte
+		Sha1    []byte
+		Stream  io.ReadSeeker
+		MsgInfo *oidb.MsgInfo
+		Compat  *message.VideoFile
+	}
+
+	VideoThumb struct {
+		Stream io.ReadSeeker
+		Size   uint32
+		Md5    []byte
+		Sha1   []byte
+		Width  uint32
+		Height uint32
 	}
 
 	LightAppElement struct {
@@ -252,18 +260,14 @@ func NewSteramVideo(r io.ReadSeeker, thumb io.ReadSeeker, Summary ...string) *Sh
 		summary = Summary[0]
 	}
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
-	thumbMd5, thumbSha1, thumbSize := crypto.ComputeMd5AndSha1AndLength(thumb)
 	return &ShortVideoElement{
-		Size:      uint32(length),
-		ThumbSize: uint32(thumbSize),
-		Thumb:     thumb,
-		Summary:   summary,
-		Md5:       md5,
-		Sha1:      sha1,
-		ThumbMd5:  thumbMd5,
-		ThumbSha1: thumbSha1,
-		Stream:    r,
-		Compat:    &message.VideoFile{},
+		Size:    uint32(length),
+		Thumb:   NewVideoThumb(thumb),
+		Summary: summary,
+		Md5:     md5,
+		Sha1:    sha1,
+		Stream:  r,
+		Compat:  &message.VideoFile{},
 	}
 }
 
@@ -273,6 +277,25 @@ func NewFileVideo(path string, thumb []byte, Summary ...string) (*ShortVideoElem
 		return nil, err
 	}
 	return NewSteramVideo(file, bytes.NewReader(thumb), Summary...), nil
+}
+
+func NewVideoThumb(r io.ReadSeeker) *VideoThumb {
+	width := uint32(1920)
+	height := uint32(1080)
+	md5, sha1, size := crypto.ComputeMd5AndSha1AndLength(r)
+	_, imgSize, err := utils.ImageResolve(r)
+	if err == nil {
+		width = uint32(imgSize.Width)
+		height = uint32(imgSize.Height)
+	}
+	return &VideoThumb{
+		Stream: r,
+		Size:   uint32(size),
+		Md5:    md5,
+		Sha1:   sha1,
+		Width:  width,
+		Height: height,
+	}
 }
 
 func NewFile(data []byte, fileName string) *FileElement {

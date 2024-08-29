@@ -208,12 +208,14 @@ func parseMessageElements(msg []*message.Elem) []IMessageElement {
 		if elem.VideoFile != nil {
 			return []IMessageElement{
 				&ShortVideoElement{
-					Name:      elem.VideoFile.FileName,
-					Uuid:      utils.S2B(elem.VideoFile.FileUuid),
-					Size:      uint32(elem.VideoFile.FileSize),
-					ThumbSize: uint32(elem.VideoFile.ThumbFileSize),
-					Md5:       elem.VideoFile.FileMd5,
-					ThumbMd5:  elem.VideoFile.ThumbFileMd5,
+					Name: elem.VideoFile.FileName,
+					Uuid: utils.S2B(elem.VideoFile.FileUuid),
+					Size: uint32(elem.VideoFile.FileSize),
+					Md5:  elem.VideoFile.FileMd5,
+					Thumb: &VideoThumb{
+						Size: uint32(elem.VideoFile.ThumbFileSize),
+						Md5:  elem.VideoFile.ThumbFileMd5,
+					},
 				},
 			}
 		}

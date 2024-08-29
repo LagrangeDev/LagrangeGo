@@ -55,9 +55,9 @@ func BuildGroupVideoUploadReq(groupUin uint32, video *message.ShortVideoElement)
 					SubFileType: 0,
 				}, {
 					FileInfo: &oidb.FileInfo{
-						FileSize: video.ThumbSize,
-						FileHash: hex.EncodeToString(video.ThumbMd5),
-						FileSha1: hex.EncodeToString(video.ThumbSha1),
+						FileSize: video.Thumb.Size,
+						FileHash: hex.EncodeToString(video.Thumb.Md5),
+						FileSha1: hex.EncodeToString(video.Thumb.Sha1),
 						FileName: "video.jpg",
 						Type: &oidb.FileType{
 							Type:        1,
@@ -65,8 +65,8 @@ func BuildGroupVideoUploadReq(groupUin uint32, video *message.ShortVideoElement)
 							VideoFormat: 0,
 							VoiceFormat: 0,
 						},
-						Width:    1920,
-						Height:   1080,
+						Width:    video.Thumb.Width,
+						Height:   video.Thumb.Height,
 						Time:     0,
 						Original: 0,
 					},

@@ -359,7 +359,7 @@ func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVide
 		if err != nil {
 			return nil, err
 		}
-		err = c.highwayUpload(1002, video.Thumb, uint64(video.ThumbSize), md5, extStream)
+		err = c.highwayUpload(1002, video.Thumb.Stream, uint64(video.Thumb.Size), md5, extStream)
 		if err != nil {
 			return nil, err
 		}
@@ -446,7 +446,7 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 		if err != nil {
 			return nil, err
 		}
-		err = c.highwayUpload(1006, video.Thumb, uint64(video.ThumbSize), md5, extStream)
+		err = c.highwayUpload(1006, video.Thumb.Stream, uint64(video.Thumb.Size), md5, extStream)
 		if err != nil {
 			return nil, err
 		}
