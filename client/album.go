@@ -6,14 +6,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/tidwall/gjson"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/album"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/tidwall/gjson"
 )
 
 const TimeLayout = "2006-01-02 15:04:05"
@@ -56,6 +58,7 @@ func (c *QQClient) GetGroupAlbum(groupUin uint32) ([]*GroupAlbum, error) {
 			fmt.Println(err)
 		}
 		grpAlbumList[i] = &GroupAlbum{
+			GroupUin:       groupUin,
 			Name:           v.Get("title").Str,
 			ID:             v.Get("id").Str,
 			Description:    v.Get("desc").Str,
@@ -66,6 +69,59 @@ func (c *QQClient) GetGroupAlbum(groupUin uint32) ([]*GroupAlbum, error) {
 		}
 	}
 	return grpAlbumList, nil
+}
+
+func (c *QQClient) GetGroupAlbumElem(ab *GroupAlbum) ([]*GroupAlbumElem, error) {
+	var elem []*GroupAlbumElem
+	pageInfo := ""
+	for {
+		pkt, err := album.BuildGetMediaListReq(c.Uin, ab.GroupUin, ab.ID, pageInfo)
+		if err != nil {
+			return nil, err
+		}
+		payload, err := c.sendUniPacketAndWait("QunAlbum.trpc.qzone.webapp_qun_media.QunMedia.GetMediaList", pkt)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := album.ParseGetMediaListResp(payload)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range resp.Body.ElemInfo {
+			if v.ImgInfo != nil {
+				elem = append(elem, &GroupAlbumElem{
+					photo: &GroupPhoto{
+						ID:  v.ImgInfo.ImageID,
+						Url: v.ImgInfo.ImgLinkInfo.ImageURL,
+					},
+					operatorUserInfo: &GroupAlbumElemUserInfo{
+						UserNickName: v.UploaderInfo.UserNickName,
+						UserUin:      v.UploaderInfo.UserUin,
+					},
+				})
+			}
+			if v.VideoInfo != nil {
+				elem = append(elem, &GroupAlbumElem{
+					video: &GroupVideo{
+						ID:  v.VideoInfo.VideoID,
+						Url: v.VideoInfo.VideoURL,
+					},
+					operatorUserInfo: &GroupAlbumElemUserInfo{
+						UserNickName: v.UploaderInfo.UserNickName,
+						UserUin:      v.UploaderInfo.UserUin,
+					},
+				})
+			}
+		}
+		if resp.Body.PageInfo.IsNone() || gjson.Get(resp.Body.PageInfo.Unwrap(), "Loc.return_num").Int() == 0 {
+			break
+		}
+		if resp.Body.ElemInfo == nil && resp.Body.ElemMetaInfo == nil {
+			break
+		}
+		pageInfo = resp.Body.PageInfo.Unwrap()
+	}
+	return elem, nil
 }
 
 func (c *QQClient) buildUploadSessionReq(param *uploadSessionParam) (*groupAlbumUploadReq, int64, error) {
@@ -226,7 +282,9 @@ func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, se
 	_ = writer.WriteField("cmd", "FileUpload")
 	_ = writer.WriteField("slice_size", strconv.Itoa(chunkSize))
 	_ = writer.Close()
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("https://h5.qzone.qq.com/webapp/json/sliceUpload/%s?seq=%d&retry=0&offset=%d&end=%d&total=%d&type=form&g_tk=%d",
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("https://h5.qzone.qq.com/webapp/json/sliceUpload/%s?seq=%d&retry=0&offset=%d&end=%d&total=%d&type=form&g_tk=%d",
 		uploadUriCmd, seq, offset, offset+chunkSize, totalSize, gtk), body)
 	if err != nil {
 		return nil, err
@@ -388,9 +446,26 @@ func (c *QQClient) UploadGroupAlbumVideo(parms *GroupAlbumUploadParam) (*GroupVi
 		return nil, err
 	}
 	if utbRsp.SPhotoID == "" || utbRsp.SBURL == "" {
-		return nil, errors.New("upload group album failed because utbRsp missing fields")
+		return nil, errors.New("upload group album failed because missing video thumbnail fields")
 	}
-	return &GroupVideo{}, nil // TODO: where to get the video url?
+	// get video url
+	updList, err := c.GetGroupAlbumElem(&GroupAlbum{
+		GroupUin: parms.GroupUin,
+		ID:       parms.AlbumId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	// simple loop, enough
+	for _, elem := range updList {
+		if elem.video != nil && elem.video.ID == uvbRsp.VID {
+			return &GroupVideo{
+				ID:  elem.video.ID,
+				Url: elem.video.Url,
+			}, nil
+		}
+	}
+	return &GroupVideo{}, errors.New("upload success but cannot get video url")
 }
 
 type ResourceType int
@@ -427,6 +502,7 @@ type (
 
 type (
 	GroupAlbum struct {
+		GroupUin       uint32
 		Name           string
 		ID             string
 		Description    string
@@ -434,6 +510,12 @@ type (
 		CreateNickname string
 		CreateUin      uint32
 		CreateTime     int64
+	}
+
+	GroupAlbumElem struct {
+		photo            *GroupPhoto
+		video            *GroupVideo
+		operatorUserInfo *GroupAlbumElemUserInfo
 	}
 
 	GroupPhoto struct {
@@ -444,6 +526,11 @@ type (
 	GroupVideo struct {
 		ID  string
 		Url string
+	}
+
+	GroupAlbumElemUserInfo struct {
+		UserNickName string
+		UserUin      string
 	}
 
 	ImageFile struct {
