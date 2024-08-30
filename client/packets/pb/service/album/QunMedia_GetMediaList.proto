@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/album";
+
+message QzoneGetMediaList {
+  uint32 Field1 = 1;
+  string Field2 = 2;
+  string Field3 = 3;
+  QzoneGetMediaList_F4 Field4 = 4;
+  string UinTimeStamp = 5;
+  QzoneGetMediaList_F10 Field10 = 10;
+}
+
+message QzoneGetMediaList_F4 {
+  string GroupID = 1;
+  string AlbumID = 2;
+  uint32 Field3 = 3;
+  string Field4 = 4;
+  string PageInfo = 5;
+}
+
+message QzoneGetMediaList_F10 {
+  string AppIdFlag = 1;
+  string AppIdValue = 2;
+}
+
+message QzoneGetMediaList_Response{
+  optional uint32 Field1 = 1;
+  optional uint32 ErrorCode = 2;
+  optional string ErrorMsg = 3;
+  optional QzoneGetMediaList_Response_Body Body = 4;
+}
+
+message QzoneGetMediaList_Response_Body {
+  AlbumInfo AlbumInfo = 1;
+  repeated AlbumElemMetaInfo ElemMetaInfo = 2;
+  repeated AlbumElemInfo ElemInfo = 3;
+  optional string PageInfo = 5;
+}
+
+message AlbumInfo {
+  string AlbumID = 1;
+  string AlbumName = 3;
+  uint32 CreateTime = 5;
+  uint32 LastModifyTime = 6;
+  uint32 LastUploadTime = 7;
+  uint32 Count = 8;
+  AlbumThumbInfo ThumbInfo = 9;
+  UserInfo CreatorInfo = 10;
+}
+
+message AlbumThumbInfo {
+  AlbumThumbImageInfo ThumbImageInfo = 2;
+}
+
+message AlbumThumbImageInfo {
+  string ImageID = 3;
+  repeated AlbumElemImgLinkComplexInfo ImgLinkInfos = 4;
+  AlbumElemImgLinkInfo ImgLinkInfo = 5;
+}
+
+message AlbumElemMetaInfo {
+  uint32 UploadTimeStamp = 1;
+  string UploadDate = 3;
+  UserInfo UploaderInfo = 4;
+}
+
+message AlbumElemInfo {
+  optional AlbumElemImgInfo ImgInfo = 2;
+  optional AlbumElemVideoInfo VideoInfo = 3;
+  string UploaderUin = 4;
+  uint32 LastModifyTime = 7;
+  uint32 LastUploadTime = 8;
+  UserInfo UploaderInfo = 12;
+}
+
+message AlbumElemImgInfo {
+  string FileName = 1;
+  string ImageID = 3;
+  repeated AlbumElemImgLinkComplexInfo ImgLinkInfos = 4;
+  AlbumElemImgLinkInfo ImgLinkInfo = 5;
+}
+
+message AlbumElemImgLinkComplexInfo {
+  uint32 Seq = 1;
+  AlbumElemImgLinkInfo ImgLinkInfo = 2;
+}
+
+message AlbumElemImgLinkInfo {
+  string ImageURL = 1;
+  uint32 Height = 2;
+  uint32 Width = 3;
+}
+
+message AlbumElemVideoInfo {
+  string VideoID = 1;
+  string VideoURL = 2;
+  AlbumElemVideoMetaInfo VideoMetaInfo = 3;
+  uint32 VideoHeight = 4;
+  uint32 VideoWidth = 5;
+  AlbumElemImgLinkComplexInfo VideoThumbImageInfo = 7;
+}
+
+message AlbumElemVideoMetaInfo {
+  string VideoName = 1;
+  string VideoThumbImageID = 3;
+  repeated AlbumElemImgLinkComplexInfo VideoThumbImageInfos = 4;
+  AlbumElemImgLinkInfo VideoThumbImageInfo = 5;
+}
+
+message UserInfo {
+  string UserNickName = 2;
+  string UserUin = 13;
+}
+
+
