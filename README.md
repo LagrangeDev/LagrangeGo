@@ -5,6 +5,8 @@ ntqq 协议的golang实现 移植于 [Lagrange.Core](https://github.com/KonataDe
 ## 使用前声明
 本项目为协议实现，不推荐直接使用。
 
+基于此项目的[go-cqhttp](https://github.com/LagrangeDev/go-cqhttp)已经基本完善 [下载链接](https://github.com/LagrangeDev/go-cqhttp/actions/workflows/ci.yml)
+
 ## 使用方法
 
 ```bash
