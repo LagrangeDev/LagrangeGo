@@ -48,8 +48,8 @@ message Message {
   optional RoutingHead RoutingHead = 1;
   optional ContentHead ContentHead = 2;
   optional MessageBody Body = 3;
-  optional uint32 Seq = 4;
-  optional uint32 Rand = 5;
+  optional uint32 ClientSequence = 4;
+  optional uint32 Random = 5;
   optional bytes SyncCookie = 6;
   // optional AppShareInfo AppShare = 7;
   optional uint32 Via = 8;

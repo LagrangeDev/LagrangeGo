@@ -50,12 +50,12 @@ type GroupRecallMsgField4 struct {
 }
 
 type Message struct {
-	RoutingHead *RoutingHead         `protobuf:"bytes,1,opt"`
-	ContentHead *ContentHead         `protobuf:"bytes,2,opt"`
-	Body        *MessageBody         `protobuf:"bytes,3,opt"`
-	Seq         proto.Option[uint32] `protobuf:"varint,4,opt"`
-	Rand        proto.Option[uint32] `protobuf:"varint,5,opt"`
-	SyncCookie  []byte               `protobuf:"bytes,6,opt"`
+	RoutingHead    *RoutingHead         `protobuf:"bytes,1,opt"`
+	ContentHead    *ContentHead         `protobuf:"bytes,2,opt"`
+	Body           *MessageBody         `protobuf:"bytes,3,opt"`
+	ClientSequence proto.Option[uint32] `protobuf:"varint,4,opt"`
+	Random         proto.Option[uint32] `protobuf:"varint,5,opt"`
+	SyncCookie     []byte               `protobuf:"bytes,6,opt"`
 	// optional AppShareInfo AppShare = 7;
 	Via         proto.Option[uint32] `protobuf:"varint,8,opt"`
 	DataStatist proto.Option[uint32] `protobuf:"varint,9,opt"`

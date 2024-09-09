@@ -17,9 +17,9 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 			SubType: proto.Some(uint32(0)),
 			DivSeq:  proto.Some(uint32(0)),
 		},
-		Body: body,
-		Seq:  proto.Some(c.getSequence()),
-		Rand: proto.Some(random),
+		Body:           body,
+		ClientSequence: proto.Some(c.getSequence()),
+		Random:         proto.Some(random),
 	}
 	// grp_id not null
 	if (route.Grp != nil && route.Grp.GroupCode.IsSome()) || (route.GrpTmp != nil && route.GrpTmp.GroupUin.IsSome()) {
