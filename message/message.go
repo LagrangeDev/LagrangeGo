@@ -39,17 +39,18 @@ const (
 
 type (
 	PrivateMessage struct {
-		Id         int32
-		InternalId int32
-		Self       int64
-		Target     int64
-		Time       int32
+		Id         uint32
+		InternalId uint32
+		CleintSeq  uint32
+		Self       uint32
+		Target     uint32
+		Time       uint32
 		Sender     *Sender
 		Elements   []IMessageElement
 	}
 
 	TempMessage struct {
-		Id        int32
+		Id        uint32
 		GroupUin  uint32
 		GroupName string
 		Self      uint32
@@ -58,12 +59,12 @@ type (
 	}
 
 	GroupMessage struct {
-		Id             int32
-		InternalId     int32
+		Id             uint32
+		InternalId     uint32
 		GroupUin       uint32
 		GroupName      string
 		Sender         *Sender
-		Time           uint64
+		Time           uint32
 		Elements       []IMessageElement
 		OriginalObject *message.PushMsgBody
 	}
@@ -99,16 +100,16 @@ func (s *Sender) IsAnonymous() bool {
 
 func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 	prvMsg := &PrivateMessage{
-		Id:         int32(msg.Message.ContentHead.Sequence.Unwrap()),
-		InternalId: int32(msg.Message.ContentHead.MsgId.Unwrap()),
-		Self:       int64(msg.Message.ResponseHead.ToUin),
-		Target:     int64(msg.Message.ResponseHead.FromUin),
+		Id:         (msg.Message.ContentHead.Sequence.Unwrap()),
+		InternalId: (msg.Message.ContentHead.MsgId.Unwrap()),
+		Self:       (msg.Message.ResponseHead.ToUin),
+		Target:     (msg.Message.ResponseHead.FromUin),
 		Sender: &Sender{
 			Uin:      msg.Message.ResponseHead.FromUin,
 			Uid:      msg.Message.ResponseHead.FromUid.Unwrap(),
 			IsFriend: true,
 		},
-		Time:     int32(msg.Message.ContentHead.TimeStamp.Unwrap()),
+		Time:     msg.Message.ContentHead.TimeStamp.Unwrap(),
 		Elements: parseMessageElements(msg.Message.Body.RichText.Elems),
 	}
 	if msg.Message != nil && msg.Message.Body != nil {
@@ -120,8 +121,8 @@ func ParsePrivateMessage(msg *message.PushMsg) *PrivateMessage {
 
 func ParseGroupMessage(msg *message.PushMsg) *GroupMessage {
 	grpMsg := &GroupMessage{
-		Id:         int32(msg.Message.ContentHead.Sequence.Unwrap()),
-		InternalId: int32(msg.Message.ContentHead.MsgId.Unwrap()),
+		Id:         msg.Message.ContentHead.Sequence.Unwrap(),
+		InternalId: msg.Message.ContentHead.MsgId.Unwrap(),
 		GroupUin:   msg.Message.ResponseHead.Grp.GroupUin,
 		GroupName:  msg.Message.ResponseHead.Grp.GroupName,
 		Sender: &Sender{

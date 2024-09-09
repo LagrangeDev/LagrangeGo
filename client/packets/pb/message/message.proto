@@ -11,9 +11,9 @@ message ContentHead {
   uint32 Type = 1;
   optional uint32 SubType = 2;
   optional uint32 DivSeq = 3;
-  optional uint64 MsgId = 4;
+  optional uint32 MsgId = 4;
   optional uint32 Sequence = 5;
-  optional uint64 TimeStamp = 6;
+  optional uint32 TimeStamp = 6;
   optional uint64 Field7 = 7;
   optional uint32 Field8 = 8;
   optional uint32 Field9 = 9;

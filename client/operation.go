@@ -486,7 +486,7 @@ func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) err
 	}
 	body := message2.PackElementsToBody([]message2.IMessageElement{uploadedFileElement})
 	mr := crypto.RandU32()
-	ret, err := c.SendRawMessage(route, body, mr)
+	ret, _, err := c.SendRawMessage(route, body, mr)
 	if err != nil || ret.PrivateSequence == 0 {
 		return err
 	}

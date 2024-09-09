@@ -12,9 +12,9 @@ type ContentHead struct {
 	Type      uint32               `protobuf:"varint,1,opt"`
 	SubType   proto.Option[uint32] `protobuf:"varint,2,opt"`
 	DivSeq    proto.Option[uint32] `protobuf:"varint,3,opt"`
-	MsgId     proto.Option[uint64] `protobuf:"varint,4,opt"`
+	MsgId     proto.Option[uint32] `protobuf:"varint,4,opt"`
 	Sequence  proto.Option[uint32] `protobuf:"varint,5,opt"`
-	TimeStamp proto.Option[uint64] `protobuf:"varint,6,opt"`
+	TimeStamp proto.Option[uint32] `protobuf:"varint,6,opt"`
 	Field7    proto.Option[uint64] `protobuf:"varint,7,opt"`
 	Field8    proto.Option[uint32] `protobuf:"varint,8,opt"`
 	Field9    proto.Option[uint32] `protobuf:"varint,9,opt"`
