@@ -264,6 +264,35 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	return oidb2.ParsePokeResp(resp)
 }
 
+func (c *QQClient) RecallFriendMessage(uin, seq, random, clientSeq, timestamp uint32) error {
+	packet := message.C2CRecallMsg{
+		Type:      1,
+		TargetUid: c.GetUid(uin),
+		Info: &message.C2CRecallMsgInfo{
+			ClientSequence:  clientSeq,
+			Random:          random,
+			MessageId:       0x10000000<<32 | uint64(random),
+			Timestamp:       timestamp,
+			Field5:          0,
+			MessageSequence: seq,
+		},
+		Settings: &message.C2CRecallMsgSettings{
+			Field1: false,
+			Field2: false,
+		},
+		Field6: false,
+	}
+	pkt, err := proto.Marshal(&packet)
+	if err != nil {
+		return err
+	}
+	_, err = c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoC2CRecallMsg", pkt)
+	if err != nil {
+		return err
+	}
+	return nil // sbtx不报错
+}
+
 // RecallGroupMessage 撤回群聊消息
 func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	packet := message.GroupRecallMsg{

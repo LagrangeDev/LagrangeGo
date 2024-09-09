@@ -16,3 +16,28 @@ type C2C struct {
 	ReceiverUid proto.Option[string] `protobuf:"bytes,6,opt"`
 	_           [0]func()
 }
+
+type C2CRecallMsg struct {
+	Type      uint32                `protobuf:"varint,1,opt"`
+	TargetUid string                `protobuf:"bytes,3,opt"`
+	Info      *C2CRecallMsgInfo     `protobuf:"bytes,4,opt"`
+	Settings  *C2CRecallMsgSettings `protobuf:"bytes,5,opt"`
+	Field6    bool                  `protobuf:"varint,6,opt"`
+	_         [0]func()
+}
+
+type C2CRecallMsgInfo struct {
+	ClientSequence  uint32 `protobuf:"varint,1,opt"`
+	Random          uint32 `protobuf:"varint,2,opt"`
+	MessageId       uint64 `protobuf:"varint,3,opt"`
+	Timestamp       uint32 `protobuf:"varint,4,opt"`
+	Field5          uint32 `protobuf:"varint,5,opt"`
+	MessageSequence uint32 `protobuf:"varint,6,opt"`
+	_               [0]func()
+}
+
+type C2CRecallMsgSettings struct {
+	Field1 bool `protobuf:"varint,1,opt"`
+	Field2 bool `protobuf:"varint,2,opt"`
+	_      [0]func()
+}
