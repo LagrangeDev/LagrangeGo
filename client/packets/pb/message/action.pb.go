@@ -124,3 +124,15 @@ type SsoGetRoamMsgResponse struct {
 	Random    uint32         `protobuf:"varint,6,opt"`
 	Messages  []*PushMsgBody `protobuf:"bytes,7,rep"`
 }
+
+type SsoGetC2CMsg struct {
+	FriendUid     proto.Option[string] `protobuf:"bytes,2,opt"`
+	StartSequence uint32               `protobuf:"varint,3,opt"`
+	EndSequence   uint32               `protobuf:"varint,4,opt"`
+	_             [0]func()
+}
+
+type SsoGetC2CMsgResponse struct {
+	FriendUid string         `protobuf:"bytes,4,opt"`
+	Messages  []*PushMsgBody `protobuf:"bytes,7,rep"`
+}
