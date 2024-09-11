@@ -107,3 +107,14 @@ message SsoGetRoamMsgResponse {
   uint32 Random = 6;
   repeated PushMsgBody Messages = 7;
 }
+
+message SsoGetC2cMsg {
+  optional string FriendUid = 2;
+  uint32 StartSequence = 3;
+  uint32 EndSequence = 4;
+}
+
+message SsoGetC2cMsgResponse {
+  string FriendUid = 4;
+  repeated PushMsgBody Messages = 7;
+}
