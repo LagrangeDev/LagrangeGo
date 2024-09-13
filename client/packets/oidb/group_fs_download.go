@@ -2,6 +2,7 @@ package oidb
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
@@ -23,6 +24,9 @@ func ParseGroupFSDownloadResp(data []byte) (string, error) {
 	var resp oidb.OidbSvcTrpcTcp0X6D6Response
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
 		return "", err
+	}
+	if resp.Download.RetCode != 0 {
+		return "", errors.New(resp.Download.ClientWording)
 	}
 	hexUrl := hex.EncodeToString(resp.Download.DownloadUrl)
 	url := fmt.Sprintf("https://%s:443/ftn_handler/%s/?fname=", resp.Download.DownloadIp, hexUrl)

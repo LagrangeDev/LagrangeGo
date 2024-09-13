@@ -251,10 +251,10 @@ func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
 }
 
 func NewVideo(data, thumb []byte, Summary ...string) *ShortVideoElement {
-	return NewSteramVideo(bytes.NewReader(data), bytes.NewReader(thumb), Summary...)
+	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), Summary...)
 }
 
-func NewSteramVideo(r io.ReadSeeker, thumb io.ReadSeeker, Summary ...string) *ShortVideoElement {
+func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, Summary ...string) *ShortVideoElement {
 	var summary string
 	if len(Summary) != 0 {
 		summary = Summary[0]
@@ -276,7 +276,7 @@ func NewFileVideo(path string, thumb []byte, Summary ...string) (*ShortVideoElem
 	if err != nil {
 		return nil, err
 	}
-	return NewSteramVideo(file, bytes.NewReader(thumb), Summary...), nil
+	return NewStreamVideo(file, bytes.NewReader(thumb), Summary...), nil
 }
 
 func NewVideoThumb(r io.ReadSeeker) *VideoThumb {
@@ -328,14 +328,13 @@ func NewLightApp(content string) *LightAppElement {
 	}
 }
 
-func NewFoward(resid string) *ForwardMessage {
-	// TODO 根据resid获取node内容
+func NewForward(resid string) *ForwardMessage {
 	return &ForwardMessage{
 		ResID: resid,
 	}
 }
 
-func NewNodeFoward(nodes []*ForwardNode) *ForwardMessage {
+func NewNodeForward(nodes []*ForwardNode) *ForwardMessage {
 	return &ForwardMessage{
 		Nodes: nodes,
 	}

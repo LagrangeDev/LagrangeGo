@@ -1,6 +1,8 @@
 package oidb
 
 import (
+	"errors"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/message"
 )
@@ -26,5 +28,12 @@ func BuildGroupFileUploadReq(groupUin uint32, file *message.FileElement, targetD
 }
 
 func ParseGroupFileUploadResp(data []byte) (*oidb.OidbSvcTrpcTcp0X6D6Response, error) {
-	return ParseTypedError[oidb.OidbSvcTrpcTcp0X6D6Response](data)
+	var resp oidb.OidbSvcTrpcTcp0X6D6Response
+	if _, err := ParseOidbPacket(data, &resp); err != nil {
+		return nil, err
+	}
+	if resp.Upload.RetCode != 0 {
+		return nil, errors.New(resp.Upload.ClientWording)
+	}
+	return &resp, nil
 }

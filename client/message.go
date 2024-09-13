@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
@@ -98,7 +99,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 	resp := &message2.PrivateMessage{
 		Id:         ret.PrivateSequence,
 		InternalId: mr,
-		CleintSeq:  clientSeq,
+		ClientSeq:  clientSeq,
 		Self:       c.Uin,
 		Target:     uin,
 		Time:       ret.Timestamp1,
@@ -143,6 +144,54 @@ func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []messa
 		Elements: elements,
 	}
 	return resp, nil
+}
+
+// BuildFakeMessage make a fake message
+func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message.PushMsgBody {
+	body := make([]*message.PushMsgBody, len(msgElems))
+	for idx, elem := range msgElems {
+		avatar := fmt.Sprintf("https://q.qlogo.cn/headimg_dl?dst_uin=%d&spec=640&img_type=jpg", elem.SenderId)
+		body[idx] = &message.PushMsgBody{
+			ResponseHead: &message.ResponseHead{
+				FromUid: proto.String(""),
+			},
+			ContentHead: &message.ContentHead{
+				Type:      uint32(utils.Ternary(elem.GroupId != 0, 82, 9)),
+				MsgId:     proto.Uint32(crypto.RandU32()),
+				Sequence:  proto.Uint32(crypto.RandU32()),
+				TimeStamp: proto.Uint32(uint32(utils.TimeStamp())),
+				Field7:    proto.Uint64(1),
+				Field8:    proto.Uint32(0),
+				Field9:    proto.Uint32(0),
+				Foward: &message.ForwardHead{
+					Field1:        proto.Uint32(0),
+					Field2:        proto.Uint32(0),
+					Field3:        utils.Ternary(elem.GroupId != 0, proto.Uint32(0), proto.Uint32(2)),
+					UnknownBase64: proto.String(avatar),
+					Avatar:        proto.String(avatar),
+				},
+			},
+		}
+		if elem.GroupId != 0 {
+			body[idx].ResponseHead.FromUin = uint32(elem.SenderId)
+			body[idx].ResponseHead.Grp = &message.ResponseGrp{
+				GroupUin:   uint32(elem.GroupId),
+				MemberName: elem.SenderName,
+				Unknown5:   2,
+			}
+			c.preProcessGroupMessage(uint32(elem.GroupId), elem.Message)
+		} else {
+			body[idx].ResponseHead.ToUid = proto.String(c.GetUid(c.Uin))
+			body[idx].ResponseHead.Forward = &message.ResponseForward{
+				FriendName: proto.String(elem.SenderName),
+			}
+			body[idx].ContentHead.SubType = proto.Uint32(4)
+			body[idx].ContentHead.DivSeq = proto.Uint32(4)
+			c.preProcessPrivateMessage(c.Uin, elem.Message)
+		}
+		body[idx].Body = message2.PackElementsToBody(elem.Message)
+	}
+	return body
 }
 
 func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.IMessageElement) []message2.IMessageElement {

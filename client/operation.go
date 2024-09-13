@@ -3,16 +3,15 @@ package client
 import (
 	"errors"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
+	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 // FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
@@ -705,4 +704,74 @@ func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
 		return err
 	}
 	return oidb2.ParseGroupFolderDeleteResp(resp)
+}
+
+// FetchForwardMsg 获取合并转发消息
+func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, err error) {
+	if resId == "" {
+		return msg, errors.New("empty resId")
+	}
+	forwardMsg := &message2.ForwardMessage{ResID: resId}
+	pkt, err := messagePkt.BuildMultiMsgDownloadReq(c.GetUid(c.Uin), resId)
+	if err != nil {
+		return forwardMsg, err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.group.long_msg_interface.MsgService.SsoRecvLongMsg", pkt)
+	if err != nil {
+		return forwardMsg, err
+	}
+	pasted, err := messagePkt.ParseMultiMsgDownloadResp(resp)
+	if err != nil {
+		return forwardMsg, err
+	}
+	if pasted.Result == nil || pasted.Result.Payload == nil {
+		return forwardMsg, errors.New("empty response data")
+	}
+	data := binary.GZipUncompress(pasted.Result.Payload)
+	result := &message.LongMsgResult{}
+	if err = proto.Unmarshal(data, result); err != nil {
+		return forwardMsg, err
+	}
+	forwardMsg.Nodes = make([]*message2.ForwardNode, len(result.Action.ActionData.MsgBody))
+	for idx, b := range result.Action.ActionData.MsgBody {
+		isGroupMsg := b.ResponseHead.Grp != nil
+		forwardMsg.Nodes[idx] = &message2.ForwardNode{
+			SenderId:   int64(b.ResponseHead.FromUin),
+			SenderName: b.ResponseHead.Forward.FriendName.Unwrap(),
+			Time:       int32(b.ContentHead.TimeStamp.Unwrap()),
+		}
+		if isGroupMsg {
+			forwardMsg.Nodes[idx].GroupId = int64(b.ResponseHead.Grp.GroupUin)
+			grpMsg := message2.ParseGroupMessage(b)
+			c.PreprocessGroupMessageEvent(grpMsg)
+			forwardMsg.Nodes[idx].Message = grpMsg.Elements
+		} else {
+			prvMsg := message2.ParsePrivateMessage(b)
+			c.PreprocessPrivateMessageEvent(prvMsg)
+			forwardMsg.Nodes[idx].Message = prvMsg.Elements
+		}
+	}
+	return forwardMsg, nil
+}
+
+// UploadForwardMsg 上传合并转发消息
+// groupUin should be the group number where the uploader is located or 0 (c2c)
+func (c *QQClient) UploadForwardMsg(forwardNodes []*message2.ForwardNode, groupUin uint32) (resId string, err error) {
+	msgBody := c.BuildFakeMessage(forwardNodes)
+	pkt, err := messagePkt.BuildMultiMsgUploadReq(c.GetUid(c.Uin), groupUin, msgBody)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.group.long_msg_interface.MsgService.SsoSendLongMsg", pkt)
+	if err != nil {
+		return "", err
+	}
+	pasted, err := messagePkt.ParseMultiMsgUploadResp(resp)
+	if err != nil {
+		return "", err
+	}
+	if pasted.Result == nil {
+		return "", errors.New("empty response data")
+	}
+	return pasted.Result.ResId, nil
 }

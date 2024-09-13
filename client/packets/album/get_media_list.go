@@ -21,7 +21,7 @@ func BuildGetMediaListReq(selfUin uint32, groupUin uint32, albumId string, pageI
 			Field4:   "",
 			PageInfo: pageInfo,
 		},
-		UinTimeStamp: utils.GenerateUinTimestamp(selfUin),
+		UinTimeStamp: utils.UinTimestamp(selfUin),
 		Field10: &album.QzoneGetMediaList_F10{
 			AppIdFlag:  "fc-appid",
 			AppIdValue: "100",

@@ -39,8 +39,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	}
 	switch typ {
 	case 166, 208, 529: // 166 for private msg, 208 for private record, 529 for private file
-		prvMsg := msgConverter.ParsePrivateMessage(&msg)
-		_ = c.PreprocessPrivateMessageEvent(prvMsg)
+		prvMsg := msgConverter.ParsePrivateMessage(pkg)
+		c.PreprocessPrivateMessageEvent(prvMsg)
 		if prvMsg.Sender.Uin != c.Uin {
 			c.PrivateMessageEvent.dispatch(c, prvMsg)
 		} else {
@@ -48,8 +48,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		return nil, nil
 	case 82: // group msg
-		grpMsg := msgConverter.ParseGroupMessage(&msg)
-		_ = c.PreprocessGroupMessageEvent(grpMsg)
+		grpMsg := msgConverter.ParseGroupMessage(pkg)
+		c.PreprocessGroupMessageEvent(grpMsg)
 		if grpMsg.Sender.Uin != c.Uin {
 			c.GroupMessageEvent.dispatch(c, grpMsg)
 		} else {
@@ -57,7 +57,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		return nil, nil
 	case 141: // temp msg
-		tempMsg := msgConverter.ParseTempMessage(&msg)
+		tempMsg := msgConverter.ParseTempMessage(pkg)
 		if tempMsg.Sender.Uin != c.Uin {
 			c.TempMessageEvent.dispatch(c, tempMsg)
 		} else {
@@ -325,7 +325,7 @@ func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
 	return nil, nil
 }
 
-func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) error {
+func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) {
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
@@ -340,18 +340,25 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) e
 		case *msgConverter.ShortVideoElement:
 			url, err := c.GetVideoUrl(true, e)
 			if err != nil {
-				return err
+				continue
 			}
 			e.Url = url
 		case *msgConverter.FileElement:
 			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileId)
 			e.FileUrl = url
+		case *msgConverter.ForwardMessage:
+			if e.Nodes == nil {
+				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
+					continue
+				} else {
+					e.Nodes = forward.Nodes
+				}
+			}
 		}
 	}
-	return nil
 }
 
-func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessage) error {
+func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessage) {
 	if friend := c.GetCachedFriendInfo(msg.Sender.Uin); friend != nil {
 		msg.Sender.Nickname = friend.Nickname
 	}
@@ -366,24 +373,31 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 		case *msgConverter.VoiceElement:
 			url, err := c.GetPrivateRecordUrl(e.Node)
 			if err != nil {
-				return err
+				continue
 			}
 			e.Url = url
 		case *msgConverter.ShortVideoElement:
 			url, err := c.GetVideoUrl(false, e)
 			if err != nil {
-				return err
+				continue
 			}
 			e.Url = url
 		case *msgConverter.FileElement:
 			url, err := c.GetPrivateFileUrl(e.FileUUID, e.FileHash)
 			if err != nil {
-				return err
+				continue
 			}
 			e.FileUrl = url
+		case *msgConverter.ForwardMessage:
+			if e.Nodes == nil {
+				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
+					continue
+				} else {
+					e.Nodes = forward.Nodes
+				}
+			}
 		}
 	}
-	return nil
 }
 
 func (c *QQClient) PreprocessOther(g eventConverter.CanPreprocess) error {
