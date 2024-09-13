@@ -35,6 +35,7 @@ type ResponseForward struct {
 type ResponseGrp struct {
 	GroupUin   uint32 `protobuf:"varint,1,opt"`
 	MemberName string `protobuf:"bytes,4,opt"`
+	Unknown5   uint32 `protobuf:"varint,5,opt"`
 	GroupName  string `protobuf:"bytes,7,opt"`
 	_          [0]func()
 }

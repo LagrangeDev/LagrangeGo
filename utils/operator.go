@@ -7,12 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	"time"
 )
-
-func TimeStamp() int64 {
-	return time.Now().Unix()
-}
 
 func ReadLine(s string) string {
 	inputReader := bufio.NewReader(os.Stdin)

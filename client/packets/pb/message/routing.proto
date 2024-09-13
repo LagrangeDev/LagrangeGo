@@ -26,6 +26,7 @@ message ResponseForward {
 message ResponseGrp {
   uint32 GroupUin = 1;
   string MemberName = 4;
+  uint32 Unknown5 = 5;
   string GroupName = 7;
 }
 
