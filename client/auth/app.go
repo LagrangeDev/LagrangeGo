@@ -54,6 +54,29 @@ var AppList = map[string]map[string]*AppInfo{
 			SubSigmap:   0,
 			NTLoginType: 1,
 		},
+
+		"3.2.12-27597": {
+			OS:       "Linux",
+			Kernel:   "Linux",
+			VendorOS: "linux",
+
+			CurrentVersion:   "3.2.12-27597",
+			BuildVersion:     27597,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      19,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_LNX_NQ_3.2.12_27597_GW_B",
+			AppID:            1600001615,
+			SubAppID:         537243600,
+			AppIDQrcode:      13697054,
+			AppClientVersion: 13172,
+
+			MainSigmap:  169742560,
+			SubSigmap:   0,
+			NTLoginType: 1,
+		},
 	},
 
 	"macos": {
@@ -96,6 +119,75 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_WIN_NQ_9.9.12-25493_GW_B",
 			AppID:            1600001604,
 			SubAppID:         537231759,
+			AppIDQrcode:      537138217,
+			AppClientVersion: 13172,
+
+			MainSigmap:  169742560,
+			SubSigmap:   0,
+			NTLoginType: 5,
+		},
+
+		"9.9.12-25765": {
+			OS:       "Windows",
+			Kernel:   "Windows_NT",
+			VendorOS: "win32",
+
+			CurrentVersion:   "9.9.12-25765",
+			BuildVersion:     25765,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      23,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_WIN_NQ_9.9.12-25765_GW_B",
+			AppID:            1600001604,
+			SubAppID:         537234702,
+			AppIDQrcode:      537138217,
+			AppClientVersion: 13172,
+
+			MainSigmap:  169742560,
+			SubSigmap:   0,
+			NTLoginType: 5,
+		},
+
+		"9.9.15-27597": {
+			OS:       "Windows",
+			Kernel:   "Windows_NT",
+			VendorOS: "win32",
+
+			CurrentVersion:   "9.9.15-27597",
+			BuildVersion:     27597,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      23,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_WIN_NQ_9.9.15-27597_GW_B",
+			AppID:            1600001604,
+			SubAppID:         537243441,
+			AppIDQrcode:      537138217,
+			AppClientVersion: 13172,
+
+			MainSigmap:  169742560,
+			SubSigmap:   0,
+			NTLoginType: 5,
+		},
+
+		"9.9.15-28060": { //此版本在某种意义上跨度较大
+			OS:       "Windows",
+			Kernel:   "Windows_NT",
+			VendorOS: "win32",
+
+			CurrentVersion:   "9.9.15-28060",
+			BuildVersion:     28060,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      23,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_WIN_NQ_9.9.15-28060_GW_B",
+			AppID:            1600001604,
+			SubAppID:         537246092,
 			AppIDQrcode:      537138217,
 			AppClientVersion: 13172,
 
