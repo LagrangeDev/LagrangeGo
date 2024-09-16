@@ -400,33 +400,91 @@ func (msg *GroupMessage) ToString() string {
 	return ToReadableString(msg.Elements)
 }
 
+func (msg *GroupMessage) GetElements() []IMessageElement {
+	return msg.Elements
+}
+
+func (msg *GroupMessage) Chat() int64 {
+	return int64(msg.Id)
+}
+
+func (msg *GroupMessage) Texts() []string {
+	var texts []string
+	for _, elem := range msg.Elements {
+		texts = append(texts, ToReadableStringEle(elem))
+	}
+	return texts
+}
+
 func (msg *PrivateMessage) ToString() string {
 	return ToReadableString(msg.Elements)
+}
+
+func (msg *PrivateMessage) GetElements() []IMessageElement {
+	return msg.Elements
+}
+
+func (msg *PrivateMessage) Chat() int64 {
+	return int64(msg.Id)
+}
+
+func (msg *PrivateMessage) Texts() []string {
+	var texts []string
+	for _, elem := range msg.Elements {
+		texts = append(texts, ToReadableStringEle(elem))
+	}
+	return texts
+}
+
+func (msg *TempMessage) ToString() string {
+	return ToReadableString(msg.Elements)
+}
+
+func (msg *TempMessage) GetElements() []IMessageElement {
+	return msg.Elements
+}
+
+func (msg *TempMessage) Chat() int64 {
+	return int64(msg.Id)
+}
+
+func (msg *TempMessage) Texts() []string {
+	var texts []string
+	for _, elem := range msg.Elements {
+		texts = append(texts, ToReadableStringEle(elem))
+	}
+	return texts
 }
 
 func ToReadableString(m []IMessageElement) string {
 	sb := new(strings.Builder)
 	for _, elem := range m {
-		switch e := elem.(type) {
-		case *TextElement:
-			sb.WriteString(e.Content)
-		case *ImageElement:
-			sb.WriteString("[图片]")
-		case *AtElement:
-			sb.WriteString(e.Display)
-		case *ReplyElement:
-			sb.WriteString("[回复]")
-		case *FaceElement:
-			sb.WriteString("[表情]")
-		case *VoiceElement:
-			sb.WriteString("[语音]")
-		case *LightAppElement:
-			sb.WriteString("[卡片消息]")
-		case *ForwardMessage:
-			sb.WriteString("[转发消息]")
-		}
+		sb.WriteString(ToReadableStringEle(elem))
 	}
 	return sb.String()
+}
+
+func ToReadableStringEle(elem IMessageElement) string {
+	switch e := elem.(type) {
+	case *TextElement:
+		return e.Content
+	case *ImageElement:
+		return "[图片]"
+	case *AtElement:
+		return e.Display
+	case *ReplyElement:
+		return "[回复]" // [Optional] + ToReadableString(e.Elements), 这里不破坏原义不添加
+	case *FaceElement:
+		return "[表情]"
+	case *VoiceElement:
+		return "[语音]"
+	case *LightAppElement:
+		return "[卡片消息]"
+	case *ForwardMessage:
+		return "[转发消息]"
+	default:
+		return "[暂不支持该消息类型]"
+	}
 }
 
 func NewSendingMessage() *SendingMessage {
