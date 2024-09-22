@@ -93,6 +93,26 @@ func (c *QQClient) GetCachedMembersInfo(groupUin uint32) map[uint32]*entity.Grou
 	return c.cache.GetGroupMembers(groupUin)
 }
 
+// GetCachedRkeyInfo 获取指定类型的RKey信息(缓存)
+func (c *QQClient) GetCachedRkeyInfo(rkeyType entity.RKeyType) *entity.RKeyInfo {
+	if c.cache.RkeyInfoCacheIsEmpty() || c.cache.RkeyInfoCacheIsExpired() {
+		if err := c.RefreshAllRkeyInfoCache(); err != nil {
+			return nil
+		}
+	}
+	return c.cache.GetRKeyInfo(rkeyType)
+}
+
+// GetCachedRkeyInfos 获取所有RKey信息(缓存)
+func (c *QQClient) GetCachedRkeyInfos() map[entity.RKeyType]*entity.RKeyInfo {
+	if c.cache.RkeyInfoCacheIsEmpty() || c.cache.RkeyInfoCacheIsExpired() {
+		if err := c.RefreshAllRkeyInfoCache(); err != nil {
+			return nil
+		}
+	}
+	return c.cache.GetAllRkeyInfo()
+}
+
 // RefreshFriendCache 刷新好友缓存
 func (c *QQClient) RefreshFriendCache() error {
 	friendsData, err := c.GetFriendsData()
@@ -140,6 +160,16 @@ func (c *QQClient) RefreshAllGroupsInfo() error {
 		return err
 	}
 	c.cache.RefreshAllGroup(groupsData)
+	return nil
+}
+
+// RefreshAllRkeyInfoCache 刷新RKey缓存
+func (c *QQClient) RefreshAllRkeyInfoCache() error {
+	rkeyInfo, err := c.FetchRkey()
+	if err != nil {
+		return err
+	}
+	c.cache.RefreshAllRKeyInfo(rkeyInfo)
 	return nil
 }
 
