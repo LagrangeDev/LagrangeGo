@@ -154,6 +154,7 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 		body[idx] = &message.PushMsgBody{
 			ResponseHead: &message.ResponseHead{
 				FromUid: proto.String(""),
+				FromUin: uint32(elem.SenderId),
 			},
 			ContentHead: &message.ContentHead{
 				Type:      uint32(utils.Ternary(elem.GroupId != 0, 82, 9)),
@@ -173,7 +174,6 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 			},
 		}
 		if elem.GroupId != 0 {
-			body[idx].ResponseHead.FromUin = uint32(elem.SenderId)
 			body[idx].ResponseHead.Grp = &message.ResponseGrp{
 				GroupUin:   uint32(elem.GroupId),
 				MemberName: elem.SenderName,
