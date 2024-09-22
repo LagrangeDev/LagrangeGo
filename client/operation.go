@@ -470,6 +470,19 @@ func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
 	return oidb2.ParseSetFriendRequestResp(resp)
 }
 
+// FetchRkey 获取Rkey
+func (c *QQClient) FetchRkey() (entity.RKeyMap, error) {
+	pkt, err := oidb2.BuildFetchRKeyReq()
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseFetchRKeyResp(resp)
+}
+
 // FetchClientKey 获取ClientKey
 func (c *QQClient) FetchClientKey() (string, error) {
 	pkt, err := oidb2.BuildFetchClientKeyReq()
@@ -483,7 +496,7 @@ func (c *QQClient) FetchClientKey() (string, error) {
 	return oidb2.ParseFetchClientKeyResp(resp)
 }
 
-// FetchCookies 获取cooikes
+// FetchCookies 获取cookies
 func (c *QQClient) FetchCookies(domains []string) ([]string, error) {
 	pkt, err := oidb2.BuildFetchCookieReq(domains)
 	if err != nil {

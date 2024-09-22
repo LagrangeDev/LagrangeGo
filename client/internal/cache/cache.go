@@ -96,6 +96,22 @@ func (c *Cache) GetGroupMembers(groupUin uint32) map[uint32]*entity.GroupMember 
 	return members
 }
 
+// GetRKeyInfo 获取指定类型的RKey信息
+func (c *Cache) GetRKeyInfo(rkeyType entity.RKeyType) *entity.RKeyInfo {
+	v, _ := getCacheOf[entity.RKeyInfo](c, rkeyType)
+	return v
+}
+
+// GetAllRkeyInfo 获取所有RKey信息
+func (c *Cache) GetAllRkeyInfo() entity.RKeyMap {
+	infos := make(map[entity.RKeyType]*entity.RKeyInfo, 2)
+	rangeCacheOf[entity.RKeyInfo](c, func(k entity.RKeyType, v *entity.RKeyInfo) bool {
+		infos[k] = v
+		return true
+	})
+	return infos
+}
+
 // FriendCacheIsEmpty 好友信息缓存是否为空
 func (c *Cache) FriendCacheIsEmpty() bool {
 	return !hasRefreshed[entity.Friend](c)
@@ -117,4 +133,13 @@ func (c *Cache) GroupMemberCacheIsEmpty(groupUin uint32) bool {
 // GroupInfoCacheIsEmpty 群信息缓存是否为空
 func (c *Cache) GroupInfoCacheIsEmpty() bool {
 	return !hasRefreshed[entity.Group](c)
+}
+
+// RkeyInfoCacheIsEmpty RKey缓存是否为空
+func (c *Cache) RkeyInfoCacheIsEmpty() bool {
+	return !hasRefreshed[entity.RKeyInfo](c)
+}
+
+func (c *Cache) RkeyInfoCacheIsExpired() bool {
+	return hasExpired[entity.RKeyInfo](c)
 }

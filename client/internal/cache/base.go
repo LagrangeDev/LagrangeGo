@@ -2,19 +2,26 @@ package cache
 
 import (
 	"reflect"
+	"time"
 	"unsafe"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/RomiChan/syncx"
 )
 
-type cacheType uint32
+type (
+	cacheType uint32
+	KeyType   interface {
+		~uint32
+	}
+)
 
 const (
 	cacheTypeCache cacheType = 1 << iota
 	cacheTypeFriend
 	cacheTypeGroupInfo
 	cacheTypeGroupMember
+	cacheTypeRKey
 )
 
 func typenameof[T any]() string {
@@ -26,11 +33,13 @@ var cacheTypesMap = map[string]cacheType{
 	typenameof[entity.Friend]():      cacheTypeFriend,
 	typenameof[entity.Group]():       cacheTypeGroupInfo,
 	typenameof[entity.GroupMember](): cacheTypeGroupMember,
+	typenameof[entity.RKeyInfo]():    cacheTypeRKey,
 }
 
 type Cache struct {
-	m         syncx.Map[uint64, unsafe.Pointer]
-	refreshed syncx.Map[cacheType, struct{}]
+	m           syncx.Map[uint64, unsafe.Pointer]
+	refreshed   syncx.Map[cacheType, struct{}]
+	expiredTime syncx.Map[cacheType, int64]
 }
 
 func hasRefreshed[T any](c *Cache) bool {
@@ -42,7 +51,16 @@ func hasRefreshed[T any](c *Cache) bool {
 	return ok
 }
 
-func refreshAllCacheOf[T any](c *Cache, newcache map[uint32]*T) {
+func hasExpired[T any](c *Cache) bool {
+	typ := cacheTypesMap[reflect.ValueOf((*T)(nil)).Type().String()]
+	if typ == 0 {
+		return false
+	}
+	v, ok := c.expiredTime.Load(typ)
+	return ok && v <= time.Now().Unix()
+}
+
+func refreshAllCacheOf[T any, K KeyType](c *Cache, newcache map[K]*T) {
 	typstr := reflect.ValueOf((*T)(nil)).Type().String()
 	typ := cacheTypesMap[typstr]
 	if typ == 0 {
@@ -53,7 +71,7 @@ func refreshAllCacheOf[T any](c *Cache, newcache map[uint32]*T) {
 	dellst := make([]uint64, 0, 64)
 	c.m.Range(func(k uint64, v unsafe.Pointer) bool {
 		if k&key != 0 {
-			if _, ok := newcache[uint32(k)]; !ok {
+			if _, ok := newcache[K(uint32(k))]; !ok {
 				dellst = append(dellst, k)
 			}
 		}
@@ -67,7 +85,12 @@ func refreshAllCacheOf[T any](c *Cache, newcache map[uint32]*T) {
 	}
 }
 
-func setCacheOf[T any](c *Cache, k uint32, v *T) {
+func refreshAllExpiredCacheOf[T any, K KeyType](c *Cache, newcache map[K]*T, newextime int64) {
+	refreshAllCacheOf(c, newcache)
+	c.expiredTime.Store(cacheTypesMap[reflect.ValueOf((*T)(nil)).Type().String()], newextime)
+}
+
+func setCacheOf[T any, K KeyType](c *Cache, k K, v *T) {
 	typstr := reflect.ValueOf(v).Type().String()
 	typ := cacheTypesMap[typstr]
 	if typ == 0 {
@@ -77,7 +100,7 @@ func setCacheOf[T any](c *Cache, k uint32, v *T) {
 	c.m.Store(key, unsafe.Pointer(v))
 }
 
-func getCacheOf[T any](c *Cache, k uint32) (v *T, ok bool) {
+func getCacheOf[T any, K KeyType](c *Cache, k K) (v *T, ok bool) {
 	typstr := reflect.ValueOf(v).Type().String()
 	typ := cacheTypesMap[typstr]
 	if typ == 0 {
@@ -91,7 +114,7 @@ func getCacheOf[T any](c *Cache, k uint32) (v *T, ok bool) {
 	return
 }
 
-func rangeCacheOf[T any](c *Cache, iter func(k uint32, v *T) bool) {
+func rangeCacheOf[T any, K KeyType](c *Cache, iter func(k K, v *T) bool) {
 	typ := cacheTypesMap[reflect.ValueOf((*T)(nil)).Type().String()]
 	if typ == 0 {
 		return
@@ -99,7 +122,7 @@ func rangeCacheOf[T any](c *Cache, iter func(k uint32, v *T) bool) {
 	key := uint64(typ) << 32
 	c.m.Range(func(k uint64, v unsafe.Pointer) bool {
 		if k&key != 0 {
-			return iter(uint32(k), (*T)(v))
+			return iter(K(uint32(k)), (*T)(v))
 		}
 		return true
 	})
