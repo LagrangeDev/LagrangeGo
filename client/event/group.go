@@ -99,6 +99,16 @@ type (
 		Action   string
 	}
 
+	GroupReactionEvent struct {
+		GroupUin    uint32
+		TargetSeq   uint32
+		OperatorUid string
+		OperatorUin uint32
+		IsAdd       bool
+		Code        string
+		Count       uint32
+	}
+
 	// MemberSpecialTitleUpdated 群成员头衔更新事件 from miraigo
 	MemberSpecialTitleUpdated struct {
 		GroupUin uint32
@@ -298,7 +308,7 @@ func ParseGroupDigestEvent(event *message.NotifyMessageBody) *GroupDigestEvent {
 	}
 }
 
-func PaeseGroupPokeEvent(event *message.NotifyMessageBody, groupUin uint32) *GroupPokeEvent {
+func ParseGroupPokeEvent(event *message.NotifyMessageBody, groupUin uint32) *GroupPokeEvent {
 	e := ParsePokeEvent(event.GrayTipInfo)
 	return &GroupPokeEvent{
 		GroupUin: groupUin,
@@ -324,6 +334,21 @@ func ParseGroupMemberSpecialTitleUpdatedEvent(event *message.GroupSpecialTitle, 
 		GroupUin: groupUin,
 		Uin:      event.TargetUin,
 		NewTitle: medalData.Text,
+	}
+}
+
+func (g *GroupReactionEvent) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
+	g.OperatorUin = f(g.OperatorUid, g.GroupUin)
+}
+
+func ParseGroupReactionEvent(event *message.GroupReaction) *GroupReactionEvent {
+	return &GroupReactionEvent{
+		GroupUin:    event.GroupUid,
+		TargetSeq:   event.Data.Data.Data.Target.Sequence,
+		OperatorUid: event.Data.Data.Data.Data.OperatorUid,
+		IsAdd:       event.Data.Data.Data.Data.Type == 1,
+		Code:        event.Data.Data.Data.Data.Code,
+		Count:       event.Data.Data.Data.Data.Count,
 	}
 }
 

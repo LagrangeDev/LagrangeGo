@@ -112,6 +112,7 @@ type QQClient struct {
 	GroupRecallEvent                  EventHandle[*event.GroupRecall]
 	GroupMemberPermissionChangedEvent EventHandle[*event.GroupMemberPermissionChanged]
 	GroupNameUpdatedEvent             EventHandle[*event.GroupNameUpdated]
+	GroupReactionEvent                EventHandle[*event.GroupReactionEvent]
 	MemberSpecialTitleUpdatedEvent    EventHandle[*event.MemberSpecialTitleUpdated]
 	NewFriendRequestEvent             EventHandle[*event.NewFriendRequest] // 好友申请
 	FriendRecallEvent                 EventHandle[*event.FriendRecall]
