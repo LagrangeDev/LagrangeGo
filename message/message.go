@@ -234,13 +234,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			}
 
 			res = append(res, &ImageElement{
-				FileId:  int64(elem.CustomFace.FileId),
 				ImageId: elem.CustomFace.FilePath,
 				Size:    elem.CustomFace.Size,
 				Width:   uint32(elem.CustomFace.Width),
 				Height:  uint32(elem.CustomFace.Height),
 				Url:     url,
 				Md5:     elem.CustomFace.Md5,
+				SubType: elem.CustomFace.PbRes.SubType,
+				Summary: elem.CustomFace.PbRes.Summary,
 			})
 		}
 
@@ -259,8 +260,12 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			res = append(res, &ImageElement{
 				ImageId: elem.NotOnlineImage.FilePath,
 				Size:    elem.NotOnlineImage.FileLen,
+				Width:   elem.NotOnlineImage.PicWidth,
+				Height:  elem.NotOnlineImage.PicHeight,
 				Url:     url,
 				Md5:     elem.NotOnlineImage.PicMd5,
+				SubType: elem.NotOnlineImage.PbRes.SubType,
+				Summary: elem.NotOnlineImage.PbRes.Summary,
 			})
 		}
 
@@ -277,13 +282,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				summary = extra.ExtBizInfo.Pic.TextSummary
 			}
 			res = append(res, &ImageElement{
-				ImageType: int32(extra.ExtBizInfo.Pic.BizType),
-				Summary:   summary,
-				Width:     index.Info.Width,
-				Height:    index.Info.Height,
-				ImageId:   index.Info.FileName,
-				Size:      index.Info.FileSize,
-				MsgInfo:   extra,
+				ImageId:  index.Info.FileName,
+				FileUUID: index.FileUuid,
+				SubType:  int32(extra.ExtBizInfo.Pic.BizType),
+				Summary:  summary,
+				Width:    index.Info.Width,
+				Height:   index.Info.Height,
+				Size:     index.Info.FileSize,
+				MsgInfo:  extra,
 			})
 		}
 

@@ -1,7 +1,12 @@
 package client
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
@@ -403,6 +408,59 @@ func (c *QQClient) GetPrivateFileUrl(fileUUID string, fileHash string) (string, 
 		return "", err
 	}
 	return oidb2.ParsePrivateFileDownloadResp(resp)
+}
+
+func (c *QQClient) queryImage(url string, method string) (*message2.ImageElement, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, method, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			return
+		}
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("file not found")
+	}
+	return &message2.ImageElement{
+		Url:  url,
+		Size: uint32(resp.ContentLength),
+	}, nil
+}
+
+func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
+	var url string
+	if fileUUID != "" {
+		rkeyInfo := c.GetCachedRkeyInfo(entity.GroupRKey)
+		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1407&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
+		return c.queryImage(url, http.MethodGet)
+	} else if len(md5) == 16 {
+		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
+		return c.queryImage(url, http.MethodHead)
+	} else {
+		return nil, errors.New("invalid parameters")
+	}
+}
+
+func (c *QQClient) QueryFriendImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
+	var url string
+	if fileUUID != "" {
+		rkeyInfo := c.GetCachedRkeyInfo(entity.FriendRKey)
+		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1406&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
+		return c.queryImage(url, http.MethodGet)
+	} else if len(md5) == 16 {
+		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
+		return c.queryImage(url, http.MethodHead)
+	} else {
+		return nil, errors.New("invalid parameters")
+	}
 }
 
 // FetchUserInfo 获取用户信息
