@@ -54,7 +54,7 @@ message CustomFace {
   string Shortcut = 3;
   bytes Buffer = 4;
   bytes Flag = 5;
-  bytes OldData = 6;
+  optional bytes OldData = 6;
   uint32 FileId = 7;
   optional int32 ServerIp = 8;
   optional int32 ServerPort = 9;
@@ -82,7 +82,11 @@ message CustomFace {
   optional string X400Url = 31;
   int32 X400Width = 32;
   int32 X400Height = 33;
-  optional bytes PbReserve = 34;
+  optional PbReserve PbRes = 34;
+  message PbReserve {
+    int32 SubType = 1;
+    string Summary = 9;
+  }
 }
 
 message ElemFlags2 {
@@ -219,7 +223,30 @@ message NotOnlineImage {
   int32 FileId = 23;
   uint32 ShowLen = 24;
   uint32 DownloadLen = 25;
-  bytes PbRes = 26;
+  string X400Url = 26;
+  int32 X400Width = 27;
+  int32 X400Height = 28;
+  PbReserve PbRes = 29;
+
+  message PbReserve {
+    int32 SubType = 1;
+    int32 Field3 = 3;
+    int32 Field4 = 4;
+    string Summary = 8;
+    int32 Field10 = 10;
+    PbReserve2 Field20 = 20;
+    string Url = 30;
+    string Md5Str = 31;
+
+    message PbReserve2 {
+      int32 Field1 = 1;
+      string Field2 = 2;
+      int32 Field3 = 3;
+      int32 Field4 = 4;
+      int32 Field5 = 5;
+      string Field7 = 7;
+    }
+  }
 }
 
 message OnlineImage {

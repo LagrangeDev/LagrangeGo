@@ -55,40 +55,40 @@ type CustomElem struct {
 }
 
 type CustomFace struct {
-	Guid        []byte               `protobuf:"bytes,1,opt"`
-	FilePath    string               `protobuf:"bytes,2,opt"`
-	Shortcut    string               `protobuf:"bytes,3,opt"`
-	Buffer      []byte               `protobuf:"bytes,4,opt"`
-	Flag        []byte               `protobuf:"bytes,5,opt"`
-	OldData     []byte               `protobuf:"bytes,6,opt"`
-	FileId      uint32               `protobuf:"varint,7,opt"`
-	ServerIp    proto.Option[int32]  `protobuf:"varint,8,opt"`
-	ServerPort  proto.Option[int32]  `protobuf:"varint,9,opt"`
-	FileType    int32                `protobuf:"varint,10,opt"`
-	Signature   []byte               `protobuf:"bytes,11,opt"`
-	Useful      int32                `protobuf:"varint,12,opt"`
-	Md5         []byte               `protobuf:"bytes,13,opt"`
-	ThumbUrl    string               `protobuf:"bytes,14,opt"`
-	BigUrl      string               `protobuf:"bytes,15,opt"`
-	OrigUrl     string               `protobuf:"bytes,16,opt"`
-	BizType     int32                `protobuf:"varint,17,opt"`
-	RepeatIndex int32                `protobuf:"varint,18,opt"`
-	RepeatImage int32                `protobuf:"varint,19,opt"`
-	ImageType   int32                `protobuf:"varint,20,opt"`
-	Index       int32                `protobuf:"varint,21,opt"`
-	Width       int32                `protobuf:"varint,22,opt"`
-	Height      int32                `protobuf:"varint,23,opt"`
-	Source      int32                `protobuf:"varint,24,opt"`
-	Size        uint32               `protobuf:"varint,25,opt"`
-	Origin      int32                `protobuf:"varint,26,opt"`
-	ThumbWidth  proto.Option[int32]  `protobuf:"varint,27,opt"`
-	ThumbHeight proto.Option[int32]  `protobuf:"varint,28,opt"`
-	ShowLen     int32                `protobuf:"varint,29,opt"`
-	DownloadLen int32                `protobuf:"varint,30,opt"`
-	X400Url     proto.Option[string] `protobuf:"bytes,31,opt"`
-	X400Width   int32                `protobuf:"varint,32,opt"`
-	X400Height  int32                `protobuf:"varint,33,opt"`
-	PbReserve   []byte               `protobuf:"bytes,34,opt"`
+	Guid        []byte                `protobuf:"bytes,1,opt"`
+	FilePath    string                `protobuf:"bytes,2,opt"`
+	Shortcut    string                `protobuf:"bytes,3,opt"`
+	Buffer      []byte                `protobuf:"bytes,4,opt"`
+	Flag        []byte                `protobuf:"bytes,5,opt"`
+	OldData     []byte                `protobuf:"bytes,6,opt"`
+	FileId      uint32                `protobuf:"varint,7,opt"`
+	ServerIp    proto.Option[int32]   `protobuf:"varint,8,opt"`
+	ServerPort  proto.Option[int32]   `protobuf:"varint,9,opt"`
+	FileType    int32                 `protobuf:"varint,10,opt"`
+	Signature   []byte                `protobuf:"bytes,11,opt"`
+	Useful      int32                 `protobuf:"varint,12,opt"`
+	Md5         []byte                `protobuf:"bytes,13,opt"`
+	ThumbUrl    string                `protobuf:"bytes,14,opt"`
+	BigUrl      string                `protobuf:"bytes,15,opt"`
+	OrigUrl     string                `protobuf:"bytes,16,opt"`
+	BizType     int32                 `protobuf:"varint,17,opt"`
+	RepeatIndex int32                 `protobuf:"varint,18,opt"`
+	RepeatImage int32                 `protobuf:"varint,19,opt"`
+	ImageType   int32                 `protobuf:"varint,20,opt"`
+	Index       int32                 `protobuf:"varint,21,opt"`
+	Width       int32                 `protobuf:"varint,22,opt"`
+	Height      int32                 `protobuf:"varint,23,opt"`
+	Source      int32                 `protobuf:"varint,24,opt"`
+	Size        uint32                `protobuf:"varint,25,opt"`
+	Origin      int32                 `protobuf:"varint,26,opt"`
+	ThumbWidth  proto.Option[int32]   `protobuf:"varint,27,opt"`
+	ThumbHeight proto.Option[int32]   `protobuf:"varint,28,opt"`
+	ShowLen     int32                 `protobuf:"varint,29,opt"`
+	DownloadLen int32                 `protobuf:"varint,30,opt"`
+	X400Url     proto.Option[string]  `protobuf:"bytes,31,opt"`
+	X400Width   int32                 `protobuf:"varint,32,opt"`
+	X400Height  int32                 `protobuf:"varint,33,opt"`
+	PbRes       *CustomFace_PbReserve `protobuf:"bytes,34,opt"`
 }
 
 type ElemFlags2 struct {
@@ -201,32 +201,35 @@ type MarketFace struct {
 }
 
 type NotOnlineImage struct {
-	FilePath       string `protobuf:"bytes,1,opt"`
-	FileLen        uint32 `protobuf:"varint,2,opt"`
-	DownloadPath   string `protobuf:"bytes,3,opt"`
-	OldVerSendFile []byte `protobuf:"bytes,4,opt"`
-	ImgType        int32  `protobuf:"varint,5,opt"`
-	PreviewsImage  []byte `protobuf:"bytes,6,opt"`
-	PicMd5         []byte `protobuf:"bytes,7,opt"`
-	PicHeight      uint32 `protobuf:"varint,8,opt"`
-	PicWidth       uint32 `protobuf:"varint,9,opt"`
-	ResId          string `protobuf:"bytes,10,opt"`
-	Flag           []byte `protobuf:"bytes,11,opt"`
-	ThumbUrl       string `protobuf:"bytes,12,opt"`
-	Original       int32  `protobuf:"varint,13,opt"`
-	BigUrl         string `protobuf:"bytes,14,opt"`
-	OrigUrl        string `protobuf:"bytes,15,opt"`
-	BizType        int32  `protobuf:"varint,16,opt"`
-	Result         int32  `protobuf:"varint,17,opt"`
-	Index          int32  `protobuf:"varint,18,opt"`
-	OpFaceBuf      []byte `protobuf:"bytes,19,opt"`
-	OldPicMd5      bool   `protobuf:"varint,20,opt"`
-	ThumbWidth     int32  `protobuf:"varint,21,opt"`
-	ThumbHeight    int32  `protobuf:"varint,22,opt"`
-	FileId         int32  `protobuf:"varint,23,opt"`
-	ShowLen        uint32 `protobuf:"varint,24,opt"`
-	DownloadLen    uint32 `protobuf:"varint,25,opt"`
-	PbRes          []byte `protobuf:"bytes,26,opt"`
+	FilePath       string                    `protobuf:"bytes,1,opt"`
+	FileLen        uint32                    `protobuf:"varint,2,opt"`
+	DownloadPath   string                    `protobuf:"bytes,3,opt"`
+	OldVerSendFile []byte                    `protobuf:"bytes,4,opt"`
+	ImgType        int32                     `protobuf:"varint,5,opt"`
+	PreviewsImage  []byte                    `protobuf:"bytes,6,opt"`
+	PicMd5         []byte                    `protobuf:"bytes,7,opt"`
+	PicHeight      uint32                    `protobuf:"varint,8,opt"`
+	PicWidth       uint32                    `protobuf:"varint,9,opt"`
+	ResId          string                    `protobuf:"bytes,10,opt"`
+	Flag           []byte                    `protobuf:"bytes,11,opt"`
+	ThumbUrl       string                    `protobuf:"bytes,12,opt"`
+	Original       int32                     `protobuf:"varint,13,opt"`
+	BigUrl         string                    `protobuf:"bytes,14,opt"`
+	OrigUrl        string                    `protobuf:"bytes,15,opt"`
+	BizType        int32                     `protobuf:"varint,16,opt"`
+	Result         int32                     `protobuf:"varint,17,opt"`
+	Index          int32                     `protobuf:"varint,18,opt"`
+	OpFaceBuf      []byte                    `protobuf:"bytes,19,opt"`
+	OldPicMd5      bool                      `protobuf:"varint,20,opt"`
+	ThumbWidth     int32                     `protobuf:"varint,21,opt"`
+	ThumbHeight    int32                     `protobuf:"varint,22,opt"`
+	FileId         int32                     `protobuf:"varint,23,opt"`
+	ShowLen        uint32                    `protobuf:"varint,24,opt"`
+	DownloadLen    uint32                    `protobuf:"varint,25,opt"`
+	X400Url        string                    `protobuf:"bytes,26,opt"`
+	X400Width      int32                     `protobuf:"varint,27,opt"`
+	X400Height     int32                     `protobuf:"varint,28,opt"`
+	PbRes          *NotOnlineImage_PbReserve `protobuf:"bytes,29,opt"`
 }
 
 type OnlineImage struct {
@@ -404,4 +407,32 @@ type QSmallFaceExtra struct {
 	Preview  string `protobuf:"bytes,2,opt"`
 	Preview2 string `protobuf:"bytes,3,opt"`
 	_        [0]func()
+}
+
+type CustomFace_PbReserve struct {
+	SubType int32  `protobuf:"varint,1,opt"`
+	Summary string `protobuf:"bytes,9,opt"`
+	_       [0]func()
+}
+
+type NotOnlineImage_PbReserve struct {
+	SubType int32                                `protobuf:"varint,1,opt"`
+	Field3  int32                                `protobuf:"varint,3,opt"`
+	Field4  int32                                `protobuf:"varint,4,opt"`
+	Summary string                               `protobuf:"bytes,8,opt"`
+	Field10 int32                                `protobuf:"varint,10,opt"`
+	Field20 *NotOnlineImage_PbReserve_PbReserve2 `protobuf:"bytes,20,opt"`
+	Url     string                               `protobuf:"bytes,30,opt"`
+	Md5Str  string                               `protobuf:"bytes,31,opt"`
+	_       [0]func()
+}
+
+type NotOnlineImage_PbReserve_PbReserve2 struct {
+	Field1 int32  `protobuf:"varint,1,opt"`
+	Field2 string `protobuf:"bytes,2,opt"`
+	Field3 int32  `protobuf:"varint,3,opt"`
+	Field4 int32  `protobuf:"varint,4,opt"`
+	Field5 int32  `protobuf:"varint,5,opt"`
+	Field7 string `protobuf:"bytes,7,opt"`
+	_      [0]func()
 }

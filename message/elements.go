@@ -68,22 +68,22 @@ type (
 	}
 
 	ImageElement struct {
-		ImageId   string
-		FileId    int64
-		ImageType int32
-		Size      uint32
-		Width     uint32
-		Height    uint32
-		Url       string
+		ImageId  string
+		FileUUID string // only in new protocol photo
+		Size     uint32
+		Width    uint32
+		Height   uint32
+		Url      string
+		SubType  int32
 
 		// EffectID show pic effect id.
-		EffectID int32
-		Flash    bool
+		EffectID int32 // deprecated
+		Flash    bool  // deprecated
 
-		// send
-		Summary     string
-		Ext         string
-		Md5         []byte
+		// send & receive
+		Summary string
+		Md5     []byte // only in old protocol photo
+
 		Sha1        []byte
 		MsgInfo     *oidb.MsgInfo
 		Stream      io.ReadSeeker
