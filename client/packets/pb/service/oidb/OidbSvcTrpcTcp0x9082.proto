@@ -3,7 +3,7 @@ syntax = "proto3";
 option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
 
 // Group Set Reaction
-message OidbSvcTrpcTcp0x9082_1 {
+message OidbSvcTrpcTcp0x9082 {
   uint32 GroupUin = 2;
   uint32 Sequence = 3;
   optional string Code = 4;

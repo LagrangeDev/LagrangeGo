@@ -201,3 +201,32 @@ message GroupSpecialTitle {
   uint32 Field3 = 3;
   uint32 TargetUin = 5;
 }
+
+message GroupReaction {
+    uint32 group_uid = 4;
+    GroupReactionData0 data = 44;
+}
+
+message GroupReactionData0 {
+    GroupReactionData1 data = 1;
+}
+
+message GroupReactionData1 {
+    GroupReactionData2 data = 1;
+}
+
+message GroupReactionData2 {
+    GroupReactionTarget target = 2;
+    GroupReactionData3 data = 3;
+}
+
+message GroupReactionTarget {
+    uint32 sequence = 1;
+}
+
+message GroupReactionData3 {
+    string code = 1;
+    uint32 count = 3;
+    string operator_uid = 4;
+    uint32 type = 5;  // 1 Add, 2 Remove
+}

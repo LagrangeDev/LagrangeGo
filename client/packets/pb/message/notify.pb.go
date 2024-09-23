@@ -222,3 +222,38 @@ type GroupSpecialTitle struct {
 	TargetUin uint32 `protobuf:"varint,5,opt"`
 	_         [0]func()
 }
+
+type GroupReaction struct {
+	GroupUid uint32              `protobuf:"varint,4,opt"`
+	Data     *GroupReactionData0 `protobuf:"bytes,44,opt"`
+	_        [0]func()
+}
+
+type GroupReactionData0 struct {
+	Data *GroupReactionData1 `protobuf:"bytes,1,opt"`
+	_    [0]func()
+}
+
+type GroupReactionData1 struct {
+	Data *GroupReactionData2 `protobuf:"bytes,1,opt"`
+	_    [0]func()
+}
+
+type GroupReactionData2 struct {
+	Target *GroupReactionTarget `protobuf:"bytes,2,opt"`
+	Data   *GroupReactionData3  `protobuf:"bytes,3,opt"`
+	_      [0]func()
+}
+
+type GroupReactionTarget struct {
+	Sequence uint32 `protobuf:"varint,1,opt"`
+	_        [0]func()
+}
+
+type GroupReactionData3 struct {
+	Code        string `protobuf:"bytes,1,opt"`
+	Count       uint32 `protobuf:"varint,3,opt"`
+	OperatorUid string `protobuf:"bytes,4,opt"`
+	Type        uint32 `protobuf:"varint,5,opt"` // 1 Add, 2 Remove
+	_           [0]func()
+}

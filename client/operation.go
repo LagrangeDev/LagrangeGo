@@ -242,6 +242,18 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 	return oidb2.ParseGroupSetSpecialTitleResp(resp)
 }
 
+func (c *QQClient) GroupSetReaction(groupUin, sequence uint32, code string, isAdd bool) error {
+	pkt, err := oidb2.BuildGroupSetReactionReq(groupUin, sequence, code, isAdd)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseGroupSetReactionResp(resp)
+}
+
 // GroupPoke 戳一戳群友
 func (c *QQClient) GroupPoke(groupUin, uin uint32) error {
 	pkt, err := oidb2.BuildGroupPokeReq(groupUin, uin)
