@@ -126,9 +126,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			ev.TargetUin = user.Uin
 			ev.TargetNick = user.Nickname
 		}
-		requests, err := c.GetGroupSystemMessages(ev.GroupUin)
-		if err == nil {
-			for _, request := range requests {
+		commonRequests, reqErr := c.GetGroupSystemMessages(false, 20, ev.GroupUin)
+		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
+		if reqErr == nil && freqErr == nil {
+			for _, request := range append(commonRequests, filteredRequests...) {
 				if request.TargetUid == ev.TargetUid && !request.Checked() {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
@@ -165,9 +166,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			ev.InvitorUin = user.Uin
 			ev.InvitorNick = user.Nickname
 		}
-		requests, err := c.GetGroupSystemMessages(ev.GroupUin)
-		if err == nil {
-			for _, request := range requests {
+		commonRequests, reqErr := c.GetGroupSystemMessages(false, 20, ev.GroupUin)
+		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
+		if reqErr == nil && freqErr == nil {
+			for _, request := range append(commonRequests, filteredRequests...) {
 				if request.TargetUid == c.GetUid(c.Uin) && !request.Checked() {
 					ev.RequestSeq = request.Sequence
 					break
