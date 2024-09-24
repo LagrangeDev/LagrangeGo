@@ -502,8 +502,8 @@ func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
 }
 
 // GetGroupSystemMessages 获取加群请求信息
-func (c *QQClient) GetGroupSystemMessages(groupUin ...uint32) ([]*entity.GroupJoinRequest, error) {
-	pkt, err := oidb2.BuildFetchGroupSystemMessagesReq(20)
+func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUin ...uint32) ([]*entity.GroupJoinRequest, error) {
+	pkt, err := oidb2.BuildFetchGroupSystemMessagesReq(isFiltered, count)
 	if err != nil {
 		return nil, err
 	}
@@ -511,12 +511,12 @@ func (c *QQClient) GetGroupSystemMessages(groupUin ...uint32) ([]*entity.GroupJo
 	if err != nil {
 		return nil, err
 	}
-	return oidb2.ParseFetchGroupSystemMessagesReq(resp, groupUin...)
+	return oidb2.ParseFetchGroupSystemMessagesReq(isFiltered, resp, groupUin...)
 }
 
 // SetGroupRequest 处理加群请求
-func (c *QQClient) SetGroupRequest(accept bool, sequence uint64, typ uint32, groupUin uint32, message string) error {
-	pkt, err := oidb2.BuildSetGroupRequestReq(accept, sequence, typ, groupUin, message)
+func (c *QQClient) SetGroupRequest(isFiltered bool, accept bool, sequence uint64, typ uint32, groupUin uint32, message string) error {
+	pkt, err := oidb2.BuildSetGroupRequestReq(isFiltered, accept, sequence, typ, groupUin, message)
 	if err != nil {
 		return err
 	}

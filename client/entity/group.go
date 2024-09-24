@@ -29,9 +29,10 @@ type (
 		State       EventState // 0不需要处理 1未处理 2已处理
 		EventType   uint32     // 1申请加群 3设置管理员 16取消管理员
 		Comment     string
+		IsFiltered  bool
 	}
 )
 
 func (r *GroupJoinRequest) Checked() bool {
-	return r.State == Processed || r.State == Unprocessed
+	return r.State != Unprocessed
 }
