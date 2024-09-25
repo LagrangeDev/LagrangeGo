@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/RomiChan/syncx"
@@ -28,8 +29,14 @@ type (
 	}
 )
 
-func (c *QQClient) SendRequestWithCookie(request *http.Request) (*http.Response, error) {
-	// 应该不需要考虑cookie的问题
+func (c *QQClient) SendRequestWithCookie(request *http.Request, domain string) (*http.Response, error) {
+	cookies, err := c.GetCookies(domain)
+	if err != nil {
+		return nil, err
+	}
+	request.AddCookie(&http.Cookie{Name: "skey", Value: cookies.SKey})
+	request.AddCookie(&http.Cookie{Name: "p_uin", Value: strconv.Itoa(int(cookies.uin))})
+	request.AddCookie(&http.Cookie{Name: "p_skey", Value: cookies.PsKey})
 	return c.ticket.client.Do(request)
 }
 
