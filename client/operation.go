@@ -910,8 +910,11 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 					elements = append(elements, &message2.FaceElement{FaceID: uint16(e.Get("face_index").Int())})
 				case 3:
 					elements = append(elements, &message2.ImageElement{Url: e.Get("image_url").String()})
-				case 4: // TODO: file element
-					elements = append(elements, &message2.ShortVideoElement{Url: e.Get("file_thumbnail_url").String()})
+				case 4:
+					elements = append(elements, &message2.FileElement{
+						FileId:  e.Get("file_id").String(),
+						FileUrl: e.Get("file_thumbnail_url").String(),
+					})
 				}
 			}
 			senderUin := uint32(v.Get("sender_uin").Int())
