@@ -884,7 +884,7 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 		if err != nil {
 			return essenceMsg, err
 		}
-		resp, err := c.SendRequestWithCookie(req, "qun.qq.com")
+		resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
 		if err != nil {
 			return essenceMsg, err
 		}
@@ -957,7 +957,7 @@ func (c *QQClient) GetGroupHonorInfo(groupCode int64, honorType entity.HonorType
 	if err != nil {
 		return ret, err
 	}
-	resp, err := c.SendRequestWithCookie(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return ret, err
 	}
@@ -998,7 +998,7 @@ func (c *QQClient) GetGroupNotice(groupCode int64) (l []*entity.GroupNoticeFeed,
 	v.Set("s", "-1")
 	v.Set("n", "20")
 	req, _ := http.NewRequest(http.MethodGet, "https://web.qun.qq.com/cgi-bin/announce/get_t_list?"+v.Encode(), nil)
-	resp, err := c.SendRequestWithCookie(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
 	if err != nil {
 		return nil, err
 	}
@@ -1034,7 +1034,7 @@ func (c *QQClient) uploadGroupNoticePic(bkn int, img []byte) (*entity.NoticeImag
 		return ret, err
 	}
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	resp, err := c.SendRequestWithCookie(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
 	if err != nil {
 		return ret, err
 	}
@@ -1065,7 +1065,7 @@ func (c *QQClient) AddGroupNoticeSimple(groupCode int64, text string) (noticeId 
 	if err != nil {
 		return "", err
 	}
-	resp, err := c.SendRequestWithCookie(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
 	if err != nil {
 		return "", err
 	}
@@ -1093,7 +1093,7 @@ func (c *QQClient) AddGroupNoticeWithPic(groupCode int64, text string, pic []byt
 	if err != nil {
 		return "", err
 	}
-	resp, err := c.SendRequestWithCookie(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
 	if err != nil {
 		return "", err
 	}
@@ -1117,7 +1117,7 @@ func (c *QQClient) DelGroupNotice(groupCode int64, fid string) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.SendRequestWithCookie(req, "qun.qq.com")
+	_, err = c.SendRequestWithCookieDomain(req, "qun.qq.com")
 	if err != nil {
 		return err
 	}

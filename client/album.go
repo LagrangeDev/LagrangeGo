@@ -33,7 +33,7 @@ func (c *QQClient) GetGroupAlbum(groupUin uint32) ([]*GroupAlbum, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.SendRequestWithCookie(req, "qzone.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (c *QQClient) getGroupAlbumUploadSession(param *uploadSessionParam) (*uploa
 		return nil, timeStamp, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := c.SendRequestWithCookie(req, "qzone.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return nil, timeStamp, err
 	}
@@ -290,7 +290,7 @@ func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, se
 		return nil, err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	resp, err := c.SendRequestWithCookie(req, "qzone.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return nil, err
 	}

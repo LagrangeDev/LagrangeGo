@@ -29,7 +29,11 @@ type (
 	}
 )
 
-func (c *QQClient) SendRequestWithCookie(request *http.Request, domain string) (*http.Response, error) {
+func (c *QQClient) SendRequestWithCookie(request *http.Request) (*http.Response, error) {
+	return c.ticket.client.Do(request)
+}
+
+func (c *QQClient) SendRequestWithCookieDomain(request *http.Request, domain string) (*http.Response, error) {
 	cookies, err := c.GetCookies(domain)
 	if err != nil {
 		return nil, err
