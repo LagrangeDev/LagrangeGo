@@ -90,6 +90,8 @@ func (c *QQClient) GetCookies(domain string) (*Cookies, error) {
 	var token string
 	if tokenTime, ok := c.ticket.psKeys.Load(domain); ok {
 		if time.Now().Before(tokenTime.expireTime) {
+			token = tokenTime.key
+		} else {
 			cookies, err := c.FetchCookies([]string{domain})
 			if err != nil {
 				return nil, err
@@ -99,8 +101,6 @@ func (c *QQClient) GetCookies(domain string) (*Cookies, error) {
 				key:        token,
 				expireTime: time.Now().Add(24 * time.Hour),
 			})
-		} else {
-			token = tokenTime.key
 		}
 	} else {
 		cookies, err := c.FetchCookies([]string{domain})
