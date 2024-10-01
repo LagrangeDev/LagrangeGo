@@ -328,13 +328,20 @@ func NewLightApp(content string) *LightAppElement {
 	}
 }
 
-func NewForward(resid string) *ForwardMessage {
+func NewForward(resid string, nodes []*ForwardNode) *ForwardMessage {
+	return &ForwardMessage{
+		ResID: resid,
+		Nodes: nodes,
+	}
+}
+
+func NewForwardWithResID(resid string) *ForwardMessage {
 	return &ForwardMessage{
 		ResID: resid,
 	}
 }
 
-func NewNodeForward(nodes []*ForwardNode) *ForwardMessage {
+func NewForwardWithNodes(nodes []*ForwardNode) *ForwardMessage {
 	return &ForwardMessage{
 		Nodes: nodes,
 	}

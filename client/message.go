@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
@@ -154,7 +155,7 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 		body[idx] = &message.PushMsgBody{
 			ResponseHead: &message.ResponseHead{
 				FromUid: proto.String(""),
-				FromUin: uint32(elem.SenderId),
+				FromUin: elem.SenderId,
 			},
 			ContentHead: &message.ContentHead{
 				Type:      uint32(utils.Ternary(elem.GroupId != 0, 82, 9)),
@@ -175,11 +176,11 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 		}
 		if elem.GroupId != 0 {
 			body[idx].ResponseHead.Grp = &message.ResponseGrp{
-				GroupUin:   uint32(elem.GroupId),
+				GroupUin:   elem.GroupId,
 				MemberName: elem.SenderName,
 				Unknown5:   2,
 			}
-			c.preProcessGroupMessage(uint32(elem.GroupId), elem.Message)
+			c.preProcessGroupMessage(elem.GroupId, elem.Message)
 		} else {
 			body[idx].ResponseHead.ToUid = proto.String(c.GetUid(c.Uin))
 			body[idx].ResponseHead.Forward = &message.ResponseForward{
@@ -234,6 +235,17 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 				c.errorln("VideoUploadGroup failed")
 				continue
 			}
+		case *message2.ForwardMessage:
+			if elem.ResID != "" && len(elem.Nodes) == 0 {
+				forward, _ := c.FetchForwardMsg(elem.ResID)
+				elem.Nodes = forward.Nodes
+			}
+			if elem.ResID == "" && len(elem.Nodes) != 0 {
+				_, err := c.UploadForwardMsg(elem, groupUin)
+				if err != nil {
+					c.errorln(err)
+				}
+			}
 		default:
 		}
 	}
@@ -275,6 +287,17 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo == nil {
 				c.errorln("VideoUploadPrivate failed")
 				continue
+			}
+		case *message2.ForwardMessage:
+			if elem.ResID != "" && len(elem.Nodes) == 0 {
+				forward, _ := c.FetchForwardMsg(elem.ResID)
+				elem.Nodes = forward.Nodes
+			}
+			if elem.ResID == "" && len(elem.Nodes) != 0 {
+				_, err := c.UploadForwardMsg(elem, 0)
+				if err != nil {
+					c.errorln(err)
+				}
 			}
 		default:
 		}

@@ -325,7 +325,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
 			multimsg := MultiMessage{}
 			_ = xml.Unmarshal(xmlData, &multimsg)
-			res = append(res, NewForward(multimsg.ResId))
+			res = append(res, NewForwardWithResID(multimsg.ResId))
 		}
 	}
 
@@ -341,6 +341,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 			case isGroup && ptt.FileId != 0:
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
+					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.GroupFileKey,
 					},

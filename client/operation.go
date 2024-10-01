@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/net/html"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -16,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
@@ -829,12 +830,12 @@ func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, 
 	for idx, b := range result.Action.ActionData.MsgBody {
 		isGroupMsg := b.ResponseHead.Grp != nil
 		forwardMsg.Nodes[idx] = &message2.ForwardNode{
-			SenderId:   int64(b.ResponseHead.FromUin),
+			SenderId:   b.ResponseHead.FromUin,
 			SenderName: b.ResponseHead.Forward.FriendName.Unwrap(),
-			Time:       int32(b.ContentHead.TimeStamp.Unwrap()),
+			Time:       b.ContentHead.TimeStamp.Unwrap(),
 		}
 		if isGroupMsg {
-			forwardMsg.Nodes[idx].GroupId = int64(b.ResponseHead.Grp.GroupUin)
+			forwardMsg.Nodes[idx].GroupId = b.ResponseHead.Grp.GroupUin
 			grpMsg := message2.ParseGroupMessage(b)
 			c.PreprocessGroupMessageEvent(grpMsg)
 			forwardMsg.Nodes[idx].Message = grpMsg.Elements
@@ -849,24 +850,25 @@ func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, 
 
 // UploadForwardMsg 上传合并转发消息
 // groupUin should be the group number where the uploader is located or 0 (c2c)
-func (c *QQClient) UploadForwardMsg(forwardNodes []*message2.ForwardNode, groupUin uint32) (resId string, err error) {
-	msgBody := c.BuildFakeMessage(forwardNodes)
+func (c *QQClient) UploadForwardMsg(forward *message2.ForwardMessage, groupUin uint32) (*message2.ForwardMessage, error) {
+	msgBody := c.BuildFakeMessage(forward.Nodes)
 	pkt, err := messagePkt.BuildMultiMsgUploadReq(c.GetUid(c.Uin), groupUin, msgBody)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	resp, err := c.sendUniPacketAndWait("trpc.group.long_msg_interface.MsgService.SsoSendLongMsg", pkt)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	pasted, err := messagePkt.ParseMultiMsgUploadResp(resp)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if pasted.Result == nil {
-		return "", errors.New("empty response data")
+		return nil, errors.New("empty response data")
 	}
-	return pasted.Result.ResId, nil
+	forward.ResID = pasted.Result.ResId
+	return forward, nil
 }
 
 // FetchEssenceMessage 获取精华消息

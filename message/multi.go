@@ -5,10 +5,10 @@ import (
 )
 
 type ForwardNode struct {
-	GroupId    int64
-	SenderId   int64
+	GroupId    uint32
+	SenderId   uint32
 	SenderName string
-	Time       int32
+	Time       uint32
 	Message    []IMessageElement
 }
 
