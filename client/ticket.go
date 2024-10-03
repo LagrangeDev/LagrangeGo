@@ -30,11 +30,11 @@ type (
 )
 
 func (c *QQClient) SendRequestWithCookie(request *http.Request) (*http.Response, error) {
-	return c.ticket.client.Do(request)
-}
-
-func (c *QQClient) SendRequestWithCookieDomain(request *http.Request, domain string) (*http.Response, error) {
-	cookies, err := c.GetCookies(domain)
+	u, err := url.Parse(request.URL.String())
+	if err != nil {
+		return nil, err
+	}
+	cookies, err := c.GetCookies(u.Hostname())
 	if err != nil {
 		return nil, err
 	}

@@ -886,7 +886,7 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 		if err != nil {
 			return essenceMsg, err
 		}
-		resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
+		resp, err := c.SendRequestWithCookie(req)
 		if err != nil {
 			return essenceMsg, err
 		}
@@ -951,10 +951,10 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 
 // GetGroupHonorInfo 获取群荣誉信息
 // reference https://github.com/Mrs4s/MiraiGo/blob/master/client/http_api.go
-func (c *QQClient) GetGroupHonorInfo(groupCode int64, honorType entity.HonorType) (*entity.GroupHonorInfo, error) {
+func (c *QQClient) GetGroupHonorInfo(groupUin uint32, honorType entity.HonorType) (*entity.GroupHonorInfo, error) {
 	ret := &entity.GroupHonorInfo{}
-	honorRe := regexp.MustCompile(`window\.__INITIAL_STATE__\s*?=\s*?(\{.*\})`)
-	reqUrl := fmt.Sprintf("https://qun.qq.com/interactive/honorlist?gc=%d&type=%d", groupCode, honorType)
+	honorRe := regexp.MustCompile(`window\.__INITIAL_STATE__\s*?=\s*?(\{.*})`)
+	reqUrl := fmt.Sprintf("https://qun.qq.com/interactive/honorlist?gc=%d&type=%d", groupUin, honorType)
 	req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
 	if err != nil {
 		return ret, err
@@ -983,14 +983,14 @@ func (c *QQClient) GetGroupHonorInfo(groupCode int64, honorType entity.HonorType
 }
 
 // GetGroupNotice 获取群公告
-func (c *QQClient) GetGroupNotice(groupCode int64) (l []*entity.GroupNoticeFeed, err error) {
+func (c *QQClient) GetGroupNotice(groupUin uint32) (l []*entity.GroupNoticeFeed, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return nil, err
 	}
 	v := url.Values{}
 	v.Set("bkn", strconv.Itoa(bkn))
-	v.Set("qid", strconv.FormatInt(groupCode, 10))
+	v.Set("qid", strconv.FormatInt(int64(groupUin), 10))
 	v.Set("ft", "23")
 	v.Set("ni", "1")
 	v.Set("n", "1")
@@ -1000,7 +1000,7 @@ func (c *QQClient) GetGroupNotice(groupCode int64) (l []*entity.GroupNoticeFeed,
 	v.Set("s", "-1")
 	v.Set("n", "20")
 	req, _ := http.NewRequest(http.MethodGet, "https://web.qun.qq.com/cgi-bin/announce/get_t_list?"+v.Encode(), nil)
-	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return nil, err
 	}
@@ -1036,7 +1036,7 @@ func (c *QQClient) uploadGroupNoticePic(bkn int, img []byte) (*entity.NoticeImag
 		return ret, err
 	}
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return ret, err
 	}
@@ -1057,17 +1057,17 @@ func (c *QQClient) uploadGroupNoticePic(bkn int, img []byte) (*entity.NoticeImag
 }
 
 // AddGroupNoticeSimple 发群公告
-func (c *QQClient) AddGroupNoticeSimple(groupCode int64, text string) (noticeId string, err error) {
+func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeId string, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return "", err
 	}
-	body := fmt.Sprintf(`qid=%v&bkn=%v&text=%v&pinned=0&type=1&settings={"is_show_edit_card":0,"tip_window_type":1,"confirm_required":1}`, groupCode, bkn, url.QueryEscape(text))
+	body := fmt.Sprintf(`qid=%v&bkn=%v&text=%v&pinned=0&type=1&settings={"is_show_edit_card":0,"tip_window_type":1,"confirm_required":1}`, groupUin, bkn, url.QueryEscape(text))
 	req, err := http.NewRequest(http.MethodPost, "https://web.qun.qq.com/cgi-bin/announce/add_qun_notice?bkn="+strconv.Itoa(bkn), strings.NewReader(body))
 	if err != nil {
 		return "", err
 	}
-	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return "", err
 	}
@@ -1081,7 +1081,7 @@ func (c *QQClient) AddGroupNoticeSimple(groupCode int64, text string) (noticeId 
 }
 
 // AddGroupNoticeWithPic 发群公告带图片
-func (c *QQClient) AddGroupNoticeWithPic(groupCode int64, text string, pic []byte) (noticeId string, err error) {
+func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byte) (noticeId string, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return "", err
@@ -1090,12 +1090,12 @@ func (c *QQClient) AddGroupNoticeWithPic(groupCode int64, text string, pic []byt
 	if err != nil {
 		return "", err
 	}
-	body := fmt.Sprintf(`qid=%v&bkn=%v&text=%v&pinned=0&type=1&settings={"is_show_edit_card":0,"tip_window_type":1,"confirm_required":1}&pic=%v&imgWidth=%v&imgHeight=%v`, groupCode, bkn, url.QueryEscape(text), img.ID, img.Width, img.Height)
+	body := fmt.Sprintf(`qid=%v&bkn=%v&text=%v&pinned=0&type=1&settings={"is_show_edit_card":0,"tip_window_type":1,"confirm_required":1}&pic=%v&imgWidth=%v&imgHeight=%v`, groupUin, bkn, url.QueryEscape(text), img.ID, img.Width, img.Height)
 	req, err := http.NewRequest(http.MethodPost, "https://web.qun.qq.com/cgi-bin/announce/add_qun_notice?bkn="+strconv.Itoa(bkn), strings.NewReader(body))
 	if err != nil {
 		return "", err
 	}
-	resp, err := c.SendRequestWithCookieDomain(req, "qun.qq.com")
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return "", err
 	}
@@ -1109,17 +1109,17 @@ func (c *QQClient) AddGroupNoticeWithPic(groupCode int64, text string, pic []byt
 }
 
 // DelGroupNotice 删除群公告
-func (c *QQClient) DelGroupNotice(groupCode int64, fid string) error {
+func (c *QQClient) DelGroupNotice(groupUin uint32, fid string) error {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return err
 	}
-	body := fmt.Sprintf(`fid=%s&qid=%v&bkn=%v&ft=23&op=1`, fid, groupCode, bkn)
+	body := fmt.Sprintf(`fid=%s&qid=%v&bkn=%v&ft=23&op=1`, fid, groupUin, bkn)
 	req, err := http.NewRequest(http.MethodPost, "https://web.qun.qq.com/cgi-bin/announce/del_feed", strings.NewReader(body))
 	if err != nil {
 		return err
 	}
-	_, err = c.SendRequestWithCookieDomain(req, "qun.qq.com")
+	_, err = c.SendRequestWithCookie(req)
 	if err != nil {
 		return err
 	}
