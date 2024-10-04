@@ -16,6 +16,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
+
 	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
@@ -29,6 +31,27 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/tidwall/gjson"
 )
+
+func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
+	pkt, _ := proto.Marshal(&action.SetStatus{
+		Status:        status,
+		ExtStatus:     ext,
+		BatteryStatus: battery,
+	})
+	resp, err := c.sendUniPacketAndWait("trpc.qq_new_tech.status_svc.StatusService.SetStatus", pkt)
+	if err != nil {
+		return err
+	}
+	setstatusResp := action.SetStatusResponse{}
+	err = proto.Unmarshal(resp, &setstatusResp)
+	if err != nil {
+		return err
+	}
+	if setstatusResp.Message != "set status success" {
+		return fmt.Errorf("set status failed: %s", setstatusResp.Message)
+	}
+	return nil
+}
 
 // FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
 func (c *QQClient) FetchFriends(token uint32) ([]*entity.Friend, uint32, error) {

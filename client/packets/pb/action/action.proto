@@ -59,9 +59,9 @@ message SendMessageResponse {
 }
 
 message SetStatus {
-  uint32 Field1 = 1;
-  uint32 Status = 2;
-  uint32 ExtStatus = 3;
+  uint32 Status = 1;
+  uint32 ExtStatus = 2;
+  uint32 BatteryStatus = 3; // 电量百分比
   optional SetStatusCustomExt CustomExt = 4;
 }
 

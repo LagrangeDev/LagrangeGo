@@ -67,11 +67,11 @@ type SendMessageResponse struct {
 }
 
 type SetStatus struct {
-	Field1    uint32              `protobuf:"varint,1,opt"`
-	Status    uint32              `protobuf:"varint,2,opt"`
-	ExtStatus uint32              `protobuf:"varint,3,opt"`
-	CustomExt *SetStatusCustomExt `protobuf:"bytes,4,opt"`
-	_         [0]func()
+	Status        uint32              `protobuf:"varint,1,opt"`
+	ExtStatus     uint32              `protobuf:"varint,2,opt"`
+	BatteryStatus uint32              `protobuf:"varint,3,opt"` // 电量百分比
+	CustomExt     *SetStatusCustomExt `protobuf:"bytes,4,opt"`
+	_             [0]func()
 }
 
 type SetStatusCustomExt struct {
