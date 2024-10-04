@@ -485,6 +485,8 @@ func ToReadableStringEle(elem IMessageElement) string {
 		return "[表情]"
 	case *VoiceElement:
 		return "[语音]"
+	case *ShortVideoElement:
+		return "[视频]"
 	case *LightAppElement:
 		return "[卡片消息]"
 	case *ForwardMessage:
