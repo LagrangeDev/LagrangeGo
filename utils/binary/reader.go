@@ -34,6 +34,15 @@ func (r *Reader) Len() int {
 	return len(r.buffer) - r.pos
 }
 
+func (r *Reader) ReadByte() (byte, error) {
+	if r.pos >= len(r.buffer) {
+		return 0, io.EOF
+	}
+	b := r.buffer[r.pos]
+	r.pos++
+	return b, nil
+}
+
 // String means read all available data and return them as a string
 //
 // if r.reader got error, it will returns as err.Error()
@@ -100,6 +109,7 @@ func (r *Reader) ReadU16() (v uint16) {
 func (r *Reader) ReadU32() (v uint32) {
 	return readint[uint32](r)
 }
+
 func (r *Reader) ReadU64() (v uint64) {
 	return readint[uint64](r)
 }
@@ -217,4 +227,12 @@ func (r *Reader) ReadI32() (v int32) {
 
 func (r *Reader) ReadI64() (v int64) {
 	return int64(r.ReadU64())
+}
+
+func (r *Reader) ReadVarint() (int64, error) {
+	return binary.ReadVarint(r)
+}
+
+func (r *Reader) ReadUvarint() (uint64, error) {
+	return binary.ReadUvarint(r)
 }
