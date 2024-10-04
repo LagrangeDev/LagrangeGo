@@ -614,8 +614,8 @@ func (c *QQClient) FetchCookies(domains []string) ([]string, error) {
 }
 
 // UploadPrivateFile 上传私聊文件
-func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) error {
-	fileElement, err := message2.NewLocalFile(localFilePath)
+func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath, filename string) error {
+	fileElement, err := message2.NewLocalFile(localFilePath, filename)
 	if err != nil {
 		return err
 	}
@@ -639,8 +639,8 @@ func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath string) err
 }
 
 // UploadGroupFile 上传群文件
-func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath string, targetDirectory string) error {
-	fileElement, err := message2.NewLocalFile(localFilePath)
+func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath, filename, targetDirectory string) error {
+	fileElement, err := message2.NewLocalFile(localFilePath, filename)
 	if err != nil {
 		return err
 	}

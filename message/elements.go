@@ -313,12 +313,16 @@ func NewStreamFile(r io.ReadSeeker, fileName string) *FileElement {
 	}
 }
 
-func NewLocalFile(path string) (*FileElement, error) {
+func NewLocalFile(path string, name ...string) (*FileElement, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamFile(file, filepath.Base(file.Name())), nil
+	return NewStreamFile(file, utils.LazyTernary(len(name) == 0, func() string {
+		return filepath.Base(file.Name())
+	}, func() string {
+		return name[0]
+	})), nil
 }
 
 func NewLightApp(content string) *LightAppElement {

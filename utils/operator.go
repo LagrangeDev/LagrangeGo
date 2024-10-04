@@ -54,6 +54,13 @@ func Ternary[T any](condition bool, trueValue, falseValue T) T {
 	return falseValue
 }
 
+func LazyTernary[T any](condition bool, trueFunc, falseFunc func() T) T {
+	if condition {
+		return trueFunc()
+	}
+	return falseFunc()
+}
+
 func Map[T any, U any](list []T, mapper func(T) U) []U {
 	result := make([]U, len(list))
 	for i, v := range list {
