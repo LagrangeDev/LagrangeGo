@@ -78,7 +78,7 @@ type (
 
 		// EffectID show pic effect id.
 		EffectID int32 // deprecated
-		Flash    bool  // deprecated
+		Flash    bool
 
 		// send & receive
 		Summary string

@@ -4,6 +4,7 @@ package message
 
 import (
 	"encoding/xml"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -150,8 +151,13 @@ func ParseTempMessage(msg *message.PushMsgBody) *TempMessage {
 
 func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 	var res []IMessageElement
+	skipNext := false
 
 	for _, elem := range msg {
+		if skipNext {
+			skipNext = false
+			continue
+		}
 		if elem.SrcMsg != nil && len(elem.SrcMsg.OrigSeqs) != 0 {
 			r := &ReplyElement{
 				ReplySeq:  elem.SrcMsg.OrigSeqs[0],
@@ -270,27 +276,48 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		}
 
 		// new protocol image
-		if elem.CommonElem != nil && (elem.CommonElem.BusinessType == 20 || elem.CommonElem.BusinessType == 10) {
-			extra := &oidb2.MsgInfo{}
-			err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
-			if err != nil {
-				continue
+		if elem.CommonElem != nil {
+			switch elem.CommonElem.ServiceType {
+			case 48:
+				if elem.CommonElem.BusinessType == 10 || elem.CommonElem.BusinessType == 20 {
+					extra := &oidb2.MsgInfo{}
+					err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
+					if err != nil {
+						continue
+					}
+					index := extra.MsgInfoBody[0].Index
+					res = append(res, &ImageElement{
+						ImageId:  index.Info.FileName,
+						FileUUID: index.FileUuid,
+						SubType:  int32(extra.ExtBizInfo.Pic.BizType),
+						Summary:  utils.Ternary(extra.ExtBizInfo.Pic.TextSummary == "", "[图片]", extra.ExtBizInfo.Pic.TextSummary),
+						Width:    index.Info.Width,
+						Height:   index.Info.Height,
+						Size:     index.Info.FileSize,
+						MsgInfo:  extra,
+					})
+				}
+			case 3: // 闪照
+				img := message.NotOnlineImage{}
+				reader := binary.NewReader(elem.CommonElem.PbElem[1:])
+				length, _ := reader.ReadUvarint()
+				err := proto.Unmarshal(reader.ReadBytes(int(length)), &img)
+				if err != nil {
+					continue
+				}
+				res = append(res, &ImageElement{
+					ImageId: img.FilePath,
+					Md5:     img.PicMd5,
+					Size:    img.FileLen,
+					SubType: img.PbRes.SubType,
+					Flash:   true,
+					Summary: "[闪照]",
+					Width:   img.PicWidth,
+					Height:  img.PicHeight,
+					Url:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
+				})
+				skipNext = true
 			}
-			index := extra.MsgInfoBody[0].Index
-			summary := "[图片]"
-			if extra.ExtBizInfo.Pic.TextSummary != "" {
-				summary = extra.ExtBizInfo.Pic.TextSummary
-			}
-			res = append(res, &ImageElement{
-				ImageId:  index.Info.FileName,
-				FileUUID: index.FileUuid,
-				SubType:  int32(extra.ExtBizInfo.Pic.BizType),
-				Summary:  summary,
-				Width:    index.Info.Width,
-				Height:   index.Info.Height,
-				Size:     index.Info.FileSize,
-				MsgInfo:  extra,
-			})
 		}
 
 		if elem.TransElem != nil && elem.TransElem.ElemType == 24 {
