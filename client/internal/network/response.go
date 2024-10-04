@@ -68,7 +68,7 @@ func (t *Transport) readSSOFrame(resp *Response, payload []byte) error {
 	switch retCode := head.ReadI32(); retCode {
 	case 0:
 		// ok
-	case -10008:
+	case -10001, -10003, -10008: // -10001正常缓存过期，-10003登录失效？
 		return errors.WithStack(ErrSessionExpired)
 	default:
 		return errors.Errorf("return code unsuccessful: %d", retCode)
