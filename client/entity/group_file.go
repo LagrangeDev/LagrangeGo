@@ -1,33 +1,33 @@
 package entity
 
 type GroupFileSystemInfo struct {
-	GroupUin   uint32
-	FileCount  uint32
-	LimitCount uint32
-	UsedSpace  uint64
-	TotalSpace uint64
+	GroupUin   uint32 `json:"group_id"`
+	FileCount  uint32 `json:"file_count"`
+	LimitCount uint32 `json:"limit_count"`
+	UsedSpace  uint64 `json:"used_space"`
+	TotalSpace uint64 `json:"total_space"`
 }
 
 type GroupFile struct {
-	GroupUin      uint32
-	FileId        string
-	FileName      string
-	BusId         uint32
-	FileSize      uint64
-	UploadTime    uint32
-	DeadTime      uint32
-	ModifyTime    uint32
-	DownloadTimes uint32
-	Uploader      uint32
-	UploaderName  string
+	GroupUin      uint32 `json:"group_id"`
+	FileId        string `json:"file_id"`
+	FileName      string `json:"file_name"`
+	BusId         uint32 `json:"busid"`
+	FileSize      uint64 `json:"file_size"`
+	UploadTime    uint32 `json:"upload_time"`
+	DeadTime      uint32 `json:"dead_time"`
+	ModifyTime    uint32 `json:"modify_time"`
+	DownloadTimes uint32 `json:"download_times"`
+	Uploader      uint32 `json:"uploader"`
+	UploaderName  string `json:"uploader_name"`
 }
 
 type GroupFolder struct {
-	GroupUin       uint32
-	FolderId       string
-	FolderName     string
-	CreateTime     uint32
-	Creator        uint32
-	CreatorName    string
-	TotalFileCount uint32
+	GroupUin       uint32 `json:"group_id"`
+	FolderId       string `json:"folder_id"`
+	FolderName     string `json:"folder_name"`
+	CreateTime     uint32 `json:"create_time"`
+	Creator        uint32 `json:"creator"`
+	CreatorName    string `json:"creator_name"`
+	TotalFileCount uint32 `json:"total_file_count"`
 }
