@@ -1178,3 +1178,15 @@ func (c *QQClient) SetGroupAvatar(groupUin uint32, avatar io.ReadSeeker) error {
 	md5, size := crypto.ComputeMd5AndLength(avatar)
 	return c.highwayUpload(3000, avatar, uint64(size), md5, extStream)
 }
+
+func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) error {
+	pkt, err := oidb2.BuildSetEssenceMessageReq(groupUin, seq, random, isSet)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseSetEssenceMessageResp(resp)
+}
