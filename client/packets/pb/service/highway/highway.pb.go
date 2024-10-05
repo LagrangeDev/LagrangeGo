@@ -156,3 +156,17 @@ type SegHead struct {
 	UpdateCacheIp uint32               `protobuf:"varint,12,opt"`
 	CachePort     proto.Option[uint32] `protobuf:"varint,13,opt"`
 }
+
+type GroupAvatarExtra struct {
+	Type     uint32                  `protobuf:"varint,1,opt"` // 101
+	GroupUin uint32                  `protobuf:"varint,2,opt"`
+	Field3   *GroupAvatarExtraField3 `protobuf:"bytes,3,opt"`
+	Field5   uint32                  `protobuf:"varint,5,opt"` // 3
+	Field6   uint32                  `protobuf:"varint,6,opt"` // 1
+	_        [0]func()
+}
+
+type GroupAvatarExtraField3 struct {
+	Field1 uint32 `protobuf:"varint,1,opt"`
+	_      [0]func()
+}

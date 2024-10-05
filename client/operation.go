@@ -16,6 +16,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 
 	"golang.org/x/net/html"
@@ -1147,4 +1149,32 @@ func (c *QQClient) DelGroupNotice(groupUin uint32, fid string) error {
 		return err
 	}
 	return nil
+}
+
+// SetAvatar 设置头像
+func (c *QQClient) SetAvatar(avatar io.ReadSeeker) error {
+	if avatar == nil {
+		return errors.New("avatar is nil")
+	}
+	md5, size := crypto.ComputeMd5AndLength(avatar)
+	return c.highwayUpload(90, avatar, uint64(size), md5, nil)
+}
+
+func (c *QQClient) SetGroupAvatar(groupUin uint32, avatar io.ReadSeeker) error {
+	if avatar == nil {
+		return errors.New("avatar is nil")
+	}
+	extra := highway.GroupAvatarExtra{
+		Type:     101,
+		GroupUin: groupUin,
+		Field3:   &highway.GroupAvatarExtraField3{Field1: 1},
+		Field5:   3,
+		Field6:   1,
+	}
+	extStream, err := proto.Marshal(&extra)
+	if err != nil {
+		return err
+	}
+	md5, size := crypto.ComputeMd5AndLength(avatar)
+	return c.highwayUpload(3000, avatar, uint64(size), md5, extStream)
 }

@@ -146,3 +146,15 @@ message SegHead {
   uint32 UpdateCacheIp = 12;
   optional uint32 CachePort = 13;
 }
+
+message GroupAvatarExtra {
+  uint32 Type = 1; // 101
+  uint32 GroupUin = 2;
+  GroupAvatarExtraField3 Field3 = 3;
+  uint32 Field5 = 5; // 3
+  uint32 Field6 = 6; // 1
+}
+
+message GroupAvatarExtraField3 {
+  uint32 Field1 = 1;
+}
