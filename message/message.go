@@ -291,6 +291,8 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						FileUUID: index.FileUuid,
 						SubType:  int32(extra.ExtBizInfo.Pic.BizType),
 						Summary:  utils.Ternary(extra.ExtBizInfo.Pic.TextSummary == "", "[图片]", extra.ExtBizInfo.Pic.TextSummary),
+						Md5:      utils.MustParseHexStr(index.Info.FileHash),
+						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
 						Width:    index.Info.Width,
 						Height:   index.Info.Height,
 						Size:     index.Info.FileSize,
