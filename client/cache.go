@@ -76,7 +76,7 @@ func (c *QQClient) GetCachedAllGroupsInfo() map[uint32]*entity.Group {
 // GetCachedMemberInfo 获取群成员信息(缓存)
 func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) *entity.GroupMember {
 	if c.cache.GroupMemberCacheIsEmpty(groupUin) {
-		if err := c.RefreshGroupMembersCache(groupUin); err != nil {
+		if err := c.RefreshGroupMemberCache(groupUin, uin); err != nil {
 			return nil
 		}
 	}
