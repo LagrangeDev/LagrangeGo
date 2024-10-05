@@ -15,8 +15,10 @@ func BuildFetchMemberReq(groupUin uint32, memberUid string) (*OidbPacket, error)
 			MemberName:       true,
 			MemberCard:       true,
 			Level:            true,
+			SpecialTitle:     true,
 			JoinTimestamp:    true,
 			LastMsgTimestamp: true,
+			ShutUpTimestamp:  true,
 			Permission:       true,
 		},
 		Params: &oidb.OidbSvcTrpcScp0XFE7_4Params{Uid: memberUid},
@@ -33,14 +35,16 @@ func ParseFetchMemberResp(data []byte) (*entity.GroupMember, error) {
 	interner := utils.NewStringInterner()
 	member := resp.Member
 	m := &entity.GroupMember{
-		Uin:         member.Uin.Uin,
-		Uid:         interner.Intern(member.Uin.Uid),
-		Permission:  entity.GroupMemberPermission(member.Permission),
-		MemberCard:  interner.Intern(member.MemberCard.MemberCard.Unwrap()),
-		MemberName:  interner.Intern(member.MemberName),
-		JoinTime:    member.JoinTimestamp,
-		LastMsgTime: member.LastMsgTimestamp,
-		Avatar:      interner.Intern(entity.FriendAvatar(member.Uin.Uin)),
+		Uin:          member.Uin.Uin,
+		Uid:          interner.Intern(member.Uin.Uid),
+		Permission:   entity.GroupMemberPermission(member.Permission),
+		MemberCard:   interner.Intern(member.MemberCard.MemberCard.Unwrap()),
+		MemberName:   interner.Intern(member.MemberName),
+		SpecialTitle: interner.Intern(member.SpecialTitle.Unwrap()),
+		JoinTime:     member.JoinTimestamp,
+		LastMsgTime:  member.LastMsgTimestamp,
+		ShutUpTime:   member.ShutUpTimestamp.Unwrap(),
+		Avatar:       interner.Intern(entity.FriendAvatar(member.Uin.Uin)),
 	}
 	if member.Level != nil {
 		m.GroupLevel = member.Level.Level

@@ -9,15 +9,17 @@ const (
 )
 
 type GroupMember struct {
-	Uin         uint32
-	Uid         string
-	Permission  GroupMemberPermission
-	GroupLevel  uint32
-	MemberCard  string
-	MemberName  string
-	JoinTime    uint32
-	LastMsgTime uint32
-	Avatar      string
+	Uin          uint32
+	Uid          string
+	Permission   GroupMemberPermission
+	GroupLevel   uint32
+	MemberCard   string
+	MemberName   string
+	SpecialTitle string
+	JoinTime     uint32
+	LastMsgTime  uint32
+	ShutUpTime   uint32
+	Avatar       string
 }
 
 func (m *GroupMember) DisplayName() string {

@@ -16,11 +16,12 @@ message OidbSvcTrpcScp0xFE7_3Body {
   bool MemberName = 10;
   bool MemberCard = 11;
   bool Level = 12;
+  bool SpecialTitle = 17;
   bool Field4 = 20;
   bool Field5 = 21;
   bool JoinTimestamp = 100;
   bool LastMsgTimestamp = 101;
-  bool Field8 = 102;
+  bool ShutUpTimestamp = 102;
   bool Field9 = 103;
   bool Field10 = 104;
   bool Field11 = 105;
@@ -42,8 +43,10 @@ message OidbSvcTrpcTcp0xFE7_2Member {
   string MemberName = 10;
   OidbSvcTrpcTcp0xFE7_2Card MemberCard = 11;
   optional OidbSvcTrpcTcp0xFE7_2Level Level = 12;
+  optional string SpecialTitle = 17;
   uint32 JoinTimestamp = 100;
   uint32 LastMsgTimestamp = 101;
+  optional uint32 ShutUpTimestamp = 102;
   uint32 Permission = 107;
 }
 

@@ -22,11 +22,12 @@ type OidbSvcTrpcScp0XFE7_3Body struct {
 	MemberName       bool `protobuf:"varint,10,opt"`
 	MemberCard       bool `protobuf:"varint,11,opt"`
 	Level            bool `protobuf:"varint,12,opt"`
+	SpecialTitle     bool `protobuf:"varint,17,opt"`
 	Field4           bool `protobuf:"varint,20,opt"`
 	Field5           bool `protobuf:"varint,21,opt"`
 	JoinTimestamp    bool `protobuf:"varint,100,opt"`
 	LastMsgTimestamp bool `protobuf:"varint,101,opt"`
-	Field8           bool `protobuf:"varint,102,opt"`
+	ShutUpTimestamp  bool `protobuf:"varint,102,opt"`
 	Field9           bool `protobuf:"varint,103,opt"`
 	Field10          bool `protobuf:"varint,104,opt"`
 	Field11          bool `protobuf:"varint,105,opt"`
@@ -49,8 +50,10 @@ type OidbSvcTrpcTcp0XFE7_2Member struct {
 	MemberName       string                      `protobuf:"bytes,10,opt"`
 	MemberCard       *OidbSvcTrpcTcp0XFE7_2Card  `protobuf:"bytes,11,opt"`
 	Level            *OidbSvcTrpcTcp0XFE7_2Level `protobuf:"bytes,12,opt"`
+	SpecialTitle     proto.Option[string]        `protobuf:"bytes,17,opt"`
 	JoinTimestamp    uint32                      `protobuf:"varint,100,opt"`
 	LastMsgTimestamp uint32                      `protobuf:"varint,101,opt"`
+	ShutUpTimestamp  proto.Option[uint32]        `protobuf:"varint,102,opt"`
 	Permission       uint32                      `protobuf:"varint,107,opt"`
 	_                [0]func()
 }
