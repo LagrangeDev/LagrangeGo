@@ -238,6 +238,7 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 		case *message2.ForwardMessage:
 			if elem.ResID != "" && len(elem.Nodes) == 0 {
 				forward, _ := c.FetchForwardMsg(elem.ResID)
+				elem.IsGroup = true
 				elem.Nodes = forward.Nodes
 			}
 			if elem.ResID == "" && len(elem.Nodes) != 0 {
@@ -291,6 +292,7 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 		case *message2.ForwardMessage:
 			if elem.ResID != "" && len(elem.Nodes) == 0 {
 				forward, _ := c.FetchForwardMsg(elem.ResID)
+				elem.SelfId = c.Uin
 				elem.Nodes = forward.Nodes
 			}
 			if elem.ResID == "" && len(elem.Nodes) != 0 {
