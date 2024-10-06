@@ -164,6 +164,34 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 		news = []News{{Text: "转发消息"}}
 	}
 
+	var metaSource string = ""
+	if len(e.Nodes) > 0 {
+		isSenderNameExist := make(map[string]bool, 0)
+		isContainSelf := false
+		isCount := 0
+		for _, v := range e.Nodes {
+			if v.SenderId == e.SelfId && e.SelfId > 0 {
+				isContainSelf = true
+			}
+			if _, ok := isSenderNameExist[v.SenderName]; !ok {
+				isCount++
+				isSenderNameExist[v.SenderName] = true
+				if metaSource == "" {
+					metaSource = v.SenderName
+				} else {
+					metaSource += fmt.Sprintf("和%s", v.SenderName)
+				}
+			}
+		}
+		if !isContainSelf || (isCount > 2 && isCount < 1) {
+			metaSource = "群聊的聊天记录"
+		} else {
+			metaSource += "的聊天记录"
+		}
+	} else {
+		metaSource = "聊天记录"
+	}
+
 	content := MultiMsgLightApp{
 		App: "com.tencent.multimsg",
 		Config: Config{
@@ -179,7 +207,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 			Detail: Detail{
 				News:    news,
 				Resid:   e.ResID,
-				Source:  "聊天记录",
+				Source:  metaSource,
 				Summary: fmt.Sprintf("查看%d条转发消息", len(e.Nodes)),
 				UniSeq:  fileId,
 			},

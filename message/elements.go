@@ -137,8 +137,10 @@ type (
 	}
 
 	ForwardMessage struct {
-		ResID string
-		Nodes []*ForwardNode
+		IsGroup bool
+		SelfId  uint32
+		ResID   string
+		Nodes   []*ForwardNode
 	}
 
 	AtType int
