@@ -861,6 +861,7 @@ func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, 
 		}
 		if isGroupMsg {
 			forwardMsg.Nodes[idx].GroupId = b.ResponseHead.Grp.GroupUin
+			forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Grp.MemberName
 			grpMsg := message2.ParseGroupMessage(b)
 			c.PreprocessGroupMessageEvent(grpMsg)
 			forwardMsg.Nodes[idx].Message = grpMsg.Elements
