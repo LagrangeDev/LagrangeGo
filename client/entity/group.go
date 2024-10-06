@@ -1,11 +1,29 @@
 package entity
 
-type EventState uint32
+type (
+	EventState uint32
+	EventType  uint32
+)
 
 const (
 	NoNeed EventState = iota
 	Unprocessed
 	Processed
+)
+
+const (
+	// UserJoinRequest 用户申请加群
+	UserJoinRequest EventType = 1
+	// GroupInvited 被邀请加群
+	GroupInvited EventType = 2
+	// AssignedAsAdmin 被设置为管理员
+	AssignedAsAdmin EventType = 3
+	// Kicked 被踢出群聊
+	Kicked EventType = 7
+	// RemoveAdmin 被取消管理员
+	RemoveAdmin EventType = 15
+	// UserInvited 群员邀请其他人
+	UserInvited EventType = 22
 )
 
 type (
@@ -17,7 +35,7 @@ type (
 		Avatar      string
 	}
 
-	GroupJoinRequest struct {
+	UserJoinGroupRequest struct {
 		GroupUin    uint32
 		InvitorUin  uint32
 		InvitorUid  string
@@ -26,13 +44,32 @@ type (
 		OperatorUin uint32
 		OperatorUid string
 		Sequence    uint64
-		State       EventState // 0不需要处理 1未处理 2已处理
-		EventType   uint32     // 1申请加群 3设置管理员 16取消管理员
+		State       EventState
+		EventType   EventType
 		Comment     string
 		IsFiltered  bool
 	}
+
+	GroupInvitedRequest struct {
+		GroupUin   uint32
+		InvitorUin uint32
+		InvitorUid string
+		Sequence   uint64
+		State      EventState
+		EventType  EventType
+		IsFiltered bool
+	}
+
+	GroupSystemMessages struct {
+		InvitedRequests []*GroupInvitedRequest
+		JoinRequests    []*UserJoinGroupRequest
+	}
 )
 
-func (r *GroupJoinRequest) Checked() bool {
+func (r *UserJoinGroupRequest) Checked() bool {
+	return r.State != Unprocessed
+}
+
+func (r GroupInvitedRequest) Checked() bool {
 	return r.State != Unprocessed
 }

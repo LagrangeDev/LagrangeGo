@@ -14,32 +14,52 @@ func BuildFetchGroupSystemMessagesReq(isFiltered bool, count uint32) (*OidbPacke
 	return BuildOidbPacket(0x10C0, utils.Ternary[uint32](isFiltered, 2, 1), body, false, false)
 }
 
-func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...uint32) ([]*entity.GroupJoinRequest, error) {
+func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...uint32) (*entity.GroupSystemMessages, error) {
 	resp, err := ParseTypedError[oidb.OidbSvcTrpcTcp0X10C0Response](data)
 	if err != nil {
 		return nil, err
 	}
-	requests := make([]*entity.GroupJoinRequest, 0)
+	requests := entity.GroupSystemMessages{}
 	for _, r := range resp.Requests {
 		if len(groupUin) > 0 && groupUin[0] != r.Group.GroupUin {
 			continue
 		}
-		req := &entity.GroupJoinRequest{
-			GroupUin:   r.Group.GroupUin,
-			TargetUid:  r.Target.Uid,
-			Sequence:   r.Sequence,
-			State:      entity.EventState(r.State),
-			EventType:  r.EventType,
-			Comment:    r.Comment,
-			IsFiltered: isFiltered,
+		switch entity.EventType(r.EventType) {
+		case entity.UserJoinRequest, entity.UserInvited:
+			requests.JoinRequests = append(requests.JoinRequests, &entity.UserJoinGroupRequest{
+				GroupUin: r.Group.GroupUin,
+				InvitorUid: utils.LazyTernary(r.Invitor != nil, func() string {
+					return r.Invitor.Uid
+				}, func() string {
+					return ""
+				}),
+				TargetUid: r.Target.Uid,
+				OperatorUid: utils.LazyTernary(r.Invitor != nil, func() string {
+					return r.Invitor.Uid
+				}, func() string {
+					return ""
+				}),
+				Sequence:   r.Sequence,
+				State:      entity.EventState(r.State),
+				EventType:  entity.EventType(r.EventType),
+				Comment:    r.Comment,
+				IsFiltered: isFiltered,
+			})
+		case entity.GroupInvited:
+			requests.InvitedRequests = append(requests.InvitedRequests, &entity.GroupInvitedRequest{
+				GroupUin: r.Group.GroupUin,
+				InvitorUid: utils.LazyTernary(r.Invitor != nil, func() string {
+					return r.Invitor.Uid
+				}, func() string {
+					return ""
+				}),
+				Sequence:   r.Sequence,
+				State:      entity.EventState(r.State),
+				EventType:  entity.EventType(r.EventType),
+				IsFiltered: isFiltered,
+			})
+		default:
 		}
-		if r.Invitor != nil {
-			req.InvitorUid = r.Invitor.Uid
-		}
-		if r.Operator != nil {
-			req.OperatorUid = r.Operator.Uid
-		}
-		requests = append(requests, req)
 	}
-	return requests, nil
+	return &requests, nil
 }

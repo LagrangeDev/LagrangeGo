@@ -538,7 +538,7 @@ func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
 }
 
 // GetGroupSystemMessages 获取加群请求信息
-func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUin ...uint32) ([]*entity.GroupJoinRequest, error) {
+func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUin ...uint32) (*entity.GroupSystemMessages, error) {
 	pkt, err := oidb2.BuildFetchGroupSystemMessagesReq(isFiltered, count)
 	if err != nil {
 		return nil, err
