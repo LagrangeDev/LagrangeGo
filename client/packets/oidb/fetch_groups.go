@@ -35,10 +35,12 @@ func ParseFetchGroupsResp(data []byte) ([]*entity.Group, error) {
 	groups := make([]*entity.Group, len(resp.Groups))
 	for i, group := range resp.Groups {
 		groups[i] = &entity.Group{
-			GroupUin:    group.GroupUin,
-			GroupName:   group.Info.GroupName,
-			MemberCount: group.Info.MemberCount,
-			MaxMember:   group.Info.MemberMax,
+			GroupUin:        group.GroupUin,
+			GroupName:       group.Info.GroupName,
+			MemberCount:     group.Info.MemberCount,
+			MaxMember:       group.Info.MemberMax,
+			GroupCreateTime: group.Info.CreateTimeStamp,
+			GroupMemo:       group.ExtInfo.GroupMemo,
 		}
 	}
 	return groups, nil

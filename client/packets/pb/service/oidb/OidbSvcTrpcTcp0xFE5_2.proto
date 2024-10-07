@@ -73,10 +73,12 @@ message OidbSvcTrpcTcp0xFE5_2Response {
 message OidbSvcTrpcTcp0xFE5_2Group {
   uint32 GroupUin = 3;
   OidbSvcTrpcTcp0xFE5_2GroupInfo Info = 4;
+  ExtGroupInfo ExtInfo = 5;
 }
 
 message OidbSvcTrpcTcp0xFE5_2GroupInfo {
   OidbSvcTrpcTcp0xFE5_2Member GroupOwner = 1;
+  uint32 CreateTimeStamp = 2;
   uint32 MemberMax = 3;
   uint32 MemberCount = 4;
   string GroupName = 5;
@@ -84,4 +86,10 @@ message OidbSvcTrpcTcp0xFE5_2GroupInfo {
 
 message OidbSvcTrpcTcp0xFE5_2Member {
   string Uid = 2;
+}
+
+message ExtGroupInfo {
+  uint32 LastMsgTimeStamp = 1;
+  string GroupMemo = 3;
+  uint32 ShutupTimestampMe = 4;
 }

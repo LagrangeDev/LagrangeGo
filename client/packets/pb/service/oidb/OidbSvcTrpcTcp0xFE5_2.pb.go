@@ -79,18 +79,27 @@ type OidbSvcTrpcTcp0XFE5_2Response struct {
 type OidbSvcTrpcTcp0XFE5_2Group struct {
 	GroupUin uint32                          `protobuf:"varint,3,opt"`
 	Info     *OidbSvcTrpcTcp0XFE5_2GroupInfo `protobuf:"bytes,4,opt"`
+	ExtInfo  *ExtGroupInfo                   `protobuf:"bytes,5,opt"`
 	_        [0]func()
 }
 
 type OidbSvcTrpcTcp0XFE5_2GroupInfo struct {
-	GroupOwner  *OidbSvcTrpcTcp0XFE5_2Member `protobuf:"bytes,1,opt"`
-	MemberMax   uint32                       `protobuf:"varint,3,opt"`
-	MemberCount uint32                       `protobuf:"varint,4,opt"`
-	GroupName   string                       `protobuf:"bytes,5,opt"`
-	_           [0]func()
+	GroupOwner      *OidbSvcTrpcTcp0XFE5_2Member `protobuf:"bytes,1,opt"`
+	CreateTimeStamp uint32                       `protobuf:"varint,2,opt"`
+	MemberMax       uint32                       `protobuf:"varint,3,opt"`
+	MemberCount     uint32                       `protobuf:"varint,4,opt"`
+	GroupName       string                       `protobuf:"bytes,5,opt"`
+	_               [0]func()
 }
 
 type OidbSvcTrpcTcp0XFE5_2Member struct {
 	Uid string `protobuf:"bytes,2,opt"`
 	_   [0]func()
+}
+
+type ExtGroupInfo struct {
+	LastMsgTimeStamp  uint32 `protobuf:"varint,1,opt"`
+	GroupMemo         string `protobuf:"bytes,3,opt"`
+	ShutupTimestampMe uint32 `protobuf:"varint,4,opt"`
+	_                 [0]func()
 }
