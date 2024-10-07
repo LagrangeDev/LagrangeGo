@@ -537,6 +537,32 @@ func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
 	return oidb2.ParseFetchUserInfoResp(resp)
 }
 
+// FetchGroupInfo 获取群信息
+func (c *QQClient) FetchGroupInfo(groupUin uint32, isStrange bool) (*entity.Group, error) {
+	pkt, err := oidb2.BuildFetchGroupReq(groupUin, isStrange)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	groupResp, err := oidb2.ParseFetchGroupResp(resp)
+	if err != nil {
+		return nil, err
+	}
+	return &entity.Group{
+		GroupUin:        groupResp.GroupUin,
+		GroupName:       groupResp.GroupName,
+		GroupOwner:      c.GetUin(groupResp.GroupOwner, groupUin),
+		GroupCreateTime: groupResp.GroupCreateTime,
+		GroupMemo:       groupResp.GroupMemo,
+		GroupLevel:      groupResp.GroupLevel,
+		MemberCount:     groupResp.GroupMemberNum,
+		MaxMember:       groupResp.GroupMemberMaxNum,
+	}, nil
+}
+
 // GetGroupSystemMessages 获取加群请求信息
 func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUin ...uint32) (*entity.GroupSystemMessages, error) {
 	pkt, err := oidb2.BuildFetchGroupSystemMessagesReq(isFiltered, count)

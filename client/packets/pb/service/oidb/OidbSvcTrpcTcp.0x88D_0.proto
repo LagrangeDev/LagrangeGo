@@ -1,0 +1,142 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// fetch group 0x88d_0 0x88d_14
+message OidbSvcTrpcTcp0x88D {
+  uint32 AppID = 1; // 537099973
+  OidbSvcTrpcTcp0x88D_Config2 Config2 = 2;
+
+}
+
+message OidbSvcTrpcTcp0x88D_Config2 {
+  uint32 GroupUin = 1;
+  D88DGroupInfo GroupInfo = 2;
+
+}
+
+message D88DGroupHeadPortrait {
+  /*
+  optional uint32 picCount = 1;
+  repeated D88DGroupHeadPortraitInfo msgInfo = 2;
+  optional uint32 defaultId = 3;
+  optional uint32 verifyingPicCnt = 4;
+  repeated D88DGroupHeadPortraitInfo msgVerifyingPicInfo = 5;
+   */
+}
+
+message D88DGroupExInfoOnly {
+  /*
+  optional uint32 tribeId = 1;
+  optional uint32 moneyForAddGroup = 2;
+   */
+};
+
+message OidbSvcTrpcTcp0x88D_Response {
+  RspGroupInfo Info = 1;
+}
+
+message RspGroupInfo{
+  optional uint64 GroupUin = 1;
+  optional uint32 result = 2;
+  optional D88DGroupInfoResp groupInfo = 3;
+}
+
+message D88DGroupInfo {
+  optional bool GroupOwner = 1;
+  optional bool GroupCreateTime = 2;
+  optional bool GroupFlag = 3;
+  optional bool GroupFlagExt = 4;
+  optional bool GroupMemberMaxNum = 5;
+  optional bool GroupMemberNum = 6;
+  optional bool GroupOption = 7;
+  optional bool GroupClassExt = 8;
+  optional bool GroupSpecialClass = 9;
+  optional bool GroupLevel = 10;
+  optional bool GroupFace = 11;
+  optional bool GroupDefaultPage = 12;
+  //  optional bool GroupInfoSeq = 13;
+  optional bool GroupRoamingTime = 14;
+  optional string  GroupName = 15;
+  //  optional string  GroupMemo = 16;
+  optional string  GroupFingerMemo = 17;
+  optional string  GroupClassText = 18;
+  //  repeated bool GroupAllianceCode = 19;
+  //  optional bool GroupExtraAadmNum = 20;
+  optional bool GroupUin = 21;
+  //  optional bool GroupCurMsgSeq = 22;
+  //  optional bool GroupLastMsgTime = 23;
+  optional string  GroupQuestion = 24;
+  optional string  GroupAnswer = 25;
+  //  optional bool GroupVisitorMaxNum = 26;
+  //  optional bool GroupVisitorCurNum = 27;
+  //  optional bool LevelNameSeq = 28;
+  //  optional bool GroupAdminMaxNum = 29;
+  //  optional bool GroupAioSkinTimestamp = 30;
+  //  optional bool GroupBoardSkinTimestamp = 31;
+  //  optional string  GroupAioSkinUrl = 32;
+  //  optional string  GroupBoardSkinUrl = 33;
+  //  optional bool GroupCoverSkinTimestamp = 34;
+  //  optional string  GroupCoverSkinUrl = 35;
+  optional bool GroupGrade = 36;
+  //  optional bool ActiveMemberNum = 37;
+  optional bool CertificationType = 38;
+  optional string  CertificationText = 39;
+  optional string  GroupRichFingerMemo = 40;
+  // repeated D88DTagRecord tagRecord = 41;
+  // optional D88DGroupGeoInfo groupGeoInfo = 42;
+  optional bool HeadPortraitSeq = 43;
+  optional D88DGroupHeadPortrait MsgHeadPortrait = 44;
+  optional bool ShutupTimestamp = 45 ;
+  optional bool ShutupTimestampMe = 46 ;
+  optional bool CreateSourceFlag = 47 ;
+  //  optional bool CmduinMsgSeq = 48;
+  //  optional bool CmduinJoinTime = 49;
+  //  optional bool CmduinUinFlag = 50;
+  //  optional bool CmduinFlagEx = 51;
+  //  optional bool CmduinNewMobileFlag = 52;
+  //  optional bool CmduinReadMsgSeq = 53;
+  //  optional bool CmduinLastMsgTime = 54;
+  optional bool GroupTypeFlag = 55;
+  optional bool AppPrivilegeFlag = 56;
+  //  optional D88DGroupExInfoOnly StGroupExInfo = 57;
+  optional bool GroupSecLevel = 58;
+  //  optional bool GroupSecLevelInfo = 59;
+  //  optional bool CmduinPrivilege = 60;
+  optional string  PoidInfo = 61;
+  //  optional bool CmduinFlagEx2 = 62;
+  //  optional bool ConfUin = 63;
+  //  optional bool ConfMaxMsgSeq = 64;
+  //  optional bool ConfToGroupTime = 65;
+  //  optional bool PasswordRedbagTime = 66;
+  optional bool SubscriptionUin = 67;
+  //  optional bool MemberListChangeSeq = 68;
+  //  optional bool MembercardSeq = 69;
+  //  optional bool RootId = 70;
+  //  optional bool ParentId = 71;
+  //  optional bool TeamSeq = 72;
+  //  optional bool HistoryMsgBeginTime = 73;
+  //  optional bool InviteNoAuthNumLimit = 74;
+  //  optional bool CmduinHistoryMsgSeq = 75;
+  //  optional bool CmduinJoinMsgSeq = 76;
+  optional bool GroupFlagext3 = 77;
+  //  optional bool GroupOpenAppid = 78;
+  optional bool IsConfGroup = 79;
+  optional bool IsModifyConfGroupFace = 80;
+  optional bool IsModifyConfGroupName = 81;
+  optional bool NoFingerOpenFlag = 82;
+  optional bool NoCodeFingerOpenFlag = 83;
+}
+
+message D88DGroupInfoResp {
+  string GroupOwner = 1;
+  uint32 GroupCreateTime = 2;
+  uint32 GroupMemberMaxNum = 5;
+  uint32 GroupMemberNum = 6;
+  uint32 GroupLevel = 10;
+  string GroupName = 15;
+  string GroupMemo = 16;
+  uint32 GroupUin = 21;
+  uint32 GroupCurMsgSeq = 22;
+  uint32 GroupLastMsgTime = 23;
+}

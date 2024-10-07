@@ -1,5 +1,7 @@
 package entity
 
+import "fmt"
+
 type (
 	EventState uint32
 	EventType  uint32
@@ -28,11 +30,14 @@ const (
 
 type (
 	Group struct {
-		GroupUin    uint32
-		GroupName   string
-		MemberCount uint32
-		MaxMember   uint32
-		Avatar      string
+		GroupUin        uint32
+		GroupName       string
+		GroupOwner      uint32
+		GroupCreateTime uint32
+		GroupMemo       string
+		GroupLevel      uint32
+		MemberCount     uint32
+		MaxMember       uint32
 	}
 
 	UserJoinGroupRequest struct {
@@ -70,6 +75,10 @@ func (r *UserJoinGroupRequest) Checked() bool {
 	return r.State != Unprocessed
 }
 
-func (r GroupInvitedRequest) Checked() bool {
+func (r *GroupInvitedRequest) Checked() bool {
 	return r.State != Unprocessed
+}
+
+func (g *Group) Avatar() string {
+	return fmt.Sprintf("https://p.qlogo.cn/gh/%d/%d/0/", g.GroupUin, g.GroupUin)
 }
