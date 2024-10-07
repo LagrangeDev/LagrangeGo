@@ -144,6 +144,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err != nil {
 			return nil, err
 		}
+		if pb.Cmd != 87 {
+			return nil, nil
+		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
 		_ = c.PreprocessOther(ev)
 		user, _ := c.FetchUserInfo(ev.TargetUid)

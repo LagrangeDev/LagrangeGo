@@ -201,17 +201,14 @@ func ParseRequestJoinNotice(event *message.GroupJoin) *GroupMemberJoinRequest {
 
 // ParseRequestInvitationNotice 成员被邀请加群
 func ParseRequestInvitationNotice(event *message.GroupInvitation) *GroupMemberJoinRequest {
-	if event.Cmd == 87 {
-		inn := event.Info.Inner
-		return &GroupMemberJoinRequest{
-			GroupEvent: GroupEvent{
-				GroupUin: inn.GroupUin,
-			},
-			TargetUid:  inn.TargetUid,
-			InvitorUid: inn.InvitorUid,
-		}
+	inn := event.Info.Inner
+	return &GroupMemberJoinRequest{
+		GroupEvent: GroupEvent{
+			GroupUin: inn.GroupUin,
+		},
+		TargetUid:  inn.TargetUid,
+		InvitorUid: inn.InvitorUid,
 	}
-	return nil
 }
 
 func (g *GroupInvite) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
