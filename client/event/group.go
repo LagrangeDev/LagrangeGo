@@ -119,6 +119,7 @@ type (
 
 type GroupInvite struct {
 	GroupUin    uint32
+	GroupName   string
 	InvitorUid  string
 	InvitorUin  uint32
 	InvitorNick string

@@ -163,6 +163,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseInviteNotice(&pb)
+		group, err := c.FetchGroupInfo(ev.GroupUin, true)
+		if err == nil {
+			ev.GroupName = group.GroupName
+		}
 		_ = c.PreprocessOther(ev)
 		user, _ := c.FetchUserInfo(ev.InvitorUid)
 		if user != nil {
