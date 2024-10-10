@@ -279,13 +279,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		if elem.CommonElem != nil {
 			switch elem.CommonElem.ServiceType {
 			case 48:
-				if elem.CommonElem.BusinessType == 10 || elem.CommonElem.BusinessType == 20 {
-					extra := &oidb2.MsgInfo{}
-					err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
-					if err != nil {
-						continue
-					}
-					index := extra.MsgInfoBody[0].Index
+				extra := &oidb2.MsgInfo{}
+				err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
+				if err != nil {
+					continue
+				}
+				index := extra.MsgInfoBody[0].Index
+				switch elem.CommonElem.BusinessType {
+				case 10, 20: // img
 					res = append(res, &ImageElement{
 						ImageId:  index.Info.FileName,
 						FileUUID: index.FileUuid,
@@ -297,6 +298,15 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						Height:   index.Info.Height,
 						Size:     index.Info.FileSize,
 						MsgInfo:  extra,
+					})
+				case 12, 22: // record 22 for Group
+					res = append(res, &VoiceElement{
+						Name:     index.Info.FileName,
+						Uuid:     index.FileUuid,
+						Md5:      utils.MustParseHexStr(index.Info.FileHash),
+						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
+						Duration: index.Info.Time,
+						Node:     index,
 					})
 				}
 			case 3: // 闪照
@@ -370,6 +380,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 			case isGroup && ptt.FileId != 0:
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
+					Uuid: ptt.FileUuid,
 					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.GroupFileKey,
@@ -378,6 +389,8 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 			case !isGroup:
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
+					Uuid: ptt.FileUuid,
+					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.FileUuid,
 					},

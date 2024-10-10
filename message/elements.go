@@ -53,6 +53,7 @@ type (
 
 	VoiceElement struct {
 		Name string
+		Uuid string
 		Size uint32
 		Url  string
 		Md5  []byte
