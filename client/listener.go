@@ -344,6 +344,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 }
 
 func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
+	c.Disconnect()
 	return nil, nil
 }
 
