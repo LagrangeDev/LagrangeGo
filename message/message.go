@@ -239,16 +239,21 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				url = "http://gchat.qpic.cn" + elem.CustomFace.OrigUrl
 			}
 
-			res = append(res, &ImageElement{
-				ImageId: elem.CustomFace.FilePath,
-				Size:    elem.CustomFace.Size,
-				Width:   uint32(elem.CustomFace.Width),
-				Height:  uint32(elem.CustomFace.Height),
-				Url:     url,
-				Md5:     elem.CustomFace.Md5,
-				SubType: elem.CustomFace.PbRes.SubType,
-				Summary: elem.CustomFace.PbRes.Summary,
-			})
+			res = append(res, func() *ImageElement {
+				img := &ImageElement{
+					ImageId: elem.CustomFace.FilePath,
+					Size:    elem.CustomFace.Size,
+					Width:   uint32(elem.CustomFace.Width),
+					Height:  uint32(elem.CustomFace.Height),
+					Url:     url,
+					Md5:     elem.CustomFace.Md5,
+				}
+				if elem.CustomFace.PbRes != nil {
+					img.SubType = elem.CustomFace.PbRes.SubType
+					img.Summary = elem.CustomFace.PbRes.Summary
+				}
+				return img
+			}())
 		}
 
 		if elem.NotOnlineImage != nil {
