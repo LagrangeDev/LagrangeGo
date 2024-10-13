@@ -10,7 +10,7 @@ import (
 // Friend Likes
 type OidbSvcTrpcTcp0X7E5_104 struct {
 	TargetUid proto.Option[string] `protobuf:"bytes,11,opt"`
-	Field2    uint32               `protobuf:"varint,12,opt"` // 71
-	Field3    uint32               `protobuf:"varint,13,opt"` // 1
+	Source    uint32               `protobuf:"varint,12,opt"` // 71
+	Count     uint32               `protobuf:"varint,13,opt"` // 1
 	_         [0]func()
 }

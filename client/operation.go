@@ -1217,3 +1217,14 @@ func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) e
 	}
 	return oidb2.ParseSetEssenceMessageResp(resp)
 }
+
+// SendFriendLike 发送好友赞
+func (c *QQClient) SendFriendLike(uin uint32, count uint32) bool {
+	if count > 20 { count = 20 } else if count < 1 { count = 1 }
+	if pkt, err := oidb2.BuildFriendLikeReq(c.GetUid(uin), count); err == nil {
+		if resp, err := c.SendOidbPacketAndWait(pkt); err == nil {
+			return nil == oidb2.ParseFriendLikeResp(resp)
+		}
+	}
+	return false
+}

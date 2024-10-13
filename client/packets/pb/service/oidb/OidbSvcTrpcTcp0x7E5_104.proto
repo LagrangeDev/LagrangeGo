@@ -5,6 +5,6 @@ option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service
 // Friend Likes
 message OidbSvcTrpcTcp0x7E5_104 {
   optional string TargetUid = 11;
-  uint32 Field2 = 12; // 71
-  uint32 Field3 = 13; // 1
+  uint32 Source = 12; // 71
+  uint32 Count  = 13; // 1
 }
