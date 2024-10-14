@@ -70,11 +70,15 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 	if err != nil {
 		return nil
 	}
+
+	BusinessType := uint32(10)
+	if e.IsGroup { BusinessType = 20 }
+
 	msg := []*message.Elem{{}, {
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
-			BusinessType: 10,
+			BusinessType: BusinessType,
 		},
 	}}
 	if e.CompatFace != nil {

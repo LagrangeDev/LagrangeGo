@@ -4,9 +4,6 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 	message2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -14,7 +11,9 @@ import (
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
 func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
@@ -33,13 +32,12 @@ func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 
 func (c *QQClient) UploadImage(target message.Source, image *message.ImageElement) (*message.ImageElement, error) {
 	switch target.SourceType {
-	case message.SourceGroup:
-		return c.ImageUploadGroup(uint32(target.PrimaryID), image)
-	case message.SourcePrivate:
-		return c.ImageUploadPrivate(c.GetUid(uint32(target.PrimaryID)), image)
+		case message.SourceGroup  : return c.ImageUploadGroup(uint32(target.PrimaryID), image)
+		case message.SourcePrivate: return c.ImageUploadPrivate(c.GetUid(uint32(target.PrimaryID)), image)
 	}
 	return nil, errors.New("unknown target type")
 }
+
 func (c *QQClient) UploadRecord(target message.Source, voice *message.VoiceElement) (*message.VoiceElement, error) {
 	switch target.SourceType {
 	case message.SourceGroup:
@@ -51,10 +49,8 @@ func (c *QQClient) UploadRecord(target message.Source, voice *message.VoiceEleme
 }
 func (c *QQClient) UploadShortVideo(target message.Source, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	switch target.SourceType {
-	case message.SourceGroup:
-		return c.VideoUploadGroup(uint32(target.PrimaryID), video)
-	case message.SourcePrivate:
-		return c.VideoUploadPrivate(c.GetUid(uint32(target.PrimaryID)), video)
+	case message.SourceGroup: return c.VideoUploadGroup(uint32(target.PrimaryID), video)
+	case message.SourcePrivate: return c.VideoUploadPrivate(c.GetUid(uint32(target.PrimaryID)), video)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -64,6 +60,7 @@ func (c *QQClient) ImageUploadPrivate(targetUid string, image *message.ImageElem
 		return nil, errors.New("image is nil")
 	}
 	defer utils.CloseIO(image.Stream)
+	image.IsGroup = false
 	req, err := oidb.BuildPrivateImageUploadReq(targetUid, image)
 	if err != nil {
 		return nil, err
@@ -127,6 +124,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement
 		return nil, errors.New("element type is not group image")
 	}
 	defer utils.CloseIO(image.Stream)
+	image.IsGroup = true
 	req, err := oidb.BuildGroupImageUploadReq(groupUin, image)
 	if err != nil {
 		return nil, err
