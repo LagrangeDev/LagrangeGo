@@ -32,8 +32,10 @@ func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 
 func (c *QQClient) UploadImage(target message.Source, image *message.ImageElement) (*message.ImageElement, error) {
 	switch target.SourceType {
-		case message.SourceGroup  : return c.ImageUploadGroup(uint32(target.PrimaryID), image)
-		case message.SourcePrivate: return c.ImageUploadPrivate(c.GetUid(uint32(target.PrimaryID)), image)
+	case message.SourceGroup:
+		return c.ImageUploadGroup(uint32(target.PrimaryID), image)
+	case message.SourcePrivate:
+		return c.ImageUploadPrivate(c.GetUid(uint32(target.PrimaryID)), image)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -49,8 +51,10 @@ func (c *QQClient) UploadRecord(target message.Source, voice *message.VoiceEleme
 }
 func (c *QQClient) UploadShortVideo(target message.Source, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	switch target.SourceType {
-	case message.SourceGroup: return c.VideoUploadGroup(uint32(target.PrimaryID), video)
-	case message.SourcePrivate: return c.VideoUploadPrivate(c.GetUid(uint32(target.PrimaryID)), video)
+	case message.SourceGroup:
+		return c.VideoUploadGroup(uint32(target.PrimaryID), video)
+	case message.SourcePrivate:
+		return c.VideoUploadPrivate(c.GetUid(uint32(target.PrimaryID)), video)
 	}
 	return nil, errors.New("unknown target type")
 }
