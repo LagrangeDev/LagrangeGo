@@ -16,22 +16,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
-
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
+	"github.com/tidwall/gjson"
 
 	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	oidb2      "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/tidwall/gjson"
 )
 
 func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
@@ -1216,4 +1215,18 @@ func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) e
 		return err
 	}
 	return oidb2.ParseSetEssenceMessageResp(resp)
+}
+
+// SendFriendLike 发送好友赞
+func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
+	if count > 20 { count = 20 } else if count < 1 { count = 1 }
+	pkt, err := oidb2.BuildFriendLikeReq(c.GetUid(uin), count)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseFriendLikeResp(resp)
 }
