@@ -70,11 +70,12 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 	if err != nil {
 		return nil
 	}
+
 	msg := []*message.Elem{{}, {
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
-			BusinessType: 10,
+			BusinessType: utils.Ternary(e.IsGroup, uint32(20), uint32(10)),
 		},
 	}}
 	if e.CompatFace != nil {
