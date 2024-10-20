@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
@@ -196,11 +197,9 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				}
 			} else if elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil {
 				qFace := message.QFaceExtra{}
-				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
-				if err == nil {
-					faceId := qFace.FaceId
-					if faceId.IsSome() {
-						res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap()), isLargeFace: true})
+				if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
+					if qFace.Qsid.IsSome() {
+						res = append(res, &FaceElement{FaceID: uint16(qFace.Qsid.Unwrap()), isLargeFace: true})
 					}
 				}
 			} else if elem.CommonElem != nil && elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil {
@@ -334,6 +333,15 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					Url:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
 				})
 				skipNext = true
+			case 37:
+				var faceExtra message.QFaceExtra
+				_ = proto.Unmarshal(elem.CommonElem.PbElem, &faceExtra)
+				result, _ := strconv.ParseInt(faceExtra.ResultId.Unwrap(), 10, 32)
+				res = append(res, &FaceElement{
+					FaceID:      uint16(faceExtra.Qsid.Unwrap()),
+					ResultID:    uint16(result),
+					isLargeFace: true,
+				})
 			}
 		}
 

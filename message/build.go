@@ -38,19 +38,25 @@ func (e *AtElement) BuildElement() []*message.Elem {
 }
 
 func (e *FaceElement) BuildElement() []*message.Elem {
-	faceId := int32(e.FaceID)
 	if e.isLargeFace {
-		qFace := message.QFaceExtra{
-			Field1:  proto.Some("1"),
-			Field2:  proto.Some("8"),
-			FaceId:  proto.Some(faceId),
-			Field4:  proto.Some(int32(1)),
-			Field5:  proto.Some(int32(1)),
-			Field6:  proto.Some(""),
-			Preview: proto.Some(""),
-			Field9:  proto.Some(int32(1)),
+		name, business, resultid := "", int32(1), ""
+		if e.FaceID == 358 {
+			name, business = "/骰子", 2
+			resultid = fmt.Sprint(e.ResultID)
+		} else if e.FaceID == 359 {
+			name, business = "/包剪锤", 2
+			resultid = fmt.Sprint(e.ResultID)
 		}
-		qFaceData, _ := proto.Marshal(&qFace)
+		qFaceData, _ := proto.Marshal(&message.QFaceExtra{
+			PackId:      proto.Some("1"),
+			StickerId:   proto.Some("8"),
+			Qsid:        proto.Some(int32(e.FaceID)),
+			SourceType:  proto.Some(int32(1)),
+			StickerType: proto.Some(business),
+			ResultId:    proto.Some(resultid),
+			Text:        proto.Some(name),
+			RandomType:  proto.Some(int32(1)),
+		})
 		return []*message.Elem{{
 			CommonElem: &message.CommonElem{
 				ServiceType:  37,
@@ -60,7 +66,7 @@ func (e *FaceElement) BuildElement() []*message.Elem {
 		}}
 	} else {
 		return []*message.Elem{{
-			Face: &message.Face{Index: proto.Some(faceId)},
+			Face: &message.Face{Index: proto.Some(int32(e.FaceID))},
 		}}
 	}
 }

@@ -391,15 +391,16 @@ type MentionExtra struct {
 }
 
 type QFaceExtra struct {
-	Field1  proto.Option[string] `protobuf:"bytes,1,opt"`
-	Field2  proto.Option[string] `protobuf:"bytes,2,opt"`
-	FaceId  proto.Option[int32]  `protobuf:"varint,3,opt"`
-	Field4  proto.Option[int32]  `protobuf:"varint,4,opt"`
-	Field5  proto.Option[int32]  `protobuf:"varint,5,opt"`
-	Field6  proto.Option[string] `protobuf:"bytes,6,opt"`
-	Preview proto.Option[string] `protobuf:"bytes,7,opt"`
-	Field9  proto.Option[int32]  `protobuf:"varint,9,opt"`
-	_       [0]func()
+	PackId      proto.Option[string] `protobuf:"bytes,1,opt"`
+	StickerId   proto.Option[string] `protobuf:"bytes,2,opt"`
+	Qsid        proto.Option[int32]  `protobuf:"varint,3,opt"`
+	SourceType  proto.Option[int32]  `protobuf:"varint,4,opt"`
+	StickerType proto.Option[int32]  `protobuf:"varint,5,opt"`
+	ResultId    proto.Option[string] `protobuf:"bytes,6,opt"`
+	Text        proto.Option[string] `protobuf:"bytes,7,opt"`
+	// optional bytes surprise_id = 8;
+	RandomType proto.Option[int32] `protobuf:"varint,9,opt"`
+	_          [0]func()
 }
 
 type QSmallFaceExtra struct {

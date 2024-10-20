@@ -403,14 +403,15 @@ message MentionExtra {
 }
 
 message QFaceExtra {
-  optional string Field1 = 1;
-  optional string Field2 = 2;
-  optional int32 FaceId = 3;
-  optional int32 Field4 = 4;
-  optional int32 Field5 = 5;
-  optional string Field6 = 6;
-  optional string Preview = 7;
-  optional int32 Field9 = 9;
+  optional string pack_id = 1;
+  optional string sticker_id = 2;
+  optional int32 qsid = 3;
+  optional int32 source_type = 4;
+  optional int32 sticker_type = 5;
+  optional string result_id = 6;
+  optional string text = 7;
+  //optional bytes surprise_id = 8;
+  optional int32 random_type = 9;
 }
 
 message QSmallFaceExtra {
@@ -418,3 +419,4 @@ message QSmallFaceExtra {
   string Preview = 2;
   string Preview2 = 3;
 }
+
