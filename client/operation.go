@@ -17,12 +17,11 @@ import (
 	"time"
 
 	"github.com/tidwall/gjson"
-
 	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
-	oidb2      "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
@@ -1219,7 +1218,11 @@ func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) e
 
 // SendFriendLike 发送好友赞
 func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
-	if count > 20 { count = 20 } else if count < 1 { count = 1 }
+	if count > 20 {
+		count = 20
+	} else if count < 1 {
+		count = 1
+	}
 	pkt, err := oidb2.BuildFriendLikeReq(c.GetUid(uin), count)
 	if err != nil {
 		return err
@@ -1229,4 +1232,36 @@ func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
 		return err
 	}
 	return oidb2.ParseFriendLikeResp(resp)
+}
+
+func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*message2.GroupMessage, error) {
+	data, err := proto.Marshal(&message.SsoGetGroupMsg{
+		Info: &message.SsoGetGroupMsgInfo{
+			GroupUin:      groupUin,
+			StartSequence: startSeq,
+			EndSequence:   endSeq,
+		},
+		Direction: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if data, err = c.sendUniPacketAndWait("trpc.msg.register_proxy.RegisterProxy.SsoGetGroupMsg", data); err != nil {
+		return nil, err
+	}
+
+	var rsp message.SsoGetGroupMsgResponse
+	if err = proto.Unmarshal(data, &rsp); err != nil {
+		return nil, err
+	}
+
+	var ret []*message2.GroupMessage
+	for _, pkt := range rsp.Body.Messages {
+		grpMsg := message2.ParseGroupMessage(pkt)
+		c.PreprocessGroupMessageEvent(grpMsg)
+		ret = append(ret, grpMsg)
+	}
+
+	return ret, nil
 }
