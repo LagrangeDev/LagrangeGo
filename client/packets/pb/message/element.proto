@@ -403,15 +403,15 @@ message MentionExtra {
 }
 
 message QFaceExtra {
-  optional string pack_id = 1;
-  optional string sticker_id = 2;
-  optional int32 qsid = 3;
-  optional int32 source_type = 4;
-  optional int32 sticker_type = 5;
-  optional string result_id = 6;
-  optional string text = 7;
-  //optional bytes surprise_id = 8;
-  optional int32 random_type = 9;
+  optional string PackId = 1;
+  optional string StickerId = 2;
+  optional int32 Qsid = 3;
+  optional int32 SourceType = 4;
+  optional int32 StickerType = 5;
+  optional string ResultId = 6;
+  optional string Text = 7;
+  //optional bytes SurpriseId = 8;
+  optional int32 RandomType = 9;
 }
 
 message QSmallFaceExtra {
