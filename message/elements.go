@@ -358,7 +358,7 @@ func NewFace(id uint16) *FaceElement {
 }
 
 func NewDice(value uint16) *FaceElement {
-	if value < 0 || value > 6 {
+	if value > 6 {
 		value = uint16(crypto.RandU32()%3) + 1
 	}
 	return &FaceElement{
