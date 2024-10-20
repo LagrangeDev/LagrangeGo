@@ -5,6 +5,7 @@ package message
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -35,6 +36,7 @@ type (
 
 	FaceElement struct {
 		FaceID      uint16
+		ResultID    uint16 // 猜拳和骰子的值
 		isLargeFace bool
 	}
 
@@ -348,6 +350,49 @@ func NewForwardWithResID(resid string) *ForwardMessage {
 func NewForwardWithNodes(nodes []*ForwardNode) *ForwardMessage {
 	return &ForwardMessage{
 		Nodes: nodes,
+	}
+}
+
+func NewFace(id uint16) *FaceElement {
+	return &FaceElement{FaceID: id}
+}
+
+func NewDice(value uint16) *FaceElement {
+	if value > 6 {
+		value = uint16(crypto.RandU32()%3) + 1
+	}
+	return &FaceElement{
+		FaceID:      358,
+		ResultID:    value,
+		isLargeFace: true,
+	}
+}
+
+type FingerGuessingType uint16
+
+const (
+	FingerGuessingRock     FingerGuessingType = 3 // 石头
+	FingerGuessingScissors FingerGuessingType = 2 // 剪刀
+	FingerGuessingPaper    FingerGuessingType = 1 // 布
+)
+
+func (m FingerGuessingType) String() string {
+	switch m {
+	case FingerGuessingRock:
+		return "石头"
+	case FingerGuessingScissors:
+		return "剪刀"
+	case FingerGuessingPaper:
+		return "布"
+	}
+	return fmt.Sprint(int(m))
+}
+
+func NewFingerGuessing(value FingerGuessingType) *FaceElement {
+	return &FaceElement{
+		FaceID:      359,
+		ResultID:    uint16(value),
+		isLargeFace: true,
 	}
 }
 
