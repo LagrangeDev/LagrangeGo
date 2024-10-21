@@ -81,7 +81,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 	return resp, nil
 }
 
-// SendPrivateMessage 发送群聊消息，默认会对消息进行预处理
+// SendPrivateMessage 发送私聊消息，默认会对消息进行预处理
 func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageElement, needPreprocess ...bool) (*message2.PrivateMessage, error) {
 	if needPreprocess == nil || needPreprocess[0] {
 		elements = c.preProcessPrivateMessage(uin, elements)
@@ -111,7 +111,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 			AnonymousInfo: nil,
 			IsFriend:      true,
 		},
-		Elements: nil,
+		Elements: elements,
 	}
 	return resp, nil
 }
