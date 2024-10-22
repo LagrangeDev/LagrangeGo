@@ -333,6 +333,10 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					Url:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
 				})
 				skipNext = true
+			case 33:
+				var newSysFaceMsg message.QSmallFaceExtra
+				_ = proto.Unmarshal(elem.CommonElem.PbElem, &newSysFaceMsg)
+				res = append(res, NewFace(uint16(newSysFaceMsg.FaceId)))
 			case 37:
 				var faceExtra message.QFaceExtra
 				_ = proto.Unmarshal(elem.CommonElem.PbElem, &faceExtra)
@@ -341,7 +345,8 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					FaceID:      uint16(faceExtra.Qsid.Unwrap()),
 					ResultID:    uint16(result),
 					isLargeFace: true,
-				})
+				}) // sticker 永远为单独消息
+				skipNext = true
 			}
 		}
 
