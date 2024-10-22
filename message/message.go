@@ -341,11 +341,12 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				var faceExtra message.QFaceExtra
 				_ = proto.Unmarshal(elem.CommonElem.PbElem, &faceExtra)
 				result, _ := strconv.ParseInt(faceExtra.ResultId.Unwrap(), 10, 32)
-				return []IMessageElement{&FaceElement{
+				res = append(res, &FaceElement{
 					FaceID:      uint16(faceExtra.Qsid.Unwrap()),
 					ResultID:    uint16(result),
 					isLargeFace: true,
-				}} // sticker 永远为单独消息
+				}) // sticker 永远为单独消息
+				skipNext = true
 			}
 		}
 
