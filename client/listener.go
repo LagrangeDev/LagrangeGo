@@ -4,6 +4,8 @@ import (
 	"errors"
 	"runtime/debug"
 
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/system"
+
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 
 	eventConverter "github.com/LagrangeDev/LagrangeGo/client/event"
@@ -344,7 +346,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 }
 
 func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
-	c.Disconnect()
+	pb := system.ServiceKickNTResponse{}
+	_ = proto.Unmarshal(pkt.Payload, &pb)
+	c.KickedEvent.dispatch(c, eventConverter.ParseKickedEvent(&pb))
 	return nil, nil
 }
 

@@ -92,6 +92,8 @@ type QQClient struct {
 	cache cache.Cache
 
 	// event handles
+	KickedEvent EventHandle[*event.Kicked]
+
 	GroupMessageEvent   EventHandle[*message.GroupMessage]
 	PrivateMessageEvent EventHandle[*message.PrivateMessage]
 	TempMessageEvent    EventHandle[*message.TempMessage]
