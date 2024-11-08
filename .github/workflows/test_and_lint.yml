@@ -27,14 +27,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        pull_request: [false, true]
-        include:
-          - pull_request: true
-            event: [pull_request, pr_push]
-          - pull_request: false
-            event: push
     steps:
       - name: Code
         uses: actions/checkout@v4
@@ -53,5 +45,5 @@ jobs:
         with:
           version: 'v1.61.0'
           args: '--timeout 9999s'
-          only-new-issues: ${{ matrix.pull_request }}
+          only-new-issues: ${{ github.event.name == 'pull_request' || github.event.name == 'pr_push' }}
           skip-save-cache: true
