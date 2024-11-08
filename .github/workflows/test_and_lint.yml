@@ -32,7 +32,7 @@ jobs:
         pull_request: [false, true]
         include:
           - pull_request: true
-            event: pull_request
+            event: [pull_request, pr_push]
           - pull_request: false
             event: push
     steps:
