@@ -42,19 +42,8 @@ jobs:
 
       - name: GolangCI-Lint
         uses: golangci/golangci-lint-action@v6
-        if: github.event.name == 'pull_request'
         with:
           version: 'v1.61.0'
           args: '--timeout 9999s'
-          only-new-issues: true
-          skip-pkg-cache: true
-          skip-build-cache: true
-
-      - name: GolangCI-Lint
-        uses: golangci/golangci-lint-action@v6
-        if: github.event.name != 'pull_request'
-        with:
-          version: 'v1.61.0'
-          args: '--timeout 9999s'
-          skip-pkg-cache: true
-          skip-build-cache: true
+          only-new-issues: ${{ github.event.name == 'pull_request' }}
+          skip-save-cache: true
