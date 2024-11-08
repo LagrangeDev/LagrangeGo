@@ -1,6 +1,8 @@
 package client
 
 import (
+	"time"
+
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 )
 
@@ -95,22 +97,40 @@ func (c *QQClient) GetCachedMembersInfo(groupUin uint32) map[uint32]*entity.Grou
 
 // GetCachedRkeyInfo 获取指定类型的RKey信息(缓存)
 func (c *QQClient) GetCachedRkeyInfo(rkeyType entity.RKeyType) *entity.RKeyInfo {
-	if c.cache.RkeyInfoCacheIsEmpty() || c.cache.RkeyInfoCacheIsExpired() {
-		if err := c.RefreshAllRkeyInfoCache(); err != nil {
-			return nil
+	refresh := c.cache.RkeyInfoCacheIsEmpty()
+	for {
+		if refresh {
+			if err := c.RefreshAllRkeyInfoCache(); err != nil {
+				return nil
+			}
 		}
+		inf := c.cache.GetRKeyInfo(rkeyType)
+		if inf.ExpireTime <= uint64(time.Now().Unix()) {
+			refresh = true
+			continue
+		}
+		return inf
 	}
-	return c.cache.GetRKeyInfo(rkeyType)
 }
 
 // GetCachedRkeyInfos 获取所有RKey信息(缓存)
 func (c *QQClient) GetCachedRkeyInfos() map[entity.RKeyType]*entity.RKeyInfo {
-	if c.cache.RkeyInfoCacheIsEmpty() || c.cache.RkeyInfoCacheIsExpired() {
-		if err := c.RefreshAllRkeyInfoCache(); err != nil {
-			return nil
+	refresh := c.cache.RkeyInfoCacheIsEmpty()
+	for {
+		if refresh {
+			if err := c.RefreshAllRkeyInfoCache(); err != nil {
+				return nil
+			}
 		}
+		inf := c.cache.GetAllRkeyInfo()
+		for _, v := range inf {
+			if v.ExpireTime <= uint64(time.Now().Unix()) {
+				refresh = true
+				continue
+			}
+		}
+		return inf
 	}
-	return c.cache.GetAllRkeyInfo()
 }
 
 // RefreshFriendCache 刷新好友缓存
