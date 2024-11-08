@@ -121,13 +121,17 @@ func (c *QQClient) GetCachedRkeyInfos() map[entity.RKeyType]*entity.RKeyInfo {
 			if err := c.RefreshAllRkeyInfoCache(); err != nil {
 				return nil
 			}
+			refresh = false
 		}
 		inf := c.cache.GetAllRkeyInfo()
 		for _, v := range inf {
 			if v.ExpireTime <= uint64(time.Now().Unix()) {
 				refresh = true
-				continue
+				break
 			}
+		}
+		if refresh {
+			continue
 		}
 		return inf
 	}
