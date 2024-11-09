@@ -345,6 +345,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	return nil, nil
 }
 
+// nolint
 func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
 	pb := system.ServiceKickNTResponse{}
 	err := proto.Unmarshal(pkt.Payload, &pb)

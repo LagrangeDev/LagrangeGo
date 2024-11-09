@@ -848,12 +848,12 @@ func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
 }
 
 // FetchForwardMsg 获取合并转发消息
-func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, err error) {
-	if resId == "" {
-		return msg, errors.New("empty resId")
+func (c *QQClient) FetchForwardMsg(resID string) (msg *message2.ForwardMessage, err error) {
+	if resID == "" {
+		return msg, errors.New("empty resID")
 	}
-	forwardMsg := &message2.ForwardMessage{ResID: resId}
-	pkt, err := messagePkt.BuildMultiMsgDownloadReq(c.GetUID(c.Uin), resId)
+	forwardMsg := &message2.ForwardMessage{ResID: resID}
+	pkt, err := messagePkt.BuildMultiMsgDownloadReq(c.GetUID(c.Uin), resID)
 	if err != nil {
 		return forwardMsg, err
 	}
@@ -1167,10 +1167,11 @@ func (c *QQClient) DelGroupNotice(groupUin uint32, fid string) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.SendRequestWithCookie(req)
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	return nil
 }
 

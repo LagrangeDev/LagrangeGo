@@ -64,11 +64,10 @@ func (e *FaceElement) BuildElement() []*message.Elem {
 				BusinessType: 1,
 			},
 		}}
-	} else {
-		return []*message.Elem{{
-			Face: &message.Face{Index: proto.Some(int32(e.FaceID))},
-		}}
 	}
+	return []*message.Elem{{
+		Face: &message.Face{Index: proto.Some(int32(e.FaceID))},
+	}}
 }
 
 func (e *ImageElement) BuildElement() []*message.Elem {

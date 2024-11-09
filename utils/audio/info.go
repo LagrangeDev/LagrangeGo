@@ -26,9 +26,8 @@ func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 			return decode(r, true)
 		}
 		return nil, errors.New("unknown audio type")
-	} else {
-		buf = append(buf, reader.ReadBytes(5)...)
 	}
+	buf = append(buf, reader.ReadBytes(5)...)
 
 	switch {
 	case strings.HasPrefix(string(buf), "#!AMR\n"):
