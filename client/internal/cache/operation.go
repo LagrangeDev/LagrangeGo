@@ -2,10 +2,14 @@ package cache
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
-	"math"
 )
 
-func (c *Cache) RefreshAll(friendCache map[uint32]*entity.Friend, groupCache map[uint32]*entity.Group, groupMemberCache map[uint32]map[uint32]*entity.GroupMember, rkeyCache entity.RKeyMap) {
+func (c *Cache) RefreshAll(
+	friendCache map[uint32]*entity.Friend,
+	groupCache map[uint32]*entity.Group,
+	groupMemberCache map[uint32]map[uint32]*entity.GroupMember,
+	rkeyCache entity.RKeyMap,
+) {
 	c.RefreshAllFriend(friendCache)
 	c.RefreshAllGroup(groupCache)
 	c.RefreshAllGroupMembers(groupMemberCache)
@@ -64,10 +68,5 @@ func (c *Cache) RefreshAllGroup(groupCache map[uint32]*entity.Group) {
 
 // RefreshAllRKeyInfo 刷新所有RKey缓存
 func (c *Cache) RefreshAllRKeyInfo(rkeyCache entity.RKeyMap) {
-	var expTime int64 = math.MaxInt64
-	for _, ext := range rkeyCache {
-		expTime = int64(ext.ExpireTime)
-		break
-	}
-	refreshAllExpiredCacheOf(c, rkeyCache, expTime)
+	refreshAllCacheOf(c, rkeyCache)
 }

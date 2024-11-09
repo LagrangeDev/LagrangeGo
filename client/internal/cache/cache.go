@@ -1,6 +1,8 @@
 package cache
 
-import "github.com/LagrangeDev/LagrangeGo/client/entity"
+import (
+	"github.com/LagrangeDev/LagrangeGo/client/entity"
+)
 
 // GetUid 根据uin获取uid
 func (c *Cache) GetUid(uin uint32, groupUin ...uint32) string {
@@ -88,7 +90,7 @@ func (c *Cache) GetGroupMember(uin, groupUin uint32) *entity.GroupMember {
 func (c *Cache) GetGroupMembers(groupUin uint32) map[uint32]*entity.GroupMember {
 	members := make(map[uint32]*entity.GroupMember, 64)
 	if group, ok := getCacheOf[Cache](c, groupUin); ok {
-		rangeCacheOf[entity.GroupMember](group, func(k uint32, member *entity.GroupMember) bool {
+		rangeCacheOf(group, func(k uint32, member *entity.GroupMember) bool {
 			members[member.Uin] = member
 			return true
 		})
@@ -105,7 +107,7 @@ func (c *Cache) GetRKeyInfo(rkeyType entity.RKeyType) *entity.RKeyInfo {
 // GetAllRkeyInfo 获取所有RKey信息
 func (c *Cache) GetAllRkeyInfo() entity.RKeyMap {
 	infos := make(map[entity.RKeyType]*entity.RKeyInfo, 2)
-	rangeCacheOf[entity.RKeyInfo](c, func(k entity.RKeyType, v *entity.RKeyInfo) bool {
+	rangeCacheOf(c, func(k entity.RKeyType, v *entity.RKeyInfo) bool {
 		infos[k] = v
 		return true
 	})
@@ -138,8 +140,4 @@ func (c *Cache) GroupInfoCacheIsEmpty() bool {
 // RkeyInfoCacheIsEmpty RKey缓存是否为空
 func (c *Cache) RkeyInfoCacheIsEmpty() bool {
 	return !hasRefreshed[entity.RKeyInfo](c)
-}
-
-func (c *Cache) RkeyInfoCacheIsExpired() bool {
-	return hasExpired[entity.RKeyInfo](c)
 }
