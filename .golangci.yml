@@ -1,10 +1,21 @@
 linters-settings:
   errcheck:
-    ignore: fmt:.*,io/ioutil:^Read.*
-    ignoretests: true
+    exclude-functions:
+      - fmt:.*
+      - io/ioutil:^Read.*
 
   goimports:
     local-prefixes: github.com/LagrangeDev/LagrangeGo
+
+  revive:
+    rules:
+      - name: var-naming
+        severity: warning
+        disabled: false
+        exclude: [ "" ]
+        arguments:
+          - [ "Uid", "uid" ] # AllowList
+          - [ ] # DenyList
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -58,7 +69,7 @@ run:
 # output configuration options
 output:
   formats:
-   - format: "colored-line-number"
+    - format: "colored-line-number"
   print-issued-lines: true
   print-linter-name: true
   uniq-by-line: true
