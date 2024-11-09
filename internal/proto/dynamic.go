@@ -29,7 +29,7 @@ func (msg DynamicMessage) Encode() []byte {
 		key   uint64
 		value any
 	}
-	all := make([]pair, len(msg))
+	all := make([]pair, 0, len(msg))
 	for k, v := range msg {
 		all = append(all, pair{key: k, value: v})
 	}

@@ -22,7 +22,11 @@ func AESGCMEncrypt(data []byte, key []byte) ([]byte, error) {
 	}
 	ciphertext := aead.Seal(nil, nonce, data, nil)
 
-	return append(nonce, ciphertext...), nil
+	result := make([]byte, len(nonce)+len(ciphertext))
+	copy(result[:len(nonce)], nonce)
+	copy(result[len(nonce):], ciphertext)
+
+	return result, nil
 }
 
 func AESGCMDecrypt(data []byte, key []byte) ([]byte, error) {
