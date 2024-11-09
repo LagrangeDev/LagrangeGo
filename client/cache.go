@@ -6,8 +6,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 )
 
-// GetUid 获取缓存中对应uin的uid
-func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
+// GetUID 获取缓存中对应uin的uid
+func (c *QQClient) GetUID(uin uint32, groupUin ...uint32) string {
 	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return ""

@@ -77,7 +77,7 @@ type (
 
 	Sender struct {
 		Uin           uint32
-		Uid           string
+		UID           string
 		Nickname      string
 		CardName      string
 		AnonymousInfo *AnonymousInfo
@@ -85,7 +85,7 @@ type (
 	}
 
 	AnonymousInfo struct {
-		AnonymousId   string
+		AnonymousID   string
 		AnonymousNick string
 	}
 
@@ -108,7 +108,7 @@ func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 		Target:     msg.ResponseHead.FromUin,
 		Sender: &Sender{
 			Uin:      msg.ResponseHead.FromUin,
-			Uid:      msg.ResponseHead.FromUid.Unwrap(),
+			UID:      msg.ResponseHead.FromUid.Unwrap(),
 			IsFriend: true,
 		},
 		Time:     msg.ContentHead.TimeStamp.Unwrap(),
@@ -129,7 +129,7 @@ func ParseGroupMessage(msg *message.PushMsgBody) *GroupMessage {
 		GroupName:  msg.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
 			Uin:      msg.ResponseHead.FromUin,
-			Uid:      msg.ResponseHead.FromUid.Unwrap(),
+			UID:      msg.ResponseHead.FromUid.Unwrap(),
 			Nickname: msg.ResponseHead.Grp.MemberName,
 			CardName: msg.ResponseHead.Grp.MemberName,
 			IsFriend: false,
@@ -192,9 +192,9 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		if elem.Face != nil {
 			switch {
 			case len(elem.Face.Old) > 0:
-				faceId := elem.Face.Index
-				if faceId.IsSome() {
-					res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap())})
+				faceID := elem.Face.Index
+				if faceID.IsSome() {
+					res = append(res, &FaceElement{FaceID: uint16(faceID.Unwrap())})
 				}
 			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil:
 				qFace := message.QFaceExtra{}
@@ -245,7 +245,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					Size:    elem.CustomFace.Size,
 					Width:   uint32(elem.CustomFace.Width),
 					Height:  uint32(elem.CustomFace.Height),
-					Url:     url,
+					URL:     url,
 					Md5:     elem.CustomFace.Md5,
 				}
 				if elem.CustomFace.PbRes != nil {
@@ -273,7 +273,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				Size:    elem.NotOnlineImage.FileLen,
 				Width:   elem.NotOnlineImage.PicWidth,
 				Height:  elem.NotOnlineImage.PicHeight,
-				Url:     url,
+				URL:     url,
 				Md5:     elem.NotOnlineImage.PicMd5,
 				SubType: elem.NotOnlineImage.PbRes.SubType,
 				Summary: elem.NotOnlineImage.PbRes.Summary,
@@ -331,7 +331,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					Summary: "[闪照]",
 					Width:   img.PicWidth,
 					Height:  img.PicHeight,
-					Url:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
+					URL:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
 				})
 				skipNext = true
 			case 33:

@@ -68,7 +68,7 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 		GroupName:  group.GroupName,
 		Sender: &message2.Sender{
 			Uin:           c.Uin,
-			Uid:           c.GetUid(c.Uin),
+			UID:           c.GetUID(c.Uin),
 			Nickname:      c.NickName(),
 			CardName:      minfo.MemberCard,
 			AnonymousInfo: nil,
@@ -89,7 +89,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
-			Uid: proto.Some(c.GetUid(uin)),
+			Uid: proto.Some(c.GetUID(uin)),
 		},
 	}
 	mr := crypto.RandU32()
@@ -106,7 +106,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 		Time:       ret.Timestamp1,
 		Sender: &message2.Sender{
 			Uin:           c.Uin,
-			Uid:           c.GetUid(c.Uin),
+			UID:           c.GetUID(c.Uin),
 			Nickname:      c.NickName(),
 			AnonymousInfo: nil,
 			IsFriend:      true,
@@ -137,7 +137,7 @@ func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []messa
 		Self:      c.Uin,
 		Sender: &message2.Sender{
 			Uin:           c.Uin,
-			Uid:           c.GetUid(c.Uin),
+			UID:           c.GetUID(c.Uin),
 			Nickname:      c.NickName(),
 			AnonymousInfo: nil,
 			IsFriend:      true,
@@ -182,7 +182,7 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 			}
 			c.preProcessGroupMessage(elem.GroupID, elem.Message)
 		} else {
-			body[idx].ResponseHead.ToUid = proto.String(c.GetUid(c.Uin))
+			body[idx].ResponseHead.ToUid = proto.String(c.GetUID(c.Uin))
 			body[idx].ResponseHead.Forward = &message.ResponseForward{
 				FriendName: proto.String(elem.SenderName),
 			}
@@ -269,8 +269,8 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUid(targetUin)
-			_, err := c.ImageUploadPrivate(targetUid, elem)
+			targetUID := c.GetUID(targetUin)
+			_, err := c.ImageUploadPrivate(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
@@ -283,8 +283,8 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUid(targetUin)
-			_, err := c.RecordUploadPrivate(targetUid, elem)
+			targetUID := c.GetUID(targetUin)
+			_, err := c.RecordUploadPrivate(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
@@ -297,7 +297,7 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUid(targetUin)
+			targetUid := c.GetUID(targetUin)
 			_, err := c.VideoUploadPrivate(targetUid, elem)
 			if err != nil {
 				c.errorln(err)

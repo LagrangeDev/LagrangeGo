@@ -7,7 +7,7 @@ import (
 )
 
 // BuildPrivateRecordDownloadReq 私聊语音
-func BuildPrivateRecordDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, error) {
+func BuildPrivateRecordDownloadReq(selfUID string, node *oidb.IndexNode) (*OidbPacket, error) {
 	body := oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -20,7 +20,7 @@ func BuildPrivateRecordDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbP
 				SceneType:    1,
 				C2C: &oidb.C2CUserInfo{
 					AccountType: 2,
-					TargetUid:   selfUid,
+					TargetUid:   selfUID,
 				},
 			},
 			Client: &oidb.ClientMeta{

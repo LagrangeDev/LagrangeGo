@@ -123,7 +123,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUid)
+		user, _ := c.FetchUserInfo(ev.TargetUID)
 		if user != nil {
 			ev.TargetUin = user.Uin
 			ev.TargetNick = user.Nickname
@@ -132,7 +132,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.JoinRequests, filteredRequests.JoinRequests...) {
-				if request.TargetUID == ev.TargetUid && !request.Checked() {
+				if request.TargetUID == ev.TargetUID && !request.Checked() {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
 				}
@@ -151,7 +151,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUid)
+		user, _ := c.FetchUserInfo(ev.TargetUID)
 		if user != nil {
 			ev.TargetUin = user.Uin
 			ev.TargetNick = user.Nickname
@@ -170,7 +170,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			ev.GroupName = group.GroupName
 		}
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.InvitorUid)
+		user, _ := c.FetchUserInfo(ev.InvitorUID)
 		if user != nil {
 			ev.InvitorUin = user.Uin
 			ev.InvitorNick = user.Nickname
@@ -200,7 +200,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				break
 			}
 			ev := eventConverter.ParseFriendRequestNotice(&pb)
-			user, _ := c.FetchUserInfo(ev.SourceUid)
+			user, _ := c.FetchUserInfo(ev.SourceUID)
 			if user != nil {
 				ev.SourceUin = user.Uin
 				ev.SourceNick = user.Nickname
@@ -356,11 +356,11 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) {
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
-			if e.Url != "" {
+			if e.URL != "" {
 				continue
 			}
 			url, _ := c.GetGroupImageUrl(msg.GroupUin, e.MsgInfo.MsgInfoBody[0].Index)
-			e.Url = url
+			e.URL = url
 		case *msgConverter.VoiceElement:
 			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
 			e.URL = url
@@ -392,11 +392,11 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
-			if e.Url != "" {
+			if e.URL != "" {
 				continue
 			}
 			url, _ := c.GetPrivateImageUrl(e.MsgInfo.MsgInfoBody[0].Index)
-			e.Url = url
+			e.URL = url
 		case *msgConverter.VoiceElement:
 			url, err := c.GetPrivateRecordUrl(e.Node)
 			if err != nil {

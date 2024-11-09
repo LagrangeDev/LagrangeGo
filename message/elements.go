@@ -72,7 +72,7 @@ type (
 		Size     uint32
 		Width    uint32
 		Height   uint32
-		Url      string
+		URL      string
 		SubType  int32
 
 		// EffectID show pic effect id.

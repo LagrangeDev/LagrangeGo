@@ -17,7 +17,7 @@ type OidbPacket struct {
 	ExtraData []byte
 }
 
-func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUid bool) (*OidbPacket, error) {
+func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUID bool) (*OidbPacket, error) {
 	bodyData, err := proto.Marshal(body)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUid bool) (*OidbP
 		Command:    cmd,
 		SubCommand: subCmd,
 		Body:       bodyData,
-		Reserved:   int32(utils.Bool2Int(isUid)),
+		Reserved:   int32(utils.Bool2Int(isUID)),
 	}
 	if isLafter {
 		oidbPkt.Lafter = &oidb.OidbLafter{}

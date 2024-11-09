@@ -70,8 +70,8 @@ func containSignPKG(cmd string) bool {
 	return ok
 }
 
-func httpGet[T any](rawUrl string, queryParams map[string]string, timeout time.Duration, header http.Header) (target T, err error) {
-	u, err := url.Parse(rawUrl)
+func httpGet[T any](rawURL string, queryParams map[string]string, timeout time.Duration, header http.Header) (target T, err error) {
+	u, err := url.Parse(rawURL)
 	if err != nil {
 		return
 	}
@@ -97,8 +97,8 @@ func httpGet[T any](rawUrl string, queryParams map[string]string, timeout time.D
 	return doHTTP[T](ctx, req)
 }
 
-func httpPost[T any](rawUrl string, body io.Reader, timeout time.Duration, header http.Header) (target T, err error) {
-	u, err := url.Parse(rawUrl)
+func httpPost[T any](rawURL string, body io.Reader, timeout time.Duration, header http.Header) (target T, err error) {
+	u, err := url.Parse(rawURL)
 	if err != nil {
 		return
 	}

@@ -35,7 +35,7 @@ func (c *QQClient) UploadImage(target message.Source, image *message.ImageElemen
 	case message.SourceGroup:
 		return c.ImageUploadGroup(uint32(target.PrimaryID), image)
 	case message.SourcePrivate:
-		return c.ImageUploadPrivate(c.GetUid(uint32(target.PrimaryID)), image)
+		return c.ImageUploadPrivate(c.GetUID(uint32(target.PrimaryID)), image)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -45,7 +45,7 @@ func (c *QQClient) UploadRecord(target message.Source, voice *message.VoiceEleme
 	case message.SourceGroup:
 		return c.RecordUploadGroup(uint32(target.PrimaryID), voice)
 	case message.SourcePrivate:
-		return c.RecordUploadPrivate(c.GetUid(uint32(target.PrimaryID)), voice)
+		return c.RecordUploadPrivate(c.GetUID(uint32(target.PrimaryID)), voice)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -54,7 +54,7 @@ func (c *QQClient) UploadShortVideo(target message.Source, video *message.ShortV
 	case message.SourceGroup:
 		return c.VideoUploadGroup(uint32(target.PrimaryID), video)
 	case message.SourcePrivate:
-		return c.VideoUploadPrivate(c.GetUid(uint32(target.PrimaryID)), video)
+		return c.VideoUploadPrivate(c.GetUID(uint32(target.PrimaryID)), video)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -480,7 +480,7 @@ func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement
 	if file == nil || file.FileStream == nil {
 		return nil, errors.New("element type is not file")
 	}
-	req, err := oidb.BuildPrivateFileUploadReq(c.GetUid(c.Uin), targetUid, file)
+	req, err := oidb.BuildPrivateFileUploadReq(c.GetUID(c.Uin), targetUid, file)
 	if err != nil {
 		return nil, err
 	}

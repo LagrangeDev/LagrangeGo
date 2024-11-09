@@ -17,7 +17,7 @@ type (
 	GroupMemberPermissionChanged struct {
 		GroupEvent
 		TargetUin uint32
-		TargetUid string
+		TargetUID string
 		IsAdmin   bool
 	}
 
@@ -25,23 +25,23 @@ type (
 		GroupUin    uint32
 		NewName     string
 		OperatorUin uint32
-		OperatorUid string
+		OperatorUID string
 	}
 
 	GroupMute struct {
 		GroupEvent
-		OperatorUid string
+		OperatorUID string
 		OperatorUin uint32
-		TargetUid   string // when TargetUid is empty, mute all members
+		TargetUID   string // when TargetUID is empty, mute all members
 		TargetUin   uint32
 		Duration    uint32 // Duration == math.MaxUint32 when means mute all
 	}
 
 	GroupRecall struct {
 		GroupEvent
-		AuthorUid   string
+		AuthorUID   string
 		AuthorUin   uint32
-		OperatorUid string
+		OperatorUID string
 		OperatorUin uint32
 		Sequence    uint64
 		Time        uint32
@@ -50,10 +50,10 @@ type (
 
 	GroupMemberJoinRequest struct {
 		GroupEvent
-		TargetUid  string
+		TargetUID  string
 		TargetUin  uint32
 		TargetNick string
-		InvitorUid string
+		InvitorUID string
 		InvitorUin uint32
 		Answer     string // 问题：(.*)答案：(.*)
 		RequestSeq uint64
@@ -61,18 +61,18 @@ type (
 
 	GroupMemberIncrease struct {
 		GroupEvent
-		MemberUid  string
+		MemberUID  string
 		MemberUin  uint32
-		InvitorUid string
+		InvitorUID string
 		InvitorUin uint32
 		JoinType   uint32
 	}
 
 	GroupMemberDecrease struct {
 		GroupEvent
-		MemberUid   string
+		MemberUID   string
 		MemberUin   uint32
-		OperatorUid string
+		OperatorUID string
 		OperatorUin uint32
 		ExitType    uint32
 	}
@@ -102,7 +102,7 @@ type (
 	GroupReactionEvent struct {
 		GroupUin    uint32
 		TargetSeq   uint32
-		OperatorUid string
+		OperatorUID string
 		OperatorUin uint32
 		IsAdd       bool
 		Code        string
@@ -120,7 +120,7 @@ type (
 type GroupInvite struct {
 	GroupUin    uint32
 	GroupName   string
-	InvitorUid  string
+	InvitorUID  string
 	InvitorUin  uint32
 	InvitorNick string
 	RequestSeq  uint64
@@ -139,7 +139,7 @@ type CanPreprocess interface {
 }
 
 func (g *GroupMute) MuteAll() bool {
-	return g.OperatorUid == ""
+	return g.OperatorUID == ""
 }
 
 func (g *GroupMemberDecrease) IsKicked() bool {
@@ -151,7 +151,7 @@ func (g *GroupDigestEvent) IsSet() bool {
 }
 
 func (g *GroupMemberPermissionChanged) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.TargetUin = f(g.TargetUid, g.GroupUin)
+	g.TargetUin = f(g.TargetUID, g.GroupUin)
 }
 
 func ParseGroupMemberPermissionChanged(event *message.GroupAdmin) *GroupMemberPermissionChanged {
@@ -168,25 +168,25 @@ func ParseGroupMemberPermissionChanged(event *message.GroupAdmin) *GroupMemberPe
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUin,
 		},
-		TargetUid: uid,
+		TargetUID: uid,
 		IsAdmin:   isAdmin,
 	}
 }
 
 func (g *GroupNameUpdated) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.OperatorUin = f(g.OperatorUid, g.GroupUin)
+	g.OperatorUin = f(g.OperatorUID, g.GroupUin)
 }
 
 func ParseGroupNameUpdatedEvent(event *message.NotifyMessageBody, groupName string) *GroupNameUpdated {
 	return &GroupNameUpdated{
 		GroupUin:    event.GroupUin,
 		NewName:     groupName,
-		OperatorUid: event.OperatorUid,
+		OperatorUID: event.OperatorUid,
 	}
 }
 
 func (g *GroupMemberJoinRequest) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.InvitorUin = f(g.InvitorUid, g.GroupUin)
+	g.InvitorUin = f(g.InvitorUID, g.GroupUin)
 }
 
 // ParseRequestJoinNotice 成员主动加群
@@ -195,7 +195,7 @@ func ParseRequestJoinNotice(event *message.GroupJoin) *GroupMemberJoinRequest {
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUin,
 		},
-		TargetUid: event.TargetUid,
+		TargetUID: event.TargetUid,
 		Answer:    event.RequestField.Unwrap(),
 	}
 }
@@ -207,26 +207,26 @@ func ParseRequestInvitationNotice(event *message.GroupInvitation) *GroupMemberJo
 		GroupEvent: GroupEvent{
 			GroupUin: inn.GroupUin,
 		},
-		TargetUid:  inn.TargetUid,
-		InvitorUid: inn.InvitorUid,
+		TargetUID:  inn.TargetUid,
+		InvitorUID: inn.InvitorUid,
 	}
 }
 
 func (g *GroupInvite) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.InvitorUin = f(g.InvitorUid, g.GroupUin)
+	g.InvitorUin = f(g.InvitorUID, g.GroupUin)
 }
 
 // ParseInviteNotice 被邀请加群
 func ParseInviteNotice(event *message.GroupInvite) *GroupInvite {
 	return &GroupInvite{
 		GroupUin:   event.GroupUin,
-		InvitorUid: event.InvitorUid,
+		InvitorUID: event.InvitorUid,
 	}
 }
 
 func (g *GroupMemberIncrease) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.InvitorUin = f(g.InvitorUid, g.GroupUin)
-	g.MemberUin = f(g.MemberUid, g.GroupUin)
+	g.InvitorUin = f(g.InvitorUID, g.GroupUin)
+	g.MemberUin = f(g.MemberUID, g.GroupUin)
 }
 
 func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
@@ -234,15 +234,15 @@ func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUin,
 		},
-		MemberUid:  event.MemberUid,
-		InvitorUid: utils.B2S(event.Operator),
+		MemberUID:  event.MemberUid,
+		InvitorUID: utils.B2S(event.Operator),
 		JoinType:   event.IncreaseType,
 	}
 }
 
 func (g *GroupMemberDecrease) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.OperatorUin = f(g.OperatorUid, g.GroupUin)
-	g.MemberUin = f(g.MemberUid, g.GroupUin)
+	g.OperatorUin = f(g.OperatorUID, g.GroupUin)
+	g.MemberUin = f(g.MemberUID, g.GroupUin)
 }
 
 func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
@@ -250,15 +250,15 @@ func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUin,
 		},
-		MemberUid:   event.MemberUid,
-		OperatorUid: utils.B2S(event.Operator),
+		MemberUID:   event.MemberUid,
+		OperatorUID: utils.B2S(event.Operator),
 		ExitType:    event.DecreaseType,
 	}
 }
 
 func (g *GroupRecall) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.OperatorUin = f(g.OperatorUid, g.GroupUin)
-	g.AuthorUin = f(g.AuthorUid, g.GroupUin)
+	g.OperatorUin = f(g.OperatorUID, g.GroupUin)
+	g.AuthorUin = f(g.AuthorUID, g.GroupUin)
 }
 
 func ParseGroupRecallEvent(event *message.NotifyMessageBody) *GroupRecall {
@@ -267,8 +267,8 @@ func ParseGroupRecallEvent(event *message.NotifyMessageBody) *GroupRecall {
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUin,
 		},
-		AuthorUid:   info.AuthorUid,
-		OperatorUid: event.Recall.OperatorUid.Unwrap(),
+		AuthorUID:   info.AuthorUid,
+		OperatorUID: event.Recall.OperatorUid.Unwrap(),
 		Sequence:    info.Sequence,
 		Time:        info.Time,
 		Random:      info.Random,
@@ -277,8 +277,8 @@ func ParseGroupRecallEvent(event *message.NotifyMessageBody) *GroupRecall {
 }
 
 func (g *GroupMute) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.OperatorUin = f(g.OperatorUid, g.GroupUin)
-	g.TargetUin = f(g.TargetUid, g.GroupUin)
+	g.OperatorUin = f(g.OperatorUID, g.GroupUin)
+	g.TargetUin = f(g.TargetUID, g.GroupUin)
 }
 
 func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {
@@ -286,8 +286,8 @@ func ParseGroupMuteEvent(event *message.GroupMute) *GroupMute {
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUin,
 		},
-		OperatorUid: event.OperatorUid.Unwrap(),
-		TargetUid:   event.Data.State.TargetUid.Unwrap(),
+		OperatorUID: event.OperatorUid.Unwrap(),
+		TargetUID:   event.Data.State.TargetUid.Unwrap(),
 		Duration:    event.Data.State.Duration,
 	}
 }
@@ -336,14 +336,14 @@ func ParseGroupMemberSpecialTitleUpdatedEvent(event *message.GroupSpecialTitle, 
 }
 
 func (g *GroupReactionEvent) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.OperatorUin = f(g.OperatorUid, g.GroupUin)
+	g.OperatorUin = f(g.OperatorUID, g.GroupUin)
 }
 
 func ParseGroupReactionEvent(event *message.GroupReaction) *GroupReactionEvent {
 	return &GroupReactionEvent{
 		GroupUin:    event.GroupUid,
 		TargetSeq:   event.Data.Data.Data.Target.Sequence,
-		OperatorUid: event.Data.Data.Data.Data.OperatorUid,
+		OperatorUID: event.Data.Data.Data.Data.OperatorUid,
 		IsAdd:       event.Data.Data.Data.Data.Type == 1,
 		Code:        event.Data.Data.Data.Data.Code,
 		Count:       event.Data.Data.Data.Data.Count,

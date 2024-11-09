@@ -52,7 +52,7 @@ func (c *QQClient) ensureHighwayServers() error {
 	return nil
 }
 
-func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
+func (c *QQClient) highwayUpload(commonID int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
 	// 能close的io就close
 	defer utils.CloseIO(r)
 	err := c.ensureHighwayServers()
@@ -60,7 +60,7 @@ func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5
 		return err
 	}
 	trans := &hw.Transaction{
-		CommandID: uint32(commonId),
+		CommandID: uint32(commonID),
 		Body:      r,
 		Sum:       md5,
 		Size:      fileSize,

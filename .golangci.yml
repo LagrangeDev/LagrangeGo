@@ -17,7 +17,7 @@ linters:
     #- depguard
     - dogsled
     - errcheck
-    - exportloopref
+    - copyloopvar
     - exhaustive
     #- funlen
     #- goconst
