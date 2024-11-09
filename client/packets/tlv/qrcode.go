@@ -42,20 +42,20 @@ func T33(guid []byte) []byte {
 	return binary.NewBuilder(nil).WriteBytes(guid).Pack(0x33)
 }
 
-func T35(PtOSVersion int) []byte {
-	return binary.NewBuilder(nil).WriteU32(uint32(PtOSVersion)).Pack(0x35)
+func T35(ptOSVersion int) []byte {
+	return binary.NewBuilder(nil).WriteU32(uint32(ptOSVersion)).Pack(0x35)
 }
 
-func T66(PtOSVersion int) []byte {
-	return binary.NewBuilder(nil).WriteU32(uint32(PtOSVersion)).Pack(0x66)
+func T66(ptOSVersion int) []byte {
+	return binary.NewBuilder(nil).WriteU32(uint32(ptOSVersion)).Pack(0x66)
 }
 
-func Td1(AppOS, DeviceName string) []byte {
+func Td1(appOS, deviceName string) []byte {
 	return binary.NewBuilder(nil).
 		WriteBytes(proto.DynamicMessage{
 			1: proto.DynamicMessage{
-				1: AppOS,
-				2: DeviceName,
+				1: appOS,
+				2: deviceName,
 			},
 			4: proto.DynamicMessage{
 				6: 1,

@@ -344,10 +344,10 @@ func (c *QQClient) RecallFriendMessage(uin, seq, random, clientSeq, timestamp ui
 }
 
 // RecallGroupMessage 撤回群聊消息
-func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
+func (c *QQClient) RecallGroupMessage(groupUin, seq uint32) error {
 	packet := message.GroupRecallMsg{
 		Type:     1,
-		GroupUin: GrpUin,
+		GroupUin: groupUin,
 		Field3: &message.GroupRecallMsgField3{
 			Sequence: seq,
 			Field3:   0,
@@ -483,14 +483,15 @@ func (c *QQClient) queryImage(url string, method string) (*message2.ImageElement
 
 func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
 	var url string
-	if fileUUID != "" {
+	switch {
+	case fileUUID != "":
 		rkeyInfo := c.GetCachedRkeyInfo(entity.GroupRKey)
 		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1407&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
 		return c.queryImage(url, http.MethodGet)
-	} else if len(md5) == 16 {
+	case len(md5) == 16:
 		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
 		return c.queryImage(url, http.MethodHead)
-	} else {
+	default:
 		return nil, errors.New("invalid parameters")
 	}
 }
