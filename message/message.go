@@ -190,19 +190,20 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		}
 
 		if elem.Face != nil {
-			if len(elem.Face.Old) > 0 {
+			switch {
+			case len(elem.Face.Old) > 0:
 				faceId := elem.Face.Index
 				if faceId.IsSome() {
 					res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap())})
 				}
-			} else if elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil {
+			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil:
 				qFace := message.QFaceExtra{}
 				if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
 					if qFace.Qsid.IsSome() {
 						res = append(res, &FaceElement{FaceID: uint16(qFace.Qsid.Unwrap()), isLargeFace: true})
 					}
 				}
-			} else if elem.CommonElem != nil && elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil {
+			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil:
 				qFace := message.QSmallFaceExtra{}
 				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
 				if err == nil {
