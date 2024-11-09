@@ -209,6 +209,9 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 				}
 			}
 		case *message2.ImageElement:
+			if elem.MsgInfo != nil {
+				continue
+			}
 			_, err := c.ImageUploadGroup(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
@@ -218,6 +221,9 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 				continue
 			}
 		case *message2.VoiceElement:
+			if elem.MsgInfo != nil {
+				continue
+			}
 			_, err := c.RecordUploadGroup(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
@@ -227,6 +233,9 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 				continue
 			}
 		case *message2.ShortVideoElement:
+			if elem.MsgInfo != nil {
+				continue
+			}
 			_, err := c.VideoUploadGroup(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
@@ -257,6 +266,9 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 	for _, element := range elements {
 		switch elem := element.(type) {
 		case *message2.ImageElement:
+			if elem.MsgInfo != nil {
+				continue
+			}
 			targetUid := c.GetUid(targetUin)
 			_, err := c.ImageUploadPrivate(targetUid, elem)
 			if err != nil {
@@ -268,6 +280,9 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 				continue
 			}
 		case *message2.VoiceElement:
+			if elem.MsgInfo != nil {
+				continue
+			}
 			targetUid := c.GetUid(targetUin)
 			_, err := c.RecordUploadPrivate(targetUid, elem)
 			if err != nil {
@@ -279,6 +294,9 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 				continue
 			}
 		case *message2.ShortVideoElement:
+			if elem.MsgInfo != nil {
+				continue
+			}
 			targetUid := c.GetUid(targetUin)
 			_, err := c.VideoUploadPrivate(targetUid, elem)
 			if err != nil {
