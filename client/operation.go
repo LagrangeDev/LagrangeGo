@@ -368,8 +368,8 @@ func (c *QQClient) RecallGroupMessage(groupUin, seq uint32) error {
 	return nil
 }
 
-// GetPrivateImageUrl 获取私聊图片下载url
-func (c *QQClient) GetPrivateImageUrl(node *oidb.IndexNode) (string, error) {
+// GetPrivateImageURL 获取私聊图片下载url
+func (c *QQClient) GetPrivateImageURL(node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildPrivateImageDownloadReq(c.GetUID(c.Uin), node)
 	if err != nil {
 		return "", err
@@ -381,8 +381,8 @@ func (c *QQClient) GetPrivateImageUrl(node *oidb.IndexNode) (string, error) {
 	return oidb2.ParsePrivateImageDownloadResp(resp)
 }
 
-// GetGroupImageUrl 获取群聊图片下载url
-func (c *QQClient) GetGroupImageUrl(groupUin uint32, node *oidb.IndexNode) (string, error) {
+// GetGroupImageURL 获取群聊图片下载url
+func (c *QQClient) GetGroupImageURL(groupUin uint32, node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildGroupImageDownloadReq(groupUin, node)
 	if err != nil {
 		return "", err
@@ -394,8 +394,8 @@ func (c *QQClient) GetGroupImageUrl(groupUin uint32, node *oidb.IndexNode) (stri
 	return oidb2.ParseGroupImageDownloadResp(resp)
 }
 
-// GetPrivateRecordUrl 获取私聊语音下载url
-func (c *QQClient) GetPrivateRecordUrl(node *oidb.IndexNode) (string, error) {
+// GetPrivateRecordURL 获取私聊语音下载url
+func (c *QQClient) GetPrivateRecordURL(node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildPrivateRecordDownloadReq(c.GetUID(c.Uin), node)
 	if err != nil {
 		return "", err
@@ -407,8 +407,8 @@ func (c *QQClient) GetPrivateRecordUrl(node *oidb.IndexNode) (string, error) {
 	return oidb2.ParsePrivateRecordDownloadResp(resp)
 }
 
-// GetGroupRecordUrl 获取群聊语音下载url
-func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (string, error) {
+// GetGroupRecordURL 获取群聊语音下载url
+func (c *QQClient) GetGroupRecordURL(groupUin uint32, node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildGroupRecordDownloadReq(groupUin, node)
 	if err != nil {
 		return "", err
@@ -420,7 +420,7 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
-func (c *QQClient) GetVideoUrl(isGroup bool, video *message2.ShortVideoElement) (string, error) {
+func (c *QQClient) GetVideoURL(isGroup bool, video *message2.ShortVideoElement) (string, error) {
 	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().UID, string(video.UUID), video.Name, isGroup, video.Md5, video.Sha1)
 	if err != nil {
 		return "", err
@@ -432,7 +432,7 @@ func (c *QQClient) GetVideoUrl(isGroup bool, video *message2.ShortVideoElement) 
 	return oidb2.ParseVideoDownloadResp(resp)
 }
 
-func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, error) {
+func (c *QQClient) GetGroupFileURL(groupUin uint32, fileID string) (string, error) {
 	pkt, err := oidb2.BuildGroupFSDownloadReq(groupUin, fileID)
 	if err != nil {
 		return "", err
@@ -444,7 +444,7 @@ func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, erro
 	return oidb2.ParseGroupFSDownloadResp(resp)
 }
 
-func (c *QQClient) GetPrivateFileUrl(fileUUID string, fileHash string) (string, error) {
+func (c *QQClient) GetPrivateFileURL(fileUUID string, fileHash string) (string, error) {
 	pkt, err := oidb2.BuildPrivateFileDownloadReq(c.GetUID(c.Uin), fileUUID, fileHash)
 	if err != nil {
 		return "", err
@@ -467,11 +467,7 @@ func (c *QQClient) queryImage(url string, method string) (*message2.ImageElement
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			return
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("file not found")
 	}
@@ -590,8 +586,8 @@ func (c *QQClient) SetGroupRequest(isFiltered bool, accept bool, sequence uint64
 }
 
 // SetFriendRequest 处理好友请求
-func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
-	pkt, err := oidb2.BuildSetFriendRequest(accept, targetUid)
+func (c *QQClient) SetFriendRequest(accept bool, targetUID string) error {
+	pkt, err := oidb2.BuildSetFriendRequest(accept, targetUID)
 	if err != nil {
 		return err
 	}
@@ -715,7 +711,7 @@ func (c *QQClient) GetGroupFileSystemInfo(groupUin uint32) (*entity.GroupFileSys
 
 // ListGroupFilesByFolder 获取群目录指定文件夹列表
 func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory string) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
-	var startIndex uint32 = 0
+	var startIndex uint32
 	var fileCount uint32 = 20
 	var files []*entity.GroupFile
 	var folders []*entity.GroupFolder
@@ -933,8 +929,8 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 	}
 	grpInfo := c.GetCachedGroupInfo(groupUin)
 	for {
-		reqUrl := fmt.Sprintf("https://qun.qq.com/cgi-bin/group_digest/digest_list?random=7800&X-CROSS-ORIGIN=fetch&group_code=%d&page_start=%d&page_limit=20&bkn=%d", groupUin, page, bkn)
-		req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
+		reqURL := fmt.Sprintf("https://qun.qq.com/cgi-bin/group_digest/digest_list?random=7800&X-CROSS-ORIGIN=fetch&group_code=%d&page_start=%d&page_limit=20&bkn=%d", groupUin, page, bkn)
+		req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 		if err != nil {
 			return essenceMsg, err
 		}
@@ -950,11 +946,11 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 		if resp.StatusCode != http.StatusOK {
 			return essenceMsg, fmt.Errorf("error resp code %d", resp.StatusCode)
 		}
-		respJson := gjson.ParseBytes(respData)
-		if respJson.Get("retcode").Int() != 0 {
-			return essenceMsg, fmt.Errorf("error code %d, %s", respJson.Get("retcode").Int(), respJson.Get("retmsg").String())
+		respJSON := gjson.ParseBytes(respData)
+		if respJSON.Get("retcode").Int() != 0 {
+			return essenceMsg, fmt.Errorf("error code %d, %s", respJSON.Get("retcode").Int(), respJSON.Get("retmsg").String())
 		}
-		for _, v := range respJson.Get("data").Get("msg_list").Array() {
+		for _, v := range respJSON.Get("data").Get("msg_list").Array() {
 			var elements []message2.IMessageElement
 			for _, e := range v.Get("msg_content").Array() {
 				switch e.Get("msg_type").Int() {
@@ -994,7 +990,7 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 				},
 			})
 		}
-		if respJson.Get("data").Get("is_end").Bool() {
+		if respJSON.Get("data").Get("is_end").Bool() {
 			break
 		}
 	}
@@ -1006,8 +1002,8 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 func (c *QQClient) GetGroupHonorInfo(groupUin uint32, honorType entity.HonorType) (*entity.GroupHonorInfo, error) {
 	ret := &entity.GroupHonorInfo{}
 	honorRe := regexp.MustCompile(`window\.__INITIAL_STATE__\s*?=\s*?(\{.*})`)
-	reqUrl := fmt.Sprintf("https://qun.qq.com/interactive/honorlist?gc=%d&type=%d", groupUin, honorType)
-	req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
+	reqURL := fmt.Sprintf("https://qun.qq.com/interactive/honorlist?gc=%d&type=%d", groupUin, honorType)
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
 		return ret, err
 	}
@@ -1109,7 +1105,7 @@ func (c *QQClient) uploadGroupNoticePic(bkn int, img []byte) (*entity.NoticeImag
 }
 
 // AddGroupNoticeSimple 发群公告
-func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeId string, err error) {
+func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeID string, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return "", err
@@ -1133,7 +1129,7 @@ func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeId 
 }
 
 // AddGroupNoticeWithPic 发群公告带图片
-func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byte) (noticeId string, err error) {
+func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byte) (noticeID string, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return "", err

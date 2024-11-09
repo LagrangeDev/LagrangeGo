@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildGroupSetReactionReq(groupUin, sequence uint32, code string, isAdd bool) (*OidbPacket, error) {
+func BuildGroupSetReactionReq(groupUin, sequence uint32, code string, isAdd bool) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X9082{
 		GroupUin: groupUin,
 		Sequence: sequence,

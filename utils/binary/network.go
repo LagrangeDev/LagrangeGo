@@ -28,8 +28,8 @@ func (r *NetworkReader) ReadByte() (byte, error) {
 	return buf[0], nil
 }
 
-func (r *NetworkReader) ReadBytes(len int) ([]byte, error) {
-	buf := make([]byte, len)
+func (r *NetworkReader) ReadBytes(l int) ([]byte, error) {
+	buf := make([]byte, l)
 	_, err := io.ReadFull(r.conn, buf)
 	return buf, err
 }

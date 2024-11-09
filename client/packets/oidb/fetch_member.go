@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildFetchMemberReq(groupUin uint32, memberUID string) (*OidbPacket, error) {
+func BuildFetchMemberReq(groupUin uint32, memberUID string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XFE7_4{
 		GroupUin: groupUin,
 		Field2:   3,

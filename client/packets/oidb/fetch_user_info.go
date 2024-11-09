@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 )
 
-func BuildFetchUserInfoReq[T ~string | ~uint32](value T) (*OidbPacket, error) {
+func BuildFetchUserInfoReq[T ~string | ~uint32](value T) (*Packet, error) {
 	keys := []uint32{20002, 27394, 20009, 20031, 101, 103, 102, 20022, 20023, 20024, 24002, 27037, 27049, 20011, 20016, 20021, 20003, 20004, 20005, 20006, 20020, 20026, 24007, 104, 105, 42432, 42362, 41756, 41757, 42257, 27372, 42315, 107, 45160, 45161, 27406, 62026, 20037}
 	keyList := make([]*oidb.OidbSvcTrpcTcp0XFE1_2Key, len(keys))
 	for i, key := range keys {

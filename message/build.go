@@ -171,7 +171,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 		news = []News{{Text: "转发消息"}}
 	}
 
-	var metaSource string = ""
+	var metaSource string
 	if len(e.Nodes) > 0 {
 		isSenderNameExist := make(map[string]bool, 0)
 		isContainSelf := false

@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildFetchGroupSystemMessagesReq(isFiltered bool, count uint32) (*OidbPacket, error) {
+func BuildFetchGroupSystemMessagesReq(isFiltered bool, count uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X10C0{
 		Count:  count,
 		Field2: 0,
@@ -24,6 +24,7 @@ func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...
 		if len(groupUin) > 0 && groupUin[0] != r.Group.GroupUin {
 			continue
 		}
+		//nolint
 		switch entity.EventType(r.EventType) {
 		case entity.UserJoinRequest, entity.UserInvited:
 			requests.JoinRequests = append(requests.JoinRequests, &entity.UserJoinGroupRequest{

@@ -297,8 +297,8 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUID(targetUin)
-			_, err := c.VideoUploadPrivate(targetUid, elem)
+			targetUID := c.GetUID(targetUin)
+			_, err := c.VideoUploadPrivate(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue

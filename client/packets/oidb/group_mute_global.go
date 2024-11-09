@@ -6,8 +6,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupMuteGlobalReq(groupUin uint32, isMute bool) (*OidbPacket, error) {
-	var s uint32 = 0
+func BuildGroupMuteGlobalReq(groupUin uint32, isMute bool) (*Packet, error) {
+	var s uint32
 	if isMute {
 		s = math.MaxUint32
 	}

@@ -14,7 +14,7 @@ import (
 )
 
 type Info struct {
-	Type AudioType
+	Type Type
 	Time float32
 }
 
@@ -24,9 +24,8 @@ func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 	if utils.B2S(buf) != utils.B2S([]byte{0x23}) {
 		if !_f {
 			return decode(r, true)
-		} else {
-			return nil, errors.New("unknown audio type")
 		}
+		return nil, errors.New("unknown audio type")
 	} else {
 		buf = append(buf, reader.ReadBytes(5)...)
 	}
@@ -45,7 +44,7 @@ func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 		data := reader.ReadAll()
 		size := len(data)
 
-		var typ AudioType
+		var typ Type
 		if _f { // txsilk
 			typ = txSilk
 		} else {
@@ -59,10 +58,9 @@ func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 			length := binary2.LittleEndian.Uint16(data[pos : pos+2])
 			if length == 0xFFFF {
 				break
-			} else {
-				blks++
-				pos += int(length) + 2
 			}
+			blks++
+			pos += int(length) + 2
 		}
 		return &Info{
 			Type: typ,

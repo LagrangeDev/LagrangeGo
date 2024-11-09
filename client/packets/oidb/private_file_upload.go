@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-func BuildPrivateFileUploadReq(selfUID string, targetUID string, file *message.FileElement) (*OidbPacket, error) {
+func BuildPrivateFileUploadReq(selfUID string, targetUID string, file *message.FileElement) (*Packet, error) {
 	md510MCheckSum, _ := crypto.ComputeMd5AndLengthWithLimit(file.FileStream, 10*1024*1024)
 	body := &oidb.OidbSvcTrpcTcp0XE37_1700{
 		Command: 1700,

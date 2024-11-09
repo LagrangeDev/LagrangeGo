@@ -121,9 +121,8 @@ func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
 				cmd, seq, time.Now().UnixMilli()-startTime))
 			c.signCount.Add(1)
 			return resp, nil
-		} else {
-			break
 		}
+		break
 	}
 	// 全寄了，重新再测下
 	go c.test()

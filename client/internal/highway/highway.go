@@ -19,6 +19,7 @@ import (
 )
 
 // see com/tencent/mobileqq/highway/utils/BaseConstants.java#L120-L121
+// nolint
 const (
 	_REQ_CMD_DATA        = "PicUp.DataUp"
 	_REQ_CMD_HEART_BREAK = "PicUp.Echo"

@@ -7,7 +7,7 @@ import (
 )
 
 // BuildPrivateRecordDownloadReq 私聊语音
-func BuildPrivateRecordDownloadReq(selfUID string, node *oidb.IndexNode) (*OidbPacket, error) {
+func BuildPrivateRecordDownloadReq(selfUID string, node *oidb.IndexNode) (*Packet, error) {
 	body := oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{

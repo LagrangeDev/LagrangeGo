@@ -11,13 +11,13 @@ import (
 
 // var oidbLogger = utils.GetLogger("oidb")
 
-type OidbPacket struct {
+type Packet struct {
 	Cmd       string
 	Data      []byte
 	ExtraData []byte
 }
 
-func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUID bool) (*OidbPacket, error) {
+func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUID bool) (*Packet, error) {
 	bodyData, err := proto.Marshal(body)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUID bool) (*OidbP
 		return nil, err
 	}
 
-	return &OidbPacket{
+	return &Packet{
 		Cmd:  fmt.Sprintf("OidbSvcTrpcTcp.0x%02x_%d", cmd, subCmd),
 		Data: data,
 	}, nil

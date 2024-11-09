@@ -182,12 +182,12 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement
 	return image, nil
 }
 
-func (c *QQClient) RecordUploadPrivate(targetUid string, record *message.VoiceElement) (*message.VoiceElement, error) {
+func (c *QQClient) RecordUploadPrivate(targetUID string, record *message.VoiceElement) (*message.VoiceElement, error) {
 	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not friend record")
 	}
 	defer utils.CloseIO(record.Stream)
-	req, err := oidb.BuildPrivateRecordUploadReq(targetUid, record)
+	req, err := oidb.BuildPrivateRecordUploadReq(targetUID, record)
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	return record, nil
 }
 
-func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
+func (c *QQClient) VideoUploadPrivate(targetUID string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	if video == nil || video.Stream == nil {
 		return nil, errors.New("video is nil")
 	}
@@ -301,7 +301,7 @@ func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVide
 	}
 	defer utils.CloseIO(video.Stream)
 	defer utils.CloseIO(video.Thumb.Stream)
-	req, err := oidb.BuildPrivateVideoUploadReq(targetUid, video)
+	req, err := oidb.BuildPrivateVideoUploadReq(targetUID, video)
 	if err != nil {
 		return nil, err
 	}
@@ -476,11 +476,11 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 	return video, nil
 }
 
-func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement) (*message.FileElement, error) {
+func (c *QQClient) FileUploadPrivate(targetUID string, file *message.FileElement) (*message.FileElement, error) {
 	if file == nil || file.FileStream == nil {
 		return nil, errors.New("element type is not file")
 	}
-	req, err := oidb.BuildPrivateFileUploadReq(c.GetUID(c.Uin), targetUid, file)
+	req, err := oidb.BuildPrivateFileUploadReq(c.GetUID(c.Uin), targetUID, file)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
-func BuildPrivateVideoUploadReq(targetUID string, video *message.ShortVideoElement) (*OidbPacket, error) {
+func BuildPrivateVideoUploadReq(targetUID string, video *message.ShortVideoElement) (*Packet, error) {
 	if video.Stream == nil {
 		return nil, errors.New("video data is nil")
 	}

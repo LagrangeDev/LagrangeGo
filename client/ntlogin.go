@@ -109,8 +109,8 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 	return ret, fmt.Errorf("login fail: %s", ret.Name())
 }
 
-func getAid(verifyUrl string) string {
-	u, _ := url.Parse(verifyUrl)
+func getAid(verifyURL string) string {
+	u, _ := url.Parse(verifyURL)
 	q := u.Query()
 	return q["sid"][0]
 }

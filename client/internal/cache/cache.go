@@ -90,7 +90,7 @@ func (c *Cache) GetGroupMember(uin, groupUin uint32) *entity.GroupMember {
 func (c *Cache) GetGroupMembers(groupUin uint32) map[uint32]*entity.GroupMember {
 	members := make(map[uint32]*entity.GroupMember, 64)
 	if group, ok := getCacheOf[Cache](c, groupUin); ok {
-		rangeCacheOf(group, func(k uint32, member *entity.GroupMember) bool {
+		rangeCacheOf(group, func(_ uint32, member *entity.GroupMember) bool {
 			members[member.Uin] = member
 			return true
 		})

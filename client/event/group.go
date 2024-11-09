@@ -357,7 +357,6 @@ func (g *GroupPokeEvent) From() uint32 {
 func (g *GroupPokeEvent) Content() string {
 	if g.Suffix != "" {
 		return fmt.Sprintf("%d%s%d的%s", g.Sender, g.Action, g.Receiver, g.Suffix)
-	} else {
-		return fmt.Sprintf("%d%s%d", g.Sender, g.Action, g.Receiver)
 	}
+	return fmt.Sprintf("%d%s%d", g.Sender, g.Action, g.Receiver)
 }
