@@ -10,8 +10,8 @@ type (
 	}
 
 	GroupNoticeFeed struct {
-		NoticeId    string `json:"fid"`
-		SenderId    uint32 `json:"u"`
+		NoticeID    string `json:"fid"`
+		SenderID    uint32 `json:"u"`
 		PublishTime uint64 `json:"pubt"`
 		Message     struct {
 			Text   string        `json:"text"`
@@ -32,6 +32,6 @@ type (
 	}
 
 	NoticeSendResp struct {
-		NoticeId string `json:"new_fid"`
+		NoticeID string `json:"new_fid"`
 	}
 )

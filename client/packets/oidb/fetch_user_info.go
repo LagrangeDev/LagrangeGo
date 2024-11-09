@@ -47,7 +47,7 @@ func ParseFetchUserInfoResp(data []byte) (*entity.Friend, error) {
 	}()
 	return &entity.Friend{
 		Uin: resp.Body.Uin,
-		//Uid:      resp.Body.Uid,
+		//UID:      resp.Body.UID,
 		Nickname: nickName,
 	}, nil
 }

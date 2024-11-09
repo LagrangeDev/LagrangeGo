@@ -16,7 +16,7 @@ var (
 type SigInfo struct {
 	Uin         uint32
 	Sequence    uint32
-	Uid         string
+	UID         string
 	Tgtgt       []byte
 	Tgt         []byte
 	D2          []byte

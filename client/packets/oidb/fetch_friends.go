@@ -52,7 +52,7 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, uint32, error) {
 		properties := parseFriendProperty(additional.Layer1.Properties)
 		friends[i] = &entity.Friend{
 			Uin:          raw.Uin,
-			Uid:          interner.Intern(raw.Uid),
+			UID:          interner.Intern(raw.Uid),
 			Nickname:     interner.Intern(properties[20002]),
 			Remarks:      interner.Intern(properties[103]),
 			PersonalSign: interner.Intern(properties[102]),

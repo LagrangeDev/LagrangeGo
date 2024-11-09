@@ -41,8 +41,8 @@ const (
 
 type (
 	PrivateMessage struct {
-		Id         uint32
-		InternalId uint32
+		ID         uint32
+		InternalID uint32
 		ClientSeq  uint32
 		Self       uint32
 		Target     uint32
@@ -52,7 +52,7 @@ type (
 	}
 
 	TempMessage struct {
-		Id        uint32
+		ID        uint32
 		GroupUin  uint32
 		GroupName string
 		Self      uint32
@@ -61,8 +61,8 @@ type (
 	}
 
 	GroupMessage struct {
-		Id             uint32
-		InternalId     uint32
+		ID             uint32
+		InternalID     uint32
 		GroupUin       uint32
 		GroupName      string
 		Sender         *Sender
@@ -102,8 +102,8 @@ func (s *Sender) IsAnonymous() bool {
 
 func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 	prvMsg := &PrivateMessage{
-		Id:         msg.ContentHead.Sequence.Unwrap(),
-		InternalId: msg.ContentHead.MsgId.Unwrap(),
+		ID:         msg.ContentHead.Sequence.Unwrap(),
+		InternalID: msg.ContentHead.MsgId.Unwrap(),
 		Self:       msg.ResponseHead.ToUin,
 		Target:     msg.ResponseHead.FromUin,
 		Sender: &Sender{
@@ -123,8 +123,8 @@ func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 
 func ParseGroupMessage(msg *message.PushMsgBody) *GroupMessage {
 	grpMsg := &GroupMessage{
-		Id:         msg.ContentHead.Sequence.Unwrap(),
-		InternalId: msg.ContentHead.MsgId.Unwrap(),
+		ID:         msg.ContentHead.Sequence.Unwrap(),
+		InternalID: msg.ContentHead.MsgId.Unwrap(),
 		GroupUin:   msg.ResponseHead.Grp.GroupUin,
 		GroupName:  msg.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
@@ -216,7 +216,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			return []IMessageElement{
 				&ShortVideoElement{
 					Name: elem.VideoFile.FileName,
-					Uuid: utils.S2B(elem.VideoFile.FileUuid),
+					UUID: utils.S2B(elem.VideoFile.FileUuid),
 					Size: uint32(elem.VideoFile.FileSize),
 					Md5:  elem.VideoFile.FileMd5,
 					Thumb: &VideoThumb{
@@ -241,7 +241,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 
 			res = append(res, func() *ImageElement {
 				img := &ImageElement{
-					ImageId: elem.CustomFace.FilePath,
+					ImageID: elem.CustomFace.FilePath,
 					Size:    elem.CustomFace.Size,
 					Width:   uint32(elem.CustomFace.Width),
 					Height:  uint32(elem.CustomFace.Height),
@@ -269,7 +269,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			}
 
 			res = append(res, &ImageElement{
-				ImageId: elem.NotOnlineImage.FilePath,
+				ImageID: elem.NotOnlineImage.FilePath,
 				Size:    elem.NotOnlineImage.FileLen,
 				Width:   elem.NotOnlineImage.PicWidth,
 				Height:  elem.NotOnlineImage.PicHeight,
@@ -293,7 +293,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				switch elem.CommonElem.BusinessType {
 				case 10, 20: // img
 					res = append(res, &ImageElement{
-						ImageId:  index.Info.FileName,
+						ImageID:  index.Info.FileName,
 						FileUUID: index.FileUuid,
 						SubType:  int32(extra.ExtBizInfo.Pic.BizType),
 						Summary:  utils.Ternary(extra.ExtBizInfo.Pic.TextSummary == "", "[图片]", extra.ExtBizInfo.Pic.TextSummary),
@@ -307,7 +307,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				case 12, 22: // record 22 for Group
 					res = append(res, &VoiceElement{
 						Name:     index.Info.FileName,
-						Uuid:     index.FileUuid,
+						UUID:     index.FileUuid,
 						Md5:      utils.MustParseHexStr(index.Info.FileHash),
 						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
 						Duration: index.Info.Time,
@@ -323,7 +323,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					continue
 				}
 				res = append(res, &ImageElement{
-					ImageId: img.FilePath,
+					ImageID: img.FilePath,
 					Md5:     img.PicMd5,
 					Size:    img.FileLen,
 					SubType: img.PbRes.SubType,
@@ -362,7 +362,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			res = append(res, &FileElement{
 				FileSize: extra.Inner.Info.FileSize,
 				FileMd5:  []byte(extra.Inner.Info.FileMd5),
-				FileId:   extra.Inner.Info.FileId,
+				FileID:   extra.Inner.Info.FileId,
 				FileName: extra.Inner.Info.FileName,
 			})
 		}
@@ -383,7 +383,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
 			multimsg := MultiMessage{}
 			_ = xml.Unmarshal(xmlData, &multimsg)
-			res = append(res, NewForwardWithResID(multimsg.ResId))
+			res = append(res, NewForwardWithResID(multimsg.ResID))
 		}
 	}
 
@@ -399,7 +399,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 			case isGroup && ptt.FileId != 0:
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
-					Uuid: ptt.FileUuid,
+					UUID: ptt.FileUuid,
 					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.GroupFileKey,
@@ -408,7 +408,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 			case !isGroup:
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
-					Uuid: ptt.FileUuid,
+					UUID: ptt.FileUuid,
 					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.FileUuid,
@@ -443,7 +443,7 @@ func (msg *GroupMessage) ToString() string {
 	//		strBuilder.WriteString(e.Content)
 	//	case *ImageElement:
 	//		strBuilder.WriteString("[Image: ")
-	//		strBuilder.WriteString(e.ImageId)
+	//		strBuilder.WriteString(e.ImageID)
 	//		strBuilder.WriteString("]")
 	//	case *AtElement:
 	//		strBuilder.WriteString(e.Display)
@@ -473,7 +473,7 @@ func (msg *GroupMessage) GetElements() []IMessageElement {
 }
 
 func (msg *GroupMessage) Chat() int64 {
-	return int64(msg.Id)
+	return int64(msg.ID)
 }
 
 func (msg *GroupMessage) Texts() []string {
@@ -493,7 +493,7 @@ func (msg *PrivateMessage) GetElements() []IMessageElement {
 }
 
 func (msg *PrivateMessage) Chat() int64 {
-	return int64(msg.Id)
+	return int64(msg.ID)
 }
 
 func (msg *PrivateMessage) Texts() []string {
@@ -513,7 +513,7 @@ func (msg *TempMessage) GetElements() []IMessageElement {
 }
 
 func (msg *TempMessage) Chat() int64 {
-	return int64(msg.Id)
+	return int64(msg.ID)
 }
 
 func (msg *TempMessage) Texts() []string {

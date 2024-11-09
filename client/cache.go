@@ -17,7 +17,7 @@ func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
 			return ""
 		}
 	}
-	return c.cache.GetUid(uin, groupUin...)
+	return c.cache.GetUID(uin, groupUin...)
 }
 
 // GetUin 获取缓存中对应的uin

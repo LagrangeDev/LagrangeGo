@@ -14,7 +14,7 @@ import (
 // BuildRegisterRequest trpc.qq_new_tech.status_svc.StatusService.Register
 func BuildRegisterRequest(app *auth.AppInfo, device *auth.DeviceInfo) []byte {
 	return proto.DynamicMessage{
-		1: strings.ToUpper(device.Guid),
+		1: strings.ToUpper(device.GUID),
 		2: 0,
 		3: app.CurrentVersion,
 		4: 0,

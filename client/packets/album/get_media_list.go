@@ -9,14 +9,14 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildGetMediaListReq(selfUin uint32, groupUin uint32, albumId string, pageInfo string) ([]byte, error) {
+func BuildGetMediaListReq(selfUin uint32, groupUin uint32, albumID string, pageInfo string) ([]byte, error) {
 	return proto.Marshal(&album.QzoneGetMediaList{
 		Field1: 0,
 		Field2: "h5_test",
 		Field3: "h5_test",
 		Field4: &album.QzoneGetMediaList_F4{
 			GroupID:  strconv.Itoa(int(groupUin)),
-			AlbumID:  albumId,
+			AlbumID:  albumID,
 			Field3:   0,
 			Field4:   "",
 			PageInfo: pageInfo,

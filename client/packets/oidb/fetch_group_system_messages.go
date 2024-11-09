@@ -28,13 +28,13 @@ func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...
 		case entity.UserJoinRequest, entity.UserInvited:
 			requests.JoinRequests = append(requests.JoinRequests, &entity.UserJoinGroupRequest{
 				GroupUin: r.Group.GroupUin,
-				InvitorUid: utils.LazyTernary(r.Invitor != nil, func() string {
+				InvitorUID: utils.LazyTernary(r.Invitor != nil, func() string {
 					return r.Invitor.Uid
 				}, func() string {
 					return ""
 				}),
-				TargetUid: r.Target.Uid,
-				OperatorUid: utils.LazyTernary(r.Invitor != nil, func() string {
+				TargetUID: r.Target.Uid,
+				OperatorUID: utils.LazyTernary(r.Invitor != nil, func() string {
 					return r.Invitor.Uid
 				}, func() string {
 					return ""
@@ -48,7 +48,7 @@ func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...
 		case entity.GroupInvited:
 			requests.InvitedRequests = append(requests.InvitedRequests, &entity.GroupInvitedRequest{
 				GroupUin: r.Group.GroupUin,
-				InvitorUid: utils.LazyTernary(r.Invitor != nil, func() string {
+				InvitorUID: utils.LazyTernary(r.Invitor != nil, func() string {
 					return r.Invitor.Uid
 				}, func() string {
 					return ""

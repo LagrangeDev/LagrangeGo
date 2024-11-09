@@ -5,13 +5,13 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 )
 
-func BuildMultiMsgDownloadReq(uid string, resId string) ([]byte, error) {
+func BuildMultiMsgDownloadReq(uid string, resID string) ([]byte, error) {
 	return proto.Marshal(&message.RecvLongMsgReq{
 		Info: &message.RecvLongMsgInfo{
 			Uid: &message.LongMsgUid{
 				Uid: proto.String(uid),
 			},
-			ResId:   proto.String(resId),
+			ResId:   proto.String(resID),
 			Acquire: true,
 		},
 		Settings: &message.LongMsgSettings{

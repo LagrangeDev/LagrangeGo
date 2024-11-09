@@ -421,7 +421,7 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 }
 
 func (c *QQClient) GetVideoUrl(isGroup bool, video *message2.ShortVideoElement) (string, error) {
-	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().Uid, string(video.Uuid), video.Name, isGroup, video.Md5, video.Sha1)
+	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().UID, string(video.UUID), video.Name, isGroup, video.Md5, video.Sha1)
 	if err != nil {
 		return "", err
 	}
@@ -739,9 +739,9 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 			if fe.FileInfo != nil {
 				files = append(files, &entity.GroupFile{
 					GroupUin:      groupUin,
-					FileId:        fe.FileInfo.FileId,
+					FileID:        fe.FileInfo.FileId,
 					FileName:      fe.FileInfo.FileName,
-					BusId:         fe.FileInfo.BusId,
+					BusID:         fe.FileInfo.BusId,
 					FileSize:      fe.FileInfo.FileSize,
 					UploadTime:    fe.FileInfo.UploadedTime,
 					DeadTime:      fe.FileInfo.ExpireTime,
@@ -754,7 +754,7 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 			if fe.FolderInfo != nil {
 				folders = append(folders, &entity.GroupFolder{
 					GroupUin:       groupUin,
-					FolderId:       fe.FolderInfo.FolderId,
+					FolderID:       fe.FolderInfo.FolderId,
 					FolderName:     fe.FolderInfo.FolderName,
 					CreateTime:     fe.FolderInfo.CreateTime,
 					Creator:        fe.FolderInfo.CreatorUin,
@@ -881,12 +881,12 @@ func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, 
 	for idx, b := range result.Action.ActionData.MsgBody {
 		isGroupMsg := b.ResponseHead.Grp != nil
 		forwardMsg.Nodes[idx] = &message2.ForwardNode{
-			SenderId:   b.ResponseHead.FromUin,
+			SenderID:   b.ResponseHead.FromUin,
 			SenderName: b.ResponseHead.Forward.FriendName.Unwrap(),
 			Time:       b.ContentHead.TimeStamp.Unwrap(),
 		}
 		if isGroupMsg {
-			forwardMsg.Nodes[idx].GroupId = b.ResponseHead.Grp.GroupUin
+			forwardMsg.Nodes[idx].GroupID = b.ResponseHead.Grp.GroupUin
 			forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Grp.MemberName
 			grpMsg := message2.ParseGroupMessage(b)
 			c.PreprocessGroupMessageEvent(grpMsg)
@@ -966,8 +966,8 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 					elements = append(elements, &message2.ImageElement{Url: e.Get("image_url").String()})
 				case 4:
 					elements = append(elements, &message2.FileElement{
-						FileId:  e.Get("file_id").String(),
-						FileUrl: e.Get("file_thumbnail_url").String(),
+						FileID:  e.Get("file_id").String(),
+						FileURL: e.Get("file_thumbnail_url").String(),
 					})
 				}
 			}
@@ -975,12 +975,12 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 			senderInfo := c.GetCachedMemberInfo(senderUin, groupUin)
 			essenceMsg = append(essenceMsg, &message2.GroupEssenceMessage{
 				OperatorUin:  uint32(v.Get("add_digest_uin").Int()),
-				OperatorUid:  c.GetUid(uint32(v.Get("add_digest_uin").Int())),
+				OperatorUID:  c.GetUid(uint32(v.Get("add_digest_uin").Int())),
 				OperatorTime: uint64(v.Get("add_digest_time").Int()),
 				CanRemove:    v.Get("can_be_removed").Bool(),
 				Message: &message2.GroupMessage{
-					Id:         uint32(v.Get("msg_seq").Int()),
-					InternalId: uint32(v.Get("msg_random").Int()),
+					ID:         uint32(v.Get("msg_seq").Int()),
+					InternalID: uint32(v.Get("msg_random").Int()),
 					GroupUin:   grpInfo.GroupUin,
 					GroupName:  grpInfo.GroupName,
 					Sender: &message2.Sender{
@@ -1129,7 +1129,7 @@ func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeId 
 		return "", err
 	}
 	_ = resp.Body.Close()
-	return res.NoticeId, nil
+	return res.NoticeID, nil
 }
 
 // AddGroupNoticeWithPic 发群公告带图片
@@ -1157,7 +1157,7 @@ func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byt
 		return "", err
 	}
 	_ = resp.Body.Close()
-	return res.NoticeId, nil
+	return res.NoticeID, nil
 }
 
 // DelGroupNotice 删除群公告

@@ -2,7 +2,7 @@ package entity
 
 type Friend struct {
 	Uin          uint32
-	Uid          string
+	UID          string
 	Nickname     string
 	Remarks      string
 	PersonalSign string

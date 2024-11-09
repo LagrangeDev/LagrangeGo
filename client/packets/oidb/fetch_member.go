@@ -36,7 +36,7 @@ func ParseFetchMemberResp(data []byte) (*entity.GroupMember, error) {
 	member := resp.Member
 	m := &entity.GroupMember{
 		Uin:          member.Uin.Uin,
-		Uid:          interner.Intern(member.Uin.Uid),
+		UID:          interner.Intern(member.Uin.Uid),
 		Permission:   entity.GroupMemberPermission(member.Permission),
 		MemberCard:   interner.Intern(member.MemberCard.MemberCard.Unwrap()),
 		MemberName:   interner.Intern(member.MemberName),

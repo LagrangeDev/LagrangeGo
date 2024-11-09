@@ -10,7 +10,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-func BuildMultiMsgUploadReq(selfUid string, groupUin uint32, msg []*message.PushMsgBody) ([]byte, error) {
+func BuildMultiMsgUploadReq(selfUID string, groupUin uint32, msg []*message.PushMsgBody) ([]byte, error) {
 	longMsgResult := &message2.LongMsgResult{
 		Action: &message2.LongMsgAction{
 			ActionCommand: "MultiMsg",
@@ -25,7 +25,7 @@ func BuildMultiMsgUploadReq(selfUid string, groupUin uint32, msg []*message.Push
 		Info: &message2.SendLongMsgInfo{
 			Type: utils.Ternary[uint32](groupUin == 0, 1, 3),
 			Uid: &message2.LongMsgUid{
-				Uid: utils.Ternary(groupUin == 0, proto.String(selfUid), proto.String(strconv.Itoa(int(groupUin)))),
+				Uid: utils.Ternary(groupUin == 0, proto.String(selfUID), proto.String(strconv.Itoa(int(groupUin)))),
 			},
 			GroupUin: proto.Uint32(groupUin),
 			Payload:  payload,

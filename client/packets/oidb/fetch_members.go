@@ -39,7 +39,7 @@ func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 		// 由于protobuf的优化策略，默认值不会被编码进实际的二进制流中
 		m := &entity.GroupMember{
 			Uin:          member.Uin.Uin,
-			Uid:          interner.Intern(member.Uin.Uid),
+			UID:          interner.Intern(member.Uin.Uid),
 			Permission:   entity.GroupMemberPermission(member.Permission),
 			MemberCard:   interner.Intern(member.MemberCard.MemberCard.Unwrap()),
 			MemberName:   interner.Intern(member.MemberName),

@@ -139,10 +139,10 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		WriteU8(0).
 		WriteTLV(
 			tlv.T16(c.version().AppID, c.version().SubAppID,
-				utils.MustParseHexStr(c.Device().Guid), c.version().PTVersion, c.version().PackageName),
+				utils.MustParseHexStr(c.Device().GUID), c.version().PTVersion, c.version().PackageName),
 			tlv.T1b(0, 0, size, margin, 72, ecLevel, 2),
 			tlv.T1d(c.version().MiscBitmap),
-			tlv.T33(utils.MustParseHexStr(c.Device().Guid)),
+			tlv.T33(utils.MustParseHexStr(c.Device().GUID)),
 			tlv.T35(c.version().PTOSVersion),
 			tlv.T66(c.version().PTOSVersion),
 			tlv.Td1(c.version().OS, c.Device().DeviceName),
@@ -215,7 +215,7 @@ func (c *QQClient) GetQRCodeResult() (qrcodestate.State, error) {
 }
 
 func (c *QQClient) keyExchange() error {
-	data, err := wtlogin.BuildKexExchangeRequest(c.Uin, c.Device().Guid)
+	data, err := wtlogin.BuildKexExchangeRequest(c.Uin, c.Device().GUID)
 	if err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func (c *QQClient) PasswordLogin(password string) (loginstate.State, error) {
 		c.version().AppID,
 		c.version().AppClientVersion,
 		int(c.Uin),
-		c.Device().Guid,
+		c.Device().GUID,
 		md5Password,
 		c.transport.Sig.Tgtgt,
 		make([]byte, 4),
@@ -299,7 +299,7 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 				tlv.T144(c.transport.Sig.Tgtgt, app, device),
 				tlv.T116(app.SubSigmap),
 				tlv.T142(app.PackageName, 0),
-				tlv.T145(utils.MustParseHexStr(device.Guid)),
+				tlv.T145(utils.MustParseHexStr(device.GUID)),
 				tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
 				tlv.T141([]byte("Unknown"), nil),
 				tlv.T177(app.WTLoginSDK, 0),

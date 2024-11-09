@@ -8,13 +8,13 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupFSDownloadReq(groupUin uint32, fileId string) (*OidbPacket, error) {
+func BuildGroupFSDownloadReq(groupUin uint32, fileID string) (*OidbPacket, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
 		Download: &oidb.OidbSvcTrpcTcp0X6D6Download{
 			GroupUin: groupUin,
-			AppId:    7,
-			BusId:    102,
-			FileId:   fileId,
+			AppID:    7,
+			BusID:    102,
+			FileId:   fileID,
 		},
 	}
 	return BuildOidbPacket(0x6D6, 2, body, false, true)

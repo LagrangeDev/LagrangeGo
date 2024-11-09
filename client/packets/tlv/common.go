@@ -36,7 +36,7 @@ func T100(ssoVersion, appID, subAppID, appClientVersion, sigmap, dbBufVer int) [
 }
 
 // T106 抄的时候注意参数顺序
-func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
+func T106(appID, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, ip []byte, savePassword bool) []byte {
 	// password_md5 + bytes(4) + write_u32(uin).pack()
 	key := crypto.MD5Digest(binary.NewBuilder(nil).
 		WriteBytes(passwordMd5).
@@ -49,7 +49,7 @@ func T106(appId, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 		WriteStruct(uint16(4), //  tgtgt version
 			crypto.RandU32(),
 			uint32(0), // sso_version, depreciated
-			uint32(appId),
+			uint32(appID),
 			uint32(appClientVersion),
 			uint64(uin)).
 		WriteU32(uint32(utils.TimeStamp())).
@@ -95,7 +95,7 @@ func T124() []byte {
 		Pack(0x124)
 }
 
-func T128(appInfoOS string, deviceGuid []byte) []byte {
+func T128(appInfoOS string, deviceGUID []byte) []byte {
 	return binary.NewBuilder(nil).
 		WriteU16(0).
 		WriteU8(0).
@@ -103,7 +103,7 @@ func T128(appInfoOS string, deviceGuid []byte) []byte {
 		WriteU8(0).
 		WriteU32(0).
 		WritePacketString(appInfoOS, "u16", false).
-		WritePacketBytes(deviceGuid, "u16", false).
+		WritePacketBytes(deviceGUID, "u16", false).
 		WritePacketString("", "u16", false).
 		Pack(0x128)
 }
@@ -131,7 +131,7 @@ func T144(tgtgtKey []byte, appInfo *auth.AppInfo, device *auth.DeviceInfo) []byt
 		WriteTLV(
 			T16e(device.DeviceName),
 			T147(appInfo.AppID, appInfo.PTVersion, appInfo.PackageName),
-			T128(appInfo.OS, utils.MustParseHexStr(device.Guid)),
+			T128(appInfo.OS, utils.MustParseHexStr(device.GUID)),
 			T124(),
 		).Pack(0x144)
 }
@@ -142,9 +142,9 @@ func T145(guid []byte) []byte {
 		Pack(0x145)
 }
 
-func T147(appId int, ptVersion string, packageName string) []byte {
+func T147(appID int, ptVersion string, packageName string) []byte {
 	return binary.NewBuilder(nil).
-		WriteU32(uint32(appId)).
+		WriteU32(uint32(appID)).
 		WritePacketString(ptVersion, "u16", false).
 		WritePacketString(packageName, "u16", false).
 		Pack(0x147)

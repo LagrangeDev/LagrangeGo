@@ -10,7 +10,7 @@ const (
 
 type GroupMember struct {
 	Uin          uint32
-	Uid          string
+	UID          string
 	Permission   GroupMemberPermission
 	GroupLevel   uint32
 	MemberCard   string

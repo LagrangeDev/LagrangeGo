@@ -132,7 +132,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.JoinRequests, filteredRequests.JoinRequests...) {
-				if request.TargetUid == ev.TargetUid && !request.Checked() {
+				if request.TargetUID == ev.TargetUid && !request.Checked() {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
 				}
@@ -363,16 +363,16 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) {
 			e.Url = url
 		case *msgConverter.VoiceElement:
 			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
-			e.Url = url
+			e.URL = url
 		case *msgConverter.ShortVideoElement:
 			url, err := c.GetVideoUrl(true, e)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.FileElement:
-			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileId)
-			e.FileUrl = url
+			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileID)
+			e.FileURL = url
 		case *msgConverter.ForwardMessage:
 			if e.Nodes == nil {
 				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
@@ -402,19 +402,19 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.ShortVideoElement:
 			url, err := c.GetVideoUrl(false, e)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.FileElement:
 			url, err := c.GetPrivateFileUrl(e.FileUUID, e.FileHash)
 			if err != nil {
 				continue
 			}
-			e.FileUrl = url
+			e.FileURL = url
 		case *msgConverter.ForwardMessage:
 			if e.Nodes == nil {
 				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {

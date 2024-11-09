@@ -22,7 +22,7 @@ import (
 
 func (c *QQClient) ensureHighwayServers() error {
 	if c.highwaySession.SsoAddr == nil || c.highwaySession.SigSession == nil || c.highwaySession.SessionKey == nil {
-		packet, err := highway2.BuildHighWayUrlReq(c.transport.Sig.Tgt)
+		packet, err := highway2.BuildHighWayURLReq(c.transport.Sig.Tgt)
 		if err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func (c *QQClient) ensureHighwayServers() error {
 		if err != nil {
 			return fmt.Errorf("get highway server: %v", err)
 		}
-		resp, err := highway2.ParseHighWayUrlReq(payload)
+		resp, err := highway2.ParseHighWayURLReq(payload)
 		if err != nil {
 			return fmt.Errorf("parse highway server: %v", err)
 		}

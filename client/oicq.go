@@ -91,7 +91,7 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
 			c.errorln(err)
 			return err
 		}
-		sig.Uid = resp.Layer1.Layer2.Uid
+		sig.UID = resp.Layer1.Layer2.Uid
 
 		c.debugln("SigInfo got")
 

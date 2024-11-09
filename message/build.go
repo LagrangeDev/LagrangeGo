@@ -28,7 +28,7 @@ func (e *AtElement) BuildElement() []*message.Elem {
 		Type:   proto.Some(atAll),
 		Uin:    proto.Some(uint32(0)),
 		Field5: proto.Some(int32(0)),
-		Uid:    proto.Some(e.TargetUid),
+		Uid:    proto.Some(e.TargetUID),
 	}
 	reserveData, _ := proto.Marshal(&reserve)
 	return []*message.Elem{{Text: &message.Text{
@@ -96,7 +96,7 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 func (e *ReplyElement) BuildElement() []*message.Elem {
 	forwardReserve := message.Preserve{
 		MessageId:   uint64(e.ReplySeq),
-		ReceiverUid: e.SenderUid,
+		ReceiverUid: e.SenderUID,
 	}
 	forwardReserveData, err := proto.Marshal(&forwardReserve)
 	if err != nil {
@@ -151,9 +151,9 @@ func (e *LightAppElement) BuildElement() []*message.Elem {
 }
 
 func (e *ForwardMessage) BuildElement() []*message.Elem {
-	fileId := utils.NewUUID()
+	fileID := utils.NewUUID()
 	extra := MultiMsgLightAppExtra{
-		FileName: fileId,
+		FileName: fileID,
 		Sum:      len(e.Nodes),
 	}
 	extraData, err := json.Marshal(&extra)
@@ -177,7 +177,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 		isContainSelf := false
 		isCount := 0
 		for _, v := range e.Nodes {
-			if v.SenderId == e.SelfId && e.SelfId > 0 {
+			if v.SenderID == e.SelfID && e.SelfID > 0 {
 				isContainSelf = true
 			}
 			if _, ok := isSenderNameExist[v.SenderName]; !ok {
@@ -216,7 +216,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 				Resid:   e.ResID,
 				Source:  metaSource,
 				Summary: fmt.Sprintf("查看%d条转发消息", len(e.Nodes)),
-				UniSeq:  fileId,
+				UniSeq:  fileID,
 			},
 		},
 		Prompt: "[聊天记录]",

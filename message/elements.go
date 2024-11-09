@@ -29,7 +29,7 @@ type (
 
 	AtElement struct {
 		TargetUin uint32
-		TargetUid string
+		TargetUID string
 		Display   string
 		SubType   AtType
 	}
@@ -43,7 +43,7 @@ type (
 	ReplyElement struct {
 		ReplySeq  uint32
 		SenderUin uint32
-		SenderUid string
+		SenderUID string
 		GroupUin  uint32 // 私聊回复群聊时
 		Time      uint32
 		Elements  []IMessageElement
@@ -51,9 +51,9 @@ type (
 
 	VoiceElement struct {
 		Name string
-		Uuid string
+		UUID string
 		Size uint32
-		Url  string
+		URL  string
 		Md5  []byte
 		Sha1 []byte
 		Node *oidb.IndexNode
@@ -67,7 +67,7 @@ type (
 	}
 
 	ImageElement struct {
-		ImageId  string
+		ImageID  string
 		FileUUID string // only in new protocol photo
 		Size     uint32
 		Width    uint32
@@ -95,8 +95,8 @@ type (
 		FileSize uint64
 		FileName string
 		FileMd5  []byte
-		FileUrl  string
-		FileId   string // group
+		FileURL  string
+		FileID   string // group
 		FileUUID string // private
 		FileHash string
 
@@ -107,9 +107,9 @@ type (
 
 	ShortVideoElement struct {
 		Name     string
-		Uuid     []byte
+		UUID     []byte
 		Size     uint32
-		Url      string
+		URL      string
 		Duration uint32
 
 		// send
@@ -138,7 +138,7 @@ type (
 
 	ForwardMessage struct {
 		IsGroup bool
-		SelfId  uint32
+		SelfID  uint32
 		ResID   string
 		Nodes   []*ForwardNode
 	}
@@ -170,7 +170,7 @@ func NewAt(target uint32, display ...string) *AtElement {
 
 func NewGroupReply(m *GroupMessage) *ReplyElement {
 	return &ReplyElement{
-		ReplySeq:  m.Id,
+		ReplySeq:  m.ID,
 		SenderUin: m.Sender.Uin,
 		Time:      m.Time,
 		Elements:  m.Elements,
@@ -179,7 +179,7 @@ func NewGroupReply(m *GroupMessage) *ReplyElement {
 
 func NewPrivateReply(m *PrivateMessage) *ReplyElement {
 	return &ReplyElement{
-		ReplySeq:  m.Id,
+		ReplySeq:  m.ID,
 		SenderUin: m.Sender.Uin,
 		Time:      m.Time,
 		Elements:  m.Elements,
