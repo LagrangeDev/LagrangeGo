@@ -4,7 +4,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupSetSpecialTitleReq(groupUin uint32, uid, title string) (*OidbPacket, error) {
+func BuildGroupSetSpecialTitleReq(groupUin uint32, uid, title string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X8FC{
 		GroupUin: groupUin,
 		Body: &oidb.OidbSvcTrpcTcp0X8FCBody{

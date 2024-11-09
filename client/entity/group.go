@@ -68,11 +68,11 @@ type (
 	UserJoinGroupRequest struct {
 		GroupUin    uint32
 		InvitorUin  uint32
-		InvitorUid  string
+		InvitorUID  string
 		TargetUin   uint32
-		TargetUid   string
+		TargetUID   string
 		OperatorUin uint32
-		OperatorUid string
+		OperatorUID string
 		Sequence    uint64
 		State       EventState
 		EventType   EventType
@@ -83,7 +83,7 @@ type (
 	GroupInvitedRequest struct {
 		GroupUin   uint32
 		InvitorUin uint32
-		InvitorUid string
+		InvitorUID string
 		Sequence   uint64
 		State      EventState
 		EventType  EventType

@@ -2,7 +2,7 @@ package oidb
 
 import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
-func BuildFetchClientKeyReq() (*OidbPacket, error) {
+func BuildFetchClientKeyReq() (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0X102A_1{}
 	return BuildOidbPacket(0x102A, 1, &body, false, false)
 }

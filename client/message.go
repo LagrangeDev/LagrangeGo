@@ -62,13 +62,13 @@ func (c *QQClient) SendGroupMessage(groupUin uint32, elements []message2.IMessag
 	group := c.GetCachedGroupInfo(groupUin)
 	minfo := c.GetCachedMemberInfo(c.Uin, groupUin)
 	resp := &message2.GroupMessage{
-		Id:         ret.GroupSequence.Unwrap(),
-		InternalId: mr,
+		ID:         ret.GroupSequence.Unwrap(),
+		InternalID: mr,
 		GroupUin:   groupUin,
 		GroupName:  group.GroupName,
 		Sender: &message2.Sender{
 			Uin:           c.Uin,
-			Uid:           c.GetUid(c.Uin),
+			UID:           c.GetUID(c.Uin),
 			Nickname:      c.NickName(),
 			CardName:      minfo.MemberCard,
 			AnonymousInfo: nil,
@@ -89,7 +89,7 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 	body := message2.PackElementsToBody(elements)
 	route := &message.RoutingHead{
 		C2C: &message.C2C{
-			Uid: proto.Some(c.GetUid(uin)),
+			Uid: proto.Some(c.GetUID(uin)),
 		},
 	}
 	mr := crypto.RandU32()
@@ -98,15 +98,15 @@ func (c *QQClient) SendPrivateMessage(uin uint32, elements []message2.IMessageEl
 		return nil, err
 	}
 	resp := &message2.PrivateMessage{
-		Id:         ret.PrivateSequence,
-		InternalId: mr,
+		ID:         ret.PrivateSequence,
+		InternalID: mr,
 		ClientSeq:  clientSeq,
 		Self:       c.Uin,
 		Target:     uin,
 		Time:       ret.Timestamp1,
 		Sender: &message2.Sender{
 			Uin:           c.Uin,
-			Uid:           c.GetUid(c.Uin),
+			UID:           c.GetUID(c.Uin),
 			Nickname:      c.NickName(),
 			AnonymousInfo: nil,
 			IsFriend:      true,
@@ -131,13 +131,13 @@ func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []messa
 	}
 	group := c.GetCachedGroupInfo(groupUin)
 	resp := &message2.TempMessage{
-		Id:        ret.PrivateSequence,
+		ID:        ret.PrivateSequence,
 		GroupUin:  groupUin,
 		GroupName: group.GroupName,
 		Self:      c.Uin,
 		Sender: &message2.Sender{
 			Uin:           c.Uin,
-			Uid:           c.GetUid(c.Uin),
+			UID:           c.GetUID(c.Uin),
 			Nickname:      c.NickName(),
 			AnonymousInfo: nil,
 			IsFriend:      true,
@@ -151,14 +151,14 @@ func (c *QQClient) SendTempMessage(groupUin uint32, uin uint32, elements []messa
 func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message.PushMsgBody {
 	body := make([]*message.PushMsgBody, len(msgElems))
 	for idx, elem := range msgElems {
-		avatar := fmt.Sprintf("https://q.qlogo.cn/headimg_dl?dst_uin=%d&spec=640&img_type=jpg", elem.SenderId)
+		avatar := fmt.Sprintf("https://q.qlogo.cn/headimg_dl?dst_uin=%d&spec=640&img_type=jpg", elem.SenderID)
 		body[idx] = &message.PushMsgBody{
 			ResponseHead: &message.ResponseHead{
 				FromUid: proto.String(""),
-				FromUin: elem.SenderId,
+				FromUin: elem.SenderID,
 			},
 			ContentHead: &message.ContentHead{
-				Type:      uint32(utils.Ternary(elem.GroupId != 0, 82, 9)),
+				Type:      uint32(utils.Ternary(elem.GroupID != 0, 82, 9)),
 				MsgId:     proto.Uint32(crypto.RandU32()),
 				Sequence:  proto.Uint32(crypto.RandU32()),
 				TimeStamp: proto.Uint32(uint32(utils.TimeStamp())),
@@ -168,21 +168,21 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 				Foward: &message.ForwardHead{
 					Field1:        proto.Uint32(0),
 					Field2:        proto.Uint32(0),
-					Field3:        utils.Ternary(elem.GroupId != 0, proto.Uint32(0), proto.Uint32(2)),
+					Field3:        utils.Ternary(elem.GroupID != 0, proto.Uint32(0), proto.Uint32(2)),
 					UnknownBase64: proto.String(avatar),
 					Avatar:        proto.String(avatar),
 				},
 			},
 		}
-		if elem.GroupId != 0 {
+		if elem.GroupID != 0 {
 			body[idx].ResponseHead.Grp = &message.ResponseGrp{
-				GroupUin:   elem.GroupId,
+				GroupUin:   elem.GroupID,
 				MemberName: elem.SenderName,
 				Unknown5:   2,
 			}
-			c.preProcessGroupMessage(elem.GroupId, elem.Message)
+			c.preProcessGroupMessage(elem.GroupID, elem.Message)
 		} else {
-			body[idx].ResponseHead.ToUid = proto.String(c.GetUid(c.Uin))
+			body[idx].ResponseHead.ToUid = proto.String(c.GetUID(c.Uin))
 			body[idx].ResponseHead.Forward = &message.ResponseForward{
 				FriendName: proto.String(elem.SenderName),
 			}
@@ -201,7 +201,7 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 		case *message2.AtElement:
 			member := c.GetCachedMemberInfo(elem.TargetUin, groupUin)
 			if member != nil {
-				elem.TargetUid = member.Uid
+				elem.TargetUID = member.UID
 				if member.MemberCard != "" {
 					elem.Display = "@" + member.MemberCard
 				} else {
@@ -269,8 +269,8 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUid(targetUin)
-			_, err := c.ImageUploadPrivate(targetUid, elem)
+			targetUID := c.GetUID(targetUin)
+			_, err := c.ImageUploadPrivate(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
@@ -283,8 +283,8 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUid(targetUin)
-			_, err := c.RecordUploadPrivate(targetUid, elem)
+			targetUID := c.GetUID(targetUin)
+			_, err := c.RecordUploadPrivate(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
@@ -297,8 +297,8 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 			if elem.MsgInfo != nil {
 				continue
 			}
-			targetUid := c.GetUid(targetUin)
-			_, err := c.VideoUploadPrivate(targetUid, elem)
+			targetUID := c.GetUID(targetUin)
+			_, err := c.VideoUploadPrivate(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
@@ -310,7 +310,7 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 		case *message2.ForwardMessage:
 			if elem.ResID != "" && len(elem.Nodes) == 0 {
 				forward, _ := c.FetchForwardMsg(elem.ResID)
-				elem.SelfId = c.Uin
+				elem.SelfID = c.Uin
 				elem.Nodes = forward.Nodes
 			}
 			if elem.ResID == "" && len(elem.Nodes) != 0 {

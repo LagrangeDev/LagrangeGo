@@ -6,7 +6,7 @@ import (
 	"github.com/RomiChan/protobuf/proto"
 )
 
-func BuildGroupSendFileReq(groupUin uint32, fileKey string) (*OidbPacket, error) {
+func BuildGroupSendFileReq(groupUin uint32, fileKey string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D9_4{
 		Body: &oidb.OidbSvcTrpcTcp0X6D9_4Body{
 			GroupUin: groupUin,

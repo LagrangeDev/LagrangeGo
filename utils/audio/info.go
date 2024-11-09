@@ -13,30 +13,29 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-type AudioInfo struct {
-	Type AudioType
+type Info struct {
+	Type Type
 	Time float32
 }
 
-func decode(r io.ReadSeeker, _f bool) (*AudioInfo, error) {
+func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 	reader := binary.ParseReader(r)
 	buf := reader.ReadBytes(1)
 	if utils.B2S(buf) != utils.B2S([]byte{0x23}) {
 		if !_f {
 			return decode(r, true)
-		} else {
-			return nil, errors.New("unknown audio type")
 		}
-	} else {
-		buf = append(buf, reader.ReadBytes(5)...)
+		return nil, errors.New("unknown audio type")
 	}
+	buf = append(buf, reader.ReadBytes(5)...)
 
-	if strings.HasPrefix(string(buf), "#!AMR\n") {
-		return &AudioInfo{
+	switch {
+	case strings.HasPrefix(string(buf), "#!AMR\n"):
+		return &Info{
 			Type: amr,
 			Time: float32(len(reader.ReadAll())) / 1607.0,
 		}, nil
-	} else if string(buf) == "#!SILK" {
+	case string(buf) == "#!SILK":
 		ver := reader.ReadBytes(3)
 		if string(ver) != "_V3" {
 			return nil, fmt.Errorf("unsupported silk version: %s", utils.B2S(ver))
@@ -44,7 +43,7 @@ func decode(r io.ReadSeeker, _f bool) (*AudioInfo, error) {
 		data := reader.ReadAll()
 		size := len(data)
 
-		var typ AudioType
+		var typ Type
 		if _f { // txsilk
 			typ = txSilk
 		} else {
@@ -58,21 +57,20 @@ func decode(r io.ReadSeeker, _f bool) (*AudioInfo, error) {
 			length := binary2.LittleEndian.Uint16(data[pos : pos+2])
 			if length == 0xFFFF {
 				break
-			} else {
-				blks++
-				pos += int(length) + 2
 			}
+			blks++
+			pos += int(length) + 2
 		}
-		return &AudioInfo{
+		return &Info{
 			Type: typ,
 			Time: float32(blks) * 0.02,
 		}, nil
-	} else {
+	default:
 		return nil, errors.New("unknown audio type")
 	}
 }
 
-func Decode(r io.ReadSeeker) (*AudioInfo, error) {
+func Decode(r io.ReadSeeker) (*Info, error) {
 	defer func() {
 		_, _ = r.Seek(0, io.SeekStart)
 	}()

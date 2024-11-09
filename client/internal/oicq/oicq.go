@@ -30,6 +30,7 @@ func NewCodec(uin int64) *Codec {
 
 type EncryptionMethod byte
 
+// nolint
 const (
 	EM_ECDH EncryptionMethod = iota
 	EM_ST

@@ -55,10 +55,11 @@ func (c *QQClient) GetSkey() (string, error) {
 	jump := "https%3A%2F%2Fh5.qzone.qq.com%2Fqqnt%2Fqzoneinpcqq%2Ffriend%3Frefresh%3D0%26clientuin%3D0%26darkMode%3D0&keyindex=19&random=2599"
 	u, _ := url.Parse(fmt.Sprintf("https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=%d&clientkey=%s&u1=%s",
 		c.Uin, clientKey, jump))
-	_, err = c.ticket.client.Get(u.String())
+	resp, err := c.ticket.client.Get(u.String())
 	if err != nil {
 		return "", err
 	}
+	resp.Body.Close()
 	for _, cookie := range c.ticket.client.Jar.Cookies(u) {
 		if cookie.Name == "skey" {
 			c.ticket.sKey.key = cookie.Value

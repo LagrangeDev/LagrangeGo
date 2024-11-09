@@ -25,7 +25,7 @@ var (
 func main() {
 	appInfo := auth.AppList["linux"]["3.2.10-25765"]
 	deviceInfo := &auth.DeviceInfo{
-		Guid:          "cfcd208495d565ef66e7dff9f98764da",
+		GUID:          "cfcd208495d565ef66e7dff9f98764da",
 		DeviceName:    "Lagrange-DCFCD07E",
 		SystemKernel:  "Windows 10.0.22631",
 		KernelVersion: "10.0.22631",

@@ -11,7 +11,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
-func BuildGroupVideoUploadReq(groupUin uint32, video *message.ShortVideoElement) (*OidbPacket, error) {
+func BuildGroupVideoUploadReq(groupUin uint32, video *message.ShortVideoElement) (*Packet, error) {
 	if video.Stream == nil {
 		return nil, errors.New("video data is nil")
 	}

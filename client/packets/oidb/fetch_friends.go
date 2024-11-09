@@ -7,7 +7,7 @@ import (
 )
 
 // BuildFetchFriendsReq OidbSvcTrpcTcp.0xfd4_1
-func BuildFetchFriendsReq(token uint32) (*OidbPacket, error) {
+func BuildFetchFriendsReq(token uint32) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0XFD4_1{
 		Field2: 300,
 		Field4: 0,
@@ -52,7 +52,7 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, uint32, error) {
 		properties := parseFriendProperty(additional.Layer1.Properties)
 		friends[i] = &entity.Friend{
 			Uin:          raw.Uin,
-			Uid:          interner.Intern(raw.Uid),
+			UID:          interner.Intern(raw.Uid),
 			Nickname:     interner.Intern(properties[20002]),
 			Remarks:      interner.Intern(properties[103]),
 			PersonalSign: interner.Intern(properties[102]),

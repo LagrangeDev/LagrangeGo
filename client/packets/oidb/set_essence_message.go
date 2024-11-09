@@ -5,7 +5,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildSetEssenceMessageReq(groupUin, seq, random uint32, isSet bool) (*OidbPacket, error) {
+func BuildSetEssenceMessageReq(groupUin, seq, random uint32, isSet bool) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0XEAC{
 		GroupUin: groupUin,
 		Sequence: seq,

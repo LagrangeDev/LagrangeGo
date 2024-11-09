@@ -7,7 +7,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -31,7 +31,7 @@ func buildNtloginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo,
 				1: app.OS,
 				2: device.DeviceName,
 				3: app.NTLoginType,
-				4: utils.MustParseHexStr(device.Guid),
+				4: utils.MustParseHexStr(device.GUID),
 			},
 			3: proto.DynamicMessage{
 				1: device.KernelVersion,
@@ -63,7 +63,7 @@ func buildNtloginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo,
 	}.Encode(), nil
 }
 
-func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginState.State, error) {
+func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State, error) {
 	var frame login.SsoNTLoginEncryptedData
 	err := proto.Unmarshal(response, &frame)
 	if err != nil {
@@ -90,15 +90,15 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginState.State,
 		sig.D2 = body.Credentials.D2
 		sig.D2Key = body.Credentials.D2Key
 		sig.TempPwd = body.Credentials.TempPassword
-		return loginState.Success, nil
+		return loginstate.Success, nil
 	}
-	ret := loginState.State(base.Header.Error.ErrorCode)
-	if ret == loginState.CaptchaVerify {
+	ret := loginstate.State(base.Header.Error.ErrorCode)
+	if ret == loginstate.CaptchaVerify {
 		sig.Cookies = base.Header.Cookie.Cookie.Unwrap()
-		verifyUrl := body.Captcha.Url
-		aid := getAid(verifyUrl)
+		verifyURL := body.Captcha.Url
+		aid := getAid(verifyURL)
 		sig.CaptchaInfo[2] = aid
-		return ret, fmt.Errorf("need captcha verify: %v", verifyUrl)
+		return ret, fmt.Errorf("need captcha verify: %v", verifyURL)
 	}
 	if base.Header.Error.Tag != "" {
 		stat := base.Header.Error
@@ -109,8 +109,8 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginState.State,
 	return ret, fmt.Errorf("login fail: %s", ret.Name())
 }
 
-func getAid(verifyUrl string) string {
-	u, _ := url.Parse(verifyUrl)
+func getAid(verifyURL string) string {
+	u, _ := url.Parse(verifyURL)
 	q := u.Query()
 	return q["sid"][0]
 }

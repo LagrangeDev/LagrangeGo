@@ -30,7 +30,7 @@ import (
 )
 
 // NewClient 创建一个新的 QQ Client
-func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
+func NewClient(uin uint32, appInfo *auth.AppInfo, signURL ...string) *QQClient {
 	cookieContainer, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	client := &QQClient{
 		Uin:  uin,
@@ -46,7 +46,7 @@ func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
 		alive: true,
 		UA:    "LagrangeGo qq/" + appInfo.PackageSign,
 	}
-	client.signProvider = sign.NewSigner(appInfo, client.debug, signUrl...)
+	client.signProvider = sign.NewSigner(appInfo, client.debug, signURL...)
 	client.transport.Version = appInfo
 	client.transport.Sig.D2Key = make([]byte, 0, 16)
 	client.highwaySession.Uin = &client.transport.Sig.Uin
@@ -122,7 +122,7 @@ type QQClient struct {
 
 	// client event handles
 	eventHandlers     eventHandlers
-	DisconnectedEvent EventHandle[*ClientDisconnectedEvent]
+	DisconnectedEvent EventHandle[*DisconnectedEvent]
 }
 
 func (c *QQClient) version() *auth.AppInfo {
@@ -156,7 +156,7 @@ func (c *QQClient) NickName() string {
 	return c.transport.Sig.Nickname
 }
 
-func (c *QQClient) sendOidbPacketAndWait(pkt *oidb.OidbPacket) ([]byte, error) {
+func (c *QQClient) sendOidbPacketAndWait(pkt *oidb.Packet) ([]byte, error) {
 	return c.sendUniPacketAndWait(pkt.Cmd, pkt.Data)
 }
 

@@ -1,7 +1,8 @@
 linters-settings:
   errcheck:
-    ignore: fmt:.*,io/ioutil:^Read.*
-    ignoretests: true
+    exclude-functions:
+      - fmt:.*
+      - io/ioutil:^Read.*
 
   goimports:
     local-prefixes: github.com/LagrangeDev/LagrangeGo
@@ -16,7 +17,7 @@ linters:
     #- depguard
     - dogsled
     - errcheck
-    - exportloopref
+    - copyloopvar
     - exhaustive
     #- funlen
     #- goconst
@@ -58,7 +59,7 @@ run:
 # output configuration options
 output:
   formats:
-   - format: "colored-line-number"
+    - format: "colored-line-number"
   print-issued-lines: true
   print-linter-name: true
   uniq-by-line: true

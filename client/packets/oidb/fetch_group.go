@@ -8,7 +8,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*OidbPacket, error) {
+func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0X88D{
 		AppID: 537099973,
 		Config2: &oidb.OidbSvcTrpcTcp0X88D_Config2{

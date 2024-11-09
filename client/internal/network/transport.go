@@ -24,7 +24,7 @@ type Transport struct {
 func (t *Transport) PackPacket(req *Request) []byte {
 	head := proto.DynamicMessage{
 		15: utils.NewTrace(),
-		16: t.Sig.Uid,
+		16: t.Sig.UID,
 	}
 
 	if req.Sign != nil {
@@ -44,7 +44,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WritePacketBytes(t.Sig.Tgt, "u32", true).
 		WritePacketString(req.CommandName, "u32", true).
 		WritePacketBytes(nil, "u32", true).
-		WritePacketBytes(utils.MustParseHexStr(t.Device.Guid), "u32", true).
+		WritePacketBytes(utils.MustParseHexStr(t.Device.GUID), "u32", true).
 		WritePacketBytes(nil, "u32", true).
 		WritePacketString(t.Version.CurrentVersion, "u16", true).
 		WritePacketBytes(head.Encode(), "u32", true).

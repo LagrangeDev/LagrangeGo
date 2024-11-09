@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupImageDownloadReq(groupUin uint32, node *oidb.IndexNode) (*OidbPacket, error) {
+func BuildGroupImageDownloadReq(groupUin uint32, node *oidb.IndexNode) (*Packet, error) {
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{

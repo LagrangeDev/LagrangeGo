@@ -1,9 +1,9 @@
 package audio
 
-type AudioType int
+type Type int
 
 const (
-	amr AudioType = iota
+	amr Type = iota
 	txSilk
 	silkV3
 )

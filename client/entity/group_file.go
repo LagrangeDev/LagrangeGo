@@ -10,9 +10,9 @@ type GroupFileSystemInfo struct {
 
 type GroupFile struct {
 	GroupUin      uint32 `json:"group_id"`
-	FileId        string `json:"file_id"`
+	FileID        string `json:"file_id"`
 	FileName      string `json:"file_name"`
-	BusId         uint32 `json:"busid"`
+	BusID         uint32 `json:"busid"`
 	FileSize      uint64 `json:"file_size"`
 	UploadTime    uint32 `json:"upload_time"`
 	DeadTime      uint32 `json:"dead_time"`
@@ -24,7 +24,7 @@ type GroupFile struct {
 
 type GroupFolder struct {
 	GroupUin       uint32 `json:"group_id"`
-	FolderId       string `json:"folder_id"`
+	FolderID       string `json:"folder_id"`
 	FolderName     string `json:"folder_name"`
 	CreateTime     uint32 `json:"create_time"`
 	Creator        uint32 `json:"creator"`

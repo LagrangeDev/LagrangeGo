@@ -45,24 +45,25 @@ func (c *QQClient) GetGroupAlbum(groupUin uint32) ([]*GroupAlbum, error) {
 		return nil, err
 	}
 	_ = resp.Body.Close()
-	respJson := gjson.ParseBytes(respData)
-	if respJson.Get("ret").Int() != 0 {
-		return nil, fmt.Errorf("error: ret:%d, msg:%s", respJson.Get("ret").Int(), respJson.Get("msg").Str)
+	respJSON := gjson.ParseBytes(respData)
+	if respJSON.Get("ret").Int() != 0 {
+		return nil, fmt.Errorf("error: ret:%d, msg:%s", respJSON.Get("ret").Int(), respJSON.Get("msg").Str)
 	}
-	albumList := respJson.Get("data.album").Array()
+	albumList := respJSON.Get("data.album").Array()
 	grpAlbumList := make([]*GroupAlbum, len(albumList))
 	for i, v := range albumList {
 		timeStr := v.Get("createtime").Str
 		timeStamp, err := time.Parse(TimeLayout, timeStr)
 		if err != nil {
-			fmt.Println(err)
+			c.errorln(err)
+			continue
 		}
 		grpAlbumList[i] = &GroupAlbum{
 			GroupUin:       groupUin,
 			Name:           v.Get("title").Str,
 			ID:             v.Get("id").Str,
 			Description:    v.Get("desc").Str,
-			CoverUrl:       v.Get("coverurl").Str,
+			CoverURL:       v.Get("coverurl").Str,
 			CreateNickname: v.Get("createnickname").Str,
 			CreateUin:      uint32(v.Get("createuin").Int()),
 			CreateTime:     timeStamp.Unix(),
@@ -92,7 +93,7 @@ func (c *QQClient) GetGroupAlbumElem(ab *GroupAlbum) ([]*GroupAlbumElem, error) 
 				elem = append(elem, &GroupAlbumElem{
 					photo: &GroupPhoto{
 						ID:  v.ImgInfo.ImageID,
-						Url: v.ImgInfo.ImgLinkInfo.ImageURL,
+						URL: v.ImgInfo.ImgLinkInfo.ImageURL,
 					},
 					operatorUserInfo: &GroupAlbumElemUserInfo{
 						UserNickName: v.UploaderInfo.UserNickName,
@@ -104,7 +105,7 @@ func (c *QQClient) GetGroupAlbumElem(ab *GroupAlbum) ([]*GroupAlbumElem, error) 
 				elem = append(elem, &GroupAlbumElem{
 					video: &GroupVideo{
 						ID:  v.VideoInfo.VideoID,
-						Url: v.VideoInfo.VideoURL,
+						URL: v.VideoInfo.VideoURL,
 					},
 					operatorUserInfo: &GroupAlbumElemUserInfo{
 						UserNickName: v.UploaderInfo.UserNickName,
@@ -152,6 +153,7 @@ func (c *QQClient) buildUploadSessionReq(param *uploadSessionParam) (*groupAlbum
 			},
 		},
 	}
+	//nolint
 	switch param.UploadType.ResourceType {
 	case ResourceTypePhoto:
 		reqBody.ControlReq[0].BizReq = imgBizReq{
@@ -180,7 +182,7 @@ func (c *QQClient) buildUploadSessionReq(param *uploadSessionParam) (*groupAlbum
 			IIsNew:      111,
 			VideoExtInfo: videoExtInfo{
 				VideoType: "3",
-				DomainId:  "5",
+				DomainID:  "5",
 				PhotoNum:  "0",
 				VideoNum:  "1",
 				QunID:     strconv.Itoa(int(param.GroupUin)),
@@ -251,18 +253,18 @@ func (c *QQClient) getGroupAlbumUploadSession(param *uploadSessionParam) (*uploa
 	if err != nil {
 		return nil, timeStamp, err
 	}
-	respJson := gjson.ParseBytes(respData)
-	if respJson.Get("ret").Int() != 0 {
-		return nil, timeStamp, fmt.Errorf("error: ret:%d, msg:%s", respJson.Get("ret").Int(), respJson.Get("msg").Str)
+	respJSON := gjson.ParseBytes(respData)
+	if respJSON.Get("ret").Int() != 0 {
+		return nil, timeStamp, fmt.Errorf("error: ret:%d, msg:%s", respJSON.Get("ret").Int(), respJSON.Get("msg").Str)
 	}
 	return &uploadOptions{
-		Session:   respJson.Get("data.session").Str,
-		BlockSize: int(respJson.Get("data.slice_size").Int()),
+		Session:   respJSON.Get("data.session").Str,
+		BlockSize: int(respJSON.Get("data.slice_size").Int()),
 	}, timeStamp, nil
 }
 
 func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, seq, offset, chunkSize, totalSize, gtk int, chunk []byte, latest bool) (rsp *uploadBlockRsp, err error) {
-	uploadUriCmd := utils.Ternary[string](typ.ResourceType == ResourceTypeVideo, "FileUploadVideo", "FileUpload")
+	uploadURLCmd := utils.Ternary[string](typ.ResourceType == ResourceTypeVideo, "FileUploadVideo", "FileUpload")
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	_ = writer.WriteField("uin", strconv.Itoa(int(c.Uin)))
@@ -285,7 +287,7 @@ func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, se
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("https://h5.qzone.qq.com/webapp/json/sliceUpload/%s?seq=%d&retry=0&offset=%d&end=%d&total=%d&type=form&g_tk=%d",
-		uploadUriCmd, seq, offset, offset+chunkSize, totalSize, gtk), body)
+		uploadURLCmd, seq, offset, offset+chunkSize, totalSize, gtk), body)
 	if err != nil {
 		return nil, err
 	}
@@ -303,20 +305,20 @@ func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, se
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error resp code %d", resp.StatusCode)
 	}
-	respJson := gjson.ParseBytes(respData)
-	if respJson.Get("ret").Int() != 0 {
-		return nil, fmt.Errorf("error: ret:%d, msg:%s", respJson.Get("ret").Int(), respJson.Get("msg").Str)
+	respJSON := gjson.ParseBytes(respData)
+	if respJSON.Get("ret").Int() != 0 {
+		return nil, fmt.Errorf("error: ret:%d, msg:%s", respJSON.Get("ret").Int(), respJSON.Get("msg").Str)
 	}
-	if respJson.Get("data.biz.sVid").String() != "" {
-		c.debug("fetched vid %s", respJson.Get("data.biz.sVid").String())
+	if respJSON.Get("data.biz.sVid").String() != "" {
+		c.debug("fetched vid %s", respJSON.Get("data.biz.sVid").String())
 		return &uploadBlockRsp{
-			VID: respJson.Get("data.biz.sVid").Str,
+			VID: respJSON.Get("data.biz.sVid").Str,
 		}, nil
 	}
 	if latest {
 		return &uploadBlockRsp{
-			SPhotoID: respJson.Get("data.biz.sPhotoID").Str,
-			SBURL:    respJson.Get("data.biz.sBURL").Str,
+			SPhotoID: respJSON.Get("data.biz.sPhotoID").Str,
+			SBURL:    respJSON.Get("data.biz.sBURL").Str,
 		}, nil
 	}
 	return nil, nil
@@ -342,7 +344,7 @@ func (c *QQClient) doUploadGroupAlbumBlock(uos *uploadOptions, usp *uploadSessio
 		if latest {
 			return rsp, nil
 		}
-		seq += 1
+		seq++
 		offset += chunkSize
 	}
 	return nil, errors.New("upload group album failed: unkown error")
@@ -365,7 +367,7 @@ func (c *QQClient) UploadGroupAlbumPhoto(parms *GroupAlbumUploadParam) (*GroupPh
 		FileName:   parms.FileName,
 		CheckSum:   md5,
 		Size:       int(size),
-		AlbumID:    parms.AlbumId,
+		AlbumID:    parms.AlbumID,
 		AlbumName:  parms.AlbumName,
 		GTK:        gtk,
 	}
@@ -383,7 +385,7 @@ func (c *QQClient) UploadGroupAlbumPhoto(parms *GroupAlbumUploadParam) (*GroupPh
 	}
 	return &GroupPhoto{
 		ID:  ubRsp.SPhotoID,
-		Url: ubRsp.SBURL,
+		URL: ubRsp.SBURL,
 	}, nil
 }
 
@@ -405,7 +407,7 @@ func (c *QQClient) UploadGroupAlbumVideo(parms *GroupAlbumUploadParam) (*GroupVi
 		FileName:   parms.FileName,
 		CheckSum:   sha1,
 		Size:       int(size),
-		AlbumID:    parms.AlbumId,
+		AlbumID:    parms.AlbumID,
 		AlbumName:  parms.AlbumName,
 		GTK:        gtk,
 	}
@@ -430,7 +432,7 @@ func (c *QQClient) UploadGroupAlbumVideo(parms *GroupAlbumUploadParam) (*GroupVi
 		FileName:     parms.FileName,
 		CheckSum:     md5,
 		Size:         int(size),
-		AlbumID:      parms.AlbumId,
+		AlbumID:      parms.AlbumID,
 		AlbumName:    parms.AlbumName,
 		VidTimeStamp: timeStamp,
 		Vid:          uvbRsp.VID,
@@ -451,7 +453,7 @@ func (c *QQClient) UploadGroupAlbumVideo(parms *GroupAlbumUploadParam) (*GroupVi
 	// get video url
 	updList, err := c.GetGroupAlbumElem(&GroupAlbum{
 		GroupUin: parms.GroupUin,
-		ID:       parms.AlbumId,
+		ID:       parms.AlbumID,
 	})
 	if err != nil {
 		return nil, err
@@ -461,7 +463,7 @@ func (c *QQClient) UploadGroupAlbumVideo(parms *GroupAlbumUploadParam) (*GroupVi
 		if elem.video != nil && elem.video.ID == uvbRsp.VID {
 			return &GroupVideo{
 				ID:  elem.video.ID,
-				Url: elem.video.Url,
+				URL: elem.video.URL,
 			}, nil
 		}
 	}
@@ -506,7 +508,7 @@ type (
 		Name           string
 		ID             string
 		Description    string
-		CoverUrl       string
+		CoverURL       string
 		CreateNickname string
 		CreateUin      uint32
 		CreateTime     int64
@@ -520,12 +522,12 @@ type (
 
 	GroupPhoto struct {
 		ID  string
-		Url string
+		URL string
 	}
 
 	GroupVideo struct {
 		ID  string
-		Url string
+		URL string
 	}
 
 	GroupAlbumElemUserInfo struct {
@@ -545,7 +547,7 @@ type (
 	GroupAlbumUploadParam struct {
 		ResourceType
 		GroupUin                     uint32
-		FileName, AlbumId, AlbumName string
+		FileName, AlbumID, AlbumName string
 		ImageFile
 		VideoFile
 	}
@@ -617,7 +619,7 @@ type (
 		IFlag            int          `json:"iFlag"`
 		IUploadTime      int          `json:"iUploadTime"`
 		IPlayTime        float64      `json:"iPlayTime"`
-		SCoverUrl        string       `json:"sCoverUrl"`
+		SCoverURL        string       `json:"sCoverUrl"`
 		IIsNew           int          `json:"iIsNew"`
 		IIsOriginalVideo int          `json:"iIsOriginalVideo"`
 		IIsFormatF20     int          `json:"iIsFormatF20"`
@@ -645,7 +647,7 @@ type (
 
 	videoExtInfo struct {
 		VideoType string `json:"video_type"`
-		DomainId  string `json:"domainid"`
+		DomainID  string `json:"domainid"`
 		PhotoNum  string `json:"photo_num"`
 		VideoNum  string `json:"video_num"`
 		QunID     string `json:"qun_id"`

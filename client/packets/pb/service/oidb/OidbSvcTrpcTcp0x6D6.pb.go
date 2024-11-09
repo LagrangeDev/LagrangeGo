@@ -30,8 +30,8 @@ type OidbSvcTrpcTcp0X6D6Upload struct {
 
 type OidbSvcTrpcTcp0X6D6Download struct {
 	GroupUin uint32 `protobuf:"varint,1,opt"`
-	AppId    uint32 `protobuf:"varint,2,opt"` // 7
-	BusId    uint32 `protobuf:"varint,3,opt"` // 102
+	AppID    uint32 `protobuf:"varint,2,opt"` // 7
+	BusID    uint32 `protobuf:"varint,3,opt"` // 102
 	FileId   string `protobuf:"bytes,4,opt"`
 	_        [0]func()
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildFetchGroupsReq() (*OidbPacket, error) {
+func BuildFetchGroupsReq() (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XFE5_2{
 		Config: &oidb.OidbSvcTrpcTcp0XFE5_2Config{
 			Config1: &oidb.OidbSvcTrpcTcp0XFE5_2Config1{

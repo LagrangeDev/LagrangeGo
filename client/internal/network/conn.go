@@ -62,8 +62,8 @@ func (t *TCPClient) Write(buf []byte) error {
 	return ErrConnectionClosed
 }
 
-func (t *TCPClient) ReadBytes(len int) ([]byte, error) {
-	buf := make([]byte, len)
+func (t *TCPClient) ReadBytes(l int) ([]byte, error) {
+	buf := make([]byte, l)
 	if conn := t.getConn(); conn != nil {
 		_, err := io.ReadFull(conn, buf)
 		if err != nil {

@@ -29,7 +29,7 @@ type (
 
 	AtElement struct {
 		TargetUin uint32
-		TargetUid string
+		TargetUID string
 		Display   string
 		SubType   AtType
 	}
@@ -43,7 +43,7 @@ type (
 	ReplyElement struct {
 		ReplySeq  uint32
 		SenderUin uint32
-		SenderUid string
+		SenderUID string
 		GroupUin  uint32 // 私聊回复群聊时
 		Time      uint32
 		Elements  []IMessageElement
@@ -51,9 +51,9 @@ type (
 
 	VoiceElement struct {
 		Name string
-		Uuid string
+		UUID string
 		Size uint32
-		Url  string
+		URL  string
 		Md5  []byte
 		Sha1 []byte
 		Node *oidb.IndexNode
@@ -67,12 +67,12 @@ type (
 	}
 
 	ImageElement struct {
-		ImageId  string
+		ImageID  string
 		FileUUID string // only in new protocol photo
 		Size     uint32
 		Width    uint32
 		Height   uint32
-		Url      string
+		URL      string
 		SubType  int32
 
 		// EffectID show pic effect id.
@@ -95,8 +95,8 @@ type (
 		FileSize uint64
 		FileName string
 		FileMd5  []byte
-		FileUrl  string
-		FileId   string // group
+		FileURL  string
+		FileID   string // group
 		FileUUID string // private
 		FileHash string
 
@@ -107,9 +107,9 @@ type (
 
 	ShortVideoElement struct {
 		Name     string
-		Uuid     []byte
+		UUID     []byte
 		Size     uint32
-		Url      string
+		URL      string
 		Duration uint32
 
 		// send
@@ -138,7 +138,7 @@ type (
 
 	ForwardMessage struct {
 		IsGroup bool
-		SelfId  uint32
+		SelfID  uint32
 		ResID   string
 		Nodes   []*ForwardNode
 	}
@@ -170,115 +170,113 @@ func NewAt(target uint32, display ...string) *AtElement {
 
 func NewGroupReply(m *GroupMessage) *ReplyElement {
 	return &ReplyElement{
-		ReplySeq:  uint32(m.Id),
+		ReplySeq:  m.ID,
 		SenderUin: m.Sender.Uin,
-		Time:      uint32(m.Time),
+		Time:      m.Time,
 		Elements:  m.Elements,
 	}
 }
 
 func NewPrivateReply(m *PrivateMessage) *ReplyElement {
 	return &ReplyElement{
-		ReplySeq:  uint32(m.Id),
+		ReplySeq:  m.ID,
 		SenderUin: m.Sender.Uin,
-		Time:      uint32(m.Time),
+		Time:      m.Time,
 		Elements:  m.Elements,
 	}
 }
 
-func NewRecord(data []byte, Summary ...string) *VoiceElement {
-	return NewStreamRecord(bytes.NewReader(data), Summary...)
+func NewRecord(data []byte, summary ...string) *VoiceElement {
+	return NewStreamRecord(bytes.NewReader(data), summary...)
 }
 
-func NewStreamRecord(r io.ReadSeeker, Summary ...string) *VoiceElement {
-	var summary string
-	if len(Summary) != 0 {
-		summary = Summary[0]
-	}
+func NewStreamRecord(r io.ReadSeeker, summary ...string) *VoiceElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
-	info, err := audio.Decode(r)
-	if err != nil {
-		return &VoiceElement{
-			Size:     uint32(length),
-			Summary:  summary,
-			Stream:   r,
-			Md5:      md5,
-			Sha1:     sha1,
-			Duration: uint32(length),
-		}
-	}
 	return &VoiceElement{
-		Size:     uint32(length),
-		Summary:  summary,
-		Stream:   r,
-		Md5:      md5,
-		Sha1:     sha1,
-		Duration: uint32(info.Time),
+		Size: uint32(length),
+		Summary: func() string {
+			if len(summary) != 0 {
+				return summary[0]
+			}
+			return ""
+		}(),
+		Stream: r,
+		Md5:    md5,
+		Sha1:   sha1,
+		Duration: func() uint32 {
+			info, err := audio.Decode(r)
+			if err != nil {
+				return uint32(info.Time)
+			}
+			return uint32(length)
+		}(),
 	}
 }
 
-func NewFileRecord(path string, Summary ...string) (*VoiceElement, error) {
+func NewFileRecord(path string, summary ...string) (*VoiceElement, error) {
 	voice, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamRecord(voice, Summary...), nil
+	return NewStreamRecord(voice, summary...), nil
 }
 
-func NewImage(data []byte, Summary ...string) *ImageElement {
-	return NewStreamImage(bytes.NewReader(data), Summary...)
+func NewImage(data []byte, summary ...string) *ImageElement {
+	return NewStreamImage(bytes.NewReader(data), summary...)
 }
 
-func NewStreamImage(r io.ReadSeeker, Summary ...string) *ImageElement {
-	var summary string
-	if len(Summary) != 0 {
-		summary = Summary[0]
-	}
+func NewStreamImage(r io.ReadSeeker, summary ...string) *ImageElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &ImageElement{
-		Size:    uint32(length),
-		Summary: summary,
-		Stream:  r,
-		Md5:     md5,
-		Sha1:    sha1,
+		Size: uint32(length),
+		Summary: func() string {
+			if len(summary) != 0 {
+				return summary[0]
+			}
+			return ""
+		}(),
+		Stream: r,
+		Md5:    md5,
+		Sha1:   sha1,
 	}
 }
 
-func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
+func NewFileImage(path string, summary ...string) (*ImageElement, error) {
 	img, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamImage(img, Summary...), nil
+	return NewStreamImage(img, summary...), nil
 }
 
-func NewVideo(data, thumb []byte, Summary ...string) *ShortVideoElement {
-	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), Summary...)
+func NewVideo(data, thumb []byte, summary ...string) *ShortVideoElement {
+	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), summary...)
 }
 
-func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, Summary ...string) *ShortVideoElement {
-	var summary string
-	if len(Summary) != 0 {
-		summary = Summary[0]
-	}
+func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, summary ...string) *ShortVideoElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &ShortVideoElement{
-		Size:    uint32(length),
-		Thumb:   NewVideoThumb(thumb),
-		Summary: summary,
-		Md5:     md5,
-		Sha1:    sha1,
-		Stream:  r,
-		Compat:  &message.VideoFile{},
+		Size:  uint32(length),
+		Thumb: NewVideoThumb(thumb),
+		Summary: func() string {
+			if len(summary) != 0 {
+				return summary[0]
+			}
+			return ""
+		}(),
+		Md5:    md5,
+		Sha1:   sha1,
+		Stream: r,
+		Compat: &message.VideoFile{},
 	}
 }
 
-func NewFileVideo(path string, thumb []byte, Summary ...string) (*ShortVideoElement, error) {
+func NewFileVideo(path string, thumb []byte, summary ...string) (*ShortVideoElement, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamVideo(file, bytes.NewReader(thumb), Summary...), nil
+	return NewStreamVideo(file, bytes.NewReader(thumb), summary...), nil
 }
 
 func NewVideoThumb(r io.ReadSeeker) *VideoThumb {

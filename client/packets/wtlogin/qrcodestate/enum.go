@@ -1,4 +1,4 @@
-package qrcodeState
+package qrcodestate
 
 type State int
 

@@ -1,4 +1,4 @@
-package loginState
+package loginstate
 
 type State int
 

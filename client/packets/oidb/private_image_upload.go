@@ -11,7 +11,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildPrivateImageUploadReq(targetUid string, image *message.ImageElement) (*OidbPacket, error) {
+func BuildPrivateImageUploadReq(targetUID string, image *message.ImageElement) (*Packet, error) {
 	// OidbSvcTrpcTcp.0x11c5_100
 	if image.Stream == nil {
 		return nil, errors.New("image data is null")
@@ -41,7 +41,7 @@ func BuildPrivateImageUploadReq(targetUid string, image *message.ImageElement) (
 				SceneType:    1,
 				C2C: &oidb.C2CUserInfo{
 					AccountType: 2,
-					TargetUid:   targetUid,
+					TargetUid:   targetUID,
 				},
 			},
 			Client: &oidb.ClientMeta{

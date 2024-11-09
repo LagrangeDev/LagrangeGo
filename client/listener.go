@@ -123,7 +123,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUid)
+		user, _ := c.FetchUserInfo(ev.TargetUID)
 		if user != nil {
 			ev.TargetUin = user.Uin
 			ev.TargetNick = user.Nickname
@@ -132,7 +132,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.JoinRequests, filteredRequests.JoinRequests...) {
-				if request.TargetUid == ev.TargetUid && !request.Checked() {
+				if request.TargetUID == ev.TargetUID && !request.Checked() {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
 				}
@@ -151,7 +151,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUid)
+		user, _ := c.FetchUserInfo(ev.TargetUID)
 		if user != nil {
 			ev.TargetUin = user.Uin
 			ev.TargetNick = user.Nickname
@@ -170,7 +170,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			ev.GroupName = group.GroupName
 		}
 		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.InvitorUid)
+		user, _ := c.FetchUserInfo(ev.InvitorUID)
 		if user != nil {
 			ev.InvitorUin = user.Uin
 			ev.InvitorNick = user.Nickname
@@ -200,7 +200,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				break
 			}
 			ev := eventConverter.ParseFriendRequestNotice(&pb)
-			user, _ := c.FetchUserInfo(ev.SourceUid)
+			user, _ := c.FetchUserInfo(ev.SourceUID)
 			if user != nil {
 				ev.SourceUin = user.Uin
 				ev.SourceNick = user.Nickname
@@ -345,9 +345,13 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 	return nil, nil
 }
 
+// nolint
 func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
 	pb := system.ServiceKickNTResponse{}
-	_ = proto.Unmarshal(pkt.Payload, &pb)
+	err := proto.Unmarshal(pkt.Payload, &pb)
+	if err != nil {
+		return nil, err
+	}
 	c.KickedEvent.dispatch(c, eventConverter.ParseKickedEvent(&pb))
 	return nil, nil
 }
@@ -356,30 +360,30 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) {
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
-			if e.Url != "" {
+			if e.URL != "" {
 				continue
 			}
-			url, _ := c.GetGroupImageUrl(msg.GroupUin, e.MsgInfo.MsgInfoBody[0].Index)
-			e.Url = url
+			url, _ := c.GetGroupImageURL(msg.GroupUin, e.MsgInfo.MsgInfoBody[0].Index)
+			e.URL = url
 		case *msgConverter.VoiceElement:
-			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
-			e.Url = url
+			url, _ := c.GetGroupRecordURL(msg.GroupUin, e.Node)
+			e.URL = url
 		case *msgConverter.ShortVideoElement:
-			url, err := c.GetVideoUrl(true, e)
+			url, err := c.GetVideoURL(true, e)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.FileElement:
-			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileId)
-			e.FileUrl = url
+			url, _ := c.GetGroupFileURL(msg.GroupUin, e.FileID)
+			e.FileURL = url
 		case *msgConverter.ForwardMessage:
 			if e.Nodes == nil {
-				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
+				forward, err := c.FetchForwardMsg(e.ResID)
+				if err != nil {
 					continue
-				} else {
-					e.Nodes = forward.Nodes
 				}
+				e.Nodes = forward.Nodes
 			}
 		}
 	}
@@ -392,36 +396,36 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
-			if e.Url != "" {
+			if e.URL != "" {
 				continue
 			}
-			url, _ := c.GetPrivateImageUrl(e.MsgInfo.MsgInfoBody[0].Index)
-			e.Url = url
+			url, _ := c.GetPrivateImageURL(e.MsgInfo.MsgInfoBody[0].Index)
+			e.URL = url
 		case *msgConverter.VoiceElement:
-			url, err := c.GetPrivateRecordUrl(e.Node)
+			url, err := c.GetPrivateRecordURL(e.Node)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.ShortVideoElement:
-			url, err := c.GetVideoUrl(false, e)
+			url, err := c.GetVideoURL(false, e)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.FileElement:
-			url, err := c.GetPrivateFileUrl(e.FileUUID, e.FileHash)
+			url, err := c.GetPrivateFileURL(e.FileUUID, e.FileHash)
 			if err != nil {
 				continue
 			}
-			e.FileUrl = url
+			e.FileURL = url
 		case *msgConverter.ForwardMessage:
 			if e.Nodes == nil {
-				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
+				forward, err := c.FetchForwardMsg(e.ResID)
+				if err != nil {
 					continue
-				} else {
-					e.Nodes = forward.Nodes
 				}
+				e.Nodes = forward.Nodes
 			}
 		}
 	}

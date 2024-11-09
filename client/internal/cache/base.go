@@ -56,7 +56,7 @@ func refreshAllCacheOf[T any, K keyType](c *Cache, newcache map[K]*T) {
 	c.refreshed.Store(typ, struct{}{})
 	key := uint64(typ) << 32
 	dellst := make([]uint64, 0, 64)
-	c.m.Range(func(k uint64, v unsafe.Pointer) bool {
+	c.m.Range(func(k uint64, _ unsafe.Pointer) bool {
 		if k&key != 0 {
 			if _, ok := newcache[K(uint32(k))]; !ok {
 				dellst = append(dellst, k)

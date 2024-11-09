@@ -35,7 +35,7 @@ func (c *QQClient) UploadImage(target message.Source, image *message.ImageElemen
 	case message.SourceGroup:
 		return c.ImageUploadGroup(uint32(target.PrimaryID), image)
 	case message.SourcePrivate:
-		return c.ImageUploadPrivate(c.GetUid(uint32(target.PrimaryID)), image)
+		return c.ImageUploadPrivate(c.GetUID(uint32(target.PrimaryID)), image)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -45,7 +45,7 @@ func (c *QQClient) UploadRecord(target message.Source, voice *message.VoiceEleme
 	case message.SourceGroup:
 		return c.RecordUploadGroup(uint32(target.PrimaryID), voice)
 	case message.SourcePrivate:
-		return c.RecordUploadPrivate(c.GetUid(uint32(target.PrimaryID)), voice)
+		return c.RecordUploadPrivate(c.GetUID(uint32(target.PrimaryID)), voice)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -54,18 +54,18 @@ func (c *QQClient) UploadShortVideo(target message.Source, video *message.ShortV
 	case message.SourceGroup:
 		return c.VideoUploadGroup(uint32(target.PrimaryID), video)
 	case message.SourcePrivate:
-		return c.VideoUploadPrivate(c.GetUid(uint32(target.PrimaryID)), video)
+		return c.VideoUploadPrivate(c.GetUID(uint32(target.PrimaryID)), video)
 	}
 	return nil, errors.New("unknown target type")
 }
 
-func (c *QQClient) ImageUploadPrivate(targetUid string, image *message.ImageElement) (*message.ImageElement, error) {
+func (c *QQClient) ImageUploadPrivate(targetUID string, image *message.ImageElement) (*message.ImageElement, error) {
 	if image == nil || image.Stream == nil {
 		return nil, errors.New("image is nil")
 	}
 	defer utils.CloseIO(image.Stream)
 	image.IsGroup = false
-	req, err := oidb.BuildPrivateImageUploadReq(targetUid, image)
+	req, err := oidb.BuildPrivateImageUploadReq(targetUID, image)
 	if err != nil {
 		return nil, err
 	}
@@ -182,12 +182,12 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement
 	return image, nil
 }
 
-func (c *QQClient) RecordUploadPrivate(targetUid string, record *message.VoiceElement) (*message.VoiceElement, error) {
+func (c *QQClient) RecordUploadPrivate(targetUID string, record *message.VoiceElement) (*message.VoiceElement, error) {
 	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not friend record")
 	}
 	defer utils.CloseIO(record.Stream)
-	req, err := oidb.BuildPrivateRecordUploadReq(targetUid, record)
+	req, err := oidb.BuildPrivateRecordUploadReq(targetUID, record)
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +292,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	return record, nil
 }
 
-func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
+func (c *QQClient) VideoUploadPrivate(targetUID string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	if video == nil || video.Stream == nil {
 		return nil, errors.New("video is nil")
 	}
@@ -301,7 +301,7 @@ func (c *QQClient) VideoUploadPrivate(targetUid string, video *message.ShortVide
 	}
 	defer utils.CloseIO(video.Stream)
 	defer utils.CloseIO(video.Thumb.Stream)
-	req, err := oidb.BuildPrivateVideoUploadReq(targetUid, video)
+	req, err := oidb.BuildPrivateVideoUploadReq(targetUID, video)
 	if err != nil {
 		return nil, err
 	}
@@ -476,11 +476,11 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 	return video, nil
 }
 
-func (c *QQClient) FileUploadPrivate(targetUid string, file *message.FileElement) (*message.FileElement, error) {
+func (c *QQClient) FileUploadPrivate(targetUID string, file *message.FileElement) (*message.FileElement, error) {
 	if file == nil || file.FileStream == nil {
 		return nil, errors.New("element type is not file")
 	}
-	req, err := oidb.BuildPrivateFileUploadReq(c.GetUid(c.Uin), targetUid, file)
+	req, err := oidb.BuildPrivateFileUploadReq(c.GetUID(c.Uin), targetUID, file)
 	if err != nil {
 		return nil, err
 	}

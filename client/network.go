@@ -122,13 +122,13 @@ func (c *QQClient) quickReconnect() {
 	time.Sleep(time.Millisecond * 200)
 	if err := c.connect(); err != nil {
 		c.error("connect server error: %v", err)
-		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "quick reconnect failed"})
+		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "quick reconnect failed"})
 		return
 	}
 	if err := c.Register(); err != nil {
 		c.error("register client failed: %v", err)
 		c.Disconnect()
-		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "register error"})
+		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "register error"})
 		return
 	}
 }
@@ -230,7 +230,7 @@ func (c *QQClient) waitPacketTimeoutSyncF(cmd string, timeout time.Duration, fil
 // 发送数据包并返回需要解析的 response
 func (c *QQClient) sendAndWaitDynamic(seq uint32, pkt []byte) ([]byte, error) {
 	ch := make(chan []byte, 1)
-	c.handlers.Store(seq, &handlerInfo{fun: func(i any, err error) { ch <- i.([]byte) }, dynamic: true})
+	c.handlers.Store(seq, &handlerInfo{fun: func(i any, _ error) { ch <- i.([]byte) }, dynamic: true})
 	err := c.sendPacket(pkt)
 	if err != nil {
 		c.handlers.Delete(seq)
@@ -269,13 +269,13 @@ func (c *QQClient) unexpectedDisconnect(_ *network.TCPClient, e error) {
 	c.Online.Store(false)
 	if err := c.connect(); err != nil {
 		c.error("connect server error: %v", err)
-		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "connection dropped by server."})
+		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "connection dropped by server."})
 		return
 	}
 	if err := c.Register(); err != nil {
 		c.error("register client failed: %v", err)
 		c.Disconnect()
-		c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "register error"})
+		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "register error"})
 		return
 	}
 }
@@ -304,7 +304,7 @@ func (c *QQClient) netLoop() {
 			c.error("parse incoming packet error: %v", err)
 			if errors.Is(err, network.ErrSessionExpired) || errors.Is(err, network.ErrPacketDropped) {
 				c.Disconnect()
-				go c.DisconnectedEvent.dispatch(c, &ClientDisconnectedEvent{Message: "session expired"})
+				go c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "session expired"})
 				continue
 			}
 			errCount++
@@ -328,7 +328,7 @@ func (c *QQClient) netLoop() {
 		c.debug("rev pkt: %v seq: %v", resp.CommandName, resp.SequenceID)
 		c.stat.PacketReceived.Add(1)
 		pkt := &network.Packet{
-			SequenceId:  uint32(resp.SequenceID),
+			SequenceID:  uint32(resp.SequenceID),
 			CommandName: resp.CommandName,
 			Payload:     resp.Body,
 		}
@@ -342,7 +342,7 @@ func (c *QQClient) netLoop() {
 
 			if decoder, ok := decoders[pkt.CommandName]; ok {
 				// found predefined decoder
-				info, ok := c.handlers.LoadAndDelete(pkt.SequenceId)
+				info, ok := c.handlers.LoadAndDelete(pkt.SequenceID)
 				var decoded any
 				decoded = pkt.Payload
 				if info == nil || !info.dynamic {
@@ -357,11 +357,11 @@ func (c *QQClient) netLoop() {
 				} else if f, ok := c.waiters.Load(pkt.CommandName); ok { // 在不存在handler的情况下触发wait
 					f(decoded, err)
 				}
-			} else if f, ok := c.handlers.LoadAndDelete(pkt.SequenceId); ok {
+			} else if f, ok := c.handlers.LoadAndDelete(pkt.SequenceID); ok {
 				// does not need decoder
 				f.fun(pkt.Payload, nil)
 			} else {
-				c.debug("Unhandled Command: %s\nSeq: %d\nThis message can be ignored.", pkt.CommandName, pkt.SequenceId)
+				c.debug("Unhandled Command: %s\nSeq: %d\nThis message can be ignored.", pkt.CommandName, pkt.SequenceID)
 			}
 		}(pkt)
 	}

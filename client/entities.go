@@ -14,7 +14,7 @@ var (
 	ErrNotExists      = errors.New("not exists")
 )
 
-type ClientDisconnectedEvent struct {
+type DisconnectedEvent struct {
 	Message string
 }
 

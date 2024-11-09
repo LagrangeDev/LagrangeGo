@@ -2,7 +2,7 @@ package message
 
 type GroupEssenceMessage struct {
 	OperatorUin  uint32
-	OperatorUid  string
+	OperatorUID  string
 	OperatorTime uint64
 	CanRemove    bool
 	Message      *GroupMessage

@@ -10,7 +10,7 @@ import (
 type (
 	NewFriendRequest struct {
 		SourceUin  uint32
-		SourceUid  string
+		SourceUID  string
 		SourceNick string
 		Msg        string
 		Source     string
@@ -18,7 +18,7 @@ type (
 
 	FriendRecall struct {
 		FromUin  uint32
-		FromUid  string
+		FromUID  string
 		Sequence uint64
 		Time     uint32
 		Random   uint32
@@ -27,7 +27,7 @@ type (
 	Rename struct {
 		SubType  uint32 // self 0 friend 1
 		Uin      uint32
-		Uid      string
+		UID      string
 		Nickname string
 	}
 
@@ -43,20 +43,20 @@ type (
 func ParseFriendRequestNotice(event *message.FriendRequest) *NewFriendRequest {
 	info := event.Info
 	return &NewFriendRequest{
-		SourceUid: info.SourceUid,
+		SourceUID: info.SourceUid,
 		Msg:       info.Message,
 		Source:    info.Source,
 	}
 }
 
 func (fe *FriendRecall) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	fe.FromUin = f(fe.FromUid)
+	fe.FromUin = f(fe.FromUID)
 }
 
 func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 	info := event.Info
 	return &FriendRecall{
-		FromUid:  info.FromUid,
+		FromUID:  info.FromUid,
 		Sequence: uint64(info.Sequence),
 		Time:     info.Time,
 		Random:   info.Random,
@@ -64,13 +64,13 @@ func ParseFriendRecallEvent(event *message.FriendRecall) *FriendRecall {
 }
 
 func (fe *Rename) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	fe.Uin = f(fe.Uid)
+	fe.Uin = f(fe.UID)
 }
 
 func ParseFriendRenameEvent(event *message.FriendRenameMsg) *Rename {
 	return &Rename{
 		SubType:  1,
-		Uid:      event.Body.Data.Uid,
+		UID:      event.Body.Data.Uid,
 		Nickname: event.Body.Data.RenameData.NickName,
 	}
 }
@@ -102,7 +102,6 @@ func (g *FriendPokeEvent) From() uint32 {
 func (g *FriendPokeEvent) Content() string {
 	if g.Suffix != "" {
 		return fmt.Sprintf("%d%s%d的%s", g.Sender, g.Action, g.Receiver, g.Suffix)
-	} else {
-		return fmt.Sprintf("%d%s%d", g.Sender, g.Action, g.Receiver)
 	}
+	return fmt.Sprintf("%d%s%d", g.Sender, g.Action, g.Receiver)
 }

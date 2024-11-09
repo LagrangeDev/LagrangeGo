@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupFolderDeleteReq(groupUin uint32, folderID string) (*OidbPacket, error) {
+func BuildGroupFolderDeleteReq(groupUin uint32, folderID string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D7{
 		Delete: &oidb.OidbSvcTrpcTcp0X6D7Delete{
 			GroupUin: groupUin,

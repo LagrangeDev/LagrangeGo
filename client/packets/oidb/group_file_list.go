@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupFileListReq(groupUin uint32, targetDirectory string, startIndex uint32, fileCount uint32) (*OidbPacket, error) {
+func BuildGroupFileListReq(groupUin uint32, targetDirectory string, startIndex uint32, fileCount uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D8{
 		List: &oidb.OidbSvcTrpcTcp0X6D8List{
 			GroupUin:        groupUin,

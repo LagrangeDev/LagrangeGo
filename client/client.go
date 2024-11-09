@@ -10,8 +10,8 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginState"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodeState"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodestate"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -69,10 +69,12 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 			switch {
 			case ret.Successful():
 				return c.Register()
-			case ret == loginState.CaptchaVerify:
+			case ret == loginstate.CaptchaVerify:
 				c.warningln("captcha verification required")
-				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine("ticket?->")
-				c.transport.Sig.CaptchaInfo[1] = utils.ReadLine("rand_str?->")
+				c.infoln("ticket?->")
+				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine()
+				c.infoln("rand_str?->")
+				c.transport.Sig.CaptchaInfo[1] = utils.ReadLine()
 			default:
 				c.error("Unhandled exception raised: %s", ret.Name())
 			}
@@ -96,7 +98,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 	return c.Register()
 }
 
-func (c *QQClient) TokenLogin() (loginState.State, error) {
+func (c *QQClient) TokenLogin() (loginstate.State, error) {
 	if c.Online.Load() {
 		return -996, ErrAlreadyOnline
 	}
@@ -137,10 +139,10 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		WriteU8(0).
 		WriteTLV(
 			tlv.T16(c.version().AppID, c.version().SubAppID,
-				utils.MustParseHexStr(c.Device().Guid), c.version().PTVersion, c.version().PackageName),
+				utils.MustParseHexStr(c.Device().GUID), c.version().PTVersion, c.version().PackageName),
 			tlv.T1b(0, 0, size, margin, 72, ecLevel, 2),
 			tlv.T1d(c.version().MiscBitmap),
-			tlv.T33(utils.MustParseHexStr(c.Device().Guid)),
+			tlv.T33(utils.MustParseHexStr(c.Device().GUID)),
 			tlv.T35(c.version().PTOSVersion),
 			tlv.T66(c.version().PTOSVersion),
 			tlv.Td1(c.version().OS, c.Device().DeviceName),
@@ -170,7 +172,7 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 	return nil, "", fmt.Errorf("err qr retcode %d", retCode)
 }
 
-func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
+func (c *QQClient) GetQRCodeResult() (qrcodestate.State, error) {
 	c.debugln("get qrcode result")
 	if c.transport.Sig.Qrsig == nil {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
@@ -195,7 +197,7 @@ func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
 	reader.ReadU16()    // cmd, 0x12
 	reader.SkipBytes(40)
 	_ = reader.ReadU32() // app id
-	retCode := qrcodeState.State(reader.ReadU8())
+	retCode := qrcodestate.State(reader.ReadU8())
 
 	if retCode == 0 {
 		reader.SkipBytes(4)
@@ -213,7 +215,7 @@ func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
 }
 
 func (c *QQClient) keyExchange() error {
-	data, err := wtlogin.BuildKexExchangeRequest(c.Uin, c.Device().Guid)
+	data, err := wtlogin.BuildKexExchangeRequest(c.Uin, c.Device().GUID)
 	if err != nil {
 		return err
 	}
@@ -230,7 +232,7 @@ func (c *QQClient) keyExchange() error {
 	return err
 }
 
-func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
+func (c *QQClient) PasswordLogin(password string) (loginstate.State, error) {
 	if c.Online.Load() {
 		return -996, ErrAlreadyOnline
 	}
@@ -245,7 +247,7 @@ func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
 		c.version().AppID,
 		c.version().AppClientVersion,
 		int(c.Uin),
-		c.Device().Guid,
+		c.Device().GUID,
 		md5Password,
 		c.transport.Sig.Tgtgt,
 		make([]byte, 4),
@@ -297,7 +299,7 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 				tlv.T144(c.transport.Sig.Tgtgt, app, device),
 				tlv.T116(app.SubSigmap),
 				tlv.T142(app.PackageName, 0),
-				tlv.T145(utils.MustParseHexStr(device.Guid)),
+				tlv.T145(utils.MustParseHexStr(device.GUID)),
 				tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
 				tlv.T141([]byte("Unknown"), nil),
 				tlv.T177(app.WTLoginSDK, 0),

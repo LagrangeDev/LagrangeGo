@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupFolderCreateReq(groupUin uint32, targetDirectory string, folderName string) (*OidbPacket, error) {
+func BuildGroupFolderCreateReq(groupUin uint32, targetDirectory string, folderName string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D7{
 		Create: &oidb.OidbSvcTrpcTcp0X6D7Create{
 			GroupUin:        groupUin,

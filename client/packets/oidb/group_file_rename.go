@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupFileRenameReq(groupUin uint32, fileID string, parentFolder string, newFileName string) (*OidbPacket, error) {
+func BuildGroupFileRenameReq(groupUin uint32, fileID string, parentFolder string, newFileName string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
 		Rename: &oidb.OidbSvcTrpcTcp0X6D6Rename{
 			GroupUin:     groupUin,

@@ -22,7 +22,7 @@ import (
 
 func (c *QQClient) ensureHighwayServers() error {
 	if c.highwaySession.SsoAddr == nil || c.highwaySession.SigSession == nil || c.highwaySession.SessionKey == nil {
-		packet, err := highway2.BuildHighWayUrlReq(c.transport.Sig.Tgt)
+		packet, err := highway2.BuildHighWayURLReq(c.transport.Sig.Tgt)
 		if err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func (c *QQClient) ensureHighwayServers() error {
 		if err != nil {
 			return fmt.Errorf("get highway server: %v", err)
 		}
-		resp, err := highway2.ParseHighWayUrlReq(payload)
+		resp, err := highway2.ParseHighWayURLReq(payload)
 		if err != nil {
 			return fmt.Errorf("parse highway server: %v", err)
 		}
@@ -52,7 +52,7 @@ func (c *QQClient) ensureHighwayServers() error {
 	return nil
 }
 
-func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
+func (c *QQClient) highwayUpload(commonID int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
 	// 能close的io就close
 	defer utils.CloseIO(r)
 	err := c.ensureHighwayServers()
@@ -60,7 +60,7 @@ func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5
 		return err
 	}
 	trans := &hw.Transaction{
-		CommandID: uint32(commonId),
+		CommandID: uint32(commonID),
 		Body:      r,
 		Sum:       md5,
 		Size:      fileSize,

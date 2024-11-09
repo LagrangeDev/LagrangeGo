@@ -4,7 +4,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupRenameReq(groupUin uint32, name string) (*OidbPacket, error) {
+func BuildGroupRenameReq(groupUin uint32, name string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X89A_15{
 		GroupUin: groupUin,
 		Body:     &oidb.OidbSvcTrpcTcp0X89A_15Body{TargetName: name},

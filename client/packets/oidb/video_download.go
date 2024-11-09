@@ -8,7 +8,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildVideoDownloadReq(selfUid, videoUuid, videoName string, isGroup bool, md5, sha1 []byte) (*OidbPacket, error) {
+func BuildVideoDownloadReq(selfUID, videoUUID, videoName string, isGroup bool, md5, sha1 []byte) (*Packet, error) {
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -21,7 +21,7 @@ func BuildVideoDownloadReq(selfUid, videoUuid, videoName string, isGroup bool, m
 				SceneType:    1,
 				C2C: &oidb.C2CUserInfo{
 					AccountType: 2,
-					TargetUid:   selfUid,
+					TargetUid:   selfUID,
 				},
 			},
 			Client: &oidb.ClientMeta{
@@ -46,7 +46,7 @@ func BuildVideoDownloadReq(selfUid, videoUuid, videoName string, isGroup bool, m
 					Time:     0,
 					Original: 0,
 				},
-				FileUuid:   videoUuid,
+				FileUuid:   videoUUID,
 				StoreId:    0,
 				UploadTime: 0,
 				Ttl:        0,

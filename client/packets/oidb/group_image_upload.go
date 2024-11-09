@@ -11,7 +11,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*OidbPacket, error) {
+func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Packet, error) {
 	// OidbSvcTrpcTcp.0x11c4_100
 	if image.Stream == nil {
 		return nil, errors.New("image data is null")
