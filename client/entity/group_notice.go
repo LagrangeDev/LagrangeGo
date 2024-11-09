@@ -1,6 +1,8 @@
 package entity
 
 // reference https://github.com/Mrs4s/MiraiGo/blob/master/client/http_api.go
+
+// nolint
 type (
 	GroupNoticeRsp struct {
 		Feeds []*GroupNoticeFeed `json:"feeds"`

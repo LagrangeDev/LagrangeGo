@@ -249,8 +249,8 @@ func NewFileImage(path string, summary ...string) (*ImageElement, error) {
 	return NewStreamImage(img, summary...), nil
 }
 
-func NewVideo(data, thumb []byte, Summary ...string) *ShortVideoElement {
-	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), Summary...)
+func NewVideo(data, thumb []byte, summary ...string) *ShortVideoElement {
+	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), summary...)
 }
 
 func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, summary ...string) *ShortVideoElement {

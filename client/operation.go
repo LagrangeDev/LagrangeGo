@@ -498,14 +498,15 @@ func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.Image
 
 func (c *QQClient) QueryFriendImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
 	var url string
-	if fileUUID != "" {
+	switch {
+	case fileUUID != "":
 		rkeyInfo := c.GetCachedRkeyInfo(entity.FriendRKey)
 		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1406&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
 		return c.queryImage(url, http.MethodGet)
-	} else if len(md5) == 16 {
+	case len(md5) == 16:
 		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
 		return c.queryImage(url, http.MethodHead)
-	} else {
+	default:
 		return nil, errors.New("invalid parameters")
 	}
 }
