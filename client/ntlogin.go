@@ -95,10 +95,10 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 	ret := loginstate.State(base.Header.Error.ErrorCode)
 	if ret == loginstate.CaptchaVerify {
 		sig.Cookies = base.Header.Cookie.Cookie.Unwrap()
-		verifyUrl := body.Captcha.Url
-		aid := getAid(verifyUrl)
+		verifyURL := body.Captcha.Url
+		aid := getAid(verifyURL)
 		sig.CaptchaInfo[2] = aid
-		return ret, fmt.Errorf("need captcha verify: %v", verifyUrl)
+		return ret, fmt.Errorf("need captcha verify: %v", verifyURL)
 	}
 	if base.Header.Error.Tag != "" {
 		stat := base.Header.Error

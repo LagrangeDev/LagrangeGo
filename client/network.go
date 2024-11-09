@@ -328,7 +328,7 @@ func (c *QQClient) netLoop() {
 		c.debug("rev pkt: %v seq: %v", resp.CommandName, resp.SequenceID)
 		c.stat.PacketReceived.Add(1)
 		pkt := &network.Packet{
-			SequenceId:  uint32(resp.SequenceID),
+			SequenceID:  uint32(resp.SequenceID),
 			CommandName: resp.CommandName,
 			Payload:     resp.Body,
 		}
@@ -342,7 +342,7 @@ func (c *QQClient) netLoop() {
 
 			if decoder, ok := decoders[pkt.CommandName]; ok {
 				// found predefined decoder
-				info, ok := c.handlers.LoadAndDelete(pkt.SequenceId)
+				info, ok := c.handlers.LoadAndDelete(pkt.SequenceID)
 				var decoded any
 				decoded = pkt.Payload
 				if info == nil || !info.dynamic {
@@ -357,11 +357,11 @@ func (c *QQClient) netLoop() {
 				} else if f, ok := c.waiters.Load(pkt.CommandName); ok { // 在不存在handler的情况下触发wait
 					f(decoded, err)
 				}
-			} else if f, ok := c.handlers.LoadAndDelete(pkt.SequenceId); ok {
+			} else if f, ok := c.handlers.LoadAndDelete(pkt.SequenceID); ok {
 				// does not need decoder
 				f.fun(pkt.Payload, nil)
 			} else {
-				c.debug("Unhandled Command: %s\nSeq: %d\nThis message can be ignored.", pkt.CommandName, pkt.SequenceId)
+				c.debug("Unhandled Command: %s\nSeq: %d\nThis message can be ignored.", pkt.CommandName, pkt.SequenceID)
 			}
 		}(pkt)
 	}

@@ -59,13 +59,13 @@ func (c *QQClient) UploadShortVideo(target message.Source, video *message.ShortV
 	return nil, errors.New("unknown target type")
 }
 
-func (c *QQClient) ImageUploadPrivate(targetUid string, image *message.ImageElement) (*message.ImageElement, error) {
+func (c *QQClient) ImageUploadPrivate(targetUID string, image *message.ImageElement) (*message.ImageElement, error) {
 	if image == nil || image.Stream == nil {
 		return nil, errors.New("image is nil")
 	}
 	defer utils.CloseIO(image.Stream)
 	image.IsGroup = false
-	req, err := oidb.BuildPrivateImageUploadReq(targetUid, image)
+	req, err := oidb.BuildPrivateImageUploadReq(targetUID, image)
 	if err != nil {
 		return nil, err
 	}

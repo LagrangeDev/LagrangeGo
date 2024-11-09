@@ -126,11 +126,11 @@ type GroupInvite struct {
 	RequestSeq  uint64
 }
 
-type JsonParam struct {
+type JSONParam struct {
 	Cmd  int    `json:"cmd"`
 	Data string `json:"data"`
 	Text string `json:"text"`
-	Url  string `json:"url"`
+	URL  string `json:"url"`
 }
 
 // CanPreprocess 实现预处理接口，对事件的uid进行转换等操作
@@ -323,7 +323,7 @@ func ParseGroupMemberSpecialTitleUpdatedEvent(event *message.GroupSpecialTitle, 
 	if len(matches) != 2 {
 		return nil
 	}
-	var medalData JsonParam
+	var medalData JSONParam
 	err := json.Unmarshal([]byte(matches[1][1]), &medalData)
 	if err != nil {
 		return nil
