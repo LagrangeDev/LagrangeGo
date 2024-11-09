@@ -7,7 +7,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginState"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/login_state"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -63,7 +63,7 @@ func buildNtloginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo,
 	}.Encode(), nil
 }
 
-func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginState.State, error) {
+func parseNtloginResponse(response []byte, sig *auth.SigInfo) (login_state.State, error) {
 	var frame login.SsoNTLoginEncryptedData
 	err := proto.Unmarshal(response, &frame)
 	if err != nil {
@@ -90,10 +90,10 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginState.State,
 		sig.D2 = body.Credentials.D2
 		sig.D2Key = body.Credentials.D2Key
 		sig.TempPwd = body.Credentials.TempPassword
-		return loginState.Success, nil
+		return login_state.Success, nil
 	}
-	ret := loginState.State(base.Header.Error.ErrorCode)
-	if ret == loginState.CaptchaVerify {
+	ret := login_state.State(base.Header.Error.ErrorCode)
+	if ret == login_state.CaptchaVerify {
 		sig.Cookies = base.Header.Cookie.Cookie.Unwrap()
 		verifyUrl := body.Captcha.Url
 		aid := getAid(verifyUrl)

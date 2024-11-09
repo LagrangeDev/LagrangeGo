@@ -10,8 +10,8 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginState"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodeState"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/login_state"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcode_state"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
@@ -69,7 +69,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 			switch {
 			case ret.Successful():
 				return c.Register()
-			case ret == loginState.CaptchaVerify:
+			case ret == login_state.CaptchaVerify:
 				c.warningln("captcha verification required")
 				c.infoln("ticket?->")
 				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine()
@@ -98,7 +98,7 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 	return c.Register()
 }
 
-func (c *QQClient) TokenLogin() (loginState.State, error) {
+func (c *QQClient) TokenLogin() (login_state.State, error) {
 	if c.Online.Load() {
 		return -996, ErrAlreadyOnline
 	}
@@ -172,7 +172,7 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 	return nil, "", fmt.Errorf("err qr retcode %d", retCode)
 }
 
-func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
+func (c *QQClient) GetQRCodeResult() (qrcode_state.State, error) {
 	c.debugln("get qrcode result")
 	if c.transport.Sig.Qrsig == nil {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
@@ -197,7 +197,7 @@ func (c *QQClient) GetQRCodeResult() (qrcodeState.State, error) {
 	reader.ReadU16()    // cmd, 0x12
 	reader.SkipBytes(40)
 	_ = reader.ReadU32() // app id
-	retCode := qrcodeState.State(reader.ReadU8())
+	retCode := qrcode_state.State(reader.ReadU8())
 
 	if retCode == 0 {
 		reader.SkipBytes(4)
@@ -232,7 +232,7 @@ func (c *QQClient) keyExchange() error {
 	return err
 }
 
-func (c *QQClient) PasswordLogin(password string) (loginState.State, error) {
+func (c *QQClient) PasswordLogin(password string) (login_state.State, error) {
 	if c.Online.Load() {
 		return -996, ErrAlreadyOnline
 	}
