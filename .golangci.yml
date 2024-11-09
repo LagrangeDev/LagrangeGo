@@ -53,7 +53,7 @@ run:
   deadline: 5m
   issues-exit-code: 1
   tests: false
-  go: '^1.23'
+  go: '1.23'
 
 # output configuration options
 output:
