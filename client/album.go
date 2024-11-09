@@ -55,7 +55,8 @@ func (c *QQClient) GetGroupAlbum(groupUin uint32) ([]*GroupAlbum, error) {
 		timeStr := v.Get("createtime").Str
 		timeStamp, err := time.Parse(TimeLayout, timeStr)
 		if err != nil {
-			fmt.Println(err)
+			c.errorln(err)
+			continue
 		}
 		grpAlbumList[i] = &GroupAlbum{
 			GroupUin:       groupUin,
