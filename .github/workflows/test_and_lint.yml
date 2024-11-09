@@ -39,7 +39,6 @@ jobs:
       - run: go generate ./...
       - name: Go vet
         run: go vet ./...
-
       - name: GolangCI-Lint
         uses: golangci/golangci-lint-action@v6
         with:
