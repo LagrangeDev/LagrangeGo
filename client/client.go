@@ -71,8 +71,10 @@ func (c *QQClient) Login(password, qrcodePath string) error {
 				return c.Register()
 			case ret == loginState.CaptchaVerify:
 				c.warningln("captcha verification required")
-				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine("ticket?->")
-				c.transport.Sig.CaptchaInfo[1] = utils.ReadLine("rand_str?->")
+				c.infoln("ticket?->")
+				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine()
+				c.infoln("rand_str?->")
+				c.transport.Sig.CaptchaInfo[1] = utils.ReadLine()
 			default:
 				c.error("Unhandled exception raised: %s", ret.Name())
 			}
