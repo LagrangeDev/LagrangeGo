@@ -477,7 +477,7 @@ func (msg *GroupMessage) Chat() int64 {
 }
 
 func (msg *GroupMessage) Texts() []string {
-	var texts []string
+	texts := make([]string, 0, len(msg.Elements))
 	for _, elem := range msg.Elements {
 		texts = append(texts, ToReadableStringEle(elem))
 	}
@@ -497,7 +497,7 @@ func (msg *PrivateMessage) Chat() int64 {
 }
 
 func (msg *PrivateMessage) Texts() []string {
-	var texts []string
+	texts := make([]string, 0, len(msg.Elements))
 	for _, elem := range msg.Elements {
 		texts = append(texts, ToReadableStringEle(elem))
 	}
@@ -517,7 +517,7 @@ func (msg *TempMessage) Chat() int64 {
 }
 
 func (msg *TempMessage) Texts() []string {
-	var texts []string
+	texts := make([]string, 0, len(msg.Elements))
 	for _, elem := range msg.Elements {
 		texts = append(texts, ToReadableStringEle(elem))
 	}

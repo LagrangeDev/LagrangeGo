@@ -1257,7 +1257,7 @@ func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*messa
 		return nil, err
 	}
 
-	var ret []*message2.GroupMessage
+	ret := make([]*message2.GroupMessage, 0, len(rsp.Body.Messages))
 	for _, pkt := range rsp.Body.Messages {
 		grpMsg := message2.ParseGroupMessage(pkt)
 		c.PreprocessGroupMessageEvent(grpMsg)
