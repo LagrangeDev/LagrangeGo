@@ -3,12 +3,13 @@ package sign
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -69,10 +70,10 @@ func containSignPKG(cmd string) bool {
 	return ok
 }
 
-func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration, target interface{}, header http.Header) error {
+func httpGet[T any](rawUrl string, queryParams map[string]string, timeout time.Duration, header http.Header) (target T, err error) {
 	u, err := url.Parse(rawUrl)
 	if err != nil {
-		return fmt.Errorf("failed to parse URL: %w", err)
+		return
 	}
 
 	q := u.Query()
@@ -86,43 +87,20 @@ func httpGet(rawUrl string, queryParams map[string]string, timeout time.Duration
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
-		return fmt.Errorf("failed to create GET request: %w", err)
+		return
 	}
 	for k, vs := range header {
 		for _, v := range vs {
 			req.Header.Add(k, v)
 		}
 	}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			return fmt.Errorf("request timed out")
-		}
-		resp, err = httpClient.Do(req)
-		if err != nil {
-			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-				return fmt.Errorf("request timed out")
-			}
-			return fmt.Errorf("failed to perform GET request: %w", err)
-		}
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
-		return fmt.Errorf("failed to unmarshal JSON response: %w", err)
-	}
-
-	return nil
+	return doHTTP[T](ctx, req)
 }
 
-func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target interface{}, header http.Header) error {
+func httpPost[T any](rawUrl string, body io.Reader, timeout time.Duration, header http.Header) (target T, err error) {
 	u, err := url.Parse(rawUrl)
 	if err != nil {
-		return fmt.Errorf("failed to parse URL: %w", err)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -130,7 +108,8 @@ func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target inter
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), body)
 	if err != nil {
-		return fmt.Errorf("failed to create POST request: %w", err)
+		err = errors.Wrap(err, "create POST")
+		return
 	}
 	for k, vs := range header {
 		for _, v := range vs {
@@ -138,38 +117,37 @@ func httpPost(rawUrl string, body io.Reader, timeout time.Duration, target inter
 		}
 	}
 	req.Header.Add("Content-Type", "application/json")
+	return doHTTP[T](ctx, req)
+}
+
+func doHTTP[T any](ctx context.Context, req *http.Request) (target T, err error) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			return fmt.Errorf("request timed out")
+			err = ctx.Err()
+			return
 		}
 		resp, err = httpClient.Do(req)
 		if err != nil {
 			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-				return fmt.Errorf("request timed out")
+				err = ctx.Err()
+				return
 			}
-			return fmt.Errorf("failed to perform POST request: %w", err)
+			err = errors.Wrap(err, "perform POST")
+			return
 		}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		err = fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
-		return fmt.Errorf("failed to unmarshal JSON response: %w", err)
+	if err = json.NewDecoder(resp.Body).Decode(&target); err != nil {
+		err = errors.Wrap(err, "unmarshal response")
+		return
 	}
 
-	return nil
-}
-
-type Response struct {
-	Platform string `json:"platform"`
-	Version  string `json:"version"`
-	Value    struct {
-		Sign  string `json:"sign"`
-		Extra string `json:"extra"`
-		Token string `json:"token"`
-	} `json:"value"`
+	return
 }
