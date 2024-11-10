@@ -19,6 +19,6 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	golang.org/x/image v0.16.0 // indirect
+	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
 )
