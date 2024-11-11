@@ -28,6 +28,6 @@ type SsoKeyExchangeDecrypted struct {
 }
 
 type SsoKeyExchangePlain struct {
-	Uin  proto.Option[uint32] `protobuf:"varint,1,opt"`
+	Uin  proto.Option[string] `protobuf:"bytes,1,opt"`
 	Guid []byte               `protobuf:"bytes,2,opt"`
 }

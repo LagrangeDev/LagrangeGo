@@ -2,6 +2,10 @@ package wtlogin
 
 import (
 	"encoding/hex"
+	"strconv"
+	"time"
+
+	"github.com/LagrangeDev/LagrangeGo/client/auth"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
@@ -14,10 +18,15 @@ import (
 var encKey, _ = hex.DecodeString("e2733bf403149913cbf80c7a95168bd4ca6935ee53cd39764beebe2e007e3aee")
 
 func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
-	encl, err := crypto.AESGCMEncrypt(proto.DynamicMessage{
-		1: uin,
-		2: guid,
-	}.Encode(), ecdh.P256().SharedKey())
+	plain1, err := proto.Marshal(&login.SsoKeyExchangePlain{
+		Uin:  proto.Some(strconv.Itoa(int(uin))),
+		Guid: utils.MustParseHexStr(guid),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	encl, err := crypto.AESGCMEncrypt(plain1, ecdh.P256().SharedKey())
 	if err != nil {
 		return nil, err
 	}
@@ -36,36 +45,38 @@ func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 		return nil, err
 	}
 
-	return proto.DynamicMessage{
-		1: ecdh.P256().PublicKey(),
-		2: 1,
-		3: encl,
-		4: utils.TimeStamp(),
-		5: encP2Hash,
-	}.Encode(), nil
+	return proto.Marshal(&login.SsoKeyExchange{
+		PubKey:    ecdh.P256().PublicKey(),
+		Type:      1,
+		GcmCalc1:  encl,
+		Timestamp: uint32(time.Now().Unix()),
+		GcmCalc2:  encP2Hash,
+	})
 }
 
-func ParseKeyExchangeResponse(response []byte) (key, sign []byte, err error) {
+func ParseKeyExchangeResponse(response []byte, sig *auth.SigInfo) error {
 	var p login.SsoKeyExchangeResponse
-	err = proto.Unmarshal(response, &p)
+	err := proto.Unmarshal(response, &p)
 	if err != nil {
-		return
+		return err
 	}
 
 	shareKey, err := ecdh.P256().Exange(p.PublicKey)
 	if err != nil {
-		return
+		return err
 	}
 
 	var decPb login.SsoKeyExchangeDecrypted
 	data, err := crypto.AESGCMDecrypt(p.GcmEncrypted, shareKey)
 	if err != nil {
-		return
+		return err
 	}
 	err = proto.Unmarshal(data, &decPb)
 	if err != nil {
-		return
+		return err
 	}
+	sig.ExchangeKey = decPb.GcmKey
+	sig.KeySig = decPb.Sign
 
-	return decPb.GcmKey, decPb.Sign, nil
+	return nil
 }

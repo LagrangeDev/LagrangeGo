@@ -23,6 +23,6 @@ message SsoKeyExchangeDecrypted {
 }
 
 message SsoKeyExchangePlain {
-  optional uint32 Uin = 1;
+  optional string Uin = 1;
   optional bytes Guid = 2;
 }

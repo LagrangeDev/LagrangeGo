@@ -1,3 +1,4 @@
+//nolint:unused
 package client
 
 // from https://github.com/Mrs4s/MiraiGo/blob/master/client/log.go

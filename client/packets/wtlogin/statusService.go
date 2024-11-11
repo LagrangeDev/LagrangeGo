@@ -3,12 +3,10 @@ package wtlogin
 import (
 	"errors"
 	"strings"
-	"unicode"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/system"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 // BuildRegisterRequest trpc.qq_new_tech.status_svc.StatusService.Register
@@ -21,7 +19,7 @@ func BuildRegisterRequest(app *auth.AppInfo, device *auth.DeviceInfo) []byte {
 		5: 2052,
 		6: proto.DynamicMessage{
 			1: device.DeviceName,
-			2: capitalize(app.VendorOS),
+			2: app.Kernel,
 			3: device.SystemKernel,
 			4: "",
 			5: app.VendorOS,
@@ -52,12 +50,4 @@ func ParseRegisterResponse(response []byte) error {
 		return nil
 	}
 	return errors.New(msg)
-}
-
-func capitalize(s string) string {
-	news := make([]byte, len(s))
-	rs := []rune(s)
-	n := copy(news, string(unicode.ToUpper(rs[0])))
-	copy(news[n:], strings.ToLower(s[n:]))
-	return utils.B2S(news)
 }
