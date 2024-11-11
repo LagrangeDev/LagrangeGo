@@ -74,9 +74,6 @@ func main() {
 		}
 
 		ret, err := c.PasswordLogin()
-		if err == nil {
-			return nil
-		}
 		for {
 			if err != nil {
 				logger.Errorf("密码登录失败: %s", err)

@@ -125,14 +125,15 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 		return -1, fmt.Errorf("proto decode failed: %s", err)
 	}
 
+	ret := loginstate.State(base.Header.Error.ErrorCode)
+
 	if body.Credentials != nil {
 		sig.Tgt = body.Credentials.Tgt
 		sig.D2 = body.Credentials.D2
 		sig.D2Key = body.Credentials.D2Key
 		sig.TempPwd = body.Credentials.TempPassword
-		return loginstate.Success, nil
+		return ret, nil
 	}
-	ret := loginstate.State(base.Header.Error.ErrorCode)
 	if base.Header.Error != nil && ret.NeedVerify() {
 		sig.UnusualSig = func() []byte {
 			if body.Unusual != nil {
