@@ -16,14 +16,6 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-func buildNtloginCaptchaSubmit(ticket, randStr, aid string) proto.DynamicMessage {
-	return proto.DynamicMessage{
-		1: ticket,
-		2: randStr,
-		3: aid,
-	}
-}
-
 func buildPasswordLoginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo, sig *auth.SigInfo, passwordMD5 [16]byte) ([]byte, error) {
 	key := crypto.MD5Digest(binary.NewBuilder(nil).
 		WriteBytes(passwordMD5[:]).

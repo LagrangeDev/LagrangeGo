@@ -74,7 +74,6 @@ func (t *Transport) readSSOFrame(resp *Response, payload []byte) error {
 		// ok
 	case -10001, -10008: // -10001正常缓存过期，-10003登录失效？
 		err = ErrSessionExpired
-		fallthrough
 	case -10003:
 		err = ErrAuthenticationFailed
 	default:

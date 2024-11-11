@@ -239,7 +239,7 @@ func (c *QQClient) GetNewDeviceVerifyURL() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return resp.StrUrl, nil
+	return resp.StrURL, nil
 }
 
 func (c *QQClient) NewDeviceVerify(verifyURL string) error {
@@ -249,7 +249,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 		})
 		for _, param := range params {
 			if strings.HasPrefix(param, "str_url=") {
-				return strings.TrimLeft(param, "str_url=")
+				return strings.TrimPrefix(param, "str_url=")
 			}
 		}
 		return ""
@@ -293,6 +293,9 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 				"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLoginNewDevice",
 				data,
 			)
+			if err != nil {
+				return err
+			}
 			ret, err := parseNewDeviceLoginResponse(packet, &c.transport.Sig)
 			if err != nil {
 				return err
@@ -400,7 +403,7 @@ type (
 
 	NTNewDeviceQrCodeResponse struct {
 		Uint32GuaranteeStatus int    `json:"uint32_guarantee_status"`
-		StrUrl                string `json:"str_url"`
+		StrURL                string `json:"str_url"`
 		ActionStatus          string `json:"ActionStatus"`
 		StrNtSuccToken        string `json:"str_nt_succ_token"`
 		ErrorCode             int    `json:"ErrorCode"`
