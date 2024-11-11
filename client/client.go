@@ -293,7 +293,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 				"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLoginNewDevice",
 				data,
 			)
-			ret, err := parseNtloginResponse(packet, &c.transport.Sig)
+			ret, err := parseNewDeviceLoginResponse(packet, &c.transport.Sig)
 			if err != nil {
 				return err
 			}

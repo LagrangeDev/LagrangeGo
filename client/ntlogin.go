@@ -167,44 +167,43 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 	return ret, fmt.Errorf("login fail: %s", ret.Name())
 }
 
-func parseNewDeviceLoginResponse(response []byte, sig *auth.SigInfo) error {
+func parseNewDeviceLoginResponse(response []byte, sig *auth.SigInfo) (loginstate.State, error) {
 	if len(sig.ExchangeKey) == 0 {
-		return errors.New("empty exchange key")
+		return -999, errors.New("empty exchange key")
 	}
 
 	var encrypted login.SsoNTLoginEncryptedData
 	err := proto.Unmarshal(response, &encrypted)
 	if err != nil {
-		return err
+		return -999, err
 	}
 
 	if encrypted.GcmCalc != nil {
 		decrypted, err := crypto.AESGCMDecrypt(encrypted.GcmCalc, sig.ExchangeKey)
 		if err != nil {
-			return err
+			return -999, err
 		}
 		var base login.SsoNTLoginBase
 		err = proto.Unmarshal(decrypted, &base)
 		if err != nil {
-			return err
+			return -999, err
 		}
 		var body login.SsoNTLoginResponse
 		err = proto.Unmarshal(base.Body, &body)
 		if err != nil {
-			return err
+			return -999, err
 		}
-
-		if base.Header.Error != nil || body.Credentials == nil {
-			ret := loginstate.State(base.Header.Error.ErrorCode)
-			return errors.New(ret.Name())
+		ret := loginstate.State(base.Header.Error.ErrorCode)
+		if body.Credentials == nil {
+			return ret, errors.New(ret.Name())
 		}
 		sig.Tgt = body.Credentials.Tgt
 		sig.D2 = body.Credentials.D2
 		sig.D2Key = body.Credentials.D2Key
 		sig.TempPwd = body.Credentials.TempPassword
-		return nil
+		return ret, nil
 	}
-	return errors.New("empty data")
+	return -999, errors.New("empty data")
 }
 
 func all(b []string) bool {
