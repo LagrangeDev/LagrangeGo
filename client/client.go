@@ -1,12 +1,16 @@
 package client
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
 	"time"
-
-	"github.com/LagrangeDev/LagrangeGo/client/auth"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
@@ -14,97 +18,11 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodestate"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
-
-func (c *QQClient) Login(password, qrcodePath string) error {
-	// prefer session login
-	if len(c.transport.Sig.D2) != 0 && c.transport.Sig.Uin != 0 {
-		c.infoln("Session found, try to login with session")
-		c.Uin = c.transport.Sig.Uin
-		if c.Online.Load() {
-			return ErrAlreadyOnline
-		}
-		err := c.connect()
-		if err != nil {
-			return err
-		}
-		err = c.Register()
-		if err != nil {
-			err = fmt.Errorf("failed to register session: %v", err)
-			c.errorln(err)
-			return err
-		}
-		return nil
-	}
-
-	if len(c.transport.Sig.TempPwd) != 0 {
-		err := c.keyExchange()
-		if err != nil {
-			return err
-		}
-
-		ret, err := c.TokenLogin()
-		if err != nil {
-			return fmt.Errorf("EasyLogin fail: %s", err)
-		}
-
-		if ret.Successful() {
-			return c.Register()
-		}
-	}
-
-	if password != "" {
-		c.infoln("login with password")
-		err := c.keyExchange()
-		if err != nil {
-			return err
-		}
-
-		for {
-			ret, err := c.PasswordLogin(password)
-			if err != nil {
-				return err
-			}
-			switch {
-			case ret.Successful():
-				return c.Register()
-			case ret == loginstate.CaptchaVerify:
-				c.warningln("captcha verification required")
-				c.infoln("ticket?->")
-				c.transport.Sig.CaptchaInfo[0] = utils.ReadLine()
-				c.infoln("rand_str?->")
-				c.transport.Sig.CaptchaInfo[1] = utils.ReadLine()
-			default:
-				c.error("Unhandled exception raised: %s", ret.Name())
-			}
-		}
-		// panic("unreachable")
-	}
-	c.infoln("login with qrcode")
-	png, _, err := c.FetchQRCodeDefault()
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(qrcodePath, png, 0666)
-	if err != nil {
-		return err
-	}
-	c.info("qrcode saved to %s", qrcodePath)
-	err = c.QRCodeLogin(3)
-	if err != nil {
-		return err
-	}
-	return c.Register()
-}
 
 func (c *QQClient) TokenLogin() (loginstate.State, error) {
 	if c.Online.Load() {
 		return -996, ErrAlreadyOnline
-	}
-	err := c.connect()
-	if err != nil {
-		return -997, err
 	}
 	data, err := buildNtloginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
 	if err != nil {
@@ -224,36 +142,27 @@ func (c *QQClient) keyExchange() error {
 		data,
 	)
 	if err != nil {
-		c.errorln(err)
 		return err
 	}
-	c.debug("keyexchange proto data: %x", packet)
-	c.transport.Sig.ExchangeKey, c.transport.Sig.KeySig, err = wtlogin.ParseKeyExchangeResponse(packet)
-	return err
+	return wtlogin.ParseKeyExchangeResponse(packet, c.Sig())
 }
 
-func (c *QQClient) PasswordLogin(password string) (loginstate.State, error) {
+func (c *QQClient) PasswordLogin() (loginstate.State, error) {
 	if c.Online.Load() {
-		return -996, ErrAlreadyOnline
+		return -994, ErrAlreadyOnline
 	}
+
 	err := c.connect()
 	if err != nil {
-		return -997, err
+		return -995, err
 	}
 
-	md5Password := crypto.MD5Digest(utils.S2B(password))
+	err = c.keyExchange()
+	if err != nil {
+		return -996, err
+	}
 
-	cr := tlv.T106(
-		c.version().AppID,
-		c.version().AppClientVersion,
-		int(c.Uin),
-		c.Device().GUID,
-		md5Password,
-		c.transport.Sig.Tgtgt,
-		make([]byte, 4),
-		true)[4:]
-
-	data, err := buildNtloginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, cr)
+	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.passwordMD5)
 	if err != nil {
 		return -998, err
 	}
@@ -267,27 +176,138 @@ func (c *QQClient) PasswordLogin(password string) (loginstate.State, error) {
 	return parseNtloginResponse(packet, &c.transport.Sig)
 }
 
-func (c *QQClient) QRCodeLogin(refreshInterval int) error {
-	if c.transport.Sig.Qrsig == nil {
-		return errors.New("no QrSig found, fetch qrcode first")
+func (c *QQClient) CommitCaptcha(ticket, randStr, aid string) (loginstate.State, error) {
+	c.Sig().CaptchaInfo = [3]string{ticket, randStr, aid}
+	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.passwordMD5)
+	if err != nil {
+		return -998, err
+	}
+	packet, err := c.sendUniPacketAndWait(
+		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
+		data,
+	)
+	if err != nil {
+		return -999, err
+	}
+	ret, err := parseNtloginResponse(packet, &c.transport.Sig)
+	if err != nil {
+		return -999, err
+	}
+	if ret.Successful() {
+		return ret, c.init()
+	}
+	return ret, nil
+}
+
+func (c *QQClient) GetNewDeviceVerifyURL() (string, error) {
+	if c.Sig().NewDeviceVerifyURL == "" {
+		return "", errors.New("no verify_url found")
 	}
 
-	for {
-		retCode, err := c.GetQRCodeResult()
+	queryParams := func() url.Values {
+		parsedURL, err := url.Parse(c.Sig().NewDeviceVerifyURL)
 		if err != nil {
-			c.errorln(err)
-			return err
+			return url.Values{}
 		}
-		if retCode.Waitable() {
-			time.Sleep(time.Duration(refreshInterval) * time.Second)
+		return parsedURL.Query()
+	}()
+
+	request, _ := json.Marshal(&NTNewDeviceQrCodeRequest{
+		StrDevAuthToken: queryParams.Get("sig"),
+		Uint32Flag:      1,
+		Uint32UrlType:   0,
+		StrUinToken:     queryParams.Get("uin-token"),
+		StrDevType:      c.version().OS,
+		StrDevName:      c.Device().DeviceName,
+	})
+
+	resp, err := func() (*NTNewDeviceQrCodeResponse, error) {
+		resp, err := http.Post(fmt.Sprintf("https://oidb.tim.qq.com/v3/oidbinterface/oidb_0xc9e_8?uid=%d&getqrcode=1&sdkappid=39998&actype=2", c.Uin),
+			"application/json", bytes.NewReader(request))
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		data, _ := io.ReadAll(resp.Body)
+		var response NTNewDeviceQrCodeResponse
+		err = json.Unmarshal(data, &response)
+		if err != nil {
+			return nil, err
+		}
+		return &response, nil
+	}()
+	if err != nil {
+		return "", err
+	}
+	return resp.StrUrl, nil
+}
+
+func (c *QQClient) NewDeviceVerify(verifyURL string) error {
+	original := func() string {
+		params := strings.FieldsFunc(strings.Split(verifyURL, "?")[1], func(r rune) bool {
+			return r == '&'
+		})
+		for _, param := range params {
+			if strings.HasPrefix(param, "str_url=") {
+				return strings.TrimLeft(param, "str_url=")
+			}
+		}
+		return ""
+	}()
+
+	query := func() []byte {
+		data, _ := json.Marshal(&NTNewDeviceQrCodeQuery{
+			Uint32Flag: 0,
+			Token:      base64.StdEncoding.EncodeToString(utils.S2B(original)),
+		})
+		return data
+	}()
+	for errCount, timeSec := 0, 0; timeSec < 120 || errCount < 3; timeSec++ {
+		resp, err := func() (*NTNewDeviceQrCodeResponse, error) {
+			resp, err := http.Post(fmt.Sprintf("https://oidb.tim.qq.com/v3/oidbinterface/oidb_0xc9e_8?uid=%d&getqrcode=1&sdkappid=39998&actype=2", c.Uin),
+				"application/json", bytes.NewReader(query))
+			if err != nil {
+				return nil, err
+			}
+			defer resp.Body.Close()
+			data, _ := io.ReadAll(resp.Body)
+			var response NTNewDeviceQrCodeResponse
+			err = json.Unmarshal(data, &response)
+			if err != nil {
+				return nil, err
+			}
+			return &response, nil
+		}()
+		if err != nil {
+			errCount++
 			continue
 		}
-		if !retCode.Success() {
-			return errors.New(retCode.Name())
-		}
-		break
-	}
+		if resp.StrNtSuccToken != "" {
+			c.transport.Sig.TempPwd = utils.S2B(resp.StrNtSuccToken)
+			data, err := buildNtloginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
+			if err != nil {
+				return err
+			}
 
+			packet, err := c.sendUniPacketAndWait(
+				"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLoginNewDevice",
+				data,
+			)
+			ret, err := parseNtloginResponse(packet, &c.transport.Sig)
+			if err != nil {
+				return err
+			}
+			if ret.Successful() {
+				return c.init()
+			}
+			return fmt.Errorf("verify error: %s", ret.Name())
+		}
+		time.Sleep(1 * time.Second)
+	}
+	return fmt.Errorf("verify timeout error")
+}
+
+func (c *QQClient) QRCodeLogin() error {
 	app := c.version()
 	device := c.Device()
 	response, err := c.sendUniPacketAndWait(
@@ -313,16 +333,19 @@ func (c *QQClient) QRCodeLogin(refreshInterval int) error {
 			).ToBytes()))
 
 	if err != nil {
-		c.errorln(err)
 		return err
 	}
 
-	return c.decodeLoginResponse(response, &c.transport.Sig)
+	err = c.decodeLoginResponse(response, &c.transport.Sig)
+	if err != nil {
+		return err
+	}
+	return c.init()
 }
 
-func (c *QQClient) FastLogin(sig *auth.SigInfo) error {
-	if sig != nil {
-		c.UseSig(*sig)
+func (c *QQClient) FastLogin() error {
+	if c.transport.Sig.Uin == 0 || len(c.transport.Sig.D2) == 0 {
+		return errors.New("no login cache")
 	}
 	c.Uin = c.transport.Sig.Uin
 	if c.Online.Load() {
@@ -332,16 +355,19 @@ func (c *QQClient) FastLogin(sig *auth.SigInfo) error {
 	if err != nil {
 		return err
 	}
-	err = c.Register()
+	err = c.register()
 	if err != nil {
-		err = fmt.Errorf("failed to register session: %v", err)
-		c.errorln(err)
-		return err
+		return fmt.Errorf("failed to register session: %v", err)
+
 	}
 	return nil
 }
 
-func (c *QQClient) Register() error {
+func (c *QQClient) init() error {
+	return c.register()
+}
+
+func (c *QQClient) register() error {
 	response, err := c.sendUniPacketAndWait(
 		"trpc.qq_new_tech.status_svc.StatusService.Register",
 		wtlogin.BuildRegisterRequest(c.version(), c.Device()))
@@ -359,6 +385,30 @@ func (c *QQClient) Register() error {
 	c.transport.Sig.Uin = c.Uin
 	c.setOnline()
 	go c.doHeartbeat()
-	c.infoln("register succeeded")
 	return nil
 }
+
+type (
+	NTNewDeviceQrCodeRequest struct {
+		StrDevAuthToken string `json:"str_dev_auth_token"`
+		Uint32Flag      int    `json:"uint32_flag"`
+		Uint32UrlType   int    `json:"uint32_url_type"`
+		StrUinToken     string `json:"str_uin_token"`
+		StrDevType      string `json:"str_dev_type"`
+		StrDevName      string `json:"str_dev_name"`
+	}
+
+	NTNewDeviceQrCodeResponse struct {
+		Uint32GuaranteeStatus int    `json:"uint32_guarantee_status"`
+		StrUrl                string `json:"str_url"`
+		ActionStatus          string `json:"ActionStatus"`
+		StrNtSuccToken        string `json:"str_nt_succ_token"`
+		ErrorCode             int    `json:"ErrorCode"`
+		ErrorInfo             string `json:"ErrorInfo"`
+	}
+
+	NTNewDeviceQrCodeQuery struct {
+		Uint32Flag uint64 `json:"uint32_flag"`
+		Token      string `json:"bytes_token"`
+	}
+)

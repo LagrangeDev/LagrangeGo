@@ -3,6 +3,7 @@ package client
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/client/client.go
 
 import (
+	"crypto/md5"
 	"errors"
 	"net/http"
 	"net/http/cookiejar"
@@ -30,11 +31,16 @@ import (
 )
 
 // NewClient 创建一个新的 QQ Client
-func NewClient(uin uint32, appInfo *auth.AppInfo, signURL ...string) *QQClient {
+func NewClient(uin uint32, password string, appInfo *auth.AppInfo, signURL ...string) *QQClient {
+	return NewClientMD5(uin, md5.Sum([]byte(password)), appInfo, signURL...)
+}
+
+func NewClientMD5(uin uint32, passwordMD5 [16]byte, appInfo *auth.AppInfo, signURL ...string) *QQClient {
 	cookieContainer, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	client := &QQClient{
-		Uin:  uin,
-		oicq: oicq.NewCodec(int64(uin)),
+		Uin:         uin,
+		oicq:        oicq.NewCodec(int64(uin)),
+		passwordMD5: passwordMD5,
 		highwaySession: highway.Session{
 			AppID:    uint32(appInfo.AppID),
 			SubAppID: uint32(appInfo.SubAppID),
@@ -65,8 +71,9 @@ type QQClient struct {
 
 	Online atomic.Bool
 
-	t106 []byte
-	t16a []byte
+	t106        []byte
+	t16a        []byte
+	passwordMD5 [16]byte
 
 	UA string
 

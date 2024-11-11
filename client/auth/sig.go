@@ -14,13 +14,15 @@ var (
 )
 
 type SigInfo struct {
-	Uin         uint32
-	Sequence    uint32
-	UID         string
-	Tgtgt       []byte
-	Tgt         []byte
-	D2          []byte
-	D2Key       []byte
+	Uin      uint32
+	Sequence uint32
+	UID      string
+
+	Tgtgt []byte
+	Tgt   []byte
+	D2    []byte
+	D2Key []byte
+
 	Qrsig       []byte
 	ExchangeKey []byte
 	KeySig      []byte
@@ -28,6 +30,9 @@ type SigInfo struct {
 	UnusualSig  []byte
 	TempPwd     []byte
 	CaptchaInfo [3]string
+
+	CaptchaURL         string
+	NewDeviceVerifyURL string
 
 	Nickname string
 	Age      uint8

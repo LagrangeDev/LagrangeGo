@@ -45,3 +45,7 @@ func (r State) Missing() bool {
 func (r State) Successful() bool {
 	return r == Success
 }
+
+func (r State) NeedVerify() bool {
+	return r == NewDeviceVerify || r == CaptchaVerify || r == UnusualVerify
+}

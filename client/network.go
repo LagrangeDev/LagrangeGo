@@ -5,6 +5,7 @@ import (
 	"net/netip"
 	"runtime/debug"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -125,7 +126,7 @@ func (c *QQClient) quickReconnect() {
 		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "quick reconnect failed"})
 		return
 	}
-	if err := c.Register(); err != nil {
+	if err := c.register(); err != nil {
 		c.error("register client failed: %v", err)
 		c.Disconnect()
 		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "register error"})
@@ -272,7 +273,7 @@ func (c *QQClient) unexpectedDisconnect(_ *network.TCPClient, e error) {
 		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "connection dropped by server."})
 		return
 	}
-	if err := c.Register(); err != nil {
+	if err := c.register(); err != nil {
 		c.error("register client failed: %v", err)
 		c.Disconnect()
 		c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "register error"})
@@ -301,10 +302,10 @@ func (c *QQClient) netLoop() {
 		resp, err := c.transport.ReadResponse(data)
 		// pkt, err := packets.ParseIncomingPacket(data, c.sig.D2Key)
 		if err != nil {
-			c.error("parse incoming packet error: %v", err)
+			c.debug("parse incoming packet error: %v", err)
 			if errors.Is(err, network.ErrSessionExpired) || errors.Is(err, network.ErrPacketDropped) {
 				c.Disconnect()
-				go c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: "session expired"})
+				go c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: err.Error()})
 				continue
 			}
 			errCount++
@@ -313,7 +314,7 @@ func (c *QQClient) netLoop() {
 			}
 			continue
 		}
-		if resp.EncryptType == network.EncryptTypeEmptyKey {
+		if resp.EncryptType == network.EncryptTypeEmptyKey && strings.HasPrefix(resp.CommandName, "wtlogin") {
 			m, err := c.oicq.Unmarshal(resp.Body)
 			if err != nil {
 				c.error("decrypt payload error: %v", err)

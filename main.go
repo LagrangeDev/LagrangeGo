@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -9,6 +10,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
@@ -31,7 +34,7 @@ func main() {
 		KernelVersion: "10.0.22631",
 	}
 
-	qqclient := client.NewClient(0, appInfo, "https://sign.lagrangecore.org/api/sign")
+	qqclient := client.NewClient(0, "", appInfo, "https://sign.lagrangecore.org/api/sign/25765")
 	qqclient.SetLogger(protocolLogger{})
 	qqclient.UseDevice(deviceInfo)
 	data, err := os.ReadFile("sig.bin")
@@ -64,26 +67,98 @@ func main() {
 		}
 	})
 
-	err = qqclient.Login("", "qrcode.png")
+	err = func(c *client.QQClient) error {
+		err := c.FastLogin()
+		if err == nil {
+			return nil
+		}
+
+		ret, err := c.PasswordLogin()
+		if err == nil {
+			return nil
+		}
+		for {
+			if err != nil {
+				logger.Errorf("密码登录失败: %s", err)
+				break
+			}
+			if ret.Successful() {
+				return nil
+			}
+			switch ret {
+			case loginstate.CaptchaVerify:
+				logger.Warnln("captcha verification required")
+				logger.Warnln(c.Sig().CaptchaURL)
+				aid := strings.Split(strings.Split(c.Sig().CaptchaURL, "&sid=")[1], "&")[0]
+				logger.Warnln("ticket?->")
+				ticket := utils.ReadLine()
+				logger.Warnln("rand_str?->")
+				randStr := utils.ReadLine()
+				ret, err = c.CommitCaptcha(ticket, randStr, aid)
+				continue
+			case loginstate.NewDeviceVerify:
+				vf, err := c.GetNewDeviceVerifyURL()
+				if err != nil {
+					return err
+				}
+				logger.Infoln(vf)
+				err = c.NewDeviceVerify(vf)
+				if err != nil {
+					return err
+				}
+			default:
+				logger.Errorf("Unhandled exception raised: %s", ret.Name())
+			}
+		}
+		logger.Infoln("login with qrcode")
+		png, _, err := c.FetchQRCodeDefault()
+		if err != nil {
+			return err
+		}
+		qrcodePath := "qrcode.png"
+		err = os.WriteFile(qrcodePath, png, 0666)
+		if err != nil {
+			return err
+		}
+		logger.Infof("qrcode saved to %s", qrcodePath)
+		for {
+			retCode, err := c.GetQRCodeResult()
+			if err != nil {
+				logger.Errorln(err)
+				return err
+			}
+			if retCode.Waitable() {
+				time.Sleep(3 * time.Second)
+				continue
+			}
+			if !retCode.Success() {
+				return errors.New(retCode.Name())
+			}
+			break
+		}
+		return c.QRCodeLogin()
+	}(qqclient)
+
 	if err != nil {
-		logrus.Errorln("login err:", err)
+		logger.Errorln("login err:", err)
 		return
 	}
+	logger.Infoln("login successed")
 
 	defer qqclient.Release()
 
 	defer func() {
 		data, err = qqclient.Sig().Marshal()
 		if err != nil {
-			logrus.Errorln("marshal sig.bin err:", err)
+			logger.Errorln("marshal sig.bin err:", err)
 			return
 		}
 		err = os.WriteFile("sig.bin", data, 0644)
 		if err != nil {
-			logrus.Errorln("write sig.bin err:", err)
+			logger.Errorln("write sig.bin err:", err)
 			return
 		}
-		logrus.Infoln("sig saved into sig.bin")
+		logger.Infoln("sig saved into sig.bin")
 	}()
 
 	// setup the main stop channel

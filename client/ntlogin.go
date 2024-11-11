@@ -1,9 +1,12 @@
 package client
 
 import (
+	"errors"
 	"fmt"
-	"net/url"
 	"strconv"
+
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	ftea "github.com/fumiama/gofastTEA"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
@@ -21,46 +24,91 @@ func buildNtloginCaptchaSubmit(ticket, randStr, aid string) proto.DynamicMessage
 	}
 }
 
+func buildPasswordLoginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo, sig *auth.SigInfo, passwordMD5 [16]byte) ([]byte, error) {
+	key := crypto.MD5Digest(binary.NewBuilder(nil).
+		WriteBytes(passwordMD5[:]).
+		WriteU32(0).
+		WriteU32(uin).
+		ToBytes(),
+	)
+
+	plainBytes := binary.NewBuilder(nil).
+		WriteU16(4).
+		WriteU32(crypto.RandU32()).
+		WriteU32(0).
+		WriteU32(uint32(app.AppID)).
+		WriteU32(8001).
+		WriteU32(0).
+		WriteU32(uin).
+		WriteU32(uint32(utils.TimeStamp())).
+		WriteU32(0).
+		WriteU8(1).
+		WriteBytes(passwordMD5[:]).
+		WriteBytes(crypto.RandomBytes(16)).
+		WriteU32(0).
+		WriteU8(1).
+		WriteBytes(utils.MustParseHexStr(device.GUID)).
+		WriteU32(1).
+		WriteU32(1).
+		WritePacketString(strconv.Itoa(int(uin)), "u16", false).
+		ToBytes()
+
+	encryptedPlain := ftea.NewTeaCipher(key).Encrypt(plainBytes)
+	return buildNtloginRequest(uin, app, device, sig, encryptedPlain)
+}
+
 func buildNtloginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo, sig *auth.SigInfo, credential []byte) ([]byte, error) {
-	body := proto.DynamicMessage{
-		1: proto.DynamicMessage{
-			1: proto.DynamicMessage{
-				1: strconv.Itoa(int(uin)),
-			},
-			2: proto.DynamicMessage{
-				1: app.OS,
-				2: device.DeviceName,
-				3: app.NTLoginType,
-				4: utils.MustParseHexStr(device.GUID),
-			},
-			3: proto.DynamicMessage{
-				1: device.KernelVersion,
-				2: app.AppID,
-				3: app.PackageName,
-			},
-		},
-		2: proto.DynamicMessage{
-			1: credential,
-		},
+	if sig.ExchangeKey == nil || sig.KeySig == nil {
+		return nil, errors.New("empty key")
 	}
 
-	if sig.Cookies != "" {
-		body[1].(proto.DynamicMessage)[5] = proto.DynamicMessage{1: sig.Cookies}
-	}
-	if all(sig.CaptchaInfo[:3]) {
-		body[2].(proto.DynamicMessage)[2] = buildNtloginCaptchaSubmit(sig.CaptchaInfo[0], sig.CaptchaInfo[1], sig.CaptchaInfo[2])
+	packet := login.SsoNTLoginBase{
+		Header: &login.SsoNTLoginHeader{
+			Uin: &login.SsoNTLoginUin{Uin: proto.Some(strconv.Itoa(int(uin)))},
+			System: &login.SsoNTLoginSystem{
+				OS:         proto.Some(app.OS),
+				DeviceName: proto.Some(device.DeviceName),
+				Type:       int32(app.NTLoginType),
+				Guid:       utils.MustParseHexStr(device.GUID),
+			},
+			Version: &login.SsoNTLoginVersion{
+				KernelVersion: proto.Some(device.KernelVersion),
+				AppId:         int32(app.AppID),
+				PackageName:   proto.Some(app.PackageName),
+			},
+			Cookie: &login.SsoNTLoginCookie{Cookie: proto.Some(sig.Cookies)},
+		},
+		Body: func() []byte {
+			body := login.SsoNTLoginEasyLogin{
+				TempPassword: credential,
+			}
+			if all(sig.CaptchaInfo[:3]) {
+				body.Captcha = &login.SsoNTLoginCaptchaSubmit{
+					Ticket:  sig.CaptchaInfo[0],
+					RandStr: sig.CaptchaInfo[1],
+					Aid:     sig.CaptchaInfo[2],
+				}
+			}
+			b, _ := proto.Marshal(&body)
+			return b
+		}(),
 	}
 
-	data, err := crypto.AESGCMEncrypt(body.Encode(), sig.ExchangeKey)
+	pkt, err := proto.Marshal(&packet)
 	if err != nil {
 		return nil, err
 	}
 
-	return proto.DynamicMessage{
-		1: sig.KeySig,
-		3: data,
-		4: 1,
-	}.Encode(), nil
+	data, err := crypto.AESGCMEncrypt(pkt, sig.ExchangeKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&login.SsoNTLoginEncryptedData{
+		Sign:    sig.KeySig,
+		GcmCalc: data,
+		Type:    1,
+	})
 }
 
 func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State, error) {
@@ -93,12 +141,22 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 		return loginstate.Success, nil
 	}
 	ret := loginstate.State(base.Header.Error.ErrorCode)
-	if ret == loginstate.CaptchaVerify {
+	if base.Header.Error != nil && ret.NeedVerify() {
+		sig.UnusualSig = func() []byte {
+			if body.Unusual != nil {
+				return body.Unusual.Sig
+			}
+			return nil
+		}()
 		sig.Cookies = base.Header.Cookie.Cookie.Unwrap()
-		verifyURL := body.Captcha.Url
-		aid := getAid(verifyURL)
-		sig.CaptchaInfo[2] = aid
-		return ret, fmt.Errorf("need captcha verify: %v", verifyURL)
+		sig.CaptchaURL = func() string {
+			if body.Captcha != nil {
+				return body.Captcha.Url
+			}
+			return ""
+		}()
+		sig.NewDeviceVerifyURL = base.Header.Error.NewDeviceVerifyUrl.Unwrap()
+		return ret, nil
 	}
 	if base.Header.Error.Tag != "" {
 		stat := base.Header.Error
@@ -109,10 +167,44 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 	return ret, fmt.Errorf("login fail: %s", ret.Name())
 }
 
-func getAid(verifyURL string) string {
-	u, _ := url.Parse(verifyURL)
-	q := u.Query()
-	return q["sid"][0]
+func parseNewDeviceLoginResponse(response []byte, sig *auth.SigInfo) error {
+	if len(sig.ExchangeKey) == 0 {
+		return errors.New("empty exchange key")
+	}
+
+	var encrypted login.SsoNTLoginEncryptedData
+	err := proto.Unmarshal(response, &encrypted)
+	if err != nil {
+		return err
+	}
+
+	if encrypted.GcmCalc != nil {
+		decrypted, err := crypto.AESGCMDecrypt(encrypted.GcmCalc, sig.ExchangeKey)
+		if err != nil {
+			return err
+		}
+		var base login.SsoNTLoginBase
+		err = proto.Unmarshal(decrypted, &base)
+		if err != nil {
+			return err
+		}
+		var body login.SsoNTLoginResponse
+		err = proto.Unmarshal(base.Body, &body)
+		if err != nil {
+			return err
+		}
+
+		if base.Header.Error != nil || body.Credentials == nil {
+			ret := loginstate.State(base.Header.Error.ErrorCode)
+			return errors.New(ret.Name())
+		}
+		sig.Tgt = body.Credentials.Tgt
+		sig.D2 = body.Credentials.D2
+		sig.D2Key = body.Credentials.D2Key
+		sig.TempPwd = body.Credentials.TempPassword
+		return nil
+	}
+	return errors.New("empty data")
 }
 
 func all(b []string) bool {
