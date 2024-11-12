@@ -12,6 +12,9 @@ on:
 
 name: Test & Lint
 
+env:
+  GO111MODULE: on
+
 jobs:
   test:
     runs-on: ubuntu-latest
