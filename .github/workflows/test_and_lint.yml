@@ -27,6 +27,7 @@ jobs:
         with:
           go-version: '^1.23'
           cache: false
+      - run: go get
       - run: go test -v -race ./...
 
   lint:
