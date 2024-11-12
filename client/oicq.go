@@ -13,6 +13,41 @@ import (
 	tea "github.com/fumiama/gofastTEA"
 )
 
+type (
+	LoginError int
+
+	LoginResponse struct {
+		Success bool
+		Code    byte
+		Error   LoginError
+
+		// Captcha info
+		CaptchaImage []byte
+		CaptchaSign  []byte
+
+		// Unsafe device
+		VerifyURL string
+
+		// SMS needed
+		SMSPhone string
+
+		// other error
+		ErrorMessage string
+	}
+)
+
+//go:generate stringer -type=LoginError
+const (
+	NeedCaptcha            LoginError = 1
+	OtherLoginError        LoginError = 3
+	UnsafeDeviceError      LoginError = 4
+	SMSNeededError         LoginError = 5
+	TooManySMSRequestError LoginError = 6
+	SMSOrVerifyNeededError LoginError = 7
+	SliderNeededError      LoginError = 8
+	UnknownLoginError      LoginError = -1
+)
+
 func (c *QQClient) buildCode2dPacket(uin uint32, cmdID int, body []byte) []byte {
 	return c.buildLoginPacket(
 		uin,
@@ -53,15 +88,14 @@ func (c *QQClient) buildLoginPacket(uin uint32, cmd string, body []byte) []byte 
 	})
 }
 
-func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
+func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) (LoginResponse, error) {
 	reader := binary.NewReader(buf)
 	reader.SkipBytes(2)
 	typ := reader.ReadU8()
 	tlv := reader.ReadTlv()
 
-	var title, content string
-
-	if typ == 0 {
+	switch typ {
+	case 0:
 		reader = binary.NewReader(tea.NewTeaCipher(sig.Tgtgt).Decrypt(tlv[0x119]))
 		tlv = reader.ReadTlv()
 		if tgt, ok := tlv[0x10A]; ok {
@@ -89,29 +123,50 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) error {
 		if err != nil {
 			err = fmt.Errorf("parsing login response error: %s", err)
 			c.errorln(err)
-			return err
+			return LoginResponse{
+				Success:      false,
+				Code:         typ,
+				Error:        UnknownLoginError,
+				ErrorMessage: err.Error(),
+			}, err
 		}
 		sig.UID = resp.Layer1.Layer2.Uid
 
 		c.debugln("SigInfo got")
 
-		return nil
-	} else if errData, ok := tlv[0x146]; ok {
-		errBuf := binary.NewReader(errData)
+		return LoginResponse{
+			Success: true,
+		}, nil
+	default:
+	}
+
+	var loginErr LoginError
+	var title, content string
+
+	if t146, ok := tlv[0x146]; ok {
+		errBuf := binary.NewReader(t146)
 		errBuf.SkipBytes(4)
 		title = errBuf.ReadString(int(errBuf.ReadU16()))
 		content = errBuf.ReadString(int(errBuf.ReadU16()))
-	} else if errData, ok := tlv[0x149]; ok {
-		errBuf := binary.NewReader(errData)
+		loginErr = OtherLoginError
+
+	} else if t149, ok := tlv[0x149]; ok {
+		errBuf := binary.NewReader(t149)
 		errBuf.SkipBytes(2)
 		title = errBuf.ReadString(int(errBuf.ReadU16()))
 		content = errBuf.ReadString(int(errBuf.ReadU16()))
+		loginErr = OtherLoginError
 	} else {
 		title = "未知错误"
 		content = "无法解析错误原因，请将完整日志提交给开发者"
+		loginErr = UnknownLoginError
 	}
 
 	err := fmt.Errorf("login fail on oicq (0x%02x): [%s]>[%s]", typ, title, content)
 	c.errorln(err)
-	return err
+	return LoginResponse{
+		Success:      false,
+		Error:        loginErr,
+		ErrorMessage: err.Error(),
+	}, nil
 }

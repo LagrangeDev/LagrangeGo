@@ -103,37 +103,45 @@ func buildNtloginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo,
 	})
 }
 
-func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State, error) {
+func parseNtloginResponse(response []byte, sig *auth.SigInfo) (LoginResponse, error) {
 	var frame login.SsoNTLoginEncryptedData
 	err := proto.Unmarshal(response, &frame)
 	if err != nil {
-		return -1, fmt.Errorf("proto decode failed: %s", err)
+		return LoginResponse{
+			Success: false,
+		}, fmt.Errorf("proto decode failed: %s", err)
 	}
 
 	var base login.SsoNTLoginBase
 	data, err := crypto.AESGCMDecrypt(frame.GcmCalc, sig.ExchangeKey)
 	if err != nil {
-		return -1, err
+		return LoginResponse{
+			Success: false,
+		}, err
 	}
 	err = proto.Unmarshal(data, &base)
 	if err != nil {
-		return -1, fmt.Errorf("proto decode failed: %s", err)
+		return LoginResponse{
+			Success: false,
+		}, fmt.Errorf("proto decode failed: %s", err)
 	}
 	var body login.SsoNTLoginResponse
 	err = proto.Unmarshal(base.Body, &body)
 	if err != nil {
-		return -1, fmt.Errorf("proto decode failed: %s", err)
+		return LoginResponse{
+			Success: false,
+		}, fmt.Errorf("proto decode failed: %s", err)
 	}
-
-	ret := loginstate.State(base.Header.Error.ErrorCode)
 
 	if body.Credentials != nil {
 		sig.Tgt = body.Credentials.Tgt
 		sig.D2 = body.Credentials.D2
 		sig.D2Key = body.Credentials.D2Key
 		sig.TempPwd = body.Credentials.TempPassword
-		return ret, nil
+		return LoginResponse{Success: true}, nil
 	}
+
+	ret := loginstate.State(base.Header.Error.ErrorCode)
 	if base.Header.Error != nil && ret.NeedVerify() {
 		sig.UnusualSig = func() []byte {
 			if body.Unusual != nil {
@@ -149,15 +157,29 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (loginstate.State,
 			return ""
 		}()
 		sig.NewDeviceVerifyURL = base.Header.Error.NewDeviceVerifyUrl.Unwrap()
-		return ret, nil
+		err = nil
 	}
 	if base.Header.Error.Tag != "" {
 		stat := base.Header.Error
 		title := stat.Tag
 		content := stat.Message
-		return ret, fmt.Errorf("login fail on ntlogin(%s): [%s]>%s", ret.Name(), title, content)
+		err = fmt.Errorf("login fail on ntlogin(%s): [%s]>%s", ret.Name(), title, content)
 	}
-	return ret, fmt.Errorf("login fail: %s", ret.Name())
+	var loginErr LoginError
+	//nolint:exhaustive
+	switch ret {
+	case loginstate.CaptchaVerify:
+		loginErr = NeedCaptcha
+	case loginstate.NewDeviceVerify:
+		loginErr = UnsafeDeviceError
+	default:
+		loginErr = OtherLoginError
+	}
+	return LoginResponse{
+		Success:      false,
+		Error:        loginErr,
+		ErrorMessage: ret.Name(),
+	}, err
 }
 
 func parseNewDeviceLoginResponse(response []byte, sig *auth.SigInfo) (loginstate.State, error) {

@@ -11,8 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
-
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/message"
@@ -69,44 +67,51 @@ func main() {
 		}
 	})
 
-	err = func(c *client.QQClient) error {
+	qqclient.DisconnectedEvent.Subscribe(func(client *client.QQClient, event *client.DisconnectedEvent) {
+		logger.Infof("连接已断开：%v", event.Message)
+	})
+
+	err = func(c *client.QQClient, passwordLogin bool) error {
+		logger.Info("login with password")
 		err := c.FastLogin()
 		if err == nil {
 			return nil
 		}
 
-		ret, err := c.PasswordLogin()
-		for {
-			if err != nil {
-				logger.Errorf("密码登录失败: %s", err)
-				break
-			}
-			if ret.Successful() {
-				return nil
-			}
-			switch ret {
-			case loginstate.CaptchaVerify:
-				logger.Warnln("captcha verification required")
-				logger.Warnln(c.Sig().CaptchaURL)
-				aid := strings.Split(strings.Split(c.Sig().CaptchaURL, "&sid=")[1], "&")[0]
-				logger.Warnln("ticket?->")
-				ticket := utils.ReadLine()
-				logger.Warnln("rand_str?->")
-				randStr := utils.ReadLine()
-				ret, err = c.CommitCaptcha(ticket, randStr, aid)
-				continue
-			case loginstate.NewDeviceVerify:
-				vf, err := c.GetNewDeviceVerifyURL()
+		if passwordLogin {
+			ret, err := c.PasswordLogin()
+			for {
 				if err != nil {
-					return err
+					logger.Errorf("密码登录失败: %s", err)
+					break
 				}
-				logger.Infoln(vf)
-				err = c.NewDeviceVerify(vf)
-				if err != nil {
-					return err
+				if ret.Success {
+					return nil
 				}
-			default:
-				logger.Errorf("Unhandled exception raised: %s", ret.Name())
+				switch ret.Error {
+				case client.NeedCaptcha:
+					logger.Warnln("captcha verification required")
+					logger.Warnln(c.Sig().CaptchaURL)
+					aid := strings.Split(strings.Split(c.Sig().CaptchaURL, "&sid=")[1], "&")[0]
+					logger.Warnln("ticket?->")
+					ticket := utils.ReadLine()
+					logger.Warnln("rand_str?->")
+					randStr := utils.ReadLine()
+					ret, err = c.CommitCaptcha(ticket, randStr, aid)
+					continue
+				case client.UnsafeDeviceError:
+					vf, err := c.GetNewDeviceVerifyURL()
+					if err != nil {
+						return err
+					}
+					logger.Infoln(vf)
+					err = c.NewDeviceVerify(vf)
+					if err != nil {
+						return err
+					}
+				default:
+					logger.Errorf("Unhandled exception raised: %s", ret.ErrorMessage)
+				}
 			}
 		}
 		logger.Infoln("login with qrcode")
@@ -135,8 +140,9 @@ func main() {
 			}
 			break
 		}
-		return c.QRCodeLogin()
-	}(qqclient)
+		_, err = c.QRCodeLogin()
+		return err
+	}(qqclient, false)
 
 	if err != nil {
 		logger.Errorln("login err:", err)

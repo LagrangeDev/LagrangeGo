@@ -14,28 +14,34 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodestate"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
-func (c *QQClient) TokenLogin() (loginstate.State, error) {
+func (c *QQClient) TokenLogin() (*LoginResponse, error) {
 	if c.Online.Load() {
-		return -996, ErrAlreadyOnline
+		return nil, ErrAlreadyOnline
 	}
 	data, err := buildNtloginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
 	if err != nil {
-		return -998, err
+		return nil, err
 	}
 	packet, err := c.sendUniPacketAndWait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginEasyLogin",
 		data,
 	)
 	if err != nil {
-		return -999, err
+		return nil, err
 	}
-	return parseNtloginResponse(packet, &c.transport.Sig)
+	res, err := parseNtloginResponse(packet, &c.transport.Sig)
+	if err != nil {
+		return nil, err
+	}
+	if res.Success {
+		err = c.init()
+	}
+	return &res, err
 }
 
 func (c *QQClient) FetchQRCodeDefault() ([]byte, string, error) {
@@ -147,56 +153,63 @@ func (c *QQClient) keyExchange() error {
 	return wtlogin.ParseKeyExchangeResponse(packet, c.Sig())
 }
 
-func (c *QQClient) PasswordLogin() (loginstate.State, error) {
+func (c *QQClient) PasswordLogin() (*LoginResponse, error) {
 	if c.Online.Load() {
-		return -994, ErrAlreadyOnline
+		return nil, ErrAlreadyOnline
 	}
 
 	err := c.connect()
 	if err != nil {
-		return -995, err
+		return nil, err
 	}
 
 	err = c.keyExchange()
 	if err != nil {
-		return -996, err
+		return nil, err
 	}
 
 	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {
-		return -998, err
+		return nil, err
 	}
 	packet, err := c.sendUniPacketAndWait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
 		data,
 	)
 	if err != nil {
-		return -999, err
+		return nil, err
 	}
-	return parseNtloginResponse(packet, &c.transport.Sig)
+	res, err := parseNtloginResponse(packet, &c.transport.Sig)
+	if err != nil {
+		return nil, err
+	}
+	if res.Success {
+		err = c.init()
+	}
+	return &res, err
 }
 
-func (c *QQClient) CommitCaptcha(ticket, randStr, aid string) (loginstate.State, error) {
+func (c *QQClient) CommitCaptcha(ticket, randStr, aid string) (*LoginResponse, error) {
 	c.Sig().CaptchaInfo = [3]string{ticket, randStr, aid}
 	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {
-		return -998, err
+		return nil, err
 	}
 	packet, err := c.sendUniPacketAndWait(
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
 		data,
 	)
 	if err != nil {
-		return -999, err
+		return nil, err
 	}
-	ret, err := parseNtloginResponse(packet, &c.transport.Sig)
+	res, err := parseNtloginResponse(packet, &c.transport.Sig)
 	if err != nil {
-		return -999, err
+		return nil, err
 	}
-	if ret.Successful() {
-		return ret, c.init()
+	if res.Success {
+		err = c.init()
 	}
-	return ret, nil
+	return &res, err
 }
 
 func (c *QQClient) GetNewDeviceVerifyURL() (string, error) {
@@ -310,7 +323,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 	return fmt.Errorf("verify timeout error")
 }
 
-func (c *QQClient) QRCodeLogin() error {
+func (c *QQClient) QRCodeLogin() (*LoginResponse, error) {
 	app := c.version()
 	device := c.Device()
 	response, err := c.sendUniPacketAndWait(
@@ -336,14 +349,17 @@ func (c *QQClient) QRCodeLogin() error {
 			).ToBytes()))
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = c.decodeLoginResponse(response, &c.transport.Sig)
+	res, err := c.decodeLoginResponse(response, &c.transport.Sig)
 	if err != nil {
-		return err
+		return &res, err
 	}
-	return c.init()
+	if res.Success {
+		err = c.init()
+	}
+	return &res, err
 }
 
 func (c *QQClient) FastLogin() error {
