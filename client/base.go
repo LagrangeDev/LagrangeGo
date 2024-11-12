@@ -31,29 +31,26 @@ import (
 )
 
 // NewClient 创建一个新的 QQ Client
-func NewClient(uin uint32, password string, appInfo *auth.AppInfo, signURL ...string) *QQClient {
-	return NewClientMD5(uin, md5.Sum([]byte(password)), appInfo, signURL...)
+func NewClient(uin uint32, password string) *QQClient {
+	return NewClientMD5(uin, md5.Sum([]byte(password)))
 }
 
-func NewClientMD5(uin uint32, passwordMD5 [16]byte, appInfo *auth.AppInfo, signURL ...string) *QQClient {
+func NewClientEmpty() *QQClient {
+	return NewClientMD5(0, [16]byte{})
+}
+
+func NewClientMD5(uin uint32, passwordMD5 [16]byte) *QQClient {
 	cookieContainer, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	client := &QQClient{
 		Uin:         uin,
 		oicq:        oicq.NewCodec(int64(uin)),
 		passwordMD5: passwordMD5,
-		highwaySession: highway.Session{
-			AppID:    uint32(appInfo.AppID),
-			SubAppID: uint32(appInfo.SubAppID),
-		},
 		ticket: &TicketService{
 			client: &http.Client{Jar: cookieContainer},
 			sKey:   &keyInfo{},
 		},
 		alive: true,
-		UA:    "LagrangeGo qq/" + appInfo.PackageSign,
 	}
-	client.signProvider = sign.NewSigner(appInfo, client.debug, signURL...)
-	client.transport.Version = appInfo
 	client.transport.Sig.D2Key = make([]byte, 0, 16)
 	client.highwaySession.Uin = &client.transport.Sig.Uin
 	client.Online.Store(false)
@@ -130,6 +127,24 @@ type QQClient struct {
 	// client event handles
 	eventHandlers     eventHandlers
 	DisconnectedEvent EventHandle[*DisconnectedEvent]
+}
+
+// AddSignServer 设置签名服务器url
+func (c *QQClient) AddSignServer(signServers ...string) {
+	c.signProvider.AddSignServer(signServers...)
+}
+
+// AddSignHeader 设置签名服务器签名时的额外http header
+func (c *QQClient) AddSignHeader(header map[string]string) {
+	c.signProvider.AddRequestHeader(header)
+}
+
+func (c *QQClient) UseVersion(app *auth.AppInfo) {
+	c.transport.Version = app
+	c.highwaySession.AppID = uint32(app.AppID)
+	c.highwaySession.SubAppID = uint32(app.SubAppID)
+	c.UA = "LagrangeGo qq/" + app.PackageSign
+	c.signProvider = sign.NewSigner(app, c.debug)
 }
 
 func (c *QQClient) version() *auth.AppInfo {

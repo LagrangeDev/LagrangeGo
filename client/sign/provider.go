@@ -12,4 +12,7 @@ type Response struct {
 
 type Provider interface {
 	Sign(cmd string, seq uint32, data []byte) (*Response, error)
+	AddRequestHeader(header map[string]string)
+	AddSignServer(signServers ...string)
+	GetSignServer() []string
 }
