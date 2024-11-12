@@ -162,7 +162,7 @@ func (c *QQClient) PasswordLogin() (loginstate.State, error) {
 		return -996, err
 	}
 
-	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.passwordMD5)
+	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {
 		return -998, err
 	}
@@ -178,7 +178,7 @@ func (c *QQClient) PasswordLogin() (loginstate.State, error) {
 
 func (c *QQClient) CommitCaptcha(ticket, randStr, aid string) (loginstate.State, error) {
 	c.Sig().CaptchaInfo = [3]string{ticket, randStr, aid}
-	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.passwordMD5)
+	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {
 		return -998, err
 	}

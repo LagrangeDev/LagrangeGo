@@ -44,7 +44,7 @@ func NewClientMD5(uin uint32, passwordMD5 [16]byte) *QQClient {
 	client := &QQClient{
 		Uin:         uin,
 		oicq:        oicq.NewCodec(int64(uin)),
-		passwordMD5: passwordMD5,
+		PasswordMD5: passwordMD5,
 		ticket: &TicketService{
 			client: &http.Client{Jar: cookieContainer},
 			sKey:   &keyInfo{},
@@ -70,7 +70,7 @@ type QQClient struct {
 
 	t106        []byte
 	t16a        []byte
-	passwordMD5 [16]byte
+	PasswordMD5 [16]byte
 
 	UA string
 
@@ -165,6 +165,10 @@ func (c *QQClient) UseSig(s auth.SigInfo) {
 
 func (c *QQClient) Sig() *auth.SigInfo {
 	return &c.transport.Sig
+}
+
+func (c *QQClient) SetCustomServer(servers []netip.AddrPort) {
+	c.servers = append(servers, c.servers...)
 }
 
 func (c *QQClient) Release() {
