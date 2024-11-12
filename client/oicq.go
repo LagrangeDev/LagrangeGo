@@ -13,6 +13,8 @@ import (
 	tea "github.com/fumiama/gofastTEA"
 )
 
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/entities.go#L18
+
 type (
 	LoginError int
 

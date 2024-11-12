@@ -18,12 +18,14 @@ jobs:
     steps:
       - name: Code
         uses: actions/checkout@v4
+
       - name: Install Go
         uses: actions/setup-go@v5
         with:
           go-version: '^1.23'
           cache: false
       - run: go get
+      - run: go install golang.org/x/tools/cmd/stringer
       - run: go generate ./...
       - run: go test -v -race ./...
 
@@ -32,15 +34,19 @@ jobs:
     steps:
       - name: Code
         uses: actions/checkout@v4
+
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          cache: false
           go-version: '^1.23'
+          cache: false
       - run: go get
+      - run: go install golang.org/x/tools/cmd/stringer
       - run: go generate ./...
+
       - name: Go vet
         run: go vet ./...
+
       - name: GolangCI-Lint
         uses: golangci/golangci-lint-action@v6
         with:
