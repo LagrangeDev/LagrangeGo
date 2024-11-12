@@ -189,7 +189,7 @@ func (c *QQClient) PasswordLogin() (*LoginResponse, error) {
 	return &res, err
 }
 
-func (c *QQClient) CommitCaptcha(ticket, randStr, aid string) (*LoginResponse, error) {
+func (c *QQClient) SubmitCaptcha(ticket, randStr, aid string) (*LoginResponse, error) {
 	c.Sig().CaptchaInfo = [3]string{ticket, randStr, aid}
 	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {

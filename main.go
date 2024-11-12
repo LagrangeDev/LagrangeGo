@@ -89,15 +89,15 @@ func main() {
 					return nil
 				}
 				switch ret.Error {
-				case client.NeedCaptcha:
+				case client.SliderNeededError:
 					logger.Warnln("captcha verification required")
-					logger.Warnln(c.Sig().CaptchaURL)
-					aid := strings.Split(strings.Split(c.Sig().CaptchaURL, "&sid=")[1], "&")[0]
+					logger.Warnln(ret.VerifyURL)
+					aid := strings.Split(strings.Split(ret.VerifyURL, "sid=")[1], "&")[0]
 					logger.Warnln("ticket?->")
 					ticket := utils.ReadLine()
 					logger.Warnln("rand_str?->")
 					randStr := utils.ReadLine()
-					ret, err = c.CommitCaptcha(ticket, randStr, aid)
+					ret, err = c.SubmitCaptcha(ticket, randStr, aid)
 					continue
 				case client.UnsafeDeviceError:
 					vf, err := c.GetNewDeviceVerifyURL()

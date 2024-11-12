@@ -150,12 +150,6 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (LoginResponse, er
 			return nil
 		}()
 		sig.Cookies = base.Header.Cookie.Cookie.Unwrap()
-		sig.CaptchaURL = func() string {
-			if body.Captcha != nil {
-				return body.Captcha.Url
-			}
-			return ""
-		}()
 		sig.NewDeviceVerifyURL = base.Header.Error.NewDeviceVerifyUrl.Unwrap()
 		err = nil
 	}
@@ -166,12 +160,15 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (LoginResponse, er
 		err = fmt.Errorf("login fail on ntlogin(%s): [%s]>%s", ret.Name(), title, content)
 	}
 	var loginErr LoginError
+	var verifyURL string
 	//nolint:exhaustive
 	switch ret {
 	case loginstate.CaptchaVerify:
-		loginErr = NeedCaptcha
+		loginErr = SliderNeededError
+		verifyURL = body.Captcha.Url
 	case loginstate.NewDeviceVerify:
 		loginErr = UnsafeDeviceError
+		verifyURL = base.Header.Error.NewDeviceVerifyUrl.Unwrap()
 	default:
 		loginErr = OtherLoginError
 	}
@@ -179,6 +176,7 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (LoginResponse, er
 		Success:      false,
 		Error:        loginErr,
 		ErrorMessage: ret.Name(),
+		VerifyURL:    verifyURL,
 	}, err
 }
 

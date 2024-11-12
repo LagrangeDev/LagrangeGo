@@ -31,7 +31,6 @@ type SigInfo struct {
 	TempPwd     []byte
 	CaptchaInfo [3]string
 
-	CaptchaURL         string
 	NewDeviceVerifyURL string
 
 	Nickname string
