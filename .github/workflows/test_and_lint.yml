@@ -27,9 +27,6 @@ jobs:
         with:
           go-version: '^1.23'
           cache: false
-      - run: go get
-      - run: go get golang.org/x/tools/cmd/stringer
-      - run: go generate ./...
       - run: go test -v -race ./...
 
   lint:
@@ -44,8 +41,6 @@ jobs:
           go-version: '^1.23'
           cache: false
       - run: go get
-      - run: go get golang.org/x/tools/cmd/stringer
-      - run: go generate ./...
 
       - name: Go vet
         run: go vet ./...
