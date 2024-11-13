@@ -398,7 +398,7 @@ type QFaceExtra struct {
 	StickerType proto.Option[int32]  `protobuf:"varint,5,opt"`
 	ResultId    proto.Option[string] `protobuf:"bytes,6,opt"`
 	Text        proto.Option[string] `protobuf:"bytes,7,opt"`
-	// optional bytes surprise_id = 8;
+	// optional bytes SurpriseId = 8;
 	RandomType proto.Option[int32] `protobuf:"varint,9,opt"`
 	_          [0]func()
 }

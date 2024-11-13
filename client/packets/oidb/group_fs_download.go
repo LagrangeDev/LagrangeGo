@@ -12,8 +12,8 @@ func BuildGroupFSDownloadReq(groupUin uint32, fileID string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
 		Download: &oidb.OidbSvcTrpcTcp0X6D6Download{
 			GroupUin: groupUin,
-			AppID:    7,
-			BusID:    102,
+			AppId:    7,
+			BusId:    102,
 			FileId:   fileID,
 		},
 	}
