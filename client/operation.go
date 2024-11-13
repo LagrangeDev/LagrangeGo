@@ -1264,3 +1264,19 @@ func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*messa
 
 	return ret, nil
 }
+
+// ImageOcr 图片识别 有些域名的图可能无法识别，需要重新上传到tx服务器并获取图片下载链接
+func (c *QQClient) ImageOcr(url string) (*oidb2.OcrResponse, error) {
+	if url != "" {
+		pkt, err := oidb2.BuildImageOcrRequestPacket(url)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.sendOidbPacketAndWait(pkt)
+		if err != nil {
+			return nil, err
+		}
+		return oidb2.ParseImageOcrResp(resp)
+	}
+	return nil, errors.New("image error")
+}

@@ -31,7 +31,7 @@ type OidbSvcTrpcTcp0XFE1_2Response struct {
 }
 
 type OidbSvcTrpcTcp0XFE1_2ResponseBody struct {
-	// string UID = 1;
+	// string Uid = 1;
 	Properties *OidbSvcTrpcTcp0XFE1_2ResponseProperty `protobuf:"bytes,2,opt"`
 	Uin        uint32                                 `protobuf:"varint,3,opt"`
 	_          [0]func()
