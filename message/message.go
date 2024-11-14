@@ -216,7 +216,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			return []IMessageElement{
 				&ShortVideoElement{
 					Name: elem.VideoFile.FileName,
-					UUID: utils.S2B(elem.VideoFile.FileUuid),
+					UUID: elem.VideoFile.FileUuid,
 					Size: uint32(elem.VideoFile.FileSize),
 					Md5:  elem.VideoFile.FileMd5,
 					Thumb: &VideoThumb{

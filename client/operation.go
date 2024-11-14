@@ -421,7 +421,7 @@ func (c *QQClient) GetGroupRecordURL(groupUin uint32, node *oidb.IndexNode) (str
 }
 
 func (c *QQClient) GetVideoURL(isGroup bool, video *message2.ShortVideoElement) (string, error) {
-	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().UID, string(video.UUID), video.Name, isGroup, video.Md5, video.Sha1)
+	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().UID, video.UUID, video.Name, isGroup, video.Md5, video.Sha1)
 	if err != nil {
 		return "", err
 	}

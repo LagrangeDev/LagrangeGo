@@ -114,6 +114,7 @@ func (c *QQClient) ImageUploadPrivate(targetUID string, image *message.ImageElem
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo
+	image.FileUUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	compatImage := &message2.NotOnlineImage{}
 	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, compatImage)
 	if err != nil {
@@ -178,6 +179,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement
 		}
 	}
 	image.MsgInfo = uploadResp.Upload.MsgInfo
+	image.FileUUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	_ = proto.Unmarshal(uploadResp.Upload.CompatQMsg, image.CompatFace)
 	return image, nil
 }
@@ -233,6 +235,7 @@ func (c *QQClient) RecordUploadPrivate(targetUID string, record *message.VoiceEl
 		}
 	}
 	record.MsgInfo = uploadResp.Upload.MsgInfo
+	record.UUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	record.Compat = uploadResp.Upload.CompatQMsg
 	return record, nil
 }
@@ -288,6 +291,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 		}
 	}
 	record.MsgInfo = uploadResp.Upload.MsgInfo
+	record.UUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	record.Compat = uploadResp.Upload.CompatQMsg
 	return record, nil
 }
@@ -377,6 +381,7 @@ func (c *QQClient) VideoUploadPrivate(targetUID string, video *message.ShortVide
 		}
 	}
 	video.MsgInfo = uploadResp.Upload.MsgInfo
+	video.UUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, video.Compat)
 	if err != nil {
 		return nil, err
@@ -469,6 +474,7 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 		}
 	}
 	video.MsgInfo = uploadResp.Upload.MsgInfo
+	video.UUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, video.Compat)
 	if err != nil {
 		return nil, err

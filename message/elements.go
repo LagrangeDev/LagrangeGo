@@ -107,7 +107,7 @@ type (
 
 	ShortVideoElement struct {
 		Name     string
-		UUID     []byte
+		UUID     string
 		Size     uint32
 		URL      string
 		Duration uint32
