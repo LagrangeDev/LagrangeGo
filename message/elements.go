@@ -193,22 +193,14 @@ func NewRecord(data []byte, summary ...string) *VoiceElement {
 func NewStreamRecord(r io.ReadSeeker, summary ...string) *VoiceElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &VoiceElement{
-		Size: uint32(length),
-		Summary: func() string {
-			if len(summary) != 0 {
-				return summary[0]
-			}
-			return ""
-		}(),
-		Stream: r,
-		Md5:    md5,
-		Sha1:   sha1,
+		Size:    uint32(length),
+		Summary: utils.Ternary(len(summary) == 0, "", summary[0]),
+		Stream:  r,
+		Md5:     md5,
+		Sha1:    sha1,
 		Duration: func() uint32 {
 			info, err := audio.Decode(r)
-			if err != nil {
-				return uint32(info.Time)
-			}
-			return uint32(length)
+			return utils.Ternary(err == nil, uint32(info.Time), uint32(length))
 		}(),
 	}
 }
@@ -228,16 +220,11 @@ func NewImage(data []byte, summary ...string) *ImageElement {
 func NewStreamImage(r io.ReadSeeker, summary ...string) *ImageElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &ImageElement{
-		Size: uint32(length),
-		Summary: func() string {
-			if len(summary) != 0 {
-				return summary[0]
-			}
-			return ""
-		}(),
-		Stream: r,
-		Md5:    md5,
-		Sha1:   sha1,
+		Size:    uint32(length),
+		Summary: utils.Ternary(len(summary) == 0, "", summary[0]),
+		Stream:  r,
+		Md5:     md5,
+		Sha1:    sha1,
 	}
 }
 
@@ -256,18 +243,13 @@ func NewVideo(data, thumb []byte, summary ...string) *ShortVideoElement {
 func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, summary ...string) *ShortVideoElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &ShortVideoElement{
-		Size:  uint32(length),
-		Thumb: NewVideoThumb(thumb),
-		Summary: func() string {
-			if len(summary) != 0 {
-				return summary[0]
-			}
-			return ""
-		}(),
-		Md5:    md5,
-		Sha1:   sha1,
-		Stream: r,
-		Compat: &message.VideoFile{},
+		Size:    uint32(length),
+		Thumb:   NewVideoThumb(thumb),
+		Summary: utils.Ternary(len(summary) == 0, "", summary[0]),
+		Md5:     md5,
+		Sha1:    sha1,
+		Stream:  r,
+		Compat:  &message.VideoFile{},
 	}
 }
 
@@ -318,11 +300,7 @@ func NewLocalFile(path string, name ...string) (*FileElement, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamFile(file, utils.LazyTernary(len(name) == 0, func() string {
-		return filepath.Base(file.Name())
-	}, func() string {
-		return name[0]
-	})), nil
+	return NewStreamFile(file, utils.Ternary(len(name) == 0, filepath.Base(file.Name()), name[0])), nil
 }
 
 func NewLightApp(content string) *LightAppElement {
