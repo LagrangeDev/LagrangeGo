@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
 
+// see https://github.com/LagrangeDev/Lagrange.Core/blob/47b819d43ad101a1a066a3f8afa094d000fe19f5/Lagrange.Core/Internal/Packets/Service/Oidb/Request/OidbSvcTrpcTcp0xEB7_1.cs
+
 message OidbSvcTrpcTcp0xEB7_1_ReqBody {
   optional StSignInWriteReq signInWriteReq = 2;
 }
