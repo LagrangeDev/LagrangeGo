@@ -1,14 +1,13 @@
 package oidb
 
 import (
-	"encoding/hex"
 	"fmt"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildVideoDownloadReq(selfUID, videoUUID, videoName string, isGroup bool, md5, sha1 []byte) (*Packet, error) {
+func BuildVideoDownloadReq(selfUID, videoUUID string, isGroup bool) (*Packet, error) {
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -32,9 +31,6 @@ func BuildVideoDownloadReq(selfUID, videoUUID, videoName string, isGroup bool, m
 			Node: &oidb.IndexNode{
 				Info: &oidb.FileInfo{
 					FileSize: 0,
-					FileHash: hex.EncodeToString(md5),
-					FileSha1: hex.EncodeToString(sha1),
-					FileName: videoName,
 					Type: &oidb.FileType{
 						Type:        2,
 						PicFormat:   0,
