@@ -20,17 +20,12 @@ func (e *TextElement) BuildElement() []*message.Elem {
 }
 
 func (e *AtElement) BuildElement() []*message.Elem {
-	var atAll int32 = 2
-	if e.TargetUin == 0 {
-		atAll = 1
-	}
-	reserve := message.MentionExtra{
-		Type:   proto.Some(atAll),
+	reserveData, _ := proto.Marshal(&message.MentionExtra{
+		Type:   proto.Some(int32(utils.Ternary(e.TargetUin == 0, 1, 2))), // atAll
 		Uin:    proto.Some(uint32(0)),
 		Field5: proto.Some(int32(0)),
 		Uid:    proto.Some(e.TargetUID),
-	}
-	reserveData, _ := proto.Marshal(&reserve)
+	})
 	return []*message.Elem{{Text: &message.Text{
 		Str:       proto.Some(e.Display),
 		PbReserve: reserveData,
