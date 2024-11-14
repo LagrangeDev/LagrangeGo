@@ -204,8 +204,7 @@ func NewStreamRecord(r io.ReadSeeker, summary ...string) *VoiceElement {
 		Md5:    md5,
 		Sha1:   sha1,
 		Duration: func() uint32 {
-			info, err := audio.Decode(r)
-			if err != nil {
+			if info, err := audio.Decode(r); err == nil {
 				return uint32(info.Time)
 			}
 			return uint32(length)
