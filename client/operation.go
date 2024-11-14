@@ -1319,7 +1319,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err erro
 
 // DeleteUnidirectionalFriend 删除单向好友
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L62
-func (c *QQClient) DeleteUnidirectionalFriend(uin int64) error {
+func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 	webRsp := &struct {
 		ErrorCode int32 `json:"ErrorCode"`
 	}{}
