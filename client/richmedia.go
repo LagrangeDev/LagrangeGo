@@ -479,7 +479,7 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 	if err != nil {
 		return nil, err
 	}
-	video.Name = video.Compat.FileUuid
+	video.Name = video.Compat.FileName
 	video.UUID = video.Compat.FileUuid
 	return video, nil
 }
