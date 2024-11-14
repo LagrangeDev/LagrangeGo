@@ -14,7 +14,7 @@ type BotGroupClockInResult struct {
 	KeepDayText    string // 已打卡N天
 	GroupRankText  string // 群内排名第N位
 	ClockInUtcTime int64  // 打卡时间
-	DetailUrl      string // Detail info url https://qun.qq.com/v2/signin/detail?...
+	DetailURL      string // Detail info url https://qun.qq.com/v2/signin/detail?...
 }
 
 func BuildGroupSignPacket(botUin, groupUin uint32, appVersion string) (*Packet, error) {
@@ -42,7 +42,7 @@ func ParseGroupSignResp(data []byte) (*BotGroupClockInResult, error) {
 	ret := &BotGroupClockInResult{
 		Title:       rsp.SignInWriteRsp.DoneInfo.Title,
 		KeepDayText: rsp.SignInWriteRsp.DoneInfo.KeepDayText,
-		DetailUrl:   rsp.SignInWriteRsp.DoneInfo.DetailUrl,
+		DetailURL:   rsp.SignInWriteRsp.DoneInfo.DetailUrl,
 	}
 	if size := len(rsp.SignInWriteRsp.DoneInfo.ClockInInfo); size > 0 {
 		ret.GroupRankText = rsp.SignInWriteRsp.DoneInfo.ClockInInfo[0]
