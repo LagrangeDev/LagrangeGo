@@ -381,11 +381,12 @@ func (c *QQClient) VideoUploadPrivate(targetUID string, video *message.ShortVide
 		}
 	}
 	video.MsgInfo = uploadResp.Upload.MsgInfo
-	video.UUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, video.Compat)
 	if err != nil {
 		return nil, err
 	}
+	video.Name = video.Compat.FileName
+	video.UUID = video.Compat.FileUuid
 	return video, nil
 }
 
@@ -474,11 +475,12 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 		}
 	}
 	video.MsgInfo = uploadResp.Upload.MsgInfo
-	video.UUID = uploadResp.Upload.MsgInfo.MsgInfoBody[0].Index.FileUuid
 	err = proto.Unmarshal(uploadResp.Upload.CompatQMsg, video.Compat)
 	if err != nil {
 		return nil, err
 	}
+	video.Name = video.Compat.FileUuid
+	video.UUID = video.Compat.FileUuid
 	return video, nil
 }
 
