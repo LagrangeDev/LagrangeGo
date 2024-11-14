@@ -2,8 +2,8 @@ package client
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -13,6 +13,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/pkg/errors"
 
 	"github.com/tidwall/gjson"
 	"golang.org/x/net/html"
@@ -1271,4 +1274,64 @@ func (c *QQClient) SendGroupSign(groupUin uint32) (*oidb2.BotGroupClockInResult,
 		return nil, err
 	}
 	return oidb2.ParseGroupSignResp(resp)
+}
+
+// GetUnidirectionalFriendList 获取单向好友列表
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L23
+func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err error) {
+	webRsp := &struct {
+		BlockList []struct {
+			Uin         uint32 `json:"uint64_uin"`
+			NickBytes   string `json:"bytes_nick"`
+			Age         uint32 `json:"uint32_age"`
+			Sex         uint32 `json:"uint32_sex"`
+			SourceBytes string `json:"bytes_source"`
+		} `json:"rpt_block_list"`
+		ErrorCode int32 `json:"ErrorCode"`
+	}{}
+	rsp, err := c.webSsoRequest("ti.qq.com", "OidbSvc.0xe17_0", fmt.Sprintf(`{"uint64_uin":%v,"uint64_top":0,"uint32_req_num":99,"bytes_cookies":""}`, c.Uin))
+	if err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(utils.S2B(rsp), webRsp); err != nil {
+		return nil, errors.Wrap(err, "unmarshal json error")
+	}
+	if webRsp.ErrorCode != 0 {
+		return nil, fmt.Errorf("web sso request error: %v", webRsp.ErrorCode)
+	}
+	for _, block := range webRsp.BlockList {
+		decodeBase64String := func(str string) string {
+			b, err := base64.StdEncoding.DecodeString(str)
+			if err != nil {
+				return ""
+			}
+			return utils.B2S(b)
+		}
+		ret = append(ret, &entity.Friend{
+			Uin:      block.Uin,
+			Nickname: decodeBase64String(block.NickBytes),
+			Age:      block.Age,
+			Source:   decodeBase64String(block.SourceBytes),
+		})
+	}
+	return
+}
+
+// DeleteUnidirectionalFriend 删除单向好友
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L62
+func (c *QQClient) DeleteUnidirectionalFriend(uin int64) error {
+	webRsp := &struct {
+		ErrorCode int32 `json:"ErrorCode"`
+	}{}
+	rsp, err := c.webSsoRequest("ti.qq.com", "OidbSvc.0x5d4_0", fmt.Sprintf(`{"uin_list":[%v]}`, uin))
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(utils.S2B(rsp), webRsp); err != nil {
+		return errors.Wrap(err, "unmarshal json error")
+	}
+	if webRsp.ErrorCode != 0 {
+		return errors.Errorf("web sso request error: %v", webRsp.ErrorCode)
+	}
+	return nil
 }

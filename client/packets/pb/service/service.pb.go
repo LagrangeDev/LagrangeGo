@@ -3,6 +3,10 @@
 
 package service
 
+import (
+	proto "github.com/RomiChan/protobuf/proto"
+)
+
 type InfoPushGroup struct {
 	GroupUin    uint32 `protobuf:"varint,1,opt"`
 	Sequence1   uint32 `protobuf:"varint,2,opt"`
@@ -13,5 +17,42 @@ type InfoPushGroup struct {
 	Sequence3   uint32 `protobuf:"varint,10,opt"`
 	Random      uint64 `protobuf:"varint,11,opt"`
 	Field13     uint32 `protobuf:"varint,13,opt"`
+	_           [0]func()
+}
+
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/pb/web/WebSsoBody.proto#L1
+type STServiceMonitItem struct {
+	Cmd     proto.Option[string] `protobuf:"bytes,1,opt"`
+	Url     proto.Option[string] `protobuf:"bytes,2,opt"`
+	Errcode proto.Option[int32]  `protobuf:"varint,3,opt"`
+	Cost    proto.Option[uint32] `protobuf:"varint,4,opt"`
+	Src     proto.Option[uint32] `protobuf:"varint,5,opt"`
+	_       [0]func()
+}
+
+type STServiceMonitReq struct {
+	List []*STServiceMonitItem `protobuf:"bytes,1,rep"`
+}
+
+type WebSsoControlData struct {
+	Frequency   proto.Option[uint32] `protobuf:"varint,1,opt"`
+	PackageSize proto.Option[uint32] `protobuf:"varint,2,opt"`
+	_           [0]func()
+}
+
+type WebSsoRequestBody struct {
+	Version proto.Option[uint32] `protobuf:"varint,1,opt"`
+	Type    proto.Option[uint32] `protobuf:"varint,2,opt"`
+	Data    proto.Option[string] `protobuf:"bytes,3,opt"`
+	WebData proto.Option[string] `protobuf:"bytes,4,opt"`
+	_       [0]func()
+}
+
+type WebSsoResponseBody struct {
+	Version     proto.Option[uint32] `protobuf:"varint,1,opt"`
+	Type        proto.Option[uint32] `protobuf:"varint,2,opt"`
+	Ret         proto.Option[uint32] `protobuf:"varint,3,opt"`
+	Data        proto.Option[string] `protobuf:"bytes,4,opt"`
+	ControlData *WebSsoControlData   `protobuf:"bytes,5,opt"`
 	_           [0]func()
 }

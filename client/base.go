@@ -4,13 +4,18 @@ package client
 
 import (
 	"crypto/md5"
-	"errors"
 	"net/http"
 	"net/http/cookiejar"
 	"net/netip"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 
 	"golang.org/x/net/publicsuffix"
 
@@ -200,6 +205,31 @@ func (c *QQClient) sendUniPacketAndWait(cmd string, buf []byte) ([]byte, error) 
 		return nil, errors.New("cannot parse response to bytes")
 	}
 	return rsp, nil
+}
+
+func (c *QQClient) webSsoRequest(host, webCmd, data string) (string, error) {
+	s := strings.Split(host, `.`)
+	sub := ""
+	for i := len(s) - 1; i >= 0; i-- {
+		sub += s[i]
+		if i != 0 {
+			sub += "_"
+		}
+	}
+	cmd := "MQUpdateSvc_" + sub + ".web." + webCmd
+	req, _ := proto.Marshal(&service.WebSsoRequestBody{
+		Type: proto.Uint32(0),
+		Data: proto.Some(data),
+	})
+	rspData, err := c.sendUniPacketAndWait(cmd, req)
+	if err != nil {
+		return "", errors.Wrap(err, "send web sso request error")
+	}
+	rsp := &service.WebSsoResponseBody{}
+	if err = proto.Unmarshal(rspData, rsp); err != nil {
+		return "", errors.Wrap(err, "unmarshal response error")
+	}
+	return rsp.Data.Unwrap(), nil
 }
 
 func (c *QQClient) doHeartbeat() {

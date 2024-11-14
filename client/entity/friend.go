@@ -7,4 +7,6 @@ type Friend struct {
 	Remarks      string
 	PersonalSign string
 	Avatar       string
+	Age          uint32
+	Source       string
 }
