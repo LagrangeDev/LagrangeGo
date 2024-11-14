@@ -1337,14 +1337,14 @@ func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 }
 
 // CheckUrlSafely 通过TX服务器检查URL安全性
-func (c *QQClient) CheckUrlSafely(url string) (oidb2.UrlSecurityLevel, error) {
+func (c *QQClient) CheckUrlSafely(url string) (oidb2.URLSecurityLevel, error) {
 	pkt, err := oidb2.BuildUrlCheckRequest(c.Uin, url)
 	if err != nil {
-		return oidb2.UrlSecurityLevelUnknown, err
+		return oidb2.URLSecurityLevelUnknown, err
 	}
 	resp, err := c.sendOidbPacketAndWait(pkt)
 	if err != nil {
-		return oidb2.UrlSecurityLevelUnknown, err
+		return oidb2.URLSecurityLevelUnknown, err
 	}
 	return oidb2.ParseUrlCheckResponse(resp)
 }

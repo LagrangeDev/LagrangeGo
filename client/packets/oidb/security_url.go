@@ -10,19 +10,19 @@ import (
 
 // see https://github.com/Mrs4s/MiraiGo/blob/master/client/security.go
 
-type UrlSecurityLevel int
+type URLSecurityLevel int
 
 const (
-	UrlSecurityLevelSafe UrlSecurityLevel = iota + 1
-	UrlSecurityLevelUnknown
-	UrlSecurityLevelDanger
+	URLSecurityLevelSafe URLSecurityLevel = iota + 1
+	URLSecurityLevelUnknown
+	URLSecurityLevelDanger
 )
 
-func (m UrlSecurityLevel) String() string {
+func (m URLSecurityLevel) String() string {
 	switch m {
-	case UrlSecurityLevelSafe:
+	case URLSecurityLevelSafe:
 		return "safe"
-	case UrlSecurityLevelDanger:
+	case URLSecurityLevelDanger:
 		return "danger"
 	default:
 		return "unknown"
@@ -48,20 +48,20 @@ func BuildUrlCheckRequest(botuin uint32, url string) (*Packet, error) {
 	return BuildOidbPacket(0xBCB, 0, body, false, false)
 }
 
-func ParseUrlCheckResponse(data []byte) (UrlSecurityLevel, error) {
+func ParseUrlCheckResponse(data []byte) (URLSecurityLevel, error) {
 	var rsp oidb.OidbSvcTrpcTcp0XBCB_0_RspBody
 	_, err := ParseOidbPacket(data, &rsp)
 	if err != nil {
-		return UrlSecurityLevelUnknown, err
+		return URLSecurityLevelUnknown, err
 	}
 	if rsp.CheckUrlRsp == nil || len(rsp.CheckUrlRsp.Results) == 0 {
-		return UrlSecurityLevelUnknown, errors.New("response is empty")
+		return URLSecurityLevelUnknown, errors.New("response is empty")
 	}
 	if rsp.CheckUrlRsp.Results[0].JumpUrl.IsSome() {
-		return UrlSecurityLevelDanger, nil
+		return URLSecurityLevelDanger, nil
 	}
 	if rsp.CheckUrlRsp.Results[0].Umrtype.Unwrap() == 2 {
-		return UrlSecurityLevelSafe, nil
+		return URLSecurityLevelSafe, nil
 	}
-	return UrlSecurityLevelUnknown, nil
+	return URLSecurityLevelUnknown, nil
 }
