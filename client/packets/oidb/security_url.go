@@ -24,12 +24,14 @@ func (m URLSecurityLevel) String() string {
 		return "safe"
 	case URLSecurityLevelDanger:
 		return "danger"
+	case URLSecurityLevelUnknown:
+		return "unknown"
 	default:
 		return "unknown"
 	}
 }
 
-func BuildUrlCheckRequest(botuin uint32, url string) (*Packet, error) {
+func BuildURLCheckRequest(botuin uint32, url string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XBCB_0_ReqBody{
 		CheckUrlReq: &oidb.CheckUrlReq{
 			Url:         []string{url},
@@ -48,7 +50,7 @@ func BuildUrlCheckRequest(botuin uint32, url string) (*Packet, error) {
 	return BuildOidbPacket(0xBCB, 0, body, false, false)
 }
 
-func ParseUrlCheckResponse(data []byte) (URLSecurityLevel, error) {
+func ParseURLCheckResponse(data []byte) (URLSecurityLevel, error) {
 	var rsp oidb.OidbSvcTrpcTcp0XBCB_0_RspBody
 	_, err := ParseOidbPacket(data, &rsp)
 	if err != nil {
