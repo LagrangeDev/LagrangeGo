@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/tidwall/gjson"
 	"golang.org/x/net/html"
@@ -456,52 +454,33 @@ func (c *QQClient) GetPrivateFileURL(fileUUID string, fileHash string) (string, 
 	return oidb2.ParsePrivateFileDownloadResp(resp)
 }
 
-func (c *QQClient) queryImage(url string, method string) (*message2.ImageElement, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("file not found")
-	}
-	return &message2.ImageElement{
-		URL:  url,
-		Size: uint32(resp.ContentLength),
-	}, nil
-}
-
 func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
-	var url string
 	switch {
 	case fileUUID != "":
 		rkeyInfo := c.GetCachedRkeyInfo(entity.GroupRKey)
-		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1407&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
-		return c.queryImage(url, http.MethodGet)
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1407&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey),
+		}, nil
 	case len(md5) == 16:
-		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
-		return c.queryImage(url, http.MethodHead)
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5),
+		}, nil
 	default:
 		return nil, errors.New("invalid parameters")
 	}
 }
 
 func (c *QQClient) QueryFriendImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
-	var url string
 	switch {
 	case fileUUID != "":
 		rkeyInfo := c.GetCachedRkeyInfo(entity.FriendRKey)
-		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1406&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
-		return c.queryImage(url, http.MethodGet)
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1406&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey),
+		}, nil
 	case len(md5) == 16:
-		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
-		return c.queryImage(url, http.MethodHead)
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5),
+		}, nil
 	default:
 		return nil, errors.New("invalid parameters")
 	}
