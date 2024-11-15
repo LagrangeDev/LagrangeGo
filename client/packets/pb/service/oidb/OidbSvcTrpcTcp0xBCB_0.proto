@@ -1,65 +1,67 @@
-syntax = "proto2";
+syntax = "proto3";
+
+// ref https://github.com/Mrs4s/MiraiGo/blob/master/client/pb/oidb/oidb0xbcb.proto
 
 option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
 
 message OidbSvcTrpcTcp0xBCB_0_ReqBody {
-  optional int32       notUseCache = 9;
-  optional CheckUrlReq checkUrlReq = 10;
+  int32       notUseCache = 9;
+  CheckUrlReq checkUrlReq = 10;
 }
 
 message CheckUrlReq {
   repeated string url = 1;
-  optional string refer = 2;
-  optional string plateform = 3;
-  optional string qqPfTo = 4;
-  optional uint32 type = 5;
-  optional uint32 from = 6;
-  optional uint64 chatid = 7;
-  optional uint64 serviceType = 8;
-  optional uint64 sendUin = 9;
-  optional string reqType = 10;
-  optional string originalUrl = 11;
-  optional bool   isArk = 12;
-  optional string arkName = 13;
-  optional bool   isFinish = 14;
+  string refer = 2;
+  string plateform = 3;
+  string qqPfTo = 4;
+  uint32 type = 5;
+  uint32 from = 6;
+  uint64 chatid = 7;
+  uint64 serviceType = 8;
+  uint64 sendUin = 9;
+  string reqType = 10;
+  string originalUrl = 11;
+  bool   isArk = 12;
+  string arkName = 13;
+  bool   isFinish = 14;
   repeated string srcUrls = 15;
-  optional uint32 srcPlatform = 16;
-  optional string qua = 17;
+  uint32 srcPlatform = 16;
+  string qua = 17;
 }
 
 message OidbSvcTrpcTcp0xBCB_0_RspBody {
-  optional string wording = 1;
-  optional CheckUrlRsp checkUrlRsp = 10;
+  string wording = 1;
+  CheckUrlRsp checkUrlRsp = 10;
 }
 
 message CheckUrlRsp {
   repeated UrlCheckResult results = 1;
-  optional uint32 nextReqDuration = 2;
+  uint32 nextReqDuration = 2;
 }
 
 message UrlCheckResult {
-  optional string url = 1;
-  optional uint32 result = 2;
-  optional uint32 jumpResult = 3;
-  optional string jumpUrl = 4;
-  optional uint32 level = 5;
-  optional uint32 subLevel = 6;
-  optional uint32 umrtype = 7;
-  optional uint32 retFrom = 8;
-  optional uint64 operationBit = 9;
+  string url = 1;
+  uint32 result = 2;
+  uint32 jumpResult = 3;
+  string jumpUrl = 4;
+  uint32 level = 5;
+  uint32 subLevel = 6;
+  uint32 umrtype = 7;
+  uint32 retFrom = 8;
+  uint64 operationBit = 9;
 }
 
 /*
 message CheckUrlReqItem {
-  optional string url = 1;
-  optional string refer = 2;
-  optional string plateform = 3;
-  optional string qqPfTo = 4;
-  optional uint32 type = 5;
-  optional uint32 from = 6;
-  optional uint64 chatid = 7;
-  optional uint64 serviceType = 8;
-  optional uint64 sendUin = 9;
-  optional string reqType = 10;
+  string url = 1;
+  string refer = 2;
+  string plateform = 3;
+  string qqPfTo = 4;
+  uint32 type = 5;
+  uint32 from = 6;
+  uint64 chatid = 7;
+  uint64 serviceType = 8;
+  uint64 sendUin = 9;
+  string reqType = 10;
 }
 */

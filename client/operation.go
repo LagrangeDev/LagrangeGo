@@ -1337,6 +1337,7 @@ func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 }
 
 // CheckURLSafely 通过TX服务器检查URL安全性
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/security.go#L24
 func (c *QQClient) CheckURLSafely(url string) (oidb2.URLSecurityLevel, error) {
 	pkt, err := oidb2.BuildURLCheckRequest(c.Uin, url)
 	if err != nil {
