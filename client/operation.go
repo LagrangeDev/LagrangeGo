@@ -14,10 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/pkg/errors"
-
 	"github.com/tidwall/gjson"
+
 	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
@@ -29,6 +28,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
@@ -1319,7 +1319,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err erro
 
 // DeleteUnidirectionalFriend 删除单向好友
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L62
-func (c *QQClient) DeleteUnidirectionalFriend(uin int64) error {
+func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 	webRsp := &struct {
 		ErrorCode int32 `json:"ErrorCode"`
 	}{}
@@ -1334,4 +1334,18 @@ func (c *QQClient) DeleteUnidirectionalFriend(uin int64) error {
 		return errors.Errorf("web sso request error: %v", webRsp.ErrorCode)
 	}
 	return nil
+}
+
+// CheckURLSafely 通过TX服务器检查URL安全性
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/security.go#L24
+func (c *QQClient) CheckURLSafely(url string) (oidb2.URLSecurityLevel, error) {
+	pkt, err := oidb2.BuildURLCheckRequest(c.Uin, url)
+	if err != nil {
+		return oidb2.URLSecurityLevelUnknown, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return oidb2.URLSecurityLevelUnknown, err
+	}
+	return oidb2.ParseURLCheckResponse(resp)
 }
