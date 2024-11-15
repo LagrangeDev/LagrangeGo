@@ -14,10 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/pkg/errors"
-
 	"github.com/tidwall/gjson"
+
 	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
@@ -29,6 +28,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
@@ -1336,7 +1336,7 @@ func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 	return nil
 }
 
-// CheckUrlSafely 通过TX服务器检查URL安全性
+// CheckURLSafely 通过TX服务器检查URL安全性
 func (c *QQClient) CheckURLSafely(url string) (oidb2.URLSecurityLevel, error) {
 	pkt, err := oidb2.BuildURLCheckRequest(c.Uin, url)
 	if err != nil {
