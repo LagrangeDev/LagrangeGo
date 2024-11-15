@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"runtime/debug"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/system"
@@ -352,7 +353,8 @@ func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.KickedEvent.dispatch(c, eventConverter.ParseKickedEvent(&pb))
+	c.Disconnect()
+	go c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: fmt.Sprintf("%s:%s", pb.Title, pb.Tips)})
 	return nil, nil
 }
 
