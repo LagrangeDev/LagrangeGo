@@ -2,9 +2,7 @@ package ecdh
 
 /*
 
-import (
-	"math/big"
-)
+import "math/big"
 
 type ec struct {
 	p, a, b  *big.Int

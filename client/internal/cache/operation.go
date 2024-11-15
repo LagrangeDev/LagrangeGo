@@ -1,8 +1,6 @@
 package cache
 
-import (
-	"github.com/LagrangeDev/LagrangeGo/client/entity"
-)
+import "github.com/LagrangeDev/LagrangeGo/client/entity"
 
 func (c *Cache) RefreshAll(
 	friendCache map[uint32]*entity.Friend,

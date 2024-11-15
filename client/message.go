@@ -3,12 +3,13 @@ package client
 import (
 	"fmt"
 
+	"github.com/RomiChan/protobuf/proto"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/RomiChan/protobuf/proto"
 )
 
 func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.MessageBody, random uint32) (*action.SendMessageResponse, uint32, error) {
