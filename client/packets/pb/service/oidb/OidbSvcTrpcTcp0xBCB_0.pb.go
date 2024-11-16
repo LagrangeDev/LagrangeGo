@@ -3,52 +3,56 @@
 
 package oidb
 
+import (
+	proto "github.com/RomiChan/protobuf/proto"
+)
+
 type OidbSvcTrpcTcp0XBCB_0_ReqBody struct {
-	NotUseCache int32        `protobuf:"varint,9,opt"`
-	CheckUrlReq *CheckUrlReq `protobuf:"bytes,10,opt"`
+	NotUseCache proto.Option[int32] `protobuf:"varint,9,opt"`
+	CheckUrlReq *CheckUrlReq        `protobuf:"bytes,10,opt"`
 	_           [0]func()
 }
 
 type CheckUrlReq struct {
-	Url         []string `protobuf:"bytes,1,rep"`
-	Refer       string   `protobuf:"bytes,2,opt"`
-	Plateform   string   `protobuf:"bytes,3,opt"`
-	QqPfTo      string   `protobuf:"bytes,4,opt"`
-	Type        uint32   `protobuf:"varint,5,opt"`
-	From        uint32   `protobuf:"varint,6,opt"`
-	Chatid      uint64   `protobuf:"varint,7,opt"`
-	ServiceType uint64   `protobuf:"varint,8,opt"`
-	SendUin     uint64   `protobuf:"varint,9,opt"`
-	ReqType     string   `protobuf:"bytes,10,opt"`
-	OriginalUrl string   `protobuf:"bytes,11,opt"`
-	IsArk       bool     `protobuf:"varint,12,opt"`
-	ArkName     string   `protobuf:"bytes,13,opt"`
-	IsFinish    bool     `protobuf:"varint,14,opt"`
-	SrcUrls     []string `protobuf:"bytes,15,rep"`
-	SrcPlatform uint32   `protobuf:"varint,16,opt"`
-	Qua         string   `protobuf:"bytes,17,opt"`
+	Url         []string             `protobuf:"bytes,1,rep"`
+	Refer       proto.Option[string] `protobuf:"bytes,2,opt"`
+	Plateform   proto.Option[string] `protobuf:"bytes,3,opt"`
+	QqPfTo      proto.Option[string] `protobuf:"bytes,4,opt"`
+	Type        proto.Option[uint32] `protobuf:"varint,5,opt"`
+	From        proto.Option[uint32] `protobuf:"varint,6,opt"`
+	ChatId      proto.Option[uint64] `protobuf:"varint,7,opt"`
+	ServiceType proto.Option[uint64] `protobuf:"varint,8,opt"`
+	SendUin     proto.Option[uint64] `protobuf:"varint,9,opt"`
+	ReqType     proto.Option[string] `protobuf:"bytes,10,opt"`
+	OriginalUrl proto.Option[string] `protobuf:"bytes,11,opt"`
+	IsArk       proto.Option[bool]   `protobuf:"varint,12,opt"`
+	ArkName     proto.Option[string] `protobuf:"bytes,13,opt"`
+	IsFinish    proto.Option[bool]   `protobuf:"varint,14,opt"`
+	SrcUrls     []string             `protobuf:"bytes,15,rep"`
+	SrcPlatform proto.Option[uint32] `protobuf:"varint,16,opt"`
+	Qua         proto.Option[string] `protobuf:"bytes,17,opt"`
 }
 
 type OidbSvcTrpcTcp0XBCB_0_RspBody struct {
-	Wording     string       `protobuf:"bytes,1,opt"`
-	CheckUrlRsp *CheckUrlRsp `protobuf:"bytes,10,opt"`
+	Wording     proto.Option[string] `protobuf:"bytes,1,opt"`
+	CheckUrlRsp *CheckUrlRsp         `protobuf:"bytes,10,opt"`
 	_           [0]func()
 }
 
 type CheckUrlRsp struct {
-	Results         []*UrlCheckResult `protobuf:"bytes,1,rep"`
-	NextReqDuration uint32            `protobuf:"varint,2,opt"`
+	Results         []*UrlCheckResult    `protobuf:"bytes,1,rep"`
+	NextReqDuration proto.Option[uint32] `protobuf:"varint,2,opt"`
 }
 
 type UrlCheckResult struct {
-	Url          string `protobuf:"bytes,1,opt"`
-	Result       uint32 `protobuf:"varint,2,opt"`
-	JumpResult   uint32 `protobuf:"varint,3,opt"`
-	JumpUrl      string `protobuf:"bytes,4,opt"`
-	Level        uint32 `protobuf:"varint,5,opt"`
-	SubLevel     uint32 `protobuf:"varint,6,opt"`
-	Umrtype      uint32 `protobuf:"varint,7,opt"`
-	RetFrom      uint32 `protobuf:"varint,8,opt"`
-	OperationBit uint64 `protobuf:"varint,9,opt"`
+	Url          proto.Option[string] `protobuf:"bytes,1,opt"`
+	Result       proto.Option[uint32] `protobuf:"varint,2,opt"`
+	JumpResult   proto.Option[uint32] `protobuf:"varint,3,opt"`
+	JumpUrl      proto.Option[string] `protobuf:"bytes,4,opt"`
+	Level        proto.Option[uint32] `protobuf:"varint,5,opt"`
+	SubLevel     proto.Option[uint32] `protobuf:"varint,6,opt"`
+	UmrType      proto.Option[uint32] `protobuf:"varint,7,opt"`
+	RetFrom      proto.Option[uint32] `protobuf:"varint,8,opt"`
+	OperationBit proto.Option[uint64] `protobuf:"varint,9,opt"`
 	_            [0]func()
 }

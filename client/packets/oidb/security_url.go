@@ -3,10 +3,12 @@ package oidb
 import (
 	"errors"
 
+	"github.com/RomiChan/protobuf/proto"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-// see https://github.com/Mrs4s/MiraiGo/blob/master/client/security.go
+// ref https://github.com/Mrs4s/MiraiGo/blob/master/client/security.go
 
 type URLSecurityLevel int
 
@@ -33,16 +35,16 @@ func BuildURLCheckRequest(botuin uint32, url string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XBCB_0_ReqBody{
 		CheckUrlReq: &oidb.CheckUrlReq{
 			Url:         []string{url},
-			QqPfTo:      "mqq.group",
-			Type:        2,
-			SendUin:     uint64(botuin),
-			ReqType:     "webview",
-			OriginalUrl: url,
-			IsArk:       false,
-			IsFinish:    false,
+			QqPfTo:      proto.String("mqq.group"),
+			Type:        proto.Uint32(2),
+			SendUin:     proto.Uint64(uint64(botuin)),
+			ReqType:     proto.String("webview"),
+			OriginalUrl: proto.String(url),
+			IsArk:       proto.Bool(false),
+			IsFinish:    proto.Bool(false),
 			SrcUrls:     []string{url},
-			SrcPlatform: 1,
-			Qua:         "AQQ_2013 4.6/2013 8.4.184945&NA_0/000000&ADR&null18&linux&2017&C2293D02BEE31158&7.1.2&V3",
+			SrcPlatform: proto.Uint32(1),
+			Qua:         proto.String("AQQ_2013 4.6/2013 8.4.184945&NA_0/000000&ADR&null18&linux&2017&C2293D02BEE31158&7.1.2&V3"),
 		},
 	}
 	return BuildOidbPacket(0xBCB, 0, body, false, false)
@@ -57,10 +59,10 @@ func ParseURLCheckResponse(data []byte) (URLSecurityLevel, error) {
 	if rsp.CheckUrlRsp == nil || len(rsp.CheckUrlRsp.Results) == 0 {
 		return URLSecurityLevelUnknown, errors.New("response is empty")
 	}
-	if rsp.CheckUrlRsp.Results[0].JumpUrl != "" {
+	if rsp.CheckUrlRsp.Results[0].JumpUrl.IsSome() {
 		return URLSecurityLevelDanger, nil
 	}
-	if rsp.CheckUrlRsp.Results[0].Umrtype == 2 {
+	if rsp.CheckUrlRsp.Results[0].UmrType.Unwrap() == 2 {
 		return URLSecurityLevelSafe, nil
 	}
 	return URLSecurityLevelUnknown, nil

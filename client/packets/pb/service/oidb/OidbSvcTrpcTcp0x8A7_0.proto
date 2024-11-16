@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+// ref https://github.com/Mrs4s/MiraiGo/blob/master/client/pb/oidb/oidb0x8a7.proto
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+message OidbSvcTrpcTcp0x8A7_0_ReqBody {
+  uint32 subCmd = 1;
+  uint32 limitIntervalTypeForUin = 2;
+  uint32 limitIntervalTypeForGroup = 3;
+  uint64 uin = 4;
+  uint64 groupUin = 5;
+}
+
+message OidbSvcTrpcTcp0x8A7_0_RspBody {
+  bool   canAtAll = 1;
+  uint32 countForUin = 2;
+  uint32 countForGroup = 3;
+  //optional bytes promptMsg1 = 4;
+  //optional bytes promptMsg2 = 5;
+}

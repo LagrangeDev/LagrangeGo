@@ -1349,3 +1349,17 @@ func (c *QQClient) CheckURLSafely(url string) (oidb2.URLSecurityLevel, error) {
 	}
 	return oidb2.ParseURLCheckResponse(resp)
 }
+
+// GetAtAllRemain 获取剩余@全员次数
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/group_msg.go#L68
+func (c *QQClient) GetAtAllRemain(uin, groupUin uint32) (*oidb2.AtAllRemainInfo, error) {
+	pkt, err := oidb2.BuildAtAllRemainRequest(uin, groupUin)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseAtAllRemainResponse(resp)
+}
