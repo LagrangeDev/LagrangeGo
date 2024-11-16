@@ -1,6 +1,8 @@
 package message
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
 type ForwardNode struct {
 	GroupID    uint32

@@ -6,10 +6,9 @@ import (
 	"crypto/rand"
 	goBinary "encoding/binary"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	tea "github.com/fumiama/gofastTEA"
 	"github.com/pkg/errors"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 type Codec struct {

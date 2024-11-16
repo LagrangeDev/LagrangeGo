@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	ftea "github.com/fumiama/gofastTEA"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
@@ -12,7 +13,6 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 

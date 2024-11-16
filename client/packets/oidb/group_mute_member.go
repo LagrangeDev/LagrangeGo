@@ -1,6 +1,8 @@
 package oidb
 
-import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+import (
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+)
 
 func BuildGroupMuteMemberReq(groupUin, duration uint32, uid string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X1253_1{

@@ -7,7 +7,9 @@ import (
 	"github.com/fumiama/imgsz"
 )
 
-var ErrImageDataTooShort = errors.New("image data is too short")
+var (
+	ErrImageDataTooShort = errors.New("image data is too short")
+)
 
 type ImageFormat uint32
 

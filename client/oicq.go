@@ -3,15 +3,14 @@ package client
 import (
 	"fmt"
 
-	"github.com/RomiChan/protobuf/proto"
-	tea "github.com/fumiama/gofastTEA"
-
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/RomiChan/protobuf/proto"
+	tea "github.com/fumiama/gofastTEA"
 )
 
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/entities.go#L18

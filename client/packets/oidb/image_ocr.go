@@ -3,9 +3,9 @@ package oidb
 import (
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+
+	"github.com/pkg/errors"
 )
 
 func BuildImageOcrRequestPacket(url string) (*Packet, error) {

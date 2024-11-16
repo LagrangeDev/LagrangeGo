@@ -4,9 +4,11 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+
+	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
 func BuildPrivateVideoUploadReq(targetUID string, video *message.ShortVideoElement) (*Packet, error) {

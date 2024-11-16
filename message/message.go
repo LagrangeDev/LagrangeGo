@@ -9,8 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -283,7 +284,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		if elem.CommonElem != nil {
 			switch elem.CommonElem.ServiceType {
 			case 48:
-				extra := &oidb.MsgInfo{}
+				extra := &oidb2.MsgInfo{}
 				err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
 				if err != nil {
 					continue
@@ -400,7 +401,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 					Name: ptt.FileName,
 					UUID: ptt.FileUuid,
 					Md5:  ptt.FileMd5,
-					Node: &oidb.IndexNode{
+					Node: &oidb2.IndexNode{
 						FileUuid: ptt.GroupFileKey,
 					},
 				})
@@ -409,7 +410,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 					Name: ptt.FileName,
 					UUID: ptt.FileUuid,
 					Md5:  ptt.FileMd5,
-					Node: &oidb.IndexNode{
+					Node: &oidb2.IndexNode{
 						FileUuid: ptt.FileUuid,
 					},
 				})

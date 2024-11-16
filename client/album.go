@@ -12,11 +12,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tidwall/gjson"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/album"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/tidwall/gjson"
 )
 
 const TimeLayout = "2006-01-02 15:04:05"

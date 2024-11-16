@@ -1,6 +1,8 @@
 package oidb
 
-import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+import (
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+)
 
 func BuildGroupRemarkReq(groupUin uint32, mark string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XF16_1{

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
+
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"

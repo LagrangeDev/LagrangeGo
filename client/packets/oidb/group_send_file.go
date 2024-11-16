@@ -1,10 +1,9 @@
 package oidb
 
 import (
-	"github.com/RomiChan/protobuf/proto"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/RomiChan/protobuf/proto"
 )
 
 func BuildGroupSendFileReq(groupUin uint32, fileKey string) (*Packet, error) {

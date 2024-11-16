@@ -2,7 +2,9 @@ package client
 
 // from https://github.com/Mrs4s/MiraiGo/blob/master/client/packet.go
 
-import "github.com/LagrangeDev/LagrangeGo/client/internal/network"
+import (
+	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
+)
 
 func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte, error) {
 	seq := c.getAndIncreaseSequence()
