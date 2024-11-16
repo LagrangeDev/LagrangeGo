@@ -1,6 +1,7 @@
 package oidb
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
@@ -55,7 +56,7 @@ func ParseImageOcrResp(data []byte) (*OcrResponse, error) {
 		return nil, errors.New(rsp.Wording)
 	}
 	if rsp.RetCode != 0 {
-		return nil, errors.Errorf("server error, code: %v msg: %v", rsp.RetCode, rsp.ErrMsg)
+		return nil, fmt.Errorf("server error, code: %v msg: %v", rsp.RetCode, rsp.ErrMsg)
 	}
 	texts := make([]*TextDetection, 0, len(rsp.OcrRspBody.TextDetections))
 	for _, text := range rsp.OcrRspBody.TextDetections {

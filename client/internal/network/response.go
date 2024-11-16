@@ -77,10 +77,10 @@ func (t *Transport) readSSOFrame(resp *Response, payload []byte) error {
 	case -10003:
 		err = ErrAuthenticationFailed
 	default:
-		err = errors.Errorf("return code unsuccessful: %d", retCode)
+		err = fmt.Errorf("return code unsuccessful: %d", retCode)
 	}
 	if err != nil {
-		return errors.Wrap(err, resp.Message)
+		return fmt.Errorf("%w: %s", errors.WithStack(err), resp.Message)
 	}
 	resp.CommandName = head.ReadStringWithLength("u32", true)
 	if resp.CommandName == "Heartbeat.Alive" {

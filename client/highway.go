@@ -28,11 +28,11 @@ func (c *QQClient) ensureHighwayServers() error {
 		}
 		payload, err := c.sendUniPacketAndWait("HttpConn.0x6ff_501", packet)
 		if err != nil {
-			return fmt.Errorf("get highway server: %v", err)
+			return fmt.Errorf("get highway server: %w", err)
 		}
 		resp, err := highway2.ParseHighWayURLReq(payload)
 		if err != nil {
-			return fmt.Errorf("parse highway server: %v", err)
+			return fmt.Errorf("parse highway server: %w", err)
 		}
 		c.highwaySession.SigSession = resp.HttpConn.SigSession
 		c.highwaySession.SessionKey = resp.HttpConn.SessionKey
@@ -103,12 +103,12 @@ func (c *QQClient) highwayUploadBlock(trans *hw.Transaction, server string, offs
 		trans.Build(&c.highwaySession, offset, uint32(blksz), blkmd5), blk, server, isEnd,
 	)
 	if err != nil {
-		return fmt.Errorf("send highway packet: %v", err)
+		return fmt.Errorf("send highway packet: %w", err)
 	}
 	defer payload.Close()
 	resphead, respbody, err := parseHighwayPacket(payload)
 	if err != nil {
-		return fmt.Errorf("parse highway packet: %v", err)
+		return fmt.Errorf("parse highway packet: %w", err)
 	}
 	c.debug("Highway Block Result: %d | %d | %x | %v",
 		resphead.ErrorCode, resphead.MsgSegHead.RetCode.Unwrap(), resphead.BytesRspExtendInfo, respbody)

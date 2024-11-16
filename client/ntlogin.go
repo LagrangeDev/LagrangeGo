@@ -109,7 +109,7 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (LoginResponse, er
 	if err != nil {
 		return LoginResponse{
 			Success: false,
-		}, fmt.Errorf("proto decode failed: %s", err)
+		}, fmt.Errorf("proto decode failed: %w", err)
 	}
 
 	var base login.SsoNTLoginBase
@@ -123,14 +123,14 @@ func parseNtloginResponse(response []byte, sig *auth.SigInfo) (LoginResponse, er
 	if err != nil {
 		return LoginResponse{
 			Success: false,
-		}, fmt.Errorf("proto decode failed: %s", err)
+		}, fmt.Errorf("proto decode failed: %w", err)
 	}
 	var body login.SsoNTLoginResponse
 	err = proto.Unmarshal(base.Body, &body)
 	if err != nil {
 		return LoginResponse{
 			Success: false,
-		}, fmt.Errorf("proto decode failed: %s", err)
+		}, fmt.Errorf("proto decode failed: %w", err)
 	}
 
 	if body.Credentials != nil {

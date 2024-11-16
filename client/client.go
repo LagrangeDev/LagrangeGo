@@ -376,7 +376,7 @@ func (c *QQClient) FastLogin() error {
 	}
 	err = c.register()
 	if err != nil {
-		return fmt.Errorf("failed to register session: %v", err)
+		return fmt.Errorf("failed to register session: %w", err)
 
 	}
 	return nil

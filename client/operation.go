@@ -1331,7 +1331,7 @@ func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 		return errors.Wrap(err, "unmarshal json error")
 	}
 	if webRsp.ErrorCode != 0 {
-		return errors.Errorf("web sso request error: %v", webRsp.ErrorCode)
+		return fmt.Errorf("web sso request error: %v", webRsp.ErrorCode)
 	}
 	return nil
 }

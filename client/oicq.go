@@ -123,7 +123,7 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) (LoginResp
 		var resp pb.Tlv543
 		err := proto.Unmarshal(tlv[0x543], &resp)
 		if err != nil {
-			err = fmt.Errorf("parsing login response error: %s", err)
+			err = fmt.Errorf("parsing login response error: %w", err)
 			c.errorln(err)
 			return LoginResponse{
 				Success:      false,
