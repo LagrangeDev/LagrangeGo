@@ -80,7 +80,7 @@ func (t *Transport) readSSOFrame(resp *Response, payload []byte) error {
 		err = errors.Errorf("return code unsuccessful: %d", retCode)
 	}
 	if err != nil {
-		return errors.Errorf("%s %s", err.Error(), resp.Message)
+		return errors.Wrap(err, resp.Message)
 	}
 	resp.CommandName = head.ReadStringWithLength("u32", true)
 	if resp.CommandName == "Heartbeat.Alive" {
