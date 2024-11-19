@@ -1286,6 +1286,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err erro
 			Age         uint32 `json:"uint32_age"`
 			Sex         uint32 `json:"uint32_sex"`
 			SourceBytes string `json:"bytes_source"`
+			UID         string `json:"str_uid"`
 		} `json:"rpt_block_list"`
 		ErrorCode int32 `json:"ErrorCode"`
 	}{}
@@ -1309,6 +1310,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err erro
 		}
 		ret = append(ret, &entity.Friend{
 			Uin:      block.Uin,
+			UID:      block.UID,
 			Nickname: decodeBase64String(block.NickBytes),
 			Age:      block.Age,
 			Source:   decodeBase64String(block.SourceBytes),
