@@ -367,6 +367,15 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			})
 		}
 
+		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 {
+			if elem.RichMsg.Template1 != nil {
+				res = append(res, &XMLElement{
+					ServiceID: 35,
+					Content:   utils.B2S(binary.ZlibUncompress(elem.LightAppElem.Data[1:])),
+				})
+			}
+		}
+
 		if elem.LightAppElem != nil && len(elem.LightAppElem.Data) > 1 {
 			var content []byte
 			if elem.LightAppElem.Data[0] == 0 {

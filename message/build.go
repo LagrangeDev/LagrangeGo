@@ -144,6 +144,15 @@ func (e *LightAppElement) BuildElement() []*message.Elem {
 	}}
 }
 
+func (e *XMLElement) BuildElement() []*message.Elem {
+	return []*message.Elem{{
+		RichMsg: &message.RichMsg{
+			ServiceId: proto.Some(int32(e.ServiceID)),
+			Template1: append([]byte{0x01}, binary.ZlibCompress([]byte(e.Content))...),
+		},
+	}}
+}
+
 func (e *ForwardMessage) BuildElement() []*message.Elem {
 	fileID := utils.NewUUID()
 	extra := MultiMsgLightAppExtra{

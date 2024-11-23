@@ -138,6 +138,11 @@ type (
 		Content string
 	}
 
+	XMLElement struct {
+		ServiceID int
+		Content   string
+	}
+
 	ForwardMessage struct {
 		IsGroup bool
 		SelfID  uint32
@@ -333,6 +338,20 @@ func NewLightApp(content string) *LightAppElement {
 	}
 }
 
+func NewXML(content string) *XMLElement {
+	return &XMLElement{
+		ServiceID: 35,
+		Content:   content,
+	}
+}
+
+func NewXMLWithID(id int, content string) *XMLElement {
+	return &XMLElement{
+		ServiceID: id,
+		Content:   content,
+	}
+}
+
 func NewForward(resid string, nodes []*ForwardNode) *ForwardMessage {
 	return &ForwardMessage{
 		ResID: resid,
@@ -427,6 +446,10 @@ func (e *ShortVideoElement) Type() ElementType {
 
 func (e *LightAppElement) Type() ElementType {
 	return LightApp
+}
+
+func (e *XMLElement) Type() ElementType {
+	return Service
 }
 
 func (e *ForwardMessage) Type() ElementType {
