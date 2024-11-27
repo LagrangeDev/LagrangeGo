@@ -4,7 +4,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupRemarkReq(groupUin uint32, mark string) (*Packet, error) {
+func BuildSetGroupRemarkReq(groupUin uint32, mark string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XF16_1{
 		Body: &oidb.OidbSvcTrpcTcp0XF16_1Body{
 			GroupUin:     groupUin,
@@ -14,6 +14,6 @@ func BuildGroupRemarkReq(groupUin uint32, mark string) (*Packet, error) {
 	return BuildOidbPacket(0xF16, 1, body, false, false)
 }
 
-func ParseGroupRemarkResp(data []byte) error {
+func ParseSetGroupRemarkResp(data []byte) error {
 	return CheckError(data)
 }

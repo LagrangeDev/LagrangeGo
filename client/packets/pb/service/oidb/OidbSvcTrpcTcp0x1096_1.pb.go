@@ -7,7 +7,7 @@ import (
 	proto "github.com/RomiChan/protobuf/proto"
 )
 
-// GroupSetAdmin
+// SetGroupAdmin
 type OidbSvcTrpcTcp0X1096_1 struct {
 	GroupUin uint32 `protobuf:"varint,1,opt"`
 	Uid      string `protobuf:"bytes,2,opt"`

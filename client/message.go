@@ -212,36 +212,36 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 			if elem.MsgInfo != nil {
 				continue
 			}
-			_, err := c.ImageUploadGroup(groupUin, elem)
+			_, err := c.UploadGroupImage(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
 			}
 			if elem.MsgInfo == nil {
-				c.errorln("ImageUploadGroup failed")
+				c.errorln("UploadGroupImage failed")
 				continue
 			}
 		case *message2.VoiceElement:
 			if elem.MsgInfo != nil {
 				continue
 			}
-			_, err := c.RecordUploadGroup(groupUin, elem)
+			_, err := c.UploadGroupRecord(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
 			}
 			if elem.MsgInfo == nil {
-				c.errorln("RecordUploadGroup failed")
+				c.errorln("UploadGroupRecord failed")
 				continue
 			}
 		case *message2.ShortVideoElement:
 			if elem.MsgInfo != nil {
 				continue
 			}
-			_, err := c.VideoUploadGroup(groupUin, elem)
+			_, err := c.UploadGroupVideo(groupUin, elem)
 			if err != nil {
 				c.errorln(err)
 			}
 			if elem.MsgInfo == nil {
-				c.errorln("VideoUploadGroup failed")
+				c.errorln("UploadGroupVideo failed")
 				continue
 			}
 		case *message2.ForwardMessage:
@@ -270,13 +270,13 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 				continue
 			}
 			targetUID := c.GetUID(targetUin)
-			_, err := c.ImageUploadPrivate(targetUID, elem)
+			_, err := c.UploadPrivateImage(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
 			}
 			if elem.MsgInfo == nil {
-				c.errorln("ImageUploadPrivate failed")
+				c.errorln("UploadPrivateImage failed")
 				continue
 			}
 		case *message2.VoiceElement:
@@ -284,13 +284,13 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 				continue
 			}
 			targetUID := c.GetUID(targetUin)
-			_, err := c.RecordUploadPrivate(targetUID, elem)
+			_, err := c.UploadPrivateRecord(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
 			}
 			if elem.MsgInfo == nil {
-				c.errorln("RecordUploadPrivate failed")
+				c.errorln("UploadPrivateRecord failed")
 				continue
 			}
 		case *message2.ShortVideoElement:
@@ -298,13 +298,13 @@ func (c *QQClient) preProcessPrivateMessage(targetUin uint32, elements []message
 				continue
 			}
 			targetUID := c.GetUID(targetUin)
-			_, err := c.VideoUploadPrivate(targetUID, elem)
+			_, err := c.UploadPrivateVideo(targetUID, elem)
 			if err != nil {
 				c.errorln(err)
 				continue
 			}
 			if elem.MsgInfo == nil {
-				c.errorln("VideoUploadPrivate failed")
+				c.errorln("UploadPrivateVideo failed")
 				continue
 			}
 		case *message2.ForwardMessage:

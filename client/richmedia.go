@@ -33,9 +33,9 @@ func oidbIPv4ToNTHighwayIPv4(ipv4s []*oidb2.IPv4) []*highway.NTHighwayIPv4 {
 func (c *QQClient) UploadImage(target message.Source, image *message.ImageElement) (*message.ImageElement, error) {
 	switch target.SourceType {
 	case message.SourceGroup:
-		return c.ImageUploadGroup(uint32(target.PrimaryID), image)
+		return c.UploadGroupImage(uint32(target.PrimaryID), image)
 	case message.SourcePrivate:
-		return c.ImageUploadPrivate(c.GetUID(uint32(target.PrimaryID)), image)
+		return c.UploadPrivateImage(c.GetUID(uint32(target.PrimaryID)), image)
 	}
 	return nil, errors.New("unknown target type")
 }
@@ -43,23 +43,23 @@ func (c *QQClient) UploadImage(target message.Source, image *message.ImageElemen
 func (c *QQClient) UploadRecord(target message.Source, voice *message.VoiceElement) (*message.VoiceElement, error) {
 	switch target.SourceType {
 	case message.SourceGroup:
-		return c.RecordUploadGroup(uint32(target.PrimaryID), voice)
+		return c.UploadGroupRecord(uint32(target.PrimaryID), voice)
 	case message.SourcePrivate:
-		return c.RecordUploadPrivate(c.GetUID(uint32(target.PrimaryID)), voice)
+		return c.UploadPrivateRecord(c.GetUID(uint32(target.PrimaryID)), voice)
 	}
 	return nil, errors.New("unknown target type")
 }
 func (c *QQClient) UploadShortVideo(target message.Source, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	switch target.SourceType {
 	case message.SourceGroup:
-		return c.VideoUploadGroup(uint32(target.PrimaryID), video)
+		return c.UploadGroupVideo(uint32(target.PrimaryID), video)
 	case message.SourcePrivate:
-		return c.VideoUploadPrivate(c.GetUID(uint32(target.PrimaryID)), video)
+		return c.UploadPrivateVideo(c.GetUID(uint32(target.PrimaryID)), video)
 	}
 	return nil, errors.New("unknown target type")
 }
 
-func (c *QQClient) ImageUploadPrivate(targetUID string, image *message.ImageElement) (*message.ImageElement, error) {
+func (c *QQClient) UploadPrivateImage(targetUID string, image *message.ImageElement) (*message.ImageElement, error) {
 	if image == nil || image.Stream == nil {
 		return nil, errors.New("image is nil")
 	}
@@ -124,7 +124,7 @@ func (c *QQClient) ImageUploadPrivate(targetUID string, image *message.ImageElem
 	return image, nil
 }
 
-func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement) (*message.ImageElement, error) {
+func (c *QQClient) UploadGroupImage(groupUin uint32, image *message.ImageElement) (*message.ImageElement, error) {
 	if image == nil || image.Stream == nil {
 		return nil, errors.New("element type is not group image")
 	}
@@ -184,7 +184,7 @@ func (c *QQClient) ImageUploadGroup(groupUin uint32, image *message.ImageElement
 	return image, nil
 }
 
-func (c *QQClient) RecordUploadPrivate(targetUID string, record *message.VoiceElement) (*message.VoiceElement, error) {
+func (c *QQClient) UploadPrivateRecord(targetUID string, record *message.VoiceElement) (*message.VoiceElement, error) {
 	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not friend record")
 	}
@@ -240,7 +240,7 @@ func (c *QQClient) RecordUploadPrivate(targetUID string, record *message.VoiceEl
 	return record, nil
 }
 
-func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceElement) (*message.VoiceElement, error) {
+func (c *QQClient) UploadGroupRecord(groupUin uint32, record *message.VoiceElement) (*message.VoiceElement, error) {
 	if record == nil || record.Stream == nil {
 		return nil, errors.New("element type is not voice record")
 	}
@@ -296,7 +296,7 @@ func (c *QQClient) RecordUploadGroup(groupUin uint32, record *message.VoiceEleme
 	return record, nil
 }
 
-func (c *QQClient) VideoUploadPrivate(targetUID string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
+func (c *QQClient) UploadPrivateVideo(targetUID string, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	if video == nil || video.Stream == nil {
 		return nil, errors.New("video is nil")
 	}
@@ -390,7 +390,7 @@ func (c *QQClient) VideoUploadPrivate(targetUID string, video *message.ShortVide
 	return video, nil
 }
 
-func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
+func (c *QQClient) UploadGroupVideo(groupUin uint32, video *message.ShortVideoElement) (*message.ShortVideoElement, error) {
 	if video == nil || video.Stream == nil {
 		return nil, errors.New("video is nil")
 	}
@@ -484,7 +484,7 @@ func (c *QQClient) VideoUploadGroup(groupUin uint32, video *message.ShortVideoEl
 	return video, nil
 }
 
-func (c *QQClient) FileUploadPrivate(targetUID string, file *message.FileElement) (*message.FileElement, error) {
+func (c *QQClient) UploadPrivateFile(targetUID string, file *message.FileElement) (*message.FileElement, error) {
 	if file == nil || file.FileStream == nil {
 		return nil, errors.New("element type is not file")
 	}
@@ -554,7 +554,7 @@ func (c *QQClient) FileUploadPrivate(targetUID string, file *message.FileElement
 	return file, nil
 }
 
-func (c *QQClient) FileUploadGroup(groupUin uint32, file *message.FileElement, targetDirectory string) (*message.FileElement, error) {
+func (c *QQClient) UploadGroupFile(groupUin uint32, file *message.FileElement, targetDirectory string) (*message.FileElement, error) {
 	if file == nil || file.FileStream == nil {
 		return nil, errors.New("element type is not group file")
 	}

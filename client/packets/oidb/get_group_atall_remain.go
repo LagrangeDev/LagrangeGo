@@ -3,7 +3,8 @@ package oidb
 import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/group_msg.go#L213
-func BuildAtAllRemainRequest(uin, gin uint32) (*Packet, error) {
+
+func BuildGetAtAllRemainRequest(uin, gin uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X8A7_0_ReqBody{
 		SubCmd:                    1,
 		LimitIntervalTypeForUin:   2,
@@ -20,8 +21,7 @@ type AtAllRemainInfo struct {
 	CountForUin   uint32 // 当前QQ剩余次数
 }
 
-// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/group_msg.go#L326
-func ParseAtAllRemainResponse(data []byte) (*AtAllRemainInfo, error) {
+func ParseGetAtAllRemainResponse(data []byte) (*AtAllRemainInfo, error) {
 	var rsp oidb.OidbSvcTrpcTcp0X8A7_0_RspBody
 	_, err := ParseOidbPacket(data, &rsp)
 	if err != nil {
