@@ -371,7 +371,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			if elem.RichMsg.Template1 != nil {
 				res = append(res, &XMLElement{
 					ServiceID: 35,
-					Content:   utils.B2S(binary.ZlibUncompress(elem.LightAppElem.Data[1:])),
+					Content:   utils.B2S(binary.ZlibUncompress(elem.RichMsg.Template1[1:])),
 				})
 			}
 		}
