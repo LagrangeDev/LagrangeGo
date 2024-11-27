@@ -1333,7 +1333,7 @@ func (c *QQClient) SendGroupSign(groupUin uint32) (*oidb2.BotGroupClockInResult,
 
 // GetUnidirectionalFriendList 获取单向好友列表
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L23
-func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.User, err error) {
+func (c *QQClient) GetUnidirectionalFriendList() ([]*entity.User, error) {
 	webRsp := &struct {
 		BlockList []struct {
 			Uin         uint32 `json:"uint64_uin"`
@@ -1355,6 +1355,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.User, err error)
 	if webRsp.ErrorCode != 0 {
 		return nil, fmt.Errorf("web sso request error: %v", webRsp.ErrorCode)
 	}
+	ret := make([]*entity.User, 0, len(webRsp.BlockList))
 	for _, block := range webRsp.BlockList {
 		decodeBase64String := func(str string) string {
 			b, err := base64.StdEncoding.DecodeString(str)
@@ -1371,7 +1372,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.User, err error)
 			Source:   decodeBase64String(block.SourceBytes),
 		})
 	}
-	return
+	return ret, err
 }
 
 // DeleteUnidirectionalFriend 删除单向好友

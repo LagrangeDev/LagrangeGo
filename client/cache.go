@@ -17,6 +17,14 @@ func (c *QQClient) GetUID(uin uint32, groupUin ...uint32) string {
 			return ""
 		}
 	}
+	if uid := c.cache.GetUID(uin, groupUin...); uid != "" {
+		return uid
+	}
+	if len(groupUin) == 0 {
+		_ = c.RefreshFriendCache()
+	} else {
+		_ = c.RefreshGroupMembersCache(groupUin[0])
+	}
 	return c.cache.GetUID(uin, groupUin...)
 }
 
@@ -32,6 +40,14 @@ func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
 			return 0
 		}
 	}
+	if uin := c.cache.GetUin(uid, groupUin...); uin != 0 {
+		return uin
+	}
+	if len(groupUin) == 0 {
+		_ = c.RefreshFriendCache()
+	} else {
+		_ = c.RefreshGroupMembersCache(groupUin[0])
+	}
 	return c.cache.GetUin(uid, groupUin...)
 }
 
@@ -42,6 +58,10 @@ func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.User {
 			return nil
 		}
 	}
+	if friend := c.cache.GetFriend(uin); friend != nil {
+		return friend
+	}
+	_ = c.RefreshFriendCache()
 	return c.cache.GetFriend(uin)
 }
 
@@ -62,6 +82,10 @@ func (c *QQClient) GetCachedGroupInfo(groupUin uint32) *entity.Group {
 			return nil
 		}
 	}
+	if g := c.cache.GetGroupInfo(groupUin); g != nil {
+		return g
+	}
+	_ = c.RefreshAllGroupsInfo()
 	return c.cache.GetGroupInfo(groupUin)
 }
 
@@ -82,6 +106,10 @@ func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) *entity.GroupMember
 			return nil
 		}
 	}
+	if m := c.cache.GetGroupMember(uin, groupUin); m != nil {
+		return m
+	}
+	_ = c.RefreshGroupMemberCache(uin, groupUin)
 	return c.cache.GetGroupMember(uin, groupUin)
 }
 
@@ -92,6 +120,10 @@ func (c *QQClient) GetCachedMembersInfo(groupUin uint32) map[uint32]*entity.Grou
 			return nil
 		}
 	}
+	if gm := c.cache.GetGroupMembers(groupUin); gm != nil {
+		return gm
+	}
+	_ = c.RefreshGroupMembersCache(groupUin)
 	return c.cache.GetGroupMembers(groupUin)
 }
 
@@ -139,11 +171,18 @@ func (c *QQClient) GetCachedRkeyInfos() map[entity.RKeyType]*entity.RKeyInfo {
 
 // RefreshFriendCache 刷新好友缓存
 func (c *QQClient) RefreshFriendCache() error {
-	friendsData, err := c.GetFriendsData()
+	friends, err := c.GetFriendsData()
 	if err != nil {
 		return err
 	}
-	c.cache.RefreshAllFriend(friendsData)
+	c.cache.RefreshAllFriend(friends)
+	unidirectionalFriends, err := c.GetUnidirectionalFriendList()
+	if err != nil {
+		return err
+	}
+	for _, f := range unidirectionalFriends {
+		c.cache.RefreshFriend(f)
+	}
 	return nil
 }
 
