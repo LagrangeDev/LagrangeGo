@@ -7,7 +7,7 @@ import (
 // GetUID 根据uin获取uid
 func (c *Cache) GetUID(uin uint32, groupUin ...uint32) string {
 	if len(groupUin) == 0 {
-		if friend, ok := getCacheOf[entity.Friend](c, uin); ok {
+		if friend, ok := getCacheOf[entity.User](c, uin); ok {
 			return friend.UID
 		}
 		return ""
@@ -23,7 +23,7 @@ func (c *Cache) GetUID(uin uint32, groupUin ...uint32) string {
 // GetUin 根据uid获取uin
 func (c *Cache) GetUin(uid string, groupUin ...uint32) (uin uint32) {
 	if len(groupUin) == 0 {
-		rangeCacheOf[entity.Friend](c, func(k uint32, friend *entity.Friend) bool {
+		rangeCacheOf[entity.User](c, func(k uint32, friend *entity.User) bool {
 			if friend.UID == uid {
 				uin = k
 				return false
@@ -46,15 +46,15 @@ func (c *Cache) GetUin(uid string, groupUin ...uint32) (uin uint32) {
 }
 
 // GetFriend 获取好友信息
-func (c *Cache) GetFriend(uin uint32) *entity.Friend {
-	v, _ := getCacheOf[entity.Friend](c, uin)
+func (c *Cache) GetFriend(uin uint32) *entity.User {
+	v, _ := getCacheOf[entity.User](c, uin)
 	return v
 }
 
 // GetAllFriends 获取所有好友信息
-func (c *Cache) GetAllFriends() map[uint32]*entity.Friend {
-	friends := make(map[uint32]*entity.Friend, 64)
-	rangeCacheOf[entity.Friend](c, func(k uint32, friend *entity.Friend) bool {
+func (c *Cache) GetAllFriends() map[uint32]*entity.User {
+	friends := make(map[uint32]*entity.User, 64)
+	rangeCacheOf[entity.User](c, func(k uint32, friend *entity.User) bool {
 		friends[k] = friend
 		return true
 	})
@@ -116,7 +116,7 @@ func (c *Cache) GetAllRkeyInfo() entity.RKeyMap {
 
 // FriendCacheIsEmpty 好友信息缓存是否为空
 func (c *Cache) FriendCacheIsEmpty() bool {
-	return !hasRefreshed[entity.Friend](c)
+	return !hasRefreshed[entity.User](c)
 }
 
 // GroupMembersCacheIsEmpty 群成员缓存是否为空

@@ -5,7 +5,7 @@ import (
 )
 
 func (c *Cache) RefreshAll(
-	friendCache map[uint32]*entity.Friend,
+	friendCache map[uint32]*entity.User,
 	groupCache map[uint32]*entity.Group,
 	groupMemberCache map[uint32]map[uint32]*entity.GroupMember,
 	rkeyCache entity.RKeyMap,
@@ -17,12 +17,12 @@ func (c *Cache) RefreshAll(
 }
 
 // RefreshFriend 刷新一个好友的缓存
-func (c *Cache) RefreshFriend(friend *entity.Friend) {
+func (c *Cache) RefreshFriend(friend *entity.User) {
 	setCacheOf(c, friend.Uin, friend)
 }
 
 // RefreshAllFriend 刷新所有好友缓存
-func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.Friend) {
+func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.User) {
 	refreshAllCacheOf(c, friendCache)
 }
 

@@ -47,7 +47,7 @@ func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 			JoinTime:     member.JoinTimestamp,
 			LastMsgTime:  member.LastMsgTimestamp,
 			ShutUpTime:   member.ShutUpTimestamp.Unwrap(),
-			Avatar:       interner.Intern(entity.FriendAvatar(member.Uin.Uin)),
+			Avatar:       interner.Intern(entity.UserAvatar(member.Uin.Uin)),
 		}
 		if member.Level != nil {
 			m.GroupLevel = member.Level.Level

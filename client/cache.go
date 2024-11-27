@@ -36,7 +36,7 @@ func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
 }
 
 // GetCachedFriendInfo 获取好友信息(缓存)
-func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.Friend {
+func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.User {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return nil
@@ -46,7 +46,7 @@ func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.Friend {
 }
 
 // GetCachedAllFriendsInfo 获取所有好友信息(缓存)
-func (c *QQClient) GetCachedAllFriendsInfo() map[uint32]*entity.Friend {
+func (c *QQClient) GetCachedAllFriendsInfo() map[uint32]*entity.User {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return nil
@@ -198,8 +198,8 @@ func (c *QQClient) RefreshAllRkeyInfoCache() error {
 }
 
 // GetFriendsData 获取好友列表数据
-func (c *QQClient) GetFriendsData() (map[uint32]*entity.Friend, error) {
-	friendsData := make(map[uint32]*entity.Friend)
+func (c *QQClient) GetFriendsData() (map[uint32]*entity.User, error) {
+	friendsData := make(map[uint32]*entity.User)
 	friends, token, err := c.FetchFriends(0)
 	if err != nil {
 		return friendsData, err

@@ -55,7 +55,7 @@ func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
 }
 
 // FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
-func (c *QQClient) FetchFriends(token uint32) ([]*entity.Friend, uint32, error) {
+func (c *QQClient) FetchFriends(token uint32) ([]*entity.User, uint32, error) {
 	pkt, err := oidb2.BuildFetchFriendsReq(token)
 	if err != nil {
 		return nil, 0, err
@@ -490,7 +490,7 @@ func (c *QQClient) QueryFriendImage(md5 []byte, fileUUID string) (*message2.Imag
 }
 
 // FetchUserInfo 获取用户信息
-func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
+func (c *QQClient) FetchUserInfo(uid string) (*entity.User, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uid)
 	if err != nil {
 		return nil, err
@@ -503,7 +503,7 @@ func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
 }
 
 // FetchUserInfoUin 通过uin获取用户信息
-func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
+func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.User, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uin)
 	if err != nil {
 		return nil, err
@@ -1278,7 +1278,7 @@ func (c *QQClient) SendGroupSign(groupUin uint32) (*oidb2.BotGroupClockInResult,
 
 // GetUnidirectionalFriendList 获取单向好友列表
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L23
-func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err error) {
+func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.User, err error) {
 	webRsp := &struct {
 		BlockList []struct {
 			Uin         uint32 `json:"uint64_uin"`
@@ -1308,7 +1308,7 @@ func (c *QQClient) GetUnidirectionalFriendList() (ret []*entity.Friend, err erro
 			}
 			return utils.B2S(b)
 		}
-		ret = append(ret, &entity.Friend{
+		ret = append(ret, &entity.User{
 			Uin:      block.Uin,
 			UID:      block.UID,
 			Nickname: decodeBase64String(block.NickBytes),

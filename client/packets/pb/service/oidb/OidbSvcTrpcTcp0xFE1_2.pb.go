@@ -41,3 +41,75 @@ type OidbSvcTrpcTcp0XFE1_2ResponseProperty struct {
 	NumberProperties []*OidbTwoNumber      `protobuf:"bytes,1,rep"`
 	StringProperties []*OidbFriendProperty `protobuf:"bytes,2,rep"`
 }
+
+type CustomStatus struct {
+	FaceId uint32               `protobuf:"varint,1,opt"`
+	Msg    proto.Option[string] `protobuf:"bytes,2,opt"`
+	_      [0]func()
+}
+
+type Avatar struct {
+	URL proto.Option[string] `protobuf:"bytes,5,opt"`
+	_   [0]func()
+}
+
+type Business struct {
+	Body *BusinessBody `protobuf:"bytes,3,opt"`
+	_    [0]func()
+}
+
+type BusinessBody struct {
+	Msg   proto.Option[string] `protobuf:"bytes,1,opt"`
+	Lists []*BusinessList      `protobuf:"bytes,3,rep"`
+}
+
+type BusinessList struct {
+	Type   uint32 `protobuf:"varint,1,opt"`
+	Field2 uint32 `protobuf:"varint,2,opt"`
+	IsYear bool   `protobuf:"varint,3,opt"` // 是否年费
+	Level  uint32 `protobuf:"varint,4,opt"`
+	IsPro  bool   `protobuf:"varint,5,opt"` // 是否超级
+	// Types that are assignable to Icon:
+	//
+	//	*BusinessList_Icon1
+	//	*BusinessList_Icon2
+	Icon isBusinessList_Icon `protobuf_oneof:"Icon"`
+	_    [0]func()
+}
+
+func (m *BusinessList) GetIcon() isBusinessList_Icon {
+	if m != nil {
+		return m.Icon
+	}
+	return nil
+}
+
+func (x *BusinessList) GetIcon1() string {
+	if x, ok := x.GetIcon().(*BusinessList_Icon1); ok {
+		return x.Icon1
+	}
+	return ""
+}
+
+func (x *BusinessList) GetIcon2() string {
+	if x, ok := x.GetIcon().(*BusinessList_Icon2); ok {
+		return x.Icon2
+	}
+	return ""
+}
+
+type isBusinessList_Icon interface {
+	isBusinessList_Icon()
+}
+
+type BusinessList_Icon1 struct {
+	Icon1 string `protobuf:"bytes,6,opt"`
+}
+
+type BusinessList_Icon2 struct {
+	Icon2 string `protobuf:"bytes,7,opt"`
+}
+
+func (*BusinessList_Icon1) isBusinessList_Icon() {}
+
+func (*BusinessList_Icon2) isBusinessList_Icon() {}

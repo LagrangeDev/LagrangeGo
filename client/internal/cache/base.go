@@ -27,7 +27,7 @@ func typenameof[T any]() string {
 
 var cacheTypesMap = map[string]cacheType{
 	typenameof[Cache]():              cacheTypeCache,
-	typenameof[entity.Friend]():      cacheTypeFriend,
+	typenameof[entity.User]():        cacheTypeFriend,
 	typenameof[entity.Group]():       cacheTypeGroupInfo,
 	typenameof[entity.GroupMember](): cacheTypeGroupMember,
 	typenameof[entity.RKeyInfo]():    cacheTypeRKey,
