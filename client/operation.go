@@ -1269,9 +1269,40 @@ func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
 	return oidb2.ParseFriendLikeResp(resp)
 }
 
+func (c *QQClient) GetPrivateMessages(uin, timestamp, count uint32) ([]*message2.PrivateMessage, error) {
+	uid := c.GetUID(uin)
+	pkt, err := proto.Marshal(&message.SsoGetRoamMsg{
+		FriendUid: proto.Some(uid),
+		Time:      timestamp,
+		Random:    0,
+		Count:     count,
+		Direction: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.register_proxy.RegisterProxy.SsoGetRoamMsg", pkt)
+	if err != nil {
+		return nil, err
+	}
+	roamMsg := message.SsoGetRoamMsgResponse{}
+	err = proto.Unmarshal(resp, &roamMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]*message2.PrivateMessage, 0, len(roamMsg.Messages))
+	for _, msg := range roamMsg.Messages {
+		m := message2.ParsePrivateMessage(msg)
+		c.PreprocessPrivateMessageEvent(m)
+		ret = append(ret, m)
+	}
+	return ret, nil
+}
+
 // GetGroupMessages 获取群聊历史消息
 func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*message2.GroupMessage, error) {
-	data, err := proto.Marshal(&message.SsoGetGroupMsg{
+	pkt, err := proto.Marshal(&message.SsoGetGroupMsg{
 		Info: &message.SsoGetGroupMsgInfo{
 			GroupUin:      groupUin,
 			StartSequence: startSeq,
@@ -1282,21 +1313,22 @@ func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*messa
 	if err != nil {
 		return nil, err
 	}
-
-	if data, err = c.sendUniPacketAndWait("trpc.msg.register_proxy.RegisterProxy.SsoGetGroupMsg", data); err != nil {
+	resp, err := c.sendUniPacketAndWait("trpc.msg.register_proxy.RegisterProxy.SsoGetGroupMsg", pkt)
+	if err != nil {
 		return nil, err
 	}
 
-	var rsp message.SsoGetGroupMsgResponse
-	if err = proto.Unmarshal(data, &rsp); err != nil {
+	var groupMsg message.SsoGetGroupMsgResponse
+	err = proto.Unmarshal(resp, &groupMsg)
+	if err != nil {
 		return nil, err
 	}
 
-	ret := make([]*message2.GroupMessage, 0, len(rsp.Body.Messages))
-	for _, pkt := range rsp.Body.Messages {
-		grpMsg := message2.ParseGroupMessage(pkt)
-		c.PreprocessGroupMessageEvent(grpMsg)
-		ret = append(ret, grpMsg)
+	ret := make([]*message2.GroupMessage, 0, len(groupMsg.Body.Messages))
+	for _, msg := range groupMsg.Body.Messages {
+		m := message2.ParseGroupMessage(msg)
+		c.PreprocessGroupMessageEvent(m)
+		ret = append(ret, m)
 	}
 
 	return ret, nil
