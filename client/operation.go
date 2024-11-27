@@ -315,6 +315,20 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	return oidb2.ParsePokeResp(resp)
 }
 
+// DeleteFriend 删除好友
+func (c *QQClient) DeleteFriend(uin uint32, block bool) error {
+	uid := c.GetUID(uin)
+	pkt, err := oidb2.BuildDeleteFriendReq(uid, block)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseDeleteFriendResp(resp)
+}
+
 // RecallFriendMessage 撤回私聊消息
 func (c *QQClient) RecallFriendMessage(uin, seq, random, clientSeq, timestamp uint32) error {
 	packet := message.C2CRecallMsg{
