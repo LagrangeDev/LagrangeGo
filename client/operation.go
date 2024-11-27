@@ -33,6 +33,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
+// SetOnlineStatus 设置在线状态
 func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
 	pkt, _ := proto.Marshal(&action.SetStatus{
 		Status:        status,
@@ -213,7 +214,6 @@ func (c *QQClient) GroupSetAdmin(groupUin, uin uint32, isAdmin bool) error {
 		m.Permission = entity.Admin
 		c.cache.RefreshGroupMember(groupUin, m)
 	}
-
 	return nil
 }
 
@@ -239,7 +239,6 @@ func (c *QQClient) GroupRenameMember(groupUin, uin uint32, name string) error {
 		m.MemberCard = name
 		c.cache.RefreshGroupMember(groupUin, m)
 	}
-
 	return nil
 }
 
@@ -277,6 +276,7 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 	return oidb2.ParseGroupSetSpecialTitleResp(resp)
 }
 
+// GroupSetReaction 设置群消息表态
 func (c *QQClient) GroupSetReaction(groupUin, sequence uint32, code string, isAdd bool) error {
 	pkt, err := oidb2.BuildGroupSetReactionReq(groupUin, sequence, code, isAdd)
 	if err != nil {
@@ -315,6 +315,7 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	return oidb2.ParsePokeResp(resp)
 }
 
+// RecallFriendMessage 撤回私聊消息
 func (c *QQClient) RecallFriendMessage(uin, seq, random, clientSeq, timestamp uint32) error {
 	packet := message.C2CRecallMsg{
 		Type:      1,
@@ -360,6 +361,52 @@ func (c *QQClient) RecallGroupMessage(groupUin, seq uint32) error {
 		return err
 	}
 	resp, err := c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoGroupRecallMsg", pktData)
+	if err != nil {
+		return err
+	}
+	if len(resp) == 0 {
+		return errors.New("empty response data")
+	}
+	return nil
+}
+
+// MarkPrivateMessageReaded 标记私聊消息已读
+func (c *QQClient) MarkPrivateMessageReaded(uin, timestamp, startSeq uint32) error {
+	uid := c.GetUID(uin)
+	pakcet := message.SsoReadedReport{
+		C2C: &message.SsoReadedReportC2C{
+			TargetUid:     proto.Some(uid),
+			Time:          timestamp,
+			StartSequence: startSeq,
+		},
+	}
+	pktData, err := proto.Marshal(&pakcet)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoReadedReport", pktData)
+	if err != nil {
+		return err
+	}
+	if len(resp) == 0 {
+		return errors.New("empty response data")
+	}
+	return nil
+}
+
+// MarkGroupMessageReaded 标记群消息已读
+func (c *QQClient) MarkGroupMessageReaded(groupUin, startSeq uint32) error {
+	pakcet := message.SsoReadedReport{
+		Group: &message.SsoReadedReportGroup{
+			GroupUin:      groupUin,
+			StartSequence: startSeq,
+		},
+	}
+	pktData, err := proto.Marshal(&pakcet)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoReadedReport", pktData)
 	if err != nil {
 		return err
 	}
@@ -421,6 +468,7 @@ func (c *QQClient) GetGroupRecordURL(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
+// GetVideoURL 获取视频下载链接
 func (c *QQClient) GetVideoURL(isGroup bool, uuid string) (string, error) {
 	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().UID, uuid, isGroup)
 	if err != nil {
@@ -433,6 +481,7 @@ func (c *QQClient) GetVideoURL(isGroup bool, uuid string) (string, error) {
 	return oidb2.ParseVideoDownloadResp(resp)
 }
 
+// GetGroupFileURL 获取群文件下载链接
 func (c *QQClient) GetGroupFileURL(groupUin uint32, fileID string) (string, error) {
 	pkt, err := oidb2.BuildGroupFSDownloadReq(groupUin, fileID)
 	if err != nil {
@@ -445,6 +494,7 @@ func (c *QQClient) GetGroupFileURL(groupUin uint32, fileID string) (string, erro
 	return oidb2.ParseGroupFSDownloadResp(resp)
 }
 
+// GetPrivateFileURL 获取私聊文件下载链接
 func (c *QQClient) GetPrivateFileURL(fileUUID string, fileHash string) (string, error) {
 	pkt, err := oidb2.BuildPrivateFileDownloadReq(c.GetUID(c.Uin), fileUUID, fileHash)
 	if err != nil {
@@ -457,6 +507,7 @@ func (c *QQClient) GetPrivateFileURL(fileUUID string, fileHash string) (string, 
 	return oidb2.ParsePrivateFileDownloadResp(resp)
 }
 
+// QueryGroupImage 获取群图片
 func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
 	switch {
 	case fileUUID != "":
@@ -473,6 +524,7 @@ func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.Image
 	}
 }
 
+// QueryFriendImage 获取私聊图片
 func (c *QQClient) QueryFriendImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
 	switch {
 	case fileUUID != "":
@@ -1166,6 +1218,7 @@ func (c *QQClient) SetAvatar(avatar io.ReadSeeker) error {
 	return c.highwayUpload(90, avatar, uint64(size), md5, nil)
 }
 
+// SetGroupAvatar 设置群头像
 func (c *QQClient) SetGroupAvatar(groupUin uint32, avatar io.ReadSeeker) error {
 	if avatar == nil {
 		return errors.New("avatar is nil")
@@ -1185,6 +1238,7 @@ func (c *QQClient) SetGroupAvatar(groupUin uint32, avatar io.ReadSeeker) error {
 	return c.highwayUpload(3000, avatar, uint64(size), md5, extStream)
 }
 
+// SetEssenceMessage 设置群聊精华消息
 func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) error {
 	pkt, err := oidb2.BuildSetEssenceMessageReq(groupUin, seq, random, isSet)
 	if err != nil {
@@ -1197,7 +1251,7 @@ func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) e
 	return oidb2.ParseSetEssenceMessageResp(resp)
 }
 
-// SendFriendLike 发送好友赞
+// SendFriendLike 给好友点赞
 func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
 	if count > 20 {
 		count = 20
@@ -1215,6 +1269,7 @@ func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
 	return oidb2.ParseFriendLikeResp(resp)
 }
 
+// GetGroupMessages 获取群聊历史消息
 func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*message2.GroupMessage, error) {
 	data, err := proto.Marshal(&message.SsoGetGroupMsg{
 		Info: &message.SsoGetGroupMsgInfo{
