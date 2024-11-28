@@ -248,7 +248,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				c.FriendNotifyEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
 			}
 		default:
-			c.warning("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
+			c.debug("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	case 0x2DC: // grp event, 732
 		subType := pkg.ContentHead.SubType.Unwrap()
@@ -337,10 +337,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			c.GroupMuteEvent.dispatch(c, ev)
 			return nil, nil
 		default:
-			c.warning("Unsupported group event, subType: %v, proto data: %x", subType, pkg.Body.MsgContent)
+			c.debug("Unsupported group event, subType: %v, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	default:
-		c.warning("Unsupported message type: %v, proto data: %x", typ, pkg.Body.MsgContent)
+		c.debug("Unsupported message type: %v, proto data: %x", typ, pkg.Body.MsgContent)
 	}
 
 	return nil, nil
