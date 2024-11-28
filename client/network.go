@@ -12,6 +12,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/pkg/errors"
 )
 
@@ -23,14 +24,49 @@ type ConnectionQualityInfo struct {
 	ChatServerLatency int64
 	// ChatServerPacketLoss 聊天服务器ICMP丢包数
 	ChatServerPacketLoss int
-	// LongMessageServerLatency 长消息服务器延迟. 涉及长消息以及合并转发消息下载
-	LongMessageServerLatency int64
-	// LongMessageServerResponseLatency 长消息服务器返回延迟
-	LongMessageServerResponseLatency int64
 	// SrvServerLatency Highway服务器延迟. 涉及媒体以及群文件上传
 	SrvServerLatency int64
 	// SrvServerPacketLoss Highway服务器ICMP丢包数.
 	SrvServerPacketLoss int
+}
+
+func (c *QQClient) ConnectionQualityTest() *ConnectionQualityInfo {
+	if !c.Online.Load() {
+		return nil
+	}
+	r := &ConnectionQualityInfo{}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	currentServerAddr := c.servers[c.currServerIndex].String()
+	go func() {
+		defer wg.Done()
+		var err error
+
+		if r.ChatServerLatency, err = qualityTest(currentServerAddr); err != nil {
+			c.error("test chat server latency error: %v", err)
+			r.ChatServerLatency = 9999
+		}
+
+		_ = c.ensureHighwayServers()
+		if c.highwaySession.AddrLength() > 0 {
+			if r.SrvServerLatency, err = qualityTest(c.highwaySession.SsoAddr[0].String()); err != nil {
+				c.error("test srv server latency error: %v", err)
+				r.SrvServerLatency = 9999
+			}
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		res := utils.RunTCPPingLoop(currentServerAddr, 10)
+		r.ChatServerPacketLoss = res.PacketsLoss
+		if c.highwaySession.AddrLength() > 0 {
+			res = utils.RunTCPPingLoop(c.highwaySession.SsoAddr[0].String(), 10)
+			r.SrvServerPacketLoss = res.PacketsLoss
+		}
+	}()
+	wg.Wait()
+	return r
 }
 
 func (c *QQClient) initServers() {
@@ -95,11 +131,23 @@ func (c *QQClient) connect() error {
 		return err
 	}
 	c.once.Do(func() {
+		c.SelfGroupMessageEvent.Subscribe(func(_ *QQClient, _ *message.GroupMessage) {
+			c.stat.MessageReceived.Add(1)
+			c.stat.LastMessageTime.Store(time.Now().Unix())
+		})
 		c.GroupMessageEvent.Subscribe(func(_ *QQClient, _ *message.GroupMessage) {
 			c.stat.MessageReceived.Add(1)
 			c.stat.LastMessageTime.Store(time.Now().Unix())
 		})
+		c.SelfPrivateMessageEvent.Subscribe(func(_ *QQClient, _ *message.PrivateMessage) {
+			c.stat.MessageReceived.Add(1)
+			c.stat.LastMessageTime.Store(time.Now().Unix())
+		})
 		c.PrivateMessageEvent.Subscribe(func(_ *QQClient, _ *message.PrivateMessage) {
+			c.stat.MessageReceived.Add(1)
+			c.stat.LastMessageTime.Store(time.Now().Unix())
+		})
+		c.SelfTempMessageEvent.Subscribe(func(_ *QQClient, _ *message.TempMessage) {
 			c.stat.MessageReceived.Add(1)
 			c.stat.LastMessageTime.Store(time.Now().Unix())
 		})
