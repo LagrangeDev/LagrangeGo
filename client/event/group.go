@@ -133,8 +133,8 @@ type JSONParam struct {
 	URL  string `json:"url"`
 }
 
-// CanPreprocess 实现预处理接口，对事件的uid进行转换等操作
-type CanPreprocess interface {
+// Iuid2uin uid转uin
+type Iuid2uin interface {
 	ResolveUin(func(uid string, groupUin ...uint32) uint32)
 }
 

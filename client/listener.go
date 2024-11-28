@@ -74,7 +74,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseMemberIncreaseEvent(&pb)
-		_ = c.PreprocessOther(ev)
+		_ = c.ResolveUin(ev)
 		if ev.MemberUin == c.Uin { // bot 进群
 			_ = c.RefreshAllGroupsInfo()
 			c.GroupJoinEvent.dispatch(c, ev)
@@ -99,7 +99,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			pb.Operator = utils.S2B(Operator.OperatorField1.OperatorUid)
 		}
 		ev := eventConverter.ParseMemberDecreaseEvent(&pb)
-		_ = c.PreprocessOther(ev)
+		_ = c.ResolveUin(ev)
 		if ev.MemberUin == c.Uin {
 			c.GroupLeaveEvent.dispatch(c, ev)
 		} else {
@@ -113,7 +113,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseGroupMemberPermissionChanged(&pb)
-		_ = c.PreprocessOther(ev)
+		_ = c.ResolveUin(ev)
 		_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.TargetUin)
 		c.GroupMemberPermissionChangedEvent.dispatch(c, ev)
 	case 84: // group request join notice
@@ -123,7 +123,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
-		_ = c.PreprocessOther(ev)
+		_ = c.ResolveUin(ev)
 		user, _ := c.FetchUserInfo(ev.TargetUID)
 		if user != nil {
 			ev.TargetUin = user.Uin
@@ -151,7 +151,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, nil
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
-		_ = c.PreprocessOther(ev)
+		_ = c.ResolveUin(ev)
 		user, _ := c.FetchUserInfo(ev.TargetUID)
 		if user != nil {
 			ev.TargetUin = user.Uin
@@ -170,7 +170,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err == nil {
 			ev.GroupName = group.GroupName
 		}
-		_ = c.PreprocessOther(ev)
+		_ = c.ResolveUin(ev)
 		user, _ := c.FetchUserInfo(ev.InvitorUID)
 		if user != nil {
 			ev.InvitorUin = user.Uin
@@ -215,7 +215,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				return nil, err
 			}
 			ev := eventConverter.ParseFriendRecallEvent(&pb)
-			_ = c.PreprocessOther(ev)
+			_ = c.ResolveUin(ev)
 			c.FriendRecallEvent.dispatch(c, ev)
 			return nil, nil
 		case 39: // friend rename
@@ -226,7 +226,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			}
 			if pb.Body.Field2 == 20 { // friend name update
 				ev := eventConverter.ParseFriendRenameEvent(&pb)
-				_ = c.PreprocessOther(ev)
+				_ = c.ResolveUin(ev)
 				c.RenameEvent.dispatch(c, ev)
 			} // 40 grp name
 			return nil, nil
@@ -287,7 +287,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				return nil, err
 			}
 			ev := eventConverter.ParseGroupRecallEvent(&pb)
-			_ = c.PreprocessOther(ev)
+			_ = c.ResolveUin(ev)
 			c.GroupRecallEvent.dispatch(c, ev)
 			return nil, nil
 		case 16: // group name update & member special title update & group reaction
@@ -311,7 +311,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				r := binary.NewReader(pb.EventParam)
 				r.SkipBytes(3)
 				ev := eventConverter.ParseGroupNameUpdatedEvent(&pb, string(r.ReadBytesWithLength("u8", false)))
-				_ = c.PreprocessOther(ev)
+				_ = c.ResolveUin(ev)
 				c.GroupNameUpdatedEvent.dispatch(c, ev)
 			case 35: // group reaction
 				r := binary.NewReader(pkg.Body.MsgContent)
@@ -323,7 +323,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 					return nil, err
 				}
 				ev := eventConverter.ParseGroupReactionEvent(&rpb)
-				_ = c.PreprocessOther(ev)
+				_ = c.ResolveUin(ev)
 				c.GroupReactionEvent.dispatch(c, ev)
 			}
 		case 12: // mute
@@ -333,7 +333,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				return nil, err
 			}
 			ev := eventConverter.ParseGroupMuteEvent(&pb)
-			_ = c.PreprocessOther(ev)
+			_ = c.ResolveUin(ev)
 			c.GroupMuteEvent.dispatch(c, ev)
 			return nil, nil
 		default:
@@ -433,7 +433,7 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 	}
 }
 
-func (c *QQClient) PreprocessOther(g eventConverter.CanPreprocess) error {
+func (c *QQClient) ResolveUin(g eventConverter.Iuid2uin) error {
 	g.ResolveUin(func(uid string, groupUin ...uint32) uint32 {
 		return c.GetUin(uid, groupUin...)
 	})
