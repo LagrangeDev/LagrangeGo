@@ -63,6 +63,7 @@ type (
 		GroupLevel      uint32
 		MemberCount     uint32
 		MaxMember       uint32
+		LastMsgSeq      uint32
 	}
 
 	UserJoinGroupRequest struct {

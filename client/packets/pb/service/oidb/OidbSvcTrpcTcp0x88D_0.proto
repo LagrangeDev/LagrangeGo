@@ -64,8 +64,8 @@ message D88DGroupInfo {
   //  repeated bool GroupAllianceCode = 19;
   //  optional bool GroupExtraAadmNum = 20;
   optional bool GroupUin = 21;
-  //  optional bool GroupCurMsgSeq = 22;
-  //  optional bool GroupLastMsgTime = 23;
+  optional bool GroupCurMsgSeq = 22;
+  optional bool GroupLastMsgTime = 23;
   optional string  GroupQuestion = 24;
   optional string  GroupAnswer = 25;
   //  optional bool GroupVisitorMaxNum = 26;

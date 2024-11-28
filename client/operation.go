@@ -581,7 +581,7 @@ func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.User, error) {
 	return oidb2.ParseFetchUserInfoResp(resp)
 }
 
-// FetchGroupInfo 获取群信息
+// FetchGroupInfo 获取群信息 isStrange是否陌生群聊
 func (c *QQClient) FetchGroupInfo(groupUin uint32, isStrange bool) (*entity.Group, error) {
 	pkt, err := oidb2.BuildFetchGroupReq(groupUin, isStrange)
 	if err != nil {
@@ -604,6 +604,7 @@ func (c *QQClient) FetchGroupInfo(groupUin uint32, isStrange bool) (*entity.Grou
 		GroupLevel:      groupResp.GroupLevel,
 		MemberCount:     groupResp.GroupMemberNum,
 		MaxMember:       groupResp.GroupMemberMaxNum,
+		LastMsgSeq:      groupResp.GroupCurMsgSeq,
 	}, nil
 }
 
