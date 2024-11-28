@@ -247,6 +247,16 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if pb.BusiType == 12 {
 				c.FriendNotifyEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
 			}
+		case 226: // 好友验证消息，申请，同意都有
+		case 179: // new friend 主动加好友且对方同意
+			pb := message.NewFriend{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			ev := eventConverter.ParseNewFriendEvent(&pb)
+			_ = c.ResolveUin(ev)
+			c.NewFriendEvent.dispatch(c, ev)
 		default:
 			c.debug("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}

@@ -16,6 +16,13 @@ type (
 		Source     string
 	}
 
+	NewFriend struct {
+		FromUin  uint32
+		FromUID  string
+		FromNick string
+		Msg      string
+	}
+
 	FriendRecall struct {
 		FromUin  uint32
 		FromUID  string
@@ -50,6 +57,19 @@ func ParseFriendRequestNotice(event *message.FriendRequest) *NewFriendRequest {
 }
 
 func (fe *FriendRecall) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
+	fe.FromUin = f(fe.FromUID)
+}
+
+func ParseNewFriendEvent(event *message.NewFriend) *NewFriend {
+	info := event.Info
+	return &NewFriend{
+		FromUID:  info.Uid,
+		FromNick: info.NickName,
+		Msg:      info.Message,
+	}
+}
+
+func (fe *NewFriend) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
 	fe.FromUin = f(fe.FromUID)
 }
 
