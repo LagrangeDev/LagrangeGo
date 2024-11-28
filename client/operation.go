@@ -34,12 +34,8 @@ import (
 )
 
 // SetOnlineStatus 设置在线状态
-func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
-	pkt, _ := proto.Marshal(&action.SetStatus{
-		Status:        status,
-		ExtStatus:     ext,
-		BatteryStatus: battery,
-	})
+func (c *QQClient) SetOnlineStatus(status action.SetStatus) error {
+	pkt, _ := proto.Marshal(&status)
 	resp, err := c.sendUniPacketAndWait("trpc.qq_new_tech.status_svc.StatusService.SetStatus", pkt)
 	if err != nil {
 		return err
