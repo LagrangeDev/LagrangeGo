@@ -67,43 +67,41 @@ type (
 	}
 
 	UserJoinGroupRequest struct {
-		GroupUin    uint32
-		InvitorUin  uint32
-		InvitorUID  string
-		TargetUin   uint32
-		TargetUID   string
-		OperatorUin uint32
-		OperatorUID string
-		Sequence    uint64
-		State       EventState
-		EventType   EventType
-		Comment     string
-		IsFiltered  bool
+		GroupName   string     `json:"group_name"`
+		GroupUin    uint32     `json:"group_id"`
+		InvitorUin  uint32     `json:"invitor_uin"`
+		InvitorUID  string     `json:"-"`
+		TargetNick  string     `json:"requester_nick"`
+		TargetUin   uint32     `json:"requester_uin"`
+		TargetUID   string     `json:"-"`
+		OperatorUin uint32     `json:"actor"`
+		OperatorUID string     `json:"-"`
+		Sequence    uint64     `json:"request_id"`
+		Checked     bool       `json:"checked"`
+		State       EventState `json:"-"`
+		EventType   EventType  `json:"-"`
+		Comment     string     `json:"message"`
+		IsFiltered  bool       `json:"is_filtered"`
 	}
 
 	GroupInvitedRequest struct {
-		GroupUin   uint32
-		InvitorUin uint32
-		InvitorUID string
-		Sequence   uint64
-		State      EventState
-		EventType  EventType
-		IsFiltered bool
+		GroupUin    uint32     `json:"group_id"`
+		GroupName   string     `json:"group_name"`
+		InvitorNick string     `json:"invitor_nick"`
+		InvitorUin  uint32     `json:"invitor_uin"`
+		InvitorUID  string     `json:"-"`
+		Sequence    uint64     `json:"request_id"`
+		Checked     bool       `json:"checked"`
+		State       EventState `json:"-"`
+		EventType   EventType  `json:"-"`
+		IsFiltered  bool       `json:"is_filtered"`
 	}
 
 	GroupSystemMessages struct {
-		InvitedRequests []*GroupInvitedRequest
-		JoinRequests    []*UserJoinGroupRequest
+		InvitedRequests []*GroupInvitedRequest  `json:"invited_requests"`
+		JoinRequests    []*UserJoinGroupRequest `json:"join_requests"`
 	}
 )
-
-func (r *UserJoinGroupRequest) Checked() bool {
-	return r.State != Unprocessed
-}
-
-func (r *GroupInvitedRequest) Checked() bool {
-	return r.State != Unprocessed
-}
 
 func (g *Group) Avatar() string {
 	return fmt.Sprintf("https://p.qlogo.cn/gh/%d/%d/0/", g.GroupUin, g.GroupUin)

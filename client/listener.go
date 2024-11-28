@@ -133,7 +133,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.JoinRequests, filteredRequests.JoinRequests...) {
-				if request.TargetUID == ev.TargetUID && !request.Checked() {
+				if request.TargetUID == ev.TargetUID && !request.Checked {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
 				}
@@ -180,7 +180,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.InvitedRequests, filteredRequests.InvitedRequests...) {
-				if !request.Checked() {
+				if !request.Checked {
 					ev.RequestSeq = request.Sequence
 					break
 				}

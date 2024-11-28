@@ -618,7 +618,27 @@ func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUi
 	if err != nil {
 		return nil, err
 	}
-	return oidb2.ParseFetchGroupSystemMessagesReq(isFiltered, resp, groupUin...)
+	msgs, err := oidb2.ParseFetchGroupSystemMessagesReq(isFiltered, resp, groupUin...)
+	if err != nil {
+		return nil, err
+	}
+	for _, req := range msgs.InvitedRequests {
+		if g, err := c.FetchGroupInfo(req.GroupUin, true); err == nil {
+			req.GroupName = g.GroupName
+		}
+		if u, err := c.FetchUserInfoUin(req.InvitorUin); err == nil {
+			req.InvitorNick = u.Nickname
+		}
+	}
+	for _, req := range msgs.JoinRequests {
+		if g, err := c.FetchGroupInfo(req.GroupUin, false); err == nil {
+			req.GroupName = g.GroupName
+		}
+		if u, err := c.FetchUserInfoUin(req.TargetUin); err == nil {
+			req.TargetNick = u.Nickname
+		}
+	}
+	return msgs, nil
 }
 
 // SetGroupRequest 处理加群请求

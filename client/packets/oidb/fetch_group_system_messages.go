@@ -41,6 +41,7 @@ func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...
 					return ""
 				}),
 				Sequence:   r.Sequence,
+				Checked:    entity.EventState(r.State) != entity.Unprocessed,
 				State:      entity.EventState(r.State),
 				EventType:  entity.EventType(r.EventType),
 				Comment:    r.Comment,
@@ -55,6 +56,7 @@ func ParseFetchGroupSystemMessagesReq(isFiltered bool, data []byte, groupUin ...
 					return ""
 				}),
 				Sequence:   r.Sequence,
+				Checked:    entity.EventState(r.State) != entity.Unprocessed,
 				State:      entity.EventState(r.State),
 				EventType:  entity.EventType(r.EventType),
 				IsFiltered: isFiltered,
