@@ -56,7 +56,7 @@ linters:
 run:
   # default concurrency is a available CPU number.
   # concurrency: 4 # explicitly omit this value to fully utilize available resources.
-  deadline: 5m
+  timeout: 5m
   issues-exit-code: 1
   tests: false
   go: '1.23'
@@ -65,6 +65,7 @@ run:
 output:
   formats:
     - format: "colored-line-number"
+      path: stdout
   print-issued-lines: true
   print-linter-name: true
   uniq-by-line: true
