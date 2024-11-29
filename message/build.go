@@ -176,7 +176,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 
 	var metaSource string
 	if len(e.Nodes) > 0 {
-		isSenderNameExist := make(map[string]bool, 0)
+		isSenderNameExist := make(map[string]bool)
 		isContainSelf := false
 		isCount := 0
 		for _, v := range e.Nodes {

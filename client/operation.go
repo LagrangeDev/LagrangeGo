@@ -1047,7 +1047,7 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 					Sender: &message2.Sender{
 						Uin:      senderUin,
 						UID:      c.GetUID(senderUin, groupUin),
-						Nickname: senderInfo.MemberName,
+						Nickname: senderInfo.Nickname,
 						CardName: senderInfo.MemberCard,
 					},
 					Time:     uint32(v.Get("sender_time").Int()),

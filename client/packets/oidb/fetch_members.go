@@ -38,16 +38,18 @@ func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 	for i, member := range resp.Members {
 		// 由于protobuf的优化策略，默认值不会被编码进实际的二进制流中
 		m := &entity.GroupMember{
-			Uin:          member.Uin.Uin,
-			UID:          interner.Intern(member.Uin.Uid),
+			User: entity.User{
+				Uin:      member.Uin.Uin,
+				UID:      interner.Intern(member.Uin.Uid),
+				Nickname: interner.Intern(member.MemberName),
+				Avatar:   interner.Intern(entity.UserAvatar(member.Uin.Uin)),
+			},
 			Permission:   entity.GroupMemberPermission(member.Permission),
 			MemberCard:   interner.Intern(member.MemberCard.MemberCard.Unwrap()),
-			MemberName:   interner.Intern(member.MemberName),
 			SpecialTitle: interner.Intern(member.SpecialTitle.Unwrap()),
 			JoinTime:     member.JoinTimestamp,
 			LastMsgTime:  member.LastMsgTimestamp,
 			ShutUpTime:   member.ShutUpTimestamp.Unwrap(),
-			Avatar:       interner.Intern(entity.UserAvatar(member.Uin.Uin)),
 		}
 		if member.Level != nil {
 			m.GroupLevel = member.Level.Level

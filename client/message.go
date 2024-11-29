@@ -202,11 +202,7 @@ func (c *QQClient) preProcessGroupMessage(groupUin uint32, elements []message2.I
 			member := c.GetCachedMemberInfo(elem.TargetUin, groupUin)
 			if member != nil {
 				elem.TargetUID = member.UID
-				if member.MemberCard != "" {
-					elem.Display = "@" + member.MemberCard
-				} else {
-					elem.Display = "@" + member.MemberName
-				}
+				elem.Display = "@" + member.DisplayName()
 			}
 		case *message2.ImageElement:
 			if elem.MsgInfo != nil {

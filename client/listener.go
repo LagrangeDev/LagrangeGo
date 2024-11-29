@@ -75,11 +75,11 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseMemberIncreaseEvent(&pb)
 		_ = c.ResolveUin(ev)
-		if ev.MemberUin == c.Uin { // bot 进群
+		if ev.UserUin == c.Uin { // bot 进群
 			_ = c.RefreshAllGroupsInfo()
 			c.GroupJoinEvent.dispatch(c, ev)
 		} else {
-			_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.MemberUin)
+			_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.UserUin)
 			c.GroupMemberJoinEvent.dispatch(c, ev)
 		}
 		return nil, nil
@@ -100,7 +100,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseMemberDecreaseEvent(&pb)
 		_ = c.ResolveUin(ev)
-		if ev.MemberUin == c.Uin {
+		if ev.UserUin == c.Uin {
 			c.GroupLeaveEvent.dispatch(c, ev)
 		} else {
 			c.GroupMemberLeaveEvent.dispatch(c, ev)
@@ -114,7 +114,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseGroupMemberPermissionChanged(&pb)
 		_ = c.ResolveUin(ev)
-		_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.TargetUin)
+		_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.UserUin)
 		c.GroupMemberPermissionChangedEvent.dispatch(c, ev)
 	case 84: // group request join notice
 		pb := message.GroupJoin{}
@@ -124,16 +124,16 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
 		_ = c.ResolveUin(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUID)
+		user, _ := c.FetchUserInfo(ev.UserUID)
 		if user != nil {
-			ev.TargetUin = user.Uin
+			ev.UserUin = user.Uin
 			ev.TargetNick = user.Nickname
 		}
 		commonRequests, reqErr := c.GetGroupSystemMessages(false, 20, ev.GroupUin)
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.JoinRequests, filteredRequests.JoinRequests...) {
-				if request.TargetUID == ev.TargetUID && !request.Checked {
+				if request.TargetUID == ev.UserUID && !request.Checked {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
 				}
@@ -152,9 +152,9 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
 		_ = c.ResolveUin(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUID)
+		user, _ := c.FetchUserInfo(ev.UserUID)
 		if user != nil {
-			ev.TargetUin = user.Uin
+			ev.UserUin = user.Uin
 			ev.TargetNick = user.Nickname
 		}
 		c.GroupMemberJoinRequestEvent.dispatch(c, ev)
