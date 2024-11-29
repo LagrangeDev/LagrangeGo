@@ -350,8 +350,19 @@ func (c *QQClient) netLoop() {
 		resp, err := c.transport.ReadResponse(data)
 		// pkt, err := packets.ParseIncomingPacket(data, c.sig.D2Key)
 		if err != nil {
-			c.error("parse incoming packet error: %v", err)
-			if errors.Is(err, network.ErrSessionExpired) || errors.Is(err, network.ErrAuthenticationFailed) || errors.Is(err, network.ErrPacketDropped) {
+			switch {
+			case errors.Is(err, network.ErrSessionExpired) || errors.Is(err, network.ErrAuthenticationFailed):
+				// 返回错误
+				go func() {
+					if f, ok := c.handlers.LoadAndDelete(uint32(resp.SequenceID)); ok {
+						// does not need decoder
+						f.fun(nil, err)
+					}
+				}()
+			case errors.Is(err, network.ErrPacketDropped):
+				fallthrough
+			default:
+				c.error("parse incoming packet error: %v", err)
 				c.Disconnect()
 				go c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: err.Error()})
 				continue
