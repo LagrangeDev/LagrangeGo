@@ -39,9 +39,7 @@ func (c *Cache) RefreshGroupMember(groupUin uint32, groupMember *entity.GroupMem
 // RefreshGroupMembers 刷新一个群内的所有群成员缓存
 func (c *Cache) RefreshGroupMembers(groupUin uint32, groupMembers map[uint32]*entity.GroupMember) {
 	newc := &Cache{}
-	for k, v := range groupMembers {
-		setCacheOf(newc, k, v)
-	}
+	refreshAllCacheOf(newc, groupMembers)
 	setCacheOf(c, groupUin, newc)
 }
 
