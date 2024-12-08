@@ -23,12 +23,6 @@ func BuildPrivateImageUploadReq(targetUID string, image *message.ImageElement) (
 	}
 	imageExt := format.String()
 
-	hexString := "0800180020004200500062009201009a0100a2010c080012001800200028003a00"
-	bytesPbReserveC2c, err := hex.DecodeString(hexString)
-	if err != nil {
-		return nil, err
-	}
-
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -76,8 +70,12 @@ func BuildPrivateImageUploadReq(targetUID string, image *message.ImageElement) (
 			CompatQMsgSceneType:    1,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
-					BytesPbReserveC2C: bytesPbReserveC2c,
-					TextSummary:       image.Summary,
+					BizType:     uint32(image.SubType),
+					TextSummary: image.Summary,
+					ExtData: &oidb.PicExtData{
+						SubType:     uint32(image.SubType),
+						TextSummary: image.Summary,
+					},
 				},
 				Video: &oidb.VideoExtBizInfo{
 					BytesPbReserve: []byte{},

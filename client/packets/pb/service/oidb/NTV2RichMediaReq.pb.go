@@ -181,13 +181,19 @@ type VideoExtBizInfo struct {
 }
 
 type PicExtBizInfo struct {
-	BizType             uint32 `protobuf:"varint,1,opt"`
-	TextSummary         string `protobuf:"bytes,2,opt"`
-	BytesPbReserveC2C   []byte `protobuf:"bytes,11,opt"`
-	BytesPbReserveTroop []byte `protobuf:"bytes,12,opt"`
-	FromScene           uint32 `protobuf:"varint,1001,opt"`
-	ToScene             uint32 `protobuf:"varint,1002,opt"`
-	OldFileId           uint32 `protobuf:"varint,1003,opt"`
+	BizType           uint32      `protobuf:"varint,1,opt"`
+	TextSummary       string      `protobuf:"bytes,2,opt"`
+	BytesPbReserveC2C []byte      `protobuf:"bytes,11,opt"`
+	ExtData           *PicExtData `protobuf:"bytes,12,opt"`
+	FromScene         uint32      `protobuf:"varint,1001,opt"`
+	ToScene           uint32      `protobuf:"varint,1002,opt"`
+	OldFileId         uint32      `protobuf:"varint,1003,opt"`
+}
+
+type PicExtData struct {
+	SubType     uint32 `protobuf:"varint,1,opt"`
+	TextSummary string `protobuf:"bytes,9,opt"`
+	_           [0]func()
 }
 
 type DownloadSafeReq struct {

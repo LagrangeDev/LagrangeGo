@@ -23,12 +23,6 @@ func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Pa
 	}
 	imageExt := format.String()
 
-	hexString := "0800180020004a00500062009201009a0100aa010c080012001800200028003a00"
-	bytesPbReserveTroop, err := hex.DecodeString(hexString)
-	if err != nil {
-		return nil, err
-	}
-
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -75,8 +69,12 @@ func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Pa
 			CompatQMsgSceneType:    2,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
-					BytesPbReserveTroop: bytesPbReserveTroop,
-					TextSummary:         image.Summary,
+					BizType:     uint32(image.SubType),
+					TextSummary: image.Summary,
+					ExtData: &oidb.PicExtData{
+						SubType:     uint32(image.SubType),
+						TextSummary: image.Summary,
+					},
 				},
 				Video: &oidb.VideoExtBizInfo{
 					BytesPbReserve: []byte{},

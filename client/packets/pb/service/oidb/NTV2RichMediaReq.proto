@@ -167,10 +167,15 @@ message PicExtBizInfo {
   uint32 BizType = 1;
   string TextSummary = 2;
   bytes BytesPbReserveC2c = 11;
-  bytes BytesPbReserveTroop = 12;
+  PicExtData ExtData = 12;
   uint32 FromScene = 1001;
   uint32 ToScene = 1002;
   uint32 OldFileId = 1003;
+}
+
+message PicExtData {
+  uint32 SubType = 1;
+  string TextSummary = 9;
 }
 
 message DownloadSafeReq {
