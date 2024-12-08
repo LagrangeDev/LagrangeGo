@@ -101,6 +101,7 @@ type (
 		GroupEvent
 		TargetSeq uint32
 		IsAdd     bool
+		IsEmoji   bool
 		Code      string
 		Count     uint32
 	}
@@ -344,6 +345,7 @@ func (g *GroupReactionEvent) ResolveUin(f func(uid string, groupUin ...uint32) u
 }
 
 func ParseGroupReactionEvent(event *message.GroupReaction) *GroupReactionEvent {
+	code := event.Data.Data.Data.Data.Code
 	return &GroupReactionEvent{
 		GroupEvent: GroupEvent{
 			GroupUin: event.GroupUid,
@@ -351,7 +353,8 @@ func ParseGroupReactionEvent(event *message.GroupReaction) *GroupReactionEvent {
 		},
 		TargetSeq: event.Data.Data.Data.Target.Sequence,
 		IsAdd:     event.Data.Data.Data.Data.Type == 1,
-		Code:      event.Data.Data.Data.Data.Code,
+		IsEmoji:   len(code) > 3,
+		Code:      code,
 		Count:     event.Data.Data.Data.Data.Count,
 	}
 }

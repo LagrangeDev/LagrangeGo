@@ -11,7 +11,7 @@ func BuildSetGroupReactionReq(groupUin, sequence uint32, code string, isAdd bool
 		GroupUin: groupUin,
 		Sequence: sequence,
 		Code:     proto.Some(code),
-		Field5:   true,
+		Type:     utils.Ternary[uint32](len(code) > 3, 2, 1),
 		Field6:   false,
 		Field7:   false,
 	}
