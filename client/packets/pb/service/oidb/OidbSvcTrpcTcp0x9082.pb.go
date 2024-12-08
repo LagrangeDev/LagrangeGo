@@ -12,7 +12,7 @@ type OidbSvcTrpcTcp0X9082 struct {
 	GroupUin uint32               `protobuf:"varint,2,opt"`
 	Sequence uint32               `protobuf:"varint,3,opt"`
 	Code     proto.Option[string] `protobuf:"bytes,4,opt"`
-	Field5   bool                 `protobuf:"varint,5,opt"`
+	Type     uint32               `protobuf:"varint,5,opt"` // 1 face 2 emoji
 	Field6   bool                 `protobuf:"varint,6,opt"`
 	Field7   bool                 `protobuf:"varint,7,opt"`
 	_        [0]func()
