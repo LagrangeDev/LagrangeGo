@@ -41,17 +41,14 @@ const (
 
 var ErrVersionMismatch = errors.New("sign version mismatch")
 
-func NewSigner(appinfo *auth.AppInfo, log func(string, ...any), signServers ...string) *Client {
+func NewSigner(log func(string, ...any), signServers ...string) *Client {
 	client := &Client{
 		instances: utils.Map(signServers, func(s string) *remote {
 			return &remote{server: s}
 		}),
-		app:        appinfo,
-		httpClient: &http.Client{},
-		extraHeaders: http.Header{
-			"User-Agent": []string{"qq/" + appinfo.CurrentVersion},
-		},
-		log: log,
+		httpClient:   &http.Client{},
+		extraHeaders: http.Header{},
+		log:          log,
 	}
 	go client.test()
 	return client
@@ -79,6 +76,13 @@ func (c *Client) GetSignServer() []string {
 	return utils.Map(c.instances, func(sign *remote) string {
 		return sign.server
 	})
+}
+
+func (c *Client) SetAppInfo(app *auth.AppInfo) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.app = app
+	c.extraHeaders.Set("User-Agent", "qq/"+app.CurrentVersion)
 }
 
 func (c *Client) getAvailableSign() *remote {

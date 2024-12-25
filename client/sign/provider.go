@@ -1,5 +1,7 @@
 package sign
 
+import "github.com/LagrangeDev/LagrangeGo/client/auth"
+
 type Response struct {
 	Platform string `json:"platform"`
 	Version  string `json:"version"`
@@ -15,4 +17,5 @@ type Provider interface {
 	AddRequestHeader(header map[string]string)
 	AddSignServer(signServers ...string)
 	GetSignServer() []string
+	SetAppInfo(app *auth.AppInfo)
 }
