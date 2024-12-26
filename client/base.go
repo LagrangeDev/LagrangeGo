@@ -162,12 +162,12 @@ func (c *QQClient) UseVersion(app *auth.AppInfo) {
 
 func (c *QQClient) UseSignProvider(p sign.Provider) {
 	c.signProvider = p
-	if c.version() != nil {
-		c.signProvider.SetAppInfo(c.version())
+	if c.Version() != nil {
+		c.signProvider.SetAppInfo(c.Version())
 	}
 }
 
-func (c *QQClient) version() *auth.AppInfo {
+func (c *QQClient) Version() *auth.AppInfo {
 	return c.transport.Version
 }
 

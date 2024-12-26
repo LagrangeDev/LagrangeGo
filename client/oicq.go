@@ -3,14 +3,15 @@ package client
 import (
 	"fmt"
 
+	"github.com/RomiChan/protobuf/proto"
+	tea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/RomiChan/protobuf/proto"
-	tea "github.com/fumiama/gofastTEA"
 )
 
 // ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/entities.go#L18
@@ -57,7 +58,7 @@ func (c *QQClient) buildCode2dPacket(uin uint32, cmdID int, body []byte) []byte 
 		binary.NewBuilder(nil).
 			WriteU8(0).
 			WriteU16(uint16(len(body))+53).
-			WriteU32(uint32(c.version().AppID)).
+			WriteU32(uint32(c.Version().AppID)).
 			WriteU32(0x72).
 			WriteBytes(make([]byte, 3)).
 			WriteU32(uint32(utils.TimeStamp())).
@@ -68,7 +69,7 @@ func (c *QQClient) buildCode2dPacket(uin uint32, cmdID int, body []byte) []byte 
 			WriteU8(3).
 			WriteU32(50).
 			WriteBytes(make([]byte, 14)).
-			WriteU32(uint32(c.version().AppID)).
+			WriteU32(uint32(c.Version().AppID)).
 			WriteBytes(body).
 			ToBytes(),
 	)

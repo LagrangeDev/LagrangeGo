@@ -23,7 +23,7 @@ func (c *QQClient) TokenLogin() (*LoginResponse, error) {
 	if c.Online.Load() {
 		return nil, ErrAlreadyOnline
 	}
-	data, err := buildNtloginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
+	data, err := buildNtloginRequest(c.Uin, c.Version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
 	if err != nil {
 		return nil, err
 	}
@@ -62,14 +62,14 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		WriteU64(0).
 		WriteU8(0).
 		WriteTLV(
-			tlv.T16(c.version().AppID, c.version().SubAppID,
-				utils.MustParseHexStr(c.Device().GUID), c.version().PTVersion, c.version().PackageName),
+			tlv.T16(c.Version().AppID, c.Version().SubAppID,
+				utils.MustParseHexStr(c.Device().GUID), c.Version().PTVersion, c.Version().PackageName),
 			tlv.T1b(0, 0, size, margin, 72, ecLevel, 2),
-			tlv.T1d(c.version().MiscBitmap),
+			tlv.T1d(c.Version().MiscBitmap),
 			tlv.T33(utils.MustParseHexStr(c.Device().GUID)),
-			tlv.T35(c.version().PTOSVersion),
-			tlv.T66(c.version().PTOSVersion),
-			tlv.Td1(c.version().OS, c.Device().DeviceName),
+			tlv.T35(c.Version().PTOSVersion),
+			tlv.T66(c.Version().PTOSVersion),
+			tlv.Td1(c.Version().OS, c.Device().DeviceName),
 		).WriteU8(3).ToBytes()
 
 	packet := c.buildCode2dPacket(c.Uin, 0x31, body)
@@ -168,7 +168,7 @@ func (c *QQClient) PasswordLogin() (*LoginResponse, error) {
 		return nil, err
 	}
 
-	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
+	data, err := buildPasswordLoginRequest(c.Uin, c.Version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func (c *QQClient) PasswordLogin() (*LoginResponse, error) {
 
 func (c *QQClient) SubmitCaptcha(ticket, randStr, aid string) (*LoginResponse, error) {
 	c.Sig().CaptchaInfo = [3]string{ticket, randStr, aid}
-	data, err := buildPasswordLoginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
+	data, err := buildPasswordLoginRequest(c.Uin, c.Version(), c.Device(), &c.transport.Sig, c.PasswordMD5)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (c *QQClient) GetNewDeviceVerifyURL() (string, error) {
 		Uint32Flag:      1,
 		Uint32UrlType:   0,
 		StrUinToken:     queryParams.Get("uin-token"),
-		StrDevType:      c.version().OS,
+		StrDevType:      c.Version().OS,
 		StrDevName:      c.Device().DeviceName,
 	})
 
@@ -297,7 +297,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 		}
 		if resp.StrNtSuccToken != "" {
 			c.transport.Sig.TempPwd = utils.S2B(resp.StrNtSuccToken)
-			data, err := buildNtloginRequest(c.Uin, c.version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
+			data, err := buildNtloginRequest(c.Uin, c.Version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
 			if err != nil {
 				return err
 			}
@@ -324,7 +324,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 }
 
 func (c *QQClient) QRCodeLogin() (*LoginResponse, error) {
-	app := c.version()
+	app := c.Version()
 	device := c.Device()
 	response, err := c.sendUniPacketAndWait(
 		"wtlogin.login",
@@ -389,7 +389,7 @@ func (c *QQClient) init() error {
 func (c *QQClient) register() error {
 	response, err := c.sendUniPacketAndWait(
 		"trpc.qq_new_tech.status_svc.StatusService.Register",
-		wtlogin.BuildRegisterRequest(c.version(), c.Device()))
+		wtlogin.BuildRegisterRequest(c.Version(), c.Device()))
 
 	if err != nil {
 		c.errorln(err)

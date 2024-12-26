@@ -1383,7 +1383,7 @@ func (c *QQClient) ImageOcr(url string) (*oidb2.OcrResponse, error) {
 
 // SendGroupSign 发送群聊打卡消息
 func (c *QQClient) SendGroupSign(groupUin uint32) (*oidb2.BotGroupClockInResult, error) {
-	pkt, err := oidb2.BuildGroupSignPacket(c.Uin, groupUin, c.version().CurrentVersion)
+	pkt, err := oidb2.BuildGroupSignPacket(c.Uin, groupUin, c.Version().CurrentVersion)
 	if err != nil {
 		return nil, err
 	}
