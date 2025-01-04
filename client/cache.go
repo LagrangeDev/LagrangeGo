@@ -8,6 +8,9 @@ import (
 
 // GetUID 获取缓存中对应uin的uid
 func (c *QQClient) GetUID(uin uint32, groupUin ...uint32) string {
+	if uin == 0 {
+		return ""
+	}
 	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return ""
@@ -30,6 +33,9 @@ func (c *QQClient) GetUID(uin uint32, groupUin ...uint32) string {
 
 // GetUin 获取缓存中对应的uin
 func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
+	if uid == "" {
+		return 0
+	}
 	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return 0
