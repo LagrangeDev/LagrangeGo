@@ -11,12 +11,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mattn/go-colorable"
+	"github.com/sirupsen/logrus"
+
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/mattn/go-colorable"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -24,7 +25,7 @@ var (
 )
 
 func main() {
-	appInfo := auth.AppList["linux"]["3.2.10-25765"]
+	appInfo := auth.AppList["linux"]["3.2.15-30366"]
 	deviceInfo := &auth.DeviceInfo{
 		GUID:          "cfcd208495d565ef66e7dff9f98764da",
 		DeviceName:    "Lagrange-DCFCD07E",
@@ -35,7 +36,7 @@ func main() {
 	qqclient := client.NewClient(0, "")
 	qqclient.SetLogger(protocolLogger{})
 	qqclient.UseVersion(appInfo)
-	qqclient.AddSignServer("https://sign.lagrangecore.org/api/sign/25765")
+	qqclient.AddSignServer("https://sign.lagrangecore.org/api/sign/30366")
 	qqclient.UseDevice(deviceInfo)
 	data, err := os.ReadFile("sig.bin")
 	if err != nil {
