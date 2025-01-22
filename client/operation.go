@@ -1484,3 +1484,37 @@ func (c *QQClient) GetAtAllRemain(uin, groupUin uint32) (*oidb2.AtAllRemainInfo,
 	}
 	return oidb2.ParseGetAtAllRemainResponse(resp)
 }
+
+// GetAiCharacters 获取AI语音角色列表
+func (c *QQClient) GetAiCharacters(groupUin uint32, chatType entity.ChatType) (*entity.AiCharacterList, error) {
+	if groupUin == 0 {
+		groupUin = 42
+	}
+	pkt, err := oidb2.BuildAiCharacterListService(groupUin, chatType)
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	result, err := oidb2.ParseAiCharacterListService(rsp)
+	if err != nil {
+		return nil, err
+	}
+	result.Type = chatType
+	return result, nil
+}
+
+// SendGroupAiRecord 发送群AI语音
+func (c *QQClient) SendGroupAiRecord(groupUin uint32, chatType entity.ChatType, voiceID, text string) (*message2.VoiceElement, error) {
+	pkt, err := oidb2.BuildGroupAiRecordService(groupUin, voiceID, text, chatType, crypto.RandU32())
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseGroupAiRecordService(rsp)
+}
