@@ -20,7 +20,7 @@ type (
 	}
 
 	AiCharacterList struct {
-		Type ChatType
-		List []AiCharacterInfo
+		Type ChatType          `json:"type"`
+		List []AiCharacterInfo `json:"chats"`
 	}
 )
