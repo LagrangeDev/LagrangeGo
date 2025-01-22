@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+message OidbSvcTrpcTcp0x929D_0_Req {
+	uint32 groupUin = 1;
+	uint32 chatType = 2; // 1 voice, 2 song
+}
+
+message OidbSvcTrpcTcp0x929D_0_Rsp {
+	repeated Key property = 1;
+	message Key {
+		string            type  = 1;
+		repeated Property value = 2;
+	}
+	message Property {
+		string characterId       = 1;
+		string characterName     = 2;
+		string characterVoiceUrl = 3;
+	}
+}
