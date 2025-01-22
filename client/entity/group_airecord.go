@@ -10,8 +10,8 @@ const (
 type (
 	AiCharacter struct {
 		Name     string `json:"name"`
-		VoiceId  string `json:"voice_id"`
-		VoiceUrl string `json:"voice_url"`
+		VoiceID  string `json:"voice_id"`
+		VoiceURL string `json:"voice_url"`
 	}
 
 	AiCharacterInfo struct {

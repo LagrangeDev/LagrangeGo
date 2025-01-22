@@ -1507,8 +1507,8 @@ func (c *QQClient) GetAiCharacters(groupUin uint32, chatType entity.ChatType) (*
 }
 
 // SendGroupAiRecord 发送群AI语音
-func (c *QQClient) SendGroupAiRecord(groupUin uint32, chatType entity.ChatType, voiceId, text string) (*message2.VoiceElement, error) {
-	pkt, err := oidb2.BuildGroupAiRecordService(groupUin, voiceId, text, chatType, crypto.RandU32())
+func (c *QQClient) SendGroupAiRecord(groupUin uint32, chatType entity.ChatType, voiceID, text string) (*message2.VoiceElement, error) {
+	pkt, err := oidb2.BuildGroupAiRecordService(groupUin, voiceID, text, chatType, crypto.RandU32())
 	if err != nil {
 		return nil, err
 	}

@@ -25,8 +25,8 @@ func ParseAiCharacterListService(data []byte) (*entity.AiCharacterList, error) {
 		for _, v := range property.Value {
 			info.Characters = append(info.Characters, entity.AiCharacter{
 				Name:     v.CharacterName,
-				VoiceId:  v.CharacterId,
-				VoiceUrl: v.CharacterVoiceUrl,
+				VoiceID:  v.CharacterId,
+				VoiceURL: v.CharacterVoiceUrl,
 			})
 		}
 		ret.List = append(ret.List, info)
@@ -37,13 +37,13 @@ func ParseAiCharacterListService(data []byte) (*entity.AiCharacterList, error) {
 	return &ret, nil
 }
 
-func BuildGroupAiRecordService(groupUin uint32, voiceId, text string, chatType entity.ChatType, chatId uint32) (*Packet, error) {
+func BuildGroupAiRecordService(groupUin uint32, voiceID, text string, chatType entity.ChatType, chatID uint32) (*Packet, error) {
 	return BuildOidbPacket(0x929B, 0, &oidb.OidbSvcTrpcTcp0X929B_0_Req{
 		GroupUin:      groupUin,
-		VoiceId:       voiceId,
+		VoiceId:       voiceID,
 		Text:          text,
 		ChatType:      uint32(chatType),
-		ClientMsgInfo: &oidb.OidbSvcTrpcTcp0X929B_0_Req_ClientMsgInfo{MsgRandom: chatId},
+		ClientMsgInfo: &oidb.OidbSvcTrpcTcp0X929B_0_Req_ClientMsgInfo{MsgRandom: chatID},
 	}, false, false)
 }
 
