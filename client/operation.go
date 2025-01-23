@@ -1022,7 +1022,7 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 				case 1:
 					elements = append(elements, &message2.TextElement{Content: e.Get("text").String()})
 				case 2:
-					elements = append(elements, &message2.FaceElement{FaceID: uint16(e.Get("face_index").Int())})
+					elements = append(elements, &message2.FaceElement{FaceID: uint32(e.Get("face_index").Int())})
 				case 3:
 					elements = append(elements, &message2.ImageElement{URL: e.Get("image_url").String()})
 				case 4:

@@ -37,8 +37,8 @@ type (
 	}
 
 	FaceElement struct {
-		FaceID      uint16
-		ResultID    uint16 // 猜拳和骰子的值
+		FaceID      uint32
+		ResultID    uint32 // 猜拳和骰子的值
 		isLargeFace bool
 	}
 
@@ -371,13 +371,13 @@ func NewForwardWithNodes(nodes []*ForwardNode) *ForwardMessage {
 	}
 }
 
-func NewFace(id uint16) *FaceElement {
+func NewFace(id uint32) *FaceElement {
 	return &FaceElement{FaceID: id}
 }
 
-func NewDice(value uint16) *FaceElement {
+func NewDice(value uint32) *FaceElement {
 	if value > 6 {
-		value = uint16(crypto.RandU32()%3) + 1
+		value = crypto.RandU32()%3 + 1
 	}
 	return &FaceElement{
 		FaceID:      358,
@@ -386,7 +386,7 @@ func NewDice(value uint16) *FaceElement {
 	}
 }
 
-type FingerGuessingType uint16
+type FingerGuessingType uint32
 
 const (
 	FingerGuessingRock     FingerGuessingType = 3 // 石头
@@ -409,7 +409,7 @@ func (m FingerGuessingType) String() string {
 func NewFingerGuessing(value FingerGuessingType) *FaceElement {
 	return &FaceElement{
 		FaceID:      359,
-		ResultID:    uint16(value),
+		ResultID:    uint32(value),
 		isLargeFace: true,
 	}
 }

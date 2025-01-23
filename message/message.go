@@ -194,20 +194,20 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			case len(elem.Face.Old) > 0:
 				faceID := elem.Face.Index
 				if faceID.IsSome() {
-					res = append(res, &FaceElement{FaceID: uint16(faceID.Unwrap())})
+					res = append(res, &FaceElement{FaceID: uint32(faceID.Unwrap())})
 				}
 			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil:
 				qFace := message.QFaceExtra{}
 				if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
 					if qFace.Qsid.IsSome() {
-						res = append(res, &FaceElement{FaceID: uint16(qFace.Qsid.Unwrap()), isLargeFace: true})
+						res = append(res, &FaceElement{FaceID: uint32(qFace.Qsid.Unwrap()), isLargeFace: true})
 					}
 				}
 			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil:
 				qFace := message.QSmallFaceExtra{}
 				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
 				if err == nil {
-					res = append(res, &FaceElement{FaceID: uint16(qFace.FaceId), isLargeFace: false})
+					res = append(res, &FaceElement{FaceID: qFace.FaceId, isLargeFace: false})
 				}
 			}
 		}
@@ -337,14 +337,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			case 33:
 				var newSysFaceMsg message.QSmallFaceExtra
 				_ = proto.Unmarshal(elem.CommonElem.PbElem, &newSysFaceMsg)
-				res = append(res, NewFace(uint16(newSysFaceMsg.FaceId)))
+				res = append(res, NewFace(newSysFaceMsg.FaceId))
 			case 37:
 				var faceExtra message.QFaceExtra
 				_ = proto.Unmarshal(elem.CommonElem.PbElem, &faceExtra)
 				result, _ := strconv.ParseInt(faceExtra.ResultId.Unwrap(), 10, 32)
 				res = append(res, &FaceElement{
-					FaceID:      uint16(faceExtra.Qsid.Unwrap()),
-					ResultID:    uint16(result),
+					FaceID:      uint32(faceExtra.Qsid.Unwrap()),
+					ResultID:    uint32(result),
 					isLargeFace: true,
 				}) // sticker 永远为单独消息
 				skipNext = true
