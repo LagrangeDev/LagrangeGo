@@ -268,16 +268,21 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				url = "http://gchat.qpic.cn" + elem.NotOnlineImage.OrigUrl
 			}
 
-			res = append(res, &ImageElement{
+			img := &ImageElement{
 				ImageID: elem.NotOnlineImage.FilePath,
 				Size:    elem.NotOnlineImage.FileLen,
 				Width:   elem.NotOnlineImage.PicWidth,
 				Height:  elem.NotOnlineImage.PicHeight,
 				URL:     url,
 				Md5:     elem.NotOnlineImage.PicMd5,
-				SubType: elem.NotOnlineImage.PbRes.SubType,
-				Summary: elem.NotOnlineImage.PbRes.Summary,
-			})
+			}
+
+			if elem.NotOnlineImage.PbRes != nil {
+				img.SubType = elem.NotOnlineImage.PbRes.SubType
+				img.Summary = elem.NotOnlineImage.PbRes.Summary
+			}
+
+			res = append(res, img)
 		}
 
 		// new protocol image
