@@ -8,8 +8,7 @@ import (
 )
 
 type LongMsgResult struct {
-	Action *LongMsgAction `protobuf:"bytes,2,opt"`
-	_      [0]func()
+	Action []*LongMsgAction `protobuf:"bytes,2,rep"`
 }
 
 type LongMsgAction struct {

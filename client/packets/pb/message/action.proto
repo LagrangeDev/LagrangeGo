@@ -5,7 +5,7 @@ option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message
 import "pb/message/message.proto";
 
 message LongMsgResult {
-  LongMsgAction Action = 2;
+  repeated LongMsgAction Action = 2;
 }
 
 message LongMsgAction {
