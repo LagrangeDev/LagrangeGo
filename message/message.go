@@ -374,10 +374,16 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 
 		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 {
 			if elem.RichMsg.Template1 != nil {
-				res = append(res, &XMLElement{
-					ServiceID: 35,
-					Content:   utils.B2S(binary.ZlibUncompress(elem.RichMsg.Template1[1:])),
-				})
+				xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
+				multimsg := MultiMessage{}
+				if err := xml.Unmarshal(xmlData, &multimsg); err == nil {
+					res = append(res, NewForwardWithResID(multimsg.ResID))
+				} else {
+					res = append(res, &XMLElement{
+						ServiceID: 35,
+						Content:   utils.B2S(binary.ZlibUncompress(elem.RichMsg.Template1[1:])),
+					})
+				}
 			}
 		}
 
@@ -392,12 +398,6 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			if len(content) > 0 && len(content) < 1024*1024*1024 { // 解析出错 or 非法内容
 				res = append(res, NewLightApp(utils.B2S(content)))
 			}
-		}
-		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 && elem.RichMsg.Template1 != nil {
-			xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
-			multimsg := MultiMessage{}
-			_ = xml.Unmarshal(xmlData, &multimsg)
-			res = append(res, NewForwardWithResID(multimsg.ResID))
 		}
 	}
 
