@@ -11,12 +11,12 @@ import (
 
 func BuildMultiMsgUploadReq(selfUID string, groupUin uint32, msg []*message.PushMsgBody) ([]byte, error) {
 	longMsgResult := &message.LongMsgResult{
-		Action: &message.LongMsgAction{
+		Action: []*message.LongMsgAction{{
 			ActionCommand: "MultiMsg",
 			ActionData: &message.LongMsgContent{
 				MsgBody: msg,
 			},
-		},
+		}},
 	}
 	longMsgResultData, _ := proto.Marshal(longMsgResult)
 	payload := binary.GZipCompress(longMsgResultData)

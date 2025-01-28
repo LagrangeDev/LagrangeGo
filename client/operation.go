@@ -917,45 +917,49 @@ func (c *QQClient) FetchForwardMsg(resID string) (msg *message2.ForwardMessage, 
 	if resID == "" {
 		return msg, errors.New("empty resID")
 	}
-	forwardMsg := &message2.ForwardMessage{ResID: resID}
 	pkt, err := messagePkt.BuildMultiMsgDownloadReq(c.GetUID(c.Uin), resID)
 	if err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
 	resp, err := c.sendUniPacketAndWait("trpc.group.long_msg_interface.MsgService.SsoRecvLongMsg", pkt)
 	if err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
 	pasted, err := messagePkt.ParseMultiMsgDownloadResp(resp)
 	if err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
 	if pasted.Result == nil || pasted.Result.Payload == nil {
-		return forwardMsg, errors.New("empty response data")
+		return nil, errors.New("empty response data")
 	}
 	data := binary.GZipUncompress(pasted.Result.Payload)
 	result := &message.LongMsgResult{}
 	if err = proto.Unmarshal(data, result); err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
-	forwardMsg.Nodes = make([]*message2.ForwardNode, len(result.Action.ActionData.MsgBody))
-	for idx, b := range result.Action.ActionData.MsgBody {
-		isGroupMsg := b.ResponseHead.Grp != nil
-		forwardMsg.Nodes[idx] = &message2.ForwardNode{
-			SenderID:   b.ResponseHead.FromUin,
-			SenderName: b.ResponseHead.Forward.FriendName.Unwrap(),
-			Time:       b.ContentHead.TimeStamp.Unwrap(),
-		}
-		if isGroupMsg {
-			forwardMsg.Nodes[idx].GroupID = b.ResponseHead.Grp.GroupUin
-			forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Grp.MemberName
-			grpMsg := message2.ParseGroupMessage(b)
-			c.PreprocessGroupMessageEvent(grpMsg)
-			forwardMsg.Nodes[idx].Message = grpMsg.Elements
-		} else {
-			prvMsg := message2.ParsePrivateMessage(b)
-			c.PreprocessPrivateMessageEvent(prvMsg)
-			forwardMsg.Nodes[idx].Message = prvMsg.Elements
+
+	forwardMsg := &message2.ForwardMessage{ResID: resID}
+	for _, action := range result.Action {
+		if action.ActionCommand == "MultiMsg" {
+			forwardMsg.Nodes = make([]*message2.ForwardNode, len(action.ActionData.MsgBody))
+			for idx, b := range action.ActionData.MsgBody {
+				forwardMsg.Nodes[idx] = &message2.ForwardNode{
+					SenderID: b.ResponseHead.FromUin,
+					Time:     b.ContentHead.TimeStamp.Unwrap(),
+				}
+				if forwardMsg.IsGroup = b.ResponseHead.Grp != nil; forwardMsg.IsGroup {
+					forwardMsg.Nodes[idx].GroupID = b.ResponseHead.Grp.GroupUin
+					forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Grp.MemberName
+					grpMsg := message2.ParseGroupMessage(b)
+					c.PreprocessGroupMessageEvent(grpMsg)
+					forwardMsg.Nodes[idx].Message = grpMsg.Elements
+				} else {
+					forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Forward.FriendName.Unwrap()
+					prvMsg := message2.ParsePrivateMessage(b)
+					c.PreprocessPrivateMessageEvent(prvMsg)
+					forwardMsg.Nodes[idx].Message = prvMsg.Elements
+				}
+			}
 		}
 	}
 	return forwardMsg, nil
