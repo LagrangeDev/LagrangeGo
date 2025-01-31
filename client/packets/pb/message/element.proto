@@ -182,19 +182,23 @@ message LightAppElem {
 }
 
 message MarketFace {
-  bytes FaceName = 1;
-  int32 ItemType = 2;
-  int32 FaceInfo = 3;
-  bytes FaceId = 4;
-  int32 TabId = 5;
-  int32 SubType = 6;
-  bytes Key = 7;
-  bytes Param = 8;
-  int32 MediaType = 9;
-  int32 ImageWidth = 10;
-  int32 ImageHeight = 11;
-  bytes Mobileparam = 12;
-  bytes PbReserve = 13;
+  optional string FaceName    = 1;  // 表情名称，UTF-8
+  optional uint32 ItemType    = 2;  // 后台二进制编码是主机字节序，不是网络，默认值 6
+  optional uint32 FaceInfo    = 3;  // 默认为1
+  optional bytes  FaceId      = 4;  // 16字节，表情ID
+  optional uint32 TabId       = 5;  // 表情的分组ID
+  optional uint32 SubType     = 6;  // 表情类型: 0->None，1->魔法表情，2->gif，3->png
+  optional bytes  Key         = 7;  // 16字节，表情的加密KEY
+  optional bytes  Param       = 8;  // 魔法表情的播放参数
+  optional uint32 MediaType   = 9;  // 媒体类型：1->有声表情，2->动态表情秀
+  optional uint32 ImageWidth  = 10; // 表情图片的宽度
+  optional uint32 ImageHeight = 11; // 表情图片的高度
+  optional bytes  MobileParam = 12; // 手Q的播放参数，避免与PC冲突
+  optional bytes  PbReserve   = 13; // 商城表情业务控制的扩展结构,参见hummer_resv_12.proto
+}
+
+message MarketFacePbReserve {
+  int32 field8 = 8;
 }
 
 message NotOnlineImage {

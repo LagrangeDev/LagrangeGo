@@ -255,3 +255,26 @@ func (e *FileElement) BuildContent() []byte {
 		})
 	return content
 }
+
+func (e *MarketFaceElement) BuildContent() []*message.Elem {
+	mFace := &message.MarketFace{
+		FaceName:    proto.String(e.Name),
+		ItemType:    proto.Uint32(uint32(e.ItemType)),
+		FaceInfo:    proto.Uint32(1),
+		FaceId:      e.FaceId,
+		TabId:       proto.Uint32(uint32(e.TabId)),
+		SubType:     proto.Uint32(uint32(e.SubType)),
+		Key:         e.EncryptKey,
+		MediaType:   proto.Uint32(uint32(e.MediaType)),
+		ImageWidth:  proto.Uint32(200),
+		ImageHeight: proto.Uint32(200),
+		MobileParam: utils.S2B(e.MagicValue),
+	}
+	mFace.PbReserve, _ = proto.Marshal(&message.MarketFacePbReserve{Field8: 1})
+
+	return []*message.Elem{{
+		MarketFace: mFace,
+	}, {
+		Text: &message.Text{Str: proto.Some(e.Name)},
+	}}
+}

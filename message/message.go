@@ -25,18 +25,19 @@ type IMessage interface {
 }
 
 const (
-	Text     ElementType = iota // 文本
-	Image                       // 图片
-	Face                        // 表情
-	At                          // 艾特
-	Reply                       // 回复
-	Service                     // 服务
-	Forward                     // 转发
-	File                        // 文件
-	Voice                       // 语音
-	Video                       // 视频
-	LightApp                    // 轻应用
-	RedBag                      // 红包
+	Text       ElementType = iota // 文本
+	Image                         // 图片
+	Face                          // 表情
+	At                            // 艾特
+	Reply                         // 回复
+	Service                       // 服务
+	Forward                       // 转发
+	File                          // 文件
+	Voice                         // 语音
+	Video                         // 视频
+	LightApp                      // 轻应用
+	RedBag                        // 红包
+	MarketFace                    // 魔法表情
 )
 
 type (
@@ -399,6 +400,20 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				res = append(res, NewLightApp(utils.B2S(content)))
 			}
 		}
+
+		if elem.MarketFace != nil {
+			res = append(res, &MarketFaceElement{
+				Name:       elem.MarketFace.FaceName.Unwrap(),
+				ItemType:   elem.MarketFace.ItemType.Unwrap(),
+				FaceInfo:   elem.MarketFace.FaceInfo.Unwrap(),
+				FaceId:     elem.MarketFace.FaceId,
+				TabId:      elem.MarketFace.TabId.Unwrap(),
+				SubType:    elem.MarketFace.SubType.Unwrap(),
+				EncryptKey: elem.MarketFace.Key,
+				MediaType:  elem.MarketFace.MediaType.Unwrap(),
+				MagicValue: utils.B2S(elem.MarketFace.MobileParam),
+			})
+		}
 	}
 
 	return res
@@ -566,6 +581,8 @@ func ToReadableStringEle(elem IMessageElement) string {
 		return "[卡片消息]"
 	case *ForwardMessage:
 		return "[转发消息]"
+	case *MarketFaceElement:
+		return "[魔法表情]"
 	default:
 		return "[暂不支持该消息类型]"
 	}

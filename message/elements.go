@@ -150,12 +150,22 @@ type (
 		Nodes   []*ForwardNode
 	}
 
+	MarketFaceElement struct {
+		Name       string
+		ItemType   uint32
+		FaceInfo   uint32
+		FaceId     []byte // decoded = mediaType == 2 ? string(FaceId) : hex.EncodeToString(FaceId).toLower().trimSpace(); download url param?
+		TabId      uint32
+		SubType    uint32 // image type, 0 -> None 1 -> Magic Face 2 -> GIF 3 -> PNG
+		EncryptKey []byte // tea + xor, see EMosmUtils.class::a maybe useful?
+		MediaType  uint32 // 1 -> Voice Face 2 -> dynamic face
+		MagicValue string
+	}
+
 	AtType int
 )
 
-const (
-	AtTypeGroupMember = 0 // At群成员
-)
+const AtTypeGroupMember = 0 // At群成员
 
 func NewText(s string) *TextElement {
 	return &TextElement{Content: s}
@@ -375,6 +385,30 @@ func NewFace(id uint32) *FaceElement {
 	return &FaceElement{FaceID: id}
 }
 
+// NewMarketFace
+//
+// key: FetchMarketFaceKey(emojiId) 获取的值
+func NewMarketFace(emojiPackId uint32, emojiId []byte, key, name, value string) *MarketFaceElement {
+	return &MarketFaceElement{
+		Name:       name,
+		ItemType:   6,
+		FaceInfo:   1,
+		FaceId:     emojiId,
+		TabId:      emojiPackId,
+		SubType:    3,
+		EncryptKey: utils.S2B(key),
+		MediaType:  0,
+		MagicValue: value,
+	}
+}
+
+func (m *MarketFaceElement) FaceIdString() string {
+	if m.MediaType == 2 {
+		return utils.B2S(m.FaceId)
+	}
+	return fmt.Sprintf("%x", m.FaceId)
+}
+
 func NewDice(value uint32) *FaceElement {
 	if value > 6 {
 		value = crypto.RandU32()%3 + 1
@@ -455,3 +489,5 @@ func (e *XMLElement) Type() ElementType {
 func (e *ForwardMessage) Type() ElementType {
 	return Forward
 }
+
+func (e *MarketFaceElement) Type() ElementType { return MarketFace }
