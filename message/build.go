@@ -266,8 +266,8 @@ func (e *MarketFaceElement) BuildContent() []*message.Elem {
 		SubType:     proto.Uint32(uint32(e.SubType)),
 		Key:         e.EncryptKey,
 		MediaType:   proto.Uint32(uint32(e.MediaType)),
-		ImageWidth:  proto.Uint32(200),
-		ImageHeight: proto.Uint32(200),
+		ImageWidth:  proto.Uint32(300),
+		ImageHeight: proto.Uint32(300),
 		MobileParam: utils.S2B(e.MagicValue),
 	}
 	mFace.PbReserve, _ = proto.Marshal(&message.MarketFacePbReserve{Field8: 1})
