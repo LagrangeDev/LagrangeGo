@@ -154,8 +154,8 @@ type (
 		Summary    string
 		ItemType   uint32
 		FaceInfo   uint32
-		FaceId     []byte // decoded = mediaType == 2 ? string(FaceId) : hex.EncodeToString(FaceId).toLower().trimSpace(); download url param?
-		TabId      uint32
+		FaceID     []byte // decoded = mediaType == 2 ? string(FaceId) : hex.EncodeToString(FaceId).toLower().trimSpace(); download url param?
+		TabID      uint32
 		SubType    uint32 // image type, 0 -> None 1 -> Magic Face 2 -> GIF 3 -> PNG
 		EncryptKey []byte // tea + xor, see EMosmUtils.class::a maybe useful?
 		MediaType  uint32 // 1 -> Voice Face 2 -> dynamic face
@@ -387,14 +387,14 @@ func NewFace(id uint32) *FaceElement {
 
 // NewMarketFace
 //
-// key: FetchMarketFaceKey(emojiId) 获取的值
-func NewMarketFace(emojiPackId uint32, emojiId []byte, key, summary, value string) *MarketFaceElement {
+// key: FetchMarketFaceKey(emojiID) 获取的值
+func NewMarketFace(emojiPackID uint32, emojiID []byte, key, summary, value string) *MarketFaceElement {
 	return &MarketFaceElement{
 		Summary:    summary,
 		ItemType:   6,
 		FaceInfo:   1,
-		FaceId:     emojiId,
-		TabId:      emojiPackId,
+		FaceID:     emojiID,
+		TabID:      emojiPackID,
 		SubType:    3,
 		EncryptKey: utils.S2B(key),
 		MediaType:  0,
@@ -402,11 +402,11 @@ func NewMarketFace(emojiPackId uint32, emojiId []byte, key, summary, value strin
 	}
 }
 
-func (m *MarketFaceElement) FaceIdString() string {
+func (m *MarketFaceElement) FaceIDString() string {
 	if m.MediaType == 2 {
-		return utils.B2S(m.FaceId)
+		return utils.B2S(m.FaceID)
 	}
-	return fmt.Sprintf("%x", m.FaceId)
+	return fmt.Sprintf("%x", m.FaceID)
 }
 
 func NewDice(value uint32) *FaceElement {
