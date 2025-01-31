@@ -259,13 +259,13 @@ func (e *FileElement) BuildContent() []byte {
 func (e *MarketFaceElement) BuildContent() []*message.Elem {
 	mFace := &message.MarketFace{
 		FaceName:    proto.String(e.Summary),
-		ItemType:    proto.Uint32(uint32(e.ItemType)),
+		ItemType:    proto.Uint32(e.ItemType),
 		FaceInfo:    proto.Uint32(1),
 		FaceId:      e.FaceID,
-		TabId:       proto.Uint32(uint32(e.TabID)),
-		SubType:     proto.Uint32(uint32(e.SubType)),
+		TabId:       proto.Uint32(e.TabID),
+		SubType:     proto.Uint32(e.SubType),
 		Key:         e.EncryptKey,
-		MediaType:   proto.Uint32(uint32(e.MediaType)),
+		MediaType:   proto.Uint32(e.MediaType),
 		ImageWidth:  proto.Uint32(300),
 		ImageHeight: proto.Uint32(300),
 		MobileParam: utils.S2B(e.MagicValue),

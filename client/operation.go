@@ -1524,13 +1524,13 @@ func (c *QQClient) SendGroupAiRecord(groupUin uint32, chatType entity.ChatType, 
 }
 
 // FetchMarketFaceKey 获取魔法表情key
-func (c *QQClient) FetchMarketFaceKey(faceIds ...string) ([]string, error) {
-	for i, v := range faceIds {
-		faceIds[i] = strings.ToLower(v)
+func (c *QQClient) FetchMarketFaceKey(faceIDS ...string) ([]string, error) {
+	for i, v := range faceIDS {
+		faceIDS[i] = strings.ToLower(v)
 	}
 	pkt, err := proto.Marshal(&message.MarketFaceKeyReq{
 		Field1: 3,
-		Info:   &message.MarketFaceKeyReqInfo{FaceIds: faceIds},
+		Info:   &message.MarketFaceKeyReqInfo{FaceIds: faceIDS},
 	})
 	if err != nil {
 		return nil, err

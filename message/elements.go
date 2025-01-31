@@ -402,11 +402,11 @@ func NewMarketFace(emojiPackID uint32, emojiID []byte, key, summary, value strin
 	}
 }
 
-func (m *MarketFaceElement) FaceIDString() string {
-	if m.MediaType == 2 {
-		return utils.B2S(m.FaceID)
+func (e *MarketFaceElement) FaceIDString() string {
+	if e.MediaType == 2 {
+		return utils.B2S(e.FaceID)
 	}
-	return fmt.Sprintf("%x", m.FaceID)
+	return fmt.Sprintf("%x", e.FaceID)
 }
 
 func NewDice(value uint32) *FaceElement {
