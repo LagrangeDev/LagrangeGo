@@ -151,7 +151,7 @@ type (
 	}
 
 	MarketFaceElement struct {
-		Name       string
+		Summary    string
 		ItemType   uint32
 		FaceInfo   uint32
 		FaceId     []byte // decoded = mediaType == 2 ? string(FaceId) : hex.EncodeToString(FaceId).toLower().trimSpace(); download url param?
@@ -388,9 +388,9 @@ func NewFace(id uint32) *FaceElement {
 // NewMarketFace
 //
 // key: FetchMarketFaceKey(emojiId) 获取的值
-func NewMarketFace(emojiPackId uint32, emojiId []byte, key, name, value string) *MarketFaceElement {
+func NewMarketFace(emojiPackId uint32, emojiId []byte, key, summary, value string) *MarketFaceElement {
 	return &MarketFaceElement{
-		Name:       name,
+		Summary:    summary,
 		ItemType:   6,
 		FaceInfo:   1,
 		FaceId:     emojiId,

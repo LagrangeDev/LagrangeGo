@@ -403,7 +403,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 
 		if elem.MarketFace != nil {
 			res = append(res, &MarketFaceElement{
-				Name:       elem.MarketFace.FaceName.Unwrap(),
+				Summary:    elem.MarketFace.FaceName.Unwrap(),
 				ItemType:   elem.MarketFace.ItemType.Unwrap(),
 				FaceInfo:   elem.MarketFace.FaceInfo.Unwrap(),
 				FaceId:     elem.MarketFace.FaceId,

@@ -258,7 +258,7 @@ func (e *FileElement) BuildContent() []byte {
 
 func (e *MarketFaceElement) BuildContent() []*message.Elem {
 	mFace := &message.MarketFace{
-		FaceName:    proto.String(e.Name),
+		FaceName:    proto.String(e.Summary),
 		ItemType:    proto.Uint32(uint32(e.ItemType)),
 		FaceInfo:    proto.Uint32(1),
 		FaceId:      e.FaceId,
@@ -275,6 +275,6 @@ func (e *MarketFaceElement) BuildContent() []*message.Elem {
 	return []*message.Elem{{
 		MarketFace: mFace,
 	}, {
-		Text: &message.Text{Str: proto.Some(e.Name)},
+		Text: &message.Text{Str: proto.Some(e.Summary)},
 	}}
 }
