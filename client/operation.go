@@ -1522,3 +1522,29 @@ func (c *QQClient) SendGroupAiRecord(groupUin uint32, chatType entity.ChatType, 
 	}
 	return oidb2.ParseGroupAiRecordService(rsp)
 }
+
+// FetchMarketFaceKey 获取魔法表情key
+func (c *QQClient) FetchMarketFaceKey(faceIDs ...string) ([]string, error) {
+	for i, v := range faceIDs {
+		faceIDs[i] = strings.ToLower(v)
+	}
+	pkt, err := proto.Marshal(&message.MarketFaceKeyReq{
+		Field1: 3,
+		Info:   &message.MarketFaceKeyReqInfo{FaceIds: faceIDs},
+	})
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := c.sendUniPacketAndWait("BQMallSvc.TabOpReq", pkt)
+	if err != nil {
+		return nil, err
+	}
+	var info message.MarketFaceKeyRsp
+	if err = proto.Unmarshal(rsp, &info); err != nil {
+		return nil, err
+	}
+	if info.Info == nil {
+		return nil, errors.New("valid ids")
+	}
+	return info.Info.Keys, nil
+}

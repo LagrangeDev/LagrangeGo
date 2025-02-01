@@ -185,19 +185,24 @@ type LightAppElem struct {
 }
 
 type MarketFace struct {
-	FaceName    []byte `protobuf:"bytes,1,opt"`
-	ItemType    int32  `protobuf:"varint,2,opt"`
-	FaceInfo    int32  `protobuf:"varint,3,opt"`
-	FaceId      []byte `protobuf:"bytes,4,opt"`
-	TabId       int32  `protobuf:"varint,5,opt"`
-	SubType     int32  `protobuf:"varint,6,opt"`
-	Key         []byte `protobuf:"bytes,7,opt"`
-	Param       []byte `protobuf:"bytes,8,opt"`
-	MediaType   int32  `protobuf:"varint,9,opt"`
-	ImageWidth  int32  `protobuf:"varint,10,opt"`
-	ImageHeight int32  `protobuf:"varint,11,opt"`
-	Mobileparam []byte `protobuf:"bytes,12,opt"`
-	PbReserve   []byte `protobuf:"bytes,13,opt"`
+	FaceName    proto.Option[string] `protobuf:"bytes,1,opt"`   // 表情名称，UTF-8
+	ItemType    proto.Option[uint32] `protobuf:"varint,2,opt"`  // 后台二进制编码是主机字节序，不是网络，默认值 6
+	FaceInfo    proto.Option[uint32] `protobuf:"varint,3,opt"`  // 默认为1
+	FaceId      []byte               `protobuf:"bytes,4,opt"`   // 16字节，表情ID
+	TabId       proto.Option[uint32] `protobuf:"varint,5,opt"`  // 表情的分组ID
+	SubType     proto.Option[uint32] `protobuf:"varint,6,opt"`  // 表情类型: 0->None，1->魔法表情，2->gif，3->png
+	Key         []byte               `protobuf:"bytes,7,opt"`   // 16字节，表情的加密KEY
+	Param       []byte               `protobuf:"bytes,8,opt"`   // 魔法表情的播放参数
+	MediaType   proto.Option[uint32] `protobuf:"varint,9,opt"`  // 媒体类型：1->有声表情，2->动态表情秀
+	ImageWidth  proto.Option[uint32] `protobuf:"varint,10,opt"` // 表情图片的宽度
+	ImageHeight proto.Option[uint32] `protobuf:"varint,11,opt"` // 表情图片的高度
+	MobileParam []byte               `protobuf:"bytes,12,opt"`  // 手Q的播放参数，避免与PC冲突
+	PbReserve   []byte               `protobuf:"bytes,13,opt"`  // 商城表情业务控制的扩展结构,参见hummer_resv_12.proto
+}
+
+type MarketFacePbReserve struct {
+	Field8 int32 `protobuf:"varint,8,opt"`
+	_      [0]func()
 }
 
 type NotOnlineImage struct {
