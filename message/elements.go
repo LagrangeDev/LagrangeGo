@@ -392,7 +392,6 @@ func NewMarketFace(emojiPackID uint32, emojiID []byte, key, summary, value strin
 	return &MarketFaceElement{
 		Summary:    summary,
 		ItemType:   6,
-		FaceInfo:   1,
 		FaceID:     emojiID,
 		TabID:      emojiPackID,
 		SubType:    3,
