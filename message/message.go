@@ -9,9 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"

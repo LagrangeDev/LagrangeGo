@@ -3,12 +3,11 @@ package tlv
 import (
 	"strconv"
 
-	ftea "github.com/fumiama/gofastTEA"
-
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	ftea "github.com/fumiama/gofastTEA"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5

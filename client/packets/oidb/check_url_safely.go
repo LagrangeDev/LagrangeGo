@@ -3,9 +3,8 @@ package oidb
 import (
 	"errors"
 
-	"github.com/RomiChan/protobuf/proto"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/RomiChan/protobuf/proto"
 )
 
 // ref https://github.com/Mrs4s/MiraiGo/blob/master/client/security.go

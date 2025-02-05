@@ -2,7 +2,6 @@ package client
 
 import (
 	"net"
-	"net/netip"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/pkg/errors"
+	"net/netip"
 )
 
 // ConnectionQualityInfo 客户端连接质量测试结果

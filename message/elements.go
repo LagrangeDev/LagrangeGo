@@ -11,14 +11,12 @@ import (
 	"strconv"
 
 	_ "embed"
-
-	"github.com/tidwall/gjson"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/audio"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/tidwall/gjson"
 )
 
 //go:embed default_thumb.jpg

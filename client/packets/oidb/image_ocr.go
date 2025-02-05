@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-
 	"github.com/pkg/errors"
 )
 

@@ -11,11 +11,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/pkg/errors"
 )
 
 // see com/tencent/mobileqq/highway/utils/BaseConstants.java#L120-L121

@@ -5,15 +5,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	ftea "github.com/fumiama/gofastTEA"
-
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	ftea "github.com/fumiama/gofastTEA"
 )
 
 func buildPasswordLoginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo, sig *auth.SigInfo, passwordMD5 [16]byte) ([]byte, error) {
