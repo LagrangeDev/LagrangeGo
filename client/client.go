@@ -44,6 +44,23 @@ func (c *QQClient) TokenLogin() (*LoginResponse, error) {
 	return &res, err
 }
 
+func (c *QQClient) Relogin() (*LoginResponse, error) {
+	if !c.Online.Load() {
+		return nil, ErrNotOnline
+	}
+
+	c.Disconnect()
+	if err := c.connect(); err != nil {
+		return nil, err
+	}
+
+	if err := c.keyExchange(); err != nil {
+		return nil, err
+	}
+
+	return c.TokenLogin()
+}
+
 func (c *QQClient) FetchQRCodeDefault() ([]byte, string, error) {
 	return c.FetchQRCode(3, 4, 2)
 }

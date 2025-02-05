@@ -43,6 +43,12 @@ func init() {
 	gob.Register(SigInfo{})
 }
 
+func (sig *SigInfo) ClearSession() {
+	sig.D2 = make([]byte, 0)
+	sig.Tgt = make([]byte, 0)
+	sig.D2Key = make([]byte, 16)
+}
+
 func (sig *SigInfo) Marshal() ([]byte, error) {
 	buffer := new(bytes.Buffer)
 	err := gob.NewEncoder(buffer).Encode(sig)
