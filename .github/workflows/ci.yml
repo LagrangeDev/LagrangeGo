@@ -35,7 +35,7 @@ jobs:
           export PATH="$PATH:$GOPATH/bin"
           go install github.com/incu6us/goimports-reviser@latest
           pwd
-          find . -name "*.go" | xargs -I {} goimports-reviser -file-path {} -project-name "github.com/LagraneDev/LagrangeGo"
+          find . -name "*.go" | xargs -I {} goimports-reviser -file-path {} -project-name "github.com/LagrangeDev/LagrangeGo"
 
       - name: GolangCI-Lint
         uses: golangci/golangci-lint-action@v6
