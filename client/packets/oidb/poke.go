@@ -1,8 +1,9 @@
 package oidb
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/RomiChan/protobuf/proto"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
 func BuildGroupPokeReq(groupUin, uin uint32) (*Packet, error) {

@@ -10,8 +10,9 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	ftea "github.com/fumiama/gofastTEA"
+
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 type Builder struct {

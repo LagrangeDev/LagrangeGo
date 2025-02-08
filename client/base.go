@@ -11,6 +11,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/RomiChan/syncx"
+	"github.com/pkg/errors"
+	"golang.org/x/net/publicsuffix"
+	"net/netip"
+
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/event"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/cache"
@@ -24,10 +29,6 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/log"
-	"github.com/RomiChan/syncx"
-	"github.com/pkg/errors"
-	"golang.org/x/net/publicsuffix"
-	"net/netip"
 )
 
 // NewClient 创建一个新的 QQ Client

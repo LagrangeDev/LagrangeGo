@@ -8,12 +8,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
+	"net/netip"
+
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/pkg/errors"
-	"net/netip"
 )
 
 // ConnectionQualityInfo 客户端连接质量测试结果

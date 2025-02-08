@@ -14,6 +14,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
+	"golang.org/x/net/html"
+
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
@@ -26,9 +30,6 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
-	"golang.org/x/net/html"
 )
 
 // SetOnlineStatus 设置在线状态

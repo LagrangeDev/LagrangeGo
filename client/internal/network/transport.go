@@ -5,11 +5,12 @@ package network
 import (
 	"strconv"
 
+	tea "github.com/fumiama/gofastTEA"
+
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
-	tea "github.com/fumiama/gofastTEA"
 )
 
 // Transport is a network transport.

@@ -10,12 +10,13 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
-	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	ftea "github.com/fumiama/gofastTEA"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 // 视频必须是1024*1024
