@@ -477,9 +477,22 @@ func (c *QQClient) GetGroupRecordURL(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
-// GetVideoURL 获取视频下载链接
-func (c *QQClient) GetVideoURL(isGroup bool, uuid string) (string, error) {
-	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().UID, uuid, isGroup)
+// GetPrivateVideoURL 获取私聊视频下载链接
+func (c *QQClient) GetPrivateVideoURL(node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildPrivateVideoDownloadReq(c.Sig().UID, node)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParseVideoDownloadResp(resp)
+}
+
+// GetGroupVideoURL 获取群聊视频下载链接
+func (c *QQClient) GetGroupVideoURL(groupUin uint32, node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildGroupVideoDownloadReq(groupUin, node)
 	if err != nil {
 		return "", err
 	}

@@ -379,7 +379,7 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) {
 			url, _ := c.GetGroupRecordURL(msg.GroupUin, e.Node)
 			e.URL = url
 		case *msgConverter.ShortVideoElement:
-			url, err := c.GetVideoURL(true, e.UUID)
+			url, err := c.GetGroupVideoURL(msg.GroupUin, e.Node)
 			if err != nil {
 				continue
 			}
@@ -418,7 +418,7 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 			}
 			e.URL = url
 		case *msgConverter.ShortVideoElement:
-			url, err := c.GetVideoURL(false, e.UUID)
+			url, err := c.GetPrivateVideoURL(e.Node)
 			if err != nil {
 				continue
 			}

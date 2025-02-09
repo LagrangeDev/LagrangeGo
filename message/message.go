@@ -3,6 +3,7 @@ package message
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/message/message.go
 
 import (
+	"encoding/hex"
 	"encoding/xml"
 	"fmt"
 	"reflect"
@@ -213,18 +214,25 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		}
 
 		if elem.VideoFile != nil {
-			return []IMessageElement{
-				&ShortVideoElement{
-					Name: elem.VideoFile.FileName,
-					UUID: elem.VideoFile.FileUuid,
-					Size: uint32(elem.VideoFile.FileSize),
-					Md5:  elem.VideoFile.FileMd5,
-					Thumb: &VideoThumb{
-						Size: uint32(elem.VideoFile.ThumbFileSize),
-						Md5:  elem.VideoFile.ThumbFileMd5,
+			video := elem.VideoFile
+			res = append(res, &ShortVideoElement{
+				Name: video.FileName,
+				UUID: video.FileUuid,
+				Size: uint32(video.FileSize),
+				Md5:  video.FileMd5,
+				Node: &oidb2.IndexNode{
+					Info: &oidb2.FileInfo{
+						FileName: video.FileName,
+						FileSize: uint32(video.FileSize),
+						FileHash: hex.EncodeToString(video.FileMd5),
 					},
+					FileUuid: video.FileUuid,
 				},
-			}
+				Thumb: &VideoThumb{
+					Size: uint32(elem.VideoFile.ThumbFileSize),
+					Md5:  elem.VideoFile.ThumbFileMd5,
+				},
+			})
 		}
 
 		if elem.CustomFace != nil {
@@ -317,6 +325,25 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
 						Duration: index.Info.Time,
 						Node:     index,
+					})
+				case 11, 21: // video
+					var thumb = new(VideoThumb)
+					if !(len(extra.MsgInfoBody) < 2) {
+						info := extra.MsgInfoBody[1].Index
+						thumb.Size = info.Info.FileSize
+						thumb.Width = info.Info.Width
+						thumb.Height = info.Info.Height
+						thumb.Md5 = utils.MustParseHexStr(info.Info.FileHash)
+						thumb.Sha1 = utils.MustParseHexStr(info.Info.FileSha1)
+					}
+					res = append(res, &ShortVideoElement{
+						Name:  index.Info.FileName,
+						UUID:  index.FileUuid,
+						Md5:   utils.MustParseHexStr(index.Info.FileHash),
+						Sha1:  utils.MustParseHexStr(index.Info.FileSha1),
+						Size:  index.Info.FileSize,
+						Thumb: thumb,
+						Node:  index,
 					})
 				}
 			case 3: // 闪照

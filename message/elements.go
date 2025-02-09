@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	_ "embed"
+
 	"github.com/tidwall/gjson"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
@@ -112,6 +113,7 @@ type (
 		Size     uint32
 		URL      string
 		Duration uint32
+		Node     *oidb.IndexNode
 
 		// send
 		Thumb   *VideoThumb
