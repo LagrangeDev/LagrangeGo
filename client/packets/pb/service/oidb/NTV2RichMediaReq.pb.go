@@ -136,7 +136,24 @@ type MsgInfoBody struct {
 	Video     *VideoInfo   `protobuf:"bytes,3,opt"`
 	Audio     *AudioInfo   `protobuf:"bytes,4,opt"`
 	FileExist bool         `protobuf:"varint,5,opt"`
-	HashSum   []byte       `protobuf:"bytes,6,opt"`
+	HashSum   *HashSum     `protobuf:"bytes,6,opt"`
+	_         [0]func()
+}
+
+type HashSum struct {
+	BytesPbReserveC2C *C2CSource   `protobuf:"bytes,201,opt"`
+	TroopSource       *TroopSource `protobuf:"bytes,202,opt"`
+	_                 [0]func()
+}
+
+type C2CSource struct {
+	FriendUid string `protobuf:"bytes,2,opt"`
+	_         [0]func()
+}
+
+type TroopSource struct {
+	GroupUin uint32 `protobuf:"varint,1,opt"`
+	_        [0]func()
 }
 
 type VideoInfo struct {

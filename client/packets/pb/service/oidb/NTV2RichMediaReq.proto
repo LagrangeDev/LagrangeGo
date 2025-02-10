@@ -121,7 +121,20 @@ message MsgInfoBody {
   VideoInfo Video = 3;
   AudioInfo Audio = 4;
   bool FileExist = 5;
-  bytes HashSum = 6;
+  HashSum HashSum = 6;
+}
+
+message HashSum {
+  C2cSource BytesPbReserveC2c = 201;
+  optional TroopSource TroopSource = 202;
+}
+
+message C2cSource {
+  string FriendUid = 2;
+}
+
+message TroopSource {
+  uint32 GroupUin = 1;
 }
 
 message VideoInfo {
