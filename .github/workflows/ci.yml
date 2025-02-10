@@ -47,6 +47,7 @@ jobs:
 
       - name: commit back
         if: github.repository_owner == 'LagrangeDev'
+        continue-on-error: true
         run: |
           git config --local user.name 'github-actions[bot]'
           git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
