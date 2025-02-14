@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"net/http"
 	"net/http/cookiejar"
+	"net/netip"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -14,7 +15,6 @@ import (
 	"github.com/RomiChan/syncx"
 	"github.com/pkg/errors"
 	"golang.org/x/net/publicsuffix"
-	"net/netip"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/event"

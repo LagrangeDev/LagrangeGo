@@ -3,14 +3,13 @@ package oicq
 // from https://github.com/Mrs4s/MiraiGo/blob/master/client/internal/oicq/ecdh.go
 
 import (
+	"crypto/ecdh"
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strconv"
-
-	"crypto/ecdh"
 )
 
 // session is ecdh session in oicq.

@@ -2,6 +2,7 @@ package client
 
 import (
 	"net"
+	"net/netip"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"net/netip"
 
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"

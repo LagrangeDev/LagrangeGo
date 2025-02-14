@@ -1,9 +1,8 @@
 package ecdh
 
 import (
-	"crypto/rand"
-
 	"crypto/ecdh"
+	"crypto/rand"
 )
 
 type Exchanger interface {

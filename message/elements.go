@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	_ "embed"
+
 	"github.com/tidwall/gjson"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
