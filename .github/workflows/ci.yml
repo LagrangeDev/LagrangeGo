@@ -33,9 +33,8 @@ jobs:
       - name: Sort Imports
         run: |
           export PATH="$PATH:$GOPATH/bin"
-          go install github.com/incu6us/goimports-reviser@latest
-          pwd
-          find . -name "*.go" | xargs -I {} goimports-reviser -file-path {} -project-name "github.com/LagrangeDev/LagrangeGo"
+          go install -v github.com/incu6us/goimports-reviser/v3@latest
+          make sort
 
       - name: GolangCI-Lint
         uses: golangci/golangci-lint-action@v6
