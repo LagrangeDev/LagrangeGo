@@ -66,7 +66,7 @@ func init() {
 	}
 }
 
-func containSignPKG(cmd string) bool {
+func ContainSignPKG(cmd string) bool {
 	_, ok := signMap[cmd]
 	return ok
 }

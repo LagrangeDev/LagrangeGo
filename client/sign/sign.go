@@ -105,7 +105,7 @@ func (c *Client) sortByLatency() {
 }
 
 func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
-	if !containSignPKG(cmd) {
+	if !ContainSignPKG(cmd) {
 		return nil, nil
 	}
 	if time.Now().After(c.lastTestTime.Add(30 * time.Minute)) {
@@ -148,7 +148,7 @@ func (c *Client) test() {
 }
 
 func (i *remote) sign(cmd string, seq uint32, buf []byte, header http.Header) (*Response, error) {
-	if !containSignPKG(cmd) {
+	if !ContainSignPKG(cmd) {
 		return nil, nil
 	}
 	sb := strings.Builder{}
