@@ -2,13 +2,13 @@ package sign
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"net/http"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -118,7 +118,7 @@ func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
 			if err != nil {
 				sign.latency.Store(serverLatencyDown)
 				continue
-			} else if resp.Version != c.app.CurrentVersion && resp.Value.Extra != c.app.SignExtraHexLower && resp.Value.Extra != c.app.SignExtraHexUpper {
+			} else if resp.Version != c.app.CurrentVersion {
 				return nil, ErrVersionMismatch
 			}
 			c.log(fmt.Sprintf("signed for [%s:%d](%dms)",
@@ -151,12 +151,17 @@ func (i *remote) sign(cmd string, seq uint32, buf []byte, header http.Header) (*
 	if !ContainSignPKG(cmd) {
 		return nil, nil
 	}
-	sb := strings.Builder{}
-	sb.WriteString(`{"cmd":"` + cmd + `",`)
-	sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
-	sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
-	resp, err := httpPost[Response](i.server, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, header)
-	if err != nil || resp.Value.Sign == "" {
+	req := Request{
+		Cmd: cmd,
+		Seq: int(seq),
+		Src: buf,
+	}
+	data, err := json.Marshal(&req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := httpPost[Response](i.server, bytes.NewReader(data), 8*time.Second, header)
+	if err != nil || len(resp.Value.Sign) == 0 {
 		resp, err = httpGet[Response](i.server, map[string]string{
 			"cmd": cmd,
 			"seq": strconv.Itoa(int(seq)),
@@ -172,13 +177,13 @@ func (i *remote) sign(cmd string, seq uint32, buf []byte, header http.Header) (*
 func (i *remote) test() {
 	startTime := time.Now().UnixMilli()
 	resp, err := i.sign("wtlogin.login", 1, []byte{11, 45, 14}, nil)
-	if err != nil || resp.Value.Sign == "" {
+	if err != nil || len(resp.Value.Sign) == 0 {
 		i.latency.Store(serverLatencyDown)
 		return
 	}
 	// 有长连接的情况，取两次平均值
 	resp, err = i.sign("wtlogin.login", 1, []byte{11, 45, 14}, nil)
-	if err != nil || resp.Value.Sign == "" {
+	if err != nil || len(resp.Value.Sign) == 0 {
 		i.latency.Store(serverLatencyDown)
 		return
 	}
