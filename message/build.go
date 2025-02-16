@@ -21,7 +21,7 @@ func (e *TextElement) BuildElement() []*message.Elem {
 
 func (e *AtElement) BuildElement() []*message.Elem {
 	reserveData, _ := proto.Marshal(&message.MentionExtra{
-		Type:   proto.Some(int32(utils.Ternary(e.TargetUin == 0, 1, 2))), // atAll
+		Type:   proto.Some(utils.Ternary[int32](e.TargetUin == 0, 1, 2)), // atAll
 		Uin:    proto.Some(uint32(0)),
 		Field5: proto.Some(int32(0)),
 		Uid:    proto.Some(e.TargetUID),
@@ -75,7 +75,7 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
-			BusinessType: utils.Ternary(e.IsGroup, uint32(20), uint32(10)),
+			BusinessType: utils.Ternary[uint32](e.IsGroup, 20, 10),
 		},
 	}}
 	if e.CompatFace != nil {

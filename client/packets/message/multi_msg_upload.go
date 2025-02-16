@@ -24,7 +24,7 @@ func BuildMultiMsgUploadReq(selfUID string, groupUin uint32, msg []*message.Push
 		Info: &message.SendLongMsgInfo{
 			Type: utils.Ternary[uint32](groupUin == 0, 1, 3),
 			Uid: &message.LongMsgUid{
-				Uid: utils.Ternary(groupUin == 0, proto.String(selfUID), proto.String(strconv.Itoa(int(groupUin)))),
+				Uid: proto.String(utils.Ternary(groupUin == 0, selfUID, strconv.Itoa(int(groupUin)))),
 			},
 			GroupUin: proto.Uint32(groupUin),
 			Payload:  payload,
