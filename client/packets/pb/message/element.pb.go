@@ -8,36 +8,26 @@ import (
 )
 
 type Elem struct {
-	Text                  *Text                  `protobuf:"bytes,1,opt"`
-	Face                  *Face                  `protobuf:"bytes,2,opt"`
-	OnlineImage           *OnlineImage           `protobuf:"bytes,3,opt"`
-	NotOnlineImage        *NotOnlineImage        `protobuf:"bytes,4,opt"`
-	TransElem             *TransElem             `protobuf:"bytes,5,opt"`
-	MarketFace            *MarketFace            `protobuf:"bytes,6,opt"`
-	CustomFace            *CustomFace            `protobuf:"bytes,8,opt"`
-	ElemFlags2            *ElemFlags2            `protobuf:"bytes,9,opt"`
-	RichMsg               *RichMsg               `protobuf:"bytes,12,opt"`
-	GroupFile             *GroupFile             `protobuf:"bytes,13,opt"`
-	ExtraInfo             *ExtraInfo             `protobuf:"bytes,16,opt"`
-	VideoFile             *VideoFile             `protobuf:"bytes,19,opt"`
-	AnonymousGroupMessage *AnonymousGroupMessage `protobuf:"bytes,21,opt"`
-	QQWalletMsg           *QQWalletMsg           `protobuf:"bytes,24,opt"`
-	CustomElem            *CustomElem            `protobuf:"bytes,31,opt"`
-	GeneralFlags          *GeneralFlags          `protobuf:"bytes,37,opt"`
-	SrcMsg                *SrcMsg                `protobuf:"bytes,45,opt"`
-	LightAppElem          *LightAppElem          `protobuf:"bytes,51,opt"`
-	CommonElem            *CommonElem            `protobuf:"bytes,53,opt"`
-	_                     [0]func()
-}
-
-type AnonymousGroupMessage struct {
-	Flags        int32  `protobuf:"varint,1,opt"`
-	AnonId       []byte `protobuf:"bytes,2,opt"`
-	AnonNick     []byte `protobuf:"bytes,3,opt"`
-	HeadPortrait int32  `protobuf:"varint,4,opt"`
-	ExpireTime   int32  `protobuf:"varint,5,opt"`
-	BubbleId     int32  `protobuf:"varint,6,opt"`
-	RankColor    []byte `protobuf:"bytes,7,opt"`
+	Text           *Text           `protobuf:"bytes,1,opt"`
+	Face           *Face           `protobuf:"bytes,2,opt"`
+	OnlineImage    *OnlineImage    `protobuf:"bytes,3,opt"`
+	NotOnlineImage *NotOnlineImage `protobuf:"bytes,4,opt"`
+	TransElem      *TransElem      `protobuf:"bytes,5,opt"`
+	MarketFace     *MarketFace     `protobuf:"bytes,6,opt"`
+	CustomFace     *CustomFace     `protobuf:"bytes,8,opt"`
+	ElemFlags2     *ElemFlags2     `protobuf:"bytes,9,opt"`
+	RichMsg        *RichMsg        `protobuf:"bytes,12,opt"`
+	GroupFile      *GroupFile      `protobuf:"bytes,13,opt"`
+	ExtraInfo      *ExtraInfo      `protobuf:"bytes,16,opt"`
+	VideoFile      *VideoFile      `protobuf:"bytes,19,opt"`
+	// optional AnonymousGroupMessage AnonymousGroupMessage = 21;
+	QQWalletMsg  *QQWalletMsg  `protobuf:"bytes,24,opt"`
+	CustomElem   *CustomElem   `protobuf:"bytes,31,opt"`
+	GeneralFlags *GeneralFlags `protobuf:"bytes,37,opt"`
+	SrcMsg       *SrcMsg       `protobuf:"bytes,45,opt"`
+	LightAppElem *LightAppElem `protobuf:"bytes,51,opt"`
+	CommonElem   *CommonElem   `protobuf:"bytes,53,opt"`
+	_            [0]func()
 }
 
 type CommonElem struct {

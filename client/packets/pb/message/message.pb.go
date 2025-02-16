@@ -4,9 +4,8 @@
 package message
 
 import (
-	proto "github.com/RomiChan/protobuf/proto"
-
 	system "github.com/LagrangeDev/LagrangeGo/client/packets/pb/system"
+	proto "github.com/RomiChan/protobuf/proto"
 )
 
 type ContentHead struct {
