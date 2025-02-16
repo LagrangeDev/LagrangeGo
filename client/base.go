@@ -188,6 +188,7 @@ func (c *QQClient) SetCustomServer(servers []netip.AddrPort) {
 }
 
 func (c *QQClient) Release() {
+	c.signProvider.Release()
 	if c.Online.Load() {
 		c.Disconnect()
 	}

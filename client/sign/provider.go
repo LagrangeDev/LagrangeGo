@@ -50,4 +50,5 @@ type Provider interface {
 	AddSignServer(signServers ...string)
 	GetSignServer() []string
 	SetAppInfo(app *auth.AppInfo)
+	Release()
 }

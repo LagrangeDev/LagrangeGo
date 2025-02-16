@@ -54,6 +54,8 @@ func NewSigner(log func(string, ...any), signServers ...string) *Client {
 	return client
 }
 
+func (c *Client) Release() {}
+
 func (c *Client) AddRequestHeader(header map[string]string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
