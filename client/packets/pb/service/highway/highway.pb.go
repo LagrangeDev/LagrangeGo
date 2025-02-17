@@ -4,8 +4,9 @@
 package highway
 
 import (
-	oidb "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	proto "github.com/RomiChan/protobuf/proto"
+
+	oidb "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
 type DataHighwayHead struct {

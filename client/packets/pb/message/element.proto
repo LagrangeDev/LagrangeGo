@@ -15,7 +15,7 @@ message Elem {
   optional GroupFile GroupFile = 13;
   optional ExtraInfo ExtraInfo = 16;
   optional VideoFile VideoFile = 19;
-  //optional AnonymousGroupMessage AnonymousGroupMessage = 21;
+  optional AnonymousGroupMessage AnonymousGroupMessage = 21;
   optional QQWalletMsg QQWalletMsg = 24;
   optional CustomElem CustomElem = 31;
   optional GeneralFlags GeneralFlags = 37;
@@ -24,7 +24,6 @@ message Elem {
   optional CommonElem CommonElem = 53;
 }
 
-/*
 message AnonymousGroupMessage {
   int32 Flags = 1;
   bytes AnonId = 2;
@@ -34,7 +33,6 @@ message AnonymousGroupMessage {
   int32 BubbleId = 6;
   bytes RankColor = 7;
 }
-*/
 
 message CommonElem {
   int32 ServiceType = 1;

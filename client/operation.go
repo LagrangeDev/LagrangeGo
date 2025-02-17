@@ -477,6 +477,21 @@ func (c *QQClient) GetGroupRecordURL(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
+/* king bug ?
+func (c *QQClient) GetVideoNode() *oidb.IndexNode {
+	return &oidb.IndexNode{
+		Info: &oidb2.FileInfo{
+			FileName: video.FileName,
+			FileSize: video.FileSize,
+			FileSha1: video.FileSha1,
+			FileHash: video.FileMd5,
+		},
+		FileUuid: video.FileUuid,
+		StoreId : 1, // 0旧服务器 1为nt服务器
+	},
+}
+*/
+
 // GetPrivateVideoURL 获取私聊视频下载链接
 func (c *QQClient) GetPrivateVideoURL(node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildPrivateVideoDownloadReq(c.Sig().UID, node)

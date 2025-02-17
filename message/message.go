@@ -81,27 +81,15 @@ type (
 		UID      string
 		Nickname string
 		CardName string
-		//AnonymousInfo *AnonymousInfo
 		IsFriend bool
 	}
-	/*
-		AnonymousInfo struct {
-			AnonymousID   string
-			AnonymousNick string
-		}
-	*/
+
 	IMessageElement interface {
 		Type() ElementType
 	}
 
 	ElementType int
 )
-
-/*
-func (s *Sender) IsAnonymous() bool {
-	return s.Uin == 80000000
-}
-*/
 
 func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 	prvMsg := &PrivateMessage{
@@ -173,15 +161,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		}
 
 		if elem.Text != nil {
-			switch {
-			case len(elem.Text.Attr6Buf) > 0:
+			if len(elem.Text.Attr6Buf) > 0 {
 				att6 := binary.NewReader(elem.Text.Attr6Buf)
 				att6.SkipBytes(7)
 				target := att6.ReadU32()
 				at := NewAt(target, elem.Text.Str.Unwrap())
 				at.SubType = AtTypeGroupMember
 				res = append(res, at)
-			default:
+			} else {
 				res = append(res, NewText(func() string {
 					if strings.Contains(elem.Text.Str.Unwrap(), "\r") && !strings.Contains(elem.Text.Str.Unwrap(), "\r\n") {
 						return strings.ReplaceAll(elem.Text.Str.Unwrap(), "\r", "\r\n")
@@ -452,8 +439,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 	if body != nil {
 		if body.RichText != nil && body.RichText.Ptt != nil {
 			ptt := body.RichText.Ptt
-			switch {
-			case isGroup && ptt.FileId != 0:
+			if isGroup && ptt.FileId != 0 {
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
 					UUID: ptt.FileUuid,
@@ -462,7 +448,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 						FileUuid: ptt.GroupFileKey,
 					},
 				})
-			case !isGroup:
+			} else if !isGroup {
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
 					UUID: ptt.FileUuid,
