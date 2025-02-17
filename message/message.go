@@ -77,17 +77,11 @@ type (
 	}
 
 	Sender struct {
-		Uin           uint32
-		UID           string
-		Nickname      string
-		CardName      string
-		AnonymousInfo *AnonymousInfo
-		IsFriend      bool
-	}
-
-	AnonymousInfo struct {
-		AnonymousID   string
-		AnonymousNick string
+		Uin      uint32
+		UID      string
+		Nickname string
+		CardName string
+		IsFriend bool
 	}
 
 	IMessageElement interface {
@@ -96,10 +90,6 @@ type (
 
 	ElementType int
 )
-
-func (s *Sender) IsAnonymous() bool {
-	return s.Uin == 80000000
-}
 
 func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 	prvMsg := &PrivateMessage{
@@ -161,26 +151,24 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			continue
 		}
 		if elem.SrcMsg != nil && len(elem.SrcMsg.OrigSeqs) != 0 {
-			r := &ReplyElement{
+			res = append(res, &ReplyElement{
 				ReplySeq:  elem.SrcMsg.OrigSeqs[0],
 				Time:      uint32(elem.SrcMsg.Time.Unwrap()),
 				SenderUin: uint32(elem.SrcMsg.SenderUin),
 				GroupUin:  uint32(elem.SrcMsg.ToUin.Unwrap()),
 				Elements:  ParseMessageElements(elem.SrcMsg.Elems),
-			}
-			res = append(res, r)
+			})
 		}
 
 		if elem.Text != nil {
-			switch {
-			case len(elem.Text.Attr6Buf) > 0:
+			if len(elem.Text.Attr6Buf) > 0 {
 				att6 := binary.NewReader(elem.Text.Attr6Buf)
 				att6.SkipBytes(7)
 				target := att6.ReadU32()
 				at := NewAt(target, elem.Text.Str.Unwrap())
 				at.SubType = AtTypeGroupMember
 				res = append(res, at)
-			default:
+			} else {
 				res = append(res, NewText(func() string {
 					if strings.Contains(elem.Text.Str.Unwrap(), "\r") && !strings.Contains(elem.Text.Str.Unwrap(), "\r\n") {
 						return strings.ReplaceAll(elem.Text.Str.Unwrap(), "\r", "\r\n")
@@ -191,24 +179,25 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 		}
 
 		if elem.Face != nil {
-			switch {
-			case len(elem.Face.Old) > 0:
+			if len(elem.Face.Old) > 0 {
 				faceID := elem.Face.Index
 				if faceID.IsSome() {
 					res = append(res, &FaceElement{FaceID: uint32(faceID.Unwrap())})
 				}
-			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil:
-				qFace := message.QFaceExtra{}
-				if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
-					if qFace.Qsid.IsSome() {
-						res = append(res, &FaceElement{FaceID: uint32(qFace.Qsid.Unwrap()), isLargeFace: true})
+			} else if elem.CommonElem != nil && elem.CommonElem.PbElem != nil {
+				if elem.CommonElem.ServiceType == 37 {
+					qFace := message.QFaceExtra{}
+					if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
+						if qFace.Qsid.IsSome() {
+							res = append(res, &FaceElement{FaceID: uint32(qFace.Qsid.Unwrap()), isLargeFace: true})
+						}
 					}
-				}
-			case elem.CommonElem != nil && elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil:
-				qFace := message.QSmallFaceExtra{}
-				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
-				if err == nil {
-					res = append(res, &FaceElement{FaceID: qFace.FaceId, isLargeFace: false})
+				} else if elem.CommonElem.ServiceType == 33 {
+					qFace := message.QSmallFaceExtra{}
+					err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
+					if err == nil {
+						res = append(res, &FaceElement{FaceID: qFace.FaceId, isLargeFace: false})
+					}
 				}
 			}
 		}
@@ -328,7 +317,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					})
 				case 11, 21: // video
 					var thumb = new(VideoThumb)
-					if !(len(extra.MsgInfoBody) < 2) {
+					if len(extra.MsgInfoBody) > 1 {
 						info := extra.MsgInfoBody[1].Index
 						thumb.Size = info.Info.FileSize
 						thumb.Width = info.Info.Width
@@ -408,7 +397,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				} else {
 					res = append(res, &XMLElement{
 						ServiceID: 35,
-						Content:   utils.B2S(binary.ZlibUncompress(elem.RichMsg.Template1[1:])),
+						Content:   utils.B2S(xmlData),
 					})
 				}
 			}
@@ -450,8 +439,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 	if body != nil {
 		if body.RichText != nil && body.RichText.Ptt != nil {
 			ptt := body.RichText.Ptt
-			switch {
-			case isGroup && ptt.FileId != 0:
+			if isGroup && ptt.FileId != 0 {
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
 					UUID: ptt.FileUuid,
@@ -460,7 +448,7 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 						FileUuid: ptt.GroupFileKey,
 					},
 				})
-			case !isGroup:
+			} else if !isGroup {
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
 					UUID: ptt.FileUuid,
@@ -654,11 +642,9 @@ func PackElementsToBody(msgElems []IMessageElement) (msgBody *message.MessageBod
 		RichText: &message.RichText{Elems: PackElements(msgElems)},
 	}
 	for _, elem := range msgElems {
-		bd, ok := elem.(MsgContentBuilder)
-		if !ok {
-			continue
+		if bd, ok := elem.(MsgContentBuilder); ok {
+			msgBody.MsgContent = bd.BuildContent()
 		}
-		msgBody.MsgContent = bd.BuildContent()
 	}
 	return
 }
@@ -669,11 +655,9 @@ func PackElements(msgElems []IMessageElement) []*message.Elem {
 	}
 	elems := make([]*message.Elem, 0, len(msgElems))
 	for _, elem := range msgElems {
-		bd, ok := elem.(ElementBuilder)
-		if !ok {
-			continue
+		if bd, ok := elem.(ElementBuilder); ok {
+			elems = append(elems, bd.BuildElement()...)
 		}
-		elems = append(elems, bd.BuildElement()...)
 	}
 	return elems
 }
