@@ -9,32 +9,11 @@ import (
 	"sync"
 )
 
-var bufferPool = sync.Pool{
-	New: func() any {
-		return new(Builder)
-	},
-}
-
-// SelectBuilder 从池中取出一个 Builder
-func SelectBuilder(key []byte) *Builder {
-	// 因为 bufferPool 定义有 New 函数
-	// 所以 bufferPool.Get() 永不为 nil
-	// 不用判空
-	return bufferPool.Get().(*Builder).init(key)
-}
-
-// PutBuilder 将 Builder 放回池中
-func PutBuilder(w *Builder) {
-	// See https://golang.org/issue/23199
-	const maxSize = 32 * 1024
-	if w.hasput {
-		return
-	}
-	w.hasput = true
-	if w.buffer.Cap() < maxSize { // 对于大Buffer直接丢弃
-		w.buffer.Reset()
-		bufferPool.Put(w)
-	}
+// NewBuilder 从池中取出一个 Builder
+func NewBuilder(key ...byte) *Builder {
+	b := new(Builder)
+	b.init(key)
+	return b
 }
 
 var gzipPool = sync.Pool{
@@ -48,14 +27,14 @@ var gzipPool = sync.Pool{
 	},
 }
 
-func AcquireGzipWriter() *GzipWriter {
+func acquireGzipWriter() *GzipWriter {
 	ret := gzipPool.Get().(*GzipWriter)
 	ret.buf.Reset()
 	ret.w.Reset(ret.buf)
 	return ret
 }
 
-func ReleaseGzipWriter(w *GzipWriter) {
+func releaseGzipWriter(w *GzipWriter) {
 	// See https://golang.org/issue/23199
 	const maxSize = 1 << 16
 	if w.buf.Cap() < maxSize {

@@ -47,12 +47,12 @@ func ZlibCompress(data []byte) []byte {
 }
 
 func GZipCompress(data []byte) []byte {
-	gw := AcquireGzipWriter()
+	gw := acquireGzipWriter()
 	_, _ = gw.Write(data)
 	_ = gw.Close()
 	ret := make([]byte, len(gw.buf.Bytes()))
 	copy(ret, gw.buf.Bytes())
-	ReleaseGzipWriter(gw)
+	releaseGzipWriter(gw)
 	return ret
 }
 

@@ -50,16 +50,16 @@ func (sig *SigInfo) ClearSession() {
 }
 
 func (sig *SigInfo) Marshal() ([]byte, error) {
-	buffer := new(bytes.Buffer)
+	buffer := binary.NewBuilder()
 	err := gob.NewEncoder(buffer).Encode(sig)
 	if err != nil {
 		return nil, err
 	}
-	dataHash := crypto.MD5Digest(buffer.Bytes())
-
-	return binary.NewBuilder(nil).
+	data := buffer.ToBytes()
+	dataHash := crypto.MD5Digest(data)
+	return binary.NewBuilder().
 		WriteLenBytes(dataHash).
-		WriteLenBytes(buffer.Bytes()).
+		WriteLenBytes(data).
 		ToBytes(), nil
 }
 

@@ -6,13 +6,13 @@ import (
 )
 
 func T11(unusualSign []byte) []byte {
-	return binary.NewBuilder(nil).
+	return binary.NewBuilder().
 		WriteBytes(unusualSign).
 		Pack(0x11)
 }
 
 func T16(appid, subAppid int, guid []byte, ptVersion, packageName string) []byte {
-	return binary.NewBuilder(nil).
+	return binary.NewBuilder().
 		WriteU32(0).
 		WriteU32(uint32(appid)).
 		WriteU32(uint32(subAppid)).
@@ -24,13 +24,13 @@ func T16(appid, subAppid int, guid []byte, ptVersion, packageName string) []byte
 }
 
 func T1b(micro, version, size, margin, dpi, ecLevel, hint uint32) []byte {
-	return binary.NewBuilder(nil).
+	return binary.NewBuilder().
 		WriteStruct(micro, version, size, margin, dpi, ecLevel, hint, uint16(0)).
 		Pack(0x1B)
 }
 
 func T1d(miscBitmap int) []byte {
-	return binary.NewBuilder(nil).
+	return binary.NewBuilder().
 		WriteU8(1).
 		WriteU32(uint32(miscBitmap)).
 		WriteU32(0).
@@ -39,19 +39,19 @@ func T1d(miscBitmap int) []byte {
 }
 
 func T33(guid []byte) []byte {
-	return binary.NewBuilder(nil).WriteBytes(guid).Pack(0x33)
+	return binary.NewBuilder().WriteBytes(guid).Pack(0x33)
 }
 
 func T35(ptOSVersion int) []byte {
-	return binary.NewBuilder(nil).WriteU32(uint32(ptOSVersion)).Pack(0x35)
+	return binary.NewBuilder().WriteU32(uint32(ptOSVersion)).Pack(0x35)
 }
 
 func T66(ptOSVersion int) []byte {
-	return binary.NewBuilder(nil).WriteU32(uint32(ptOSVersion)).Pack(0x66)
+	return binary.NewBuilder().WriteU32(uint32(ptOSVersion)).Pack(0x66)
 }
 
 func Td1(appOS, deviceName string) []byte {
-	return binary.NewBuilder(nil).
+	return binary.NewBuilder().
 		WriteBytes(proto.DynamicMessage{
 			1: proto.DynamicMessage{
 				1: appOS,

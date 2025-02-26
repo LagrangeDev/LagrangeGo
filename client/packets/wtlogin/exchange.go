@@ -31,7 +31,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 	}
 
 	p2Hash := crypto.SHA256Digest(
-		binary.NewBuilder(nil).
+		binary.NewBuilder().
 			WriteBytes(ecdh.P256().PublicKey()).
 			WriteU32(1).
 			WriteBytes(encl).

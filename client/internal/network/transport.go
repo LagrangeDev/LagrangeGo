@@ -36,7 +36,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		}
 	}
 
-	ssoHeader := binary.NewBuilder(nil).
+	ssoHeader := binary.NewBuilder().
 		WriteU32(req.SequenceID).
 		WriteU32(uint32(t.Version.SubAppID)).
 		WriteU32(2052).                                        // locate id
@@ -50,7 +50,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WritePacketBytes(head.Encode(), "u32", true).
 		ToBytes()
 
-	ssoPacket := binary.NewBuilder(nil).
+	ssoPacket := binary.NewBuilder().
 		WritePacketBytes(ssoHeader, "u32", true).
 		WritePacketBytes(req.Body, "u32", true).
 		ToBytes()
@@ -64,7 +64,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		_s = 1
 	}
 
-	service := binary.NewBuilder(nil).
+	service := binary.NewBuilder().
 		WriteU32(12).
 		WriteU8(_s).
 		WritePacketBytes(t.Sig.D2, "u32", true).
@@ -73,5 +73,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WriteBytes(encrypted).
 		ToBytes()
 
-	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).ToBytes()
+	return binary.NewBuilder().
+		WritePacketBytes(service, "u32", true).
+		ToBytes()
 }

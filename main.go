@@ -154,7 +154,7 @@ func main() {
 	defer qqclient.Release()
 
 	defer func() {
-		data, err = qqclient.Sig().Marshal()
+		data, err := qqclient.Sig().Marshal()
 		if err != nil {
 			logger.Errorln("marshal sig.bin err:", err)
 			return

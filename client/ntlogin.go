@@ -17,14 +17,14 @@ import (
 )
 
 func buildPasswordLoginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo, sig *auth.SigInfo, passwordMD5 [16]byte) ([]byte, error) {
-	key := crypto.MD5Digest(binary.NewBuilder(nil).
+	key := crypto.MD5Digest(binary.NewBuilder().
 		WriteBytes(passwordMD5[:]).
 		WriteU32(0).
 		WriteU32(uin).
 		ToBytes(),
 	)
 
-	plainBytes := binary.NewBuilder(nil).
+	plainBytes := binary.NewBuilder().
 		WriteU16(4).
 		WriteU32(crypto.RandU32()).
 		WriteU32(0).

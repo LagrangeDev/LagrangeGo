@@ -45,8 +45,7 @@ type Message struct {
 }
 
 func (c *Codec) Marshal(m *Message) []byte {
-	w := binary.SelectBuilder(nil)
-	defer binary.PutBuilder(w)
+	w := binary.NewBuilder()
 
 	w.WriteU8(0x02)
 	w.WriteU16(0)    // len 占位
@@ -137,8 +136,7 @@ type TLV struct {
 }
 
 func (t *TLV) Marshal() []byte {
-	w := binary.SelectBuilder(nil)
-	defer binary.PutBuilder(w)
+	w := binary.NewBuilder()
 
 	w.WriteU16(t.Command)
 	w.WriteU16(uint16(len(t.List)))

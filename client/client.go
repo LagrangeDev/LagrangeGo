@@ -74,7 +74,7 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		return nil, "", err
 	}
 
-	body := binary.NewBuilder(nil).
+	packet := c.buildCode2dPacket(c.Uin, 0x31, binary.NewBuilder().
 		WriteU16(0).
 		WriteU64(0).
 		WriteU8(0).
@@ -87,9 +87,8 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 			tlv.T35(c.Version().PTOSVersion),
 			tlv.T66(c.Version().PTOSVersion),
 			tlv.Td1(c.Version().OS, c.Device().DeviceName),
-		).WriteU8(3).ToBytes()
+		).WriteU8(3).ToBytes())
 
-	packet := c.buildCode2dPacket(c.Uin, 0x31, body)
 	response, err := c.sendUniPacketAndWait("wtlogin.trans_emp", packet)
 	if err != nil {
 		return nil, "", err
@@ -119,15 +118,13 @@ func (c *QQClient) GetQRCodeResult() (qrcodestate.State, error) {
 		return -1, errors.New("no qrsig found, execute fetch_qrcode first")
 	}
 
-	body := binary.NewBuilder(nil).
-		WritePacketBytes(c.transport.Sig.Qrsig, "u16", false).
-		WriteU64(0).
-		WriteU32(0).
-		WriteU8(0).
-		WriteU8(0x83).ToBytes()
-
 	response, err := c.sendUniPacketAndWait("wtlogin.trans_emp",
-		c.buildCode2dPacket(0, 0x12, body))
+		c.buildCode2dPacket(0, 0x12, binary.NewBuilder().
+			WritePacketBytes(c.transport.Sig.Qrsig, "u16", false).
+			WriteU64(0).
+			WriteU32(0).
+			WriteU8(0).
+			WriteU8(0x83).ToBytes()))
 	if err != nil {
 		return -1, err
 	}
@@ -345,10 +342,10 @@ func (c *QQClient) QRCodeLogin() (*LoginResponse, error) {
 	device := c.Device()
 	response, err := c.sendUniPacketAndWait(
 		"wtlogin.login",
-		c.buildLoginPacket(c.Uin, "wtlogin.login", binary.NewBuilder(nil).
+		c.buildLoginPacket(c.Uin, "wtlogin.login", binary.NewBuilder().
 			WriteU16(0x09).
 			WriteTLV(
-				binary.NewBuilder(nil).WriteBytes(c.t106).Pack(0x106),
+				binary.NewBuilder().WriteBytes(c.t106).Pack(0x106),
 				tlv.T144(c.transport.Sig.Tgtgt, app, device),
 				tlv.T116(app.SubSigmap),
 				tlv.T142(app.PackageName, 0),
@@ -360,7 +357,7 @@ func (c *QQClient) QRCodeLogin() (*LoginResponse, error) {
 				tlv.T100(5, app.AppID, app.SubAppID, 8001, app.MainSigmap, 0),
 				tlv.T107(1, 0x0d, 0, 1),
 				tlv.T318(nil),
-				binary.NewBuilder(nil).WriteBytes(c.t16a).Pack(0x16a),
+				binary.NewBuilder().WriteBytes(c.t16a).Pack(0x16a),
 				tlv.T166(5),
 				tlv.T521(0x13, "basicim"),
 			).ToBytes()))

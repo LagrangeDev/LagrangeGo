@@ -55,7 +55,7 @@ func (c *QQClient) buildCode2dPacket(uin uint32, cmdID int, body []byte) []byte 
 	return c.buildLoginPacket(
 		uin,
 		"wtlogin.trans_emp",
-		binary.NewBuilder(nil).
+		binary.NewBuilder().
 			WriteU8(0).
 			WriteU16(uint16(len(body))+53).
 			WriteU32(uint32(c.Version().AppID)).
