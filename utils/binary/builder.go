@@ -6,7 +6,6 @@ import (
 	"io"
 	"math"
 	"net"
-	"runtime"
 	"strconv"
 	"unsafe"
 
@@ -20,26 +19,17 @@ type Builder struct {
 	key    ftea.TEA
 	usetea bool
 	hasput bool
-	hasset bool
 	io.Writer
 	io.ReaderFrom
 }
 
 // NewWriterF from https://github.com/Mrs4s/MiraiGo/blob/master/binary/writer.go
 func NewWriterF(f func(writer *Builder)) []byte {
-	w := SelectBuilder(nil)
+	w := NewBuilder()
 	f(w)
 	b := make([]byte, w.Len())
 	copy(b, w.ToBytes())
-	w.put()
 	return b
-}
-
-// OpenWriterF must call func cl to close from https://github.com/Mrs4s/MiraiGo/blob/master/binary/writer.go
-func OpenWriterF(f func(builder *Builder)) (b []byte, cl func()) {
-	w := SelectBuilder(nil)
-	f(w)
-	return w.ToBytes(), w.put
 }
 
 // ToBytes from https://github.com/Mrs4s/MiraiGo/blob/master/binary/writer.go
@@ -55,29 +45,11 @@ func ToBytes(i any) []byte {
 	})
 }
 
-// NewBuilder with finalizer of itself.
-//
-// Be sure to use all data before builder is GCed.
-func NewBuilder(key []byte) *Builder {
-	b := SelectBuilder(key)
-	if !b.hasset {
-		b.hasset = true
-		runtime.SetFinalizer(b, func(b any) {
-			b.(*Builder).put()
-		})
-	}
-	return b
-}
-
 func (b *Builder) init(key []byte) *Builder {
 	b.key = ftea.NewTeaCipher(key)
 	b.usetea = len(key) == 16
 	b.hasput = false
 	return b
-}
-
-func (b *Builder) put() {
-	PutBuilder(b)
 }
 
 func (b *Builder) Len() int {
@@ -99,7 +71,6 @@ func (b *Builder) Buffer() *bytes.Buffer {
 // GC 安全, 返回的数据在 Builder 被销毁之后仍能被正确读取,
 // 但是只能调用一次, 调用后 Builder 即失效
 func (b *Builder) ToBytes() []byte {
-	defer b.put()
 	if b.usetea {
 		return b.key.Encrypt(b.buffer.Bytes())
 	}
@@ -113,8 +84,6 @@ func (b *Builder) ToBytes() []byte {
 // GC 安全, 返回的数据在 Builder 被销毁之后仍能被正确读取,
 // 但是只能调用一次, 调用后 Builder 即失效
 func (b *Builder) Pack(typ uint16) []byte {
-	defer b.put()
-
 	buf := make([]byte, b.Len()+2+2+16)
 
 	n := 0
