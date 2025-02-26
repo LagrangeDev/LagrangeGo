@@ -74,6 +74,7 @@ func TestBuilderTEA(t *testing.T) {
 func BenchmarkNewBuilder128(b *testing.B) {
 	test := make([]byte, 128)
 	_, _ = rand.Read(test)
+	b.SetBytes(int64(len(test)))
 	b.StartTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -85,6 +86,7 @@ func BenchmarkNewBuilder128(b *testing.B) {
 func BenchmarkNewBuilder128_3(b *testing.B) {
 	test := make([]byte, 128)
 	_, _ = rand.Read(test)
+	b.SetBytes(int64(len(test)))
 	b.StartTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -100,6 +102,7 @@ func BenchmarkNewBuilder128_3(b *testing.B) {
 func BenchmarkNewBuilder128_5(b *testing.B) {
 	test := make([]byte, 128)
 	_, _ = rand.Read(test)
+	b.SetBytes(int64(len(test)))
 	b.StartTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
