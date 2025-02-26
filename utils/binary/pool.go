@@ -7,13 +7,29 @@ import (
 	"compress/gzip"
 	"compress/zlib"
 	"sync"
+	"unsafe"
+
+	"github.com/fumiama/orbyte"
+	"github.com/fumiama/orbyte/pbuf"
 )
+
+var bufferPool = pbuf.NewBufferPool[teacfg]()
+
+type Builder orbyte.Item[pbuf.UserBuffer[teacfg]]
+
+func init() {
+	x := *(**orbyte.Pool[pbuf.UserBuffer[teacfg]])(unsafe.Pointer(&bufferPool))
+	x.SetManualDestroy(true)
+	x.SetNoPutBack(true)
+}
 
 // NewBuilder 从池中取出一个 Builder
 func NewBuilder(key ...byte) *Builder {
-	b := new(Builder)
-	b.init(key)
-	return b
+	b := bufferPool.NewBuffer(nil)
+	b.P(func(ub *pbuf.UserBuffer[teacfg]) {
+		ub.DAT.init(key)
+	})
+	return (*Builder)(b)
 }
 
 var gzipPool = sync.Pool{

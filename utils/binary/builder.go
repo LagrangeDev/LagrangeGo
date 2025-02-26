@@ -1,7 +1,6 @@
 package binary
 
 import (
-	"bytes"
 	"encoding/binary"
 	"io"
 	"math"
@@ -10,93 +9,63 @@ import (
 	"unsafe"
 
 	ftea "github.com/fumiama/gofastTEA"
+	"github.com/fumiama/orbyte"
+	"github.com/fumiama/orbyte/pbuf"
 
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-type Builder struct {
-	buffer bytes.Buffer
+type teacfg struct {
 	key    ftea.TEA
 	usetea bool
-	hasput bool
-	io.Writer
-	io.ReaderFrom
 }
 
-// NewWriterF from https://github.com/Mrs4s/MiraiGo/blob/master/binary/writer.go
-func NewWriterF(f func(writer *Builder)) []byte {
-	w := NewBuilder()
-	f(w)
-	b := make([]byte, w.Len())
-	copy(b, w.ToBytes())
-	return b
+func (tc *teacfg) init(key []byte) {
+	tc.key = ftea.NewTeaCipher(key)
+	tc.usetea = len(key) == 16
 }
 
-// ToBytes from https://github.com/Mrs4s/MiraiGo/blob/master/binary/writer.go
-func ToBytes(i any) []byte {
-	return NewWriterF(func(w *Builder) {
-		// TODO: more types
-		switch t := i.(type) {
-		case int16:
-			w.WriteU16(uint16(t))
-		case int32:
-			w.WriteU32(uint32(t))
-		}
-	})
-}
-
-func (b *Builder) init(key []byte) *Builder {
-	b.key = ftea.NewTeaCipher(key)
-	b.usetea = len(key) == 16
-	b.hasput = false
-	return b
-}
-
-func (b *Builder) Len() int {
-	return b.buffer.Len()
-}
-
-// ToReader GC 不安全, 确保在 Builder 被回收前使用
-func (b *Builder) ToReader() io.Reader {
-	return &b.buffer
-}
-
-// Buffer GC 不安全, 确保在 Builder 被回收前使用
-func (b *Builder) Buffer() *bytes.Buffer {
-	return &b.buffer
+func (b *Builder) p(f func(*pbuf.UserBuffer[teacfg])) {
+	(*orbyte.Item[pbuf.UserBuffer[teacfg]])(b).P(f)
 }
 
 // ToBytes return data with tea encryption if key is set
 //
 // GC 安全, 返回的数据在 Builder 被销毁之后仍能被正确读取,
 // 但是只能调用一次, 调用后 Builder 即失效
-func (b *Builder) ToBytes() []byte {
-	if b.usetea {
-		return b.key.Encrypt(b.buffer.Bytes())
-	}
-	buf := make([]byte, b.Len())
-	copy(buf, b.buffer.Bytes())
-	return buf
+func (b *Builder) ToBytes() (data []byte) {
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		if ub.DAT.usetea {
+			data = ub.DAT.key.Encrypt(ub.Bytes())
+			return
+		}
+		data = make([]byte, ub.Len())
+		copy(data, ub.Bytes())
+	})
+	return
 }
 
 // Pack TLV with tea encryption if key is set
 //
 // GC 安全, 返回的数据在 Builder 被销毁之后仍能被正确读取,
-// 但是只能调用一次, 调用后 Builder 即失效
-func (b *Builder) Pack(typ uint16) []byte {
-	buf := make([]byte, b.Len()+2+2+16)
+// 调用后 Builder 仍有效
+func (b *Builder) Pack(typ uint16) (data []byte) {
+	b.p(func(buf *pbuf.UserBuffer[teacfg]) {
+		data = make([]byte, buf.Len()+2+2+16)
 
-	n := 0
-	if b.usetea {
-		n = b.key.EncryptTo(b.buffer.Bytes(), buf[2+2:])
-	} else {
-		n = copy(buf[2+2:], b.buffer.Bytes())
-	}
+		n := 0
+		if buf.DAT.usetea {
+			n = buf.DAT.key.EncryptTo(buf.Bytes(), data[2+2:])
+		} else {
+			n = copy(data[2+2:], buf.Bytes())
+		}
 
-	binary.BigEndian.PutUint16(buf[0:2], typ)         // type
-	binary.BigEndian.PutUint16(buf[2:2+2], uint16(n)) // length
+		binary.BigEndian.PutUint16(data[0:2], typ)         // type
+		binary.BigEndian.PutUint16(data[2:2+2], uint16(n)) // length
 
-	return buf[:n+2+2]
+		data = data[:n+2+2]
+	})
+	return
 }
 
 func (b *Builder) WriteBool(v bool) *Builder {
@@ -140,7 +109,10 @@ func (b *Builder) WritePacketString(s, prefix string, withPrefix bool) *Builder 
 
 // Write for impl. io.Writer
 func (b *Builder) Write(p []byte) (n int, err error) {
-	return b.buffer.Write(p)
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		n, err = ub.Write(p)
+	})
+	return
 }
 
 func (b *Builder) EncryptAndWrite(key []byte, data []byte) *Builder {
@@ -150,7 +122,10 @@ func (b *Builder) EncryptAndWrite(key []byte, data []byte) *Builder {
 
 // ReadFrom for impl. io.ReaderFrom
 func (b *Builder) ReadFrom(r io.Reader) (n int64, err error) {
-	return io.Copy(&b.buffer, r)
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		n, err = io.Copy(ub, r)
+	})
+	return
 }
 
 func (b *Builder) WriteLenBytes(v []byte) *Builder {
@@ -169,21 +144,25 @@ func (b *Builder) WriteLenString(v string) *Builder {
 }
 
 func (b *Builder) WriteStruct(data ...any) *Builder {
-	for _, data := range data {
-		_ = binary.Write(&b.buffer, binary.BigEndian, data)
-	}
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		for _, data := range data {
+			_ = binary.Write(ub, binary.BigEndian, data)
+		}
+	})
 	return b
 }
 
 func (b *Builder) WriteU8(v uint8) *Builder {
-	b.buffer.WriteByte(v)
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		ub.WriteByte(v)
+	})
 	return b
 }
 
 func writeint[T ~uint16 | ~uint32 | ~uint64](b *Builder, v T) *Builder {
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(v))
-	b.buffer.Write(buf[8-unsafe.Sizeof(v):])
+	b.Write(buf[8-unsafe.Sizeof(v):])
 	return b
 }
 

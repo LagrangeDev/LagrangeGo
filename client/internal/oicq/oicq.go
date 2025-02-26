@@ -87,10 +87,8 @@ func (c *Codec) Marshal(m *Message) []byte {
 	w.WriteU8(0x03)
 
 	data := w.ToBytes()
-	buf := make([]byte, len(data))
-	copy(buf, data)
-	goBinary.BigEndian.PutUint16(buf[1:3], uint16(len(buf)))
-	return buf
+	goBinary.BigEndian.PutUint16(data[1:3], uint16(len(data)))
+	return data
 }
 
 var (
@@ -144,7 +142,7 @@ func (t *TLV) Marshal() []byte {
 		w.WriteBytes(elem)
 	}
 
-	return append([]byte(nil), w.ToBytes()...)
+	return w.ToBytes()
 }
 
 func (t *TLV) Append(b ...[]byte) {

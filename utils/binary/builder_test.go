@@ -10,6 +10,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/fumiama/orbyte/pbuf"
 )
 
 func TestBuilder(t *testing.T) {
@@ -50,6 +52,21 @@ func TestBuilder(t *testing.T) {
 		}(r[:i])
 	}
 	wg.Wait()
+}
+
+func TestBuilderTEA(t *testing.T) {
+	k := make([]byte, 16)
+	_, err := rand.Read(k)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := NewBuilder(k...)
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		dat := ub.DAT.key.ToBytes()
+		if !bytes.Equal(dat[:], k) {
+			t.Fatal("exp", hex.EncodeToString(k), "got", hex.EncodeToString(dat[:]))
+		}
+	})
 }
 
 // from https://github.com/Mrs4s/MiraiGo/blob/master/binary/writer_test.go
