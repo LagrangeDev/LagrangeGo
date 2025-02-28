@@ -9,8 +9,8 @@ github.com/fumiama/gofastTEA v0.1.3 h1:fxOi2D66knV6QN170hb59YiqxPhjlgizvBw+o0Ojx
 github.com/fumiama/gofastTEA v0.1.3/go.mod h1:RIdbYZyB4MbH6ZBlPymRaXn3cD6SedlCu5W/HHfMPBk=
 github.com/fumiama/imgsz v0.0.4 h1:Lsasu2hdSSFS+vnD+nvR1UkiRMK7hcpyYCC0FzgSMFI=
 github.com/fumiama/imgsz v0.0.4/go.mod h1:bISOQVTlw9sRytPwe8ir7tAaEmyz9hSNj9n8mXMBG0E=
-github.com/fumiama/orbyte v0.0.0-20250228160430-c23c5c47aa6a h1:TZgknEMm88bMyyDiyA9ofQwTxn5tpxliUbKhix1xY6o=
-github.com/fumiama/orbyte v0.0.0-20250228160430-c23c5c47aa6a/go.mod h1:qkUllQ1+gTx5sGrmKvIsqUgsnOO21Hiq847YHJRifbk=
+github.com/fumiama/orbyte v0.0.0-20250228175313-326f247ad703 h1:NJ3V9S03x9g8e8+patxO13CqR0+OqUq0DDQiMkIUtz4=
+github.com/fumiama/orbyte v0.0.0-20250228175313-326f247ad703/go.mod h1:qkUllQ1+gTx5sGrmKvIsqUgsnOO21Hiq847YHJRifbk=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=
 github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovkB8vQcUbaXHg=
 github.com/mattn/go-isatty v0.0.16 h1:bq3VjFmv/sOjHtdEhmkEV4x1AJtvUvOJ2PFAZ5+peKQ=
