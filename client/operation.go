@@ -818,9 +818,6 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 		if err != nil {
 			return files, folders, err
 		}
-		if res.List.IsEnd {
-			break
-		}
 		for _, fe := range res.List.Items {
 			if fe.FileInfo != nil {
 				files = append(files, &entity.GroupFile{
@@ -850,6 +847,9 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 			}
 		}
 		startIndex += fileCount
+		if res.List.IsEnd {
+			break
+		}
 	}
 	return files, folders, nil
 }
