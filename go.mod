@@ -1,7 +1,6 @@
 module github.com/LagrangeDev/LagrangeGo
 
 go 1.20
-toolchain go1.24.1
 
 require (
 	github.com/RomiChan/protobuf v0.1.1-0.20230204044148-2ed269a2e54d
