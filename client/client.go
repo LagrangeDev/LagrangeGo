@@ -79,7 +79,7 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		WriteU64(0).
 		WriteU8(0).
 		WriteTLV(
-			tlv.T16(c.Version().AppID, c.Version().SubAppID,
+			tlv.T16(c.Version().AppID, c.Version().AppIDQrcode,
 				utils.MustParseHexStr(c.Device().GUID), c.Version().PTVersion, c.Version().PackageName),
 			tlv.T1b(0, 0, size, margin, 72, ecLevel, 2),
 			tlv.T1d(c.Version().MiscBitmap),

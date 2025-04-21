@@ -25,7 +25,7 @@ func init() {
 		"trpc.o3.ecdh_access.EcdhAccess.SsoSecureAccess",
 		"trpc.o3.report.Report.SsoReport",
 		"MessageSvc.PbSendMsg",
-		//"wtlogin.trans_emp",
+		"wtlogin.trans_emp",
 		"wtlogin.login",
 		//"trpc.login.ecdh.EcdhService.SsoKeyExchange",
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
