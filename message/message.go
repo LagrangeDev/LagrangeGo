@@ -102,13 +102,12 @@ func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 			UID:      msg.ResponseHead.FromUid.Unwrap(),
 			IsFriend: true,
 		},
-		Time:     msg.ContentHead.TimeStamp.Unwrap(),
-		Elements: ParseMessageElements(msg.Body.RichText.Elems),
+		Time: msg.ContentHead.TimeStamp.Unwrap(),
 	}
 	if msg.Body != nil {
+		prvMsg.Elements = ParseMessageElements(msg.Body.RichText.Elems)
 		prvMsg.Elements = append(prvMsg.Elements, ParseMessageBody(msg.Body, false)...)
 	}
-
 	return prvMsg
 }
 
@@ -125,11 +124,12 @@ func ParseGroupMessage(msg *message.PushMsgBody) *GroupMessage {
 			CardName: msg.ResponseHead.Grp.MemberName,
 			IsFriend: false,
 		},
-		Time:           msg.ContentHead.TimeStamp.Unwrap(),
-		Elements:       ParseMessageElements(msg.Body.RichText.Elems),
+		Time: msg.ContentHead.TimeStamp.Unwrap(),
+
 		OriginalObject: msg,
 	}
 	if msg.Body != nil {
+		grpMsg.Elements = ParseMessageElements(msg.Body.RichText.Elems)
 		grpMsg.Elements = append(grpMsg.Elements, ParseMessageBody(msg.Body, true)...)
 	}
 	return grpMsg
@@ -288,7 +288,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			case 48:
 				extra := &oidb2.MsgInfo{}
 				err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
-				if err != nil {
+				if err != nil || len(extra.MsgInfoBody) == 0 { // 不合理的合并转发会导致越界
 					continue
 				}
 				index := extra.MsgInfoBody[0].Index
@@ -314,6 +314,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
 						Duration: index.Info.Time,
 						Node:     index,
+						MsgInfo:  extra,
 					})
 				case 11, 21: // video
 					var thumb = new(VideoThumb)
@@ -326,13 +327,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						thumb.Sha1 = utils.MustParseHexStr(info.Info.FileSha1)
 					}
 					res = append(res, &ShortVideoElement{
-						Name:  index.Info.FileName,
-						UUID:  index.FileUuid,
-						Md5:   utils.MustParseHexStr(index.Info.FileHash),
-						Sha1:  utils.MustParseHexStr(index.Info.FileSha1),
-						Size:  index.Info.FileSize,
-						Thumb: thumb,
-						Node:  index,
+						Name:    index.Info.FileName,
+						UUID:    index.FileUuid,
+						Md5:     utils.MustParseHexStr(index.Info.FileHash),
+						Sha1:    utils.MustParseHexStr(index.Info.FileSha1),
+						Size:    index.Info.FileSize,
+						Thumb:   thumb,
+						Node:    index,
+						MsgInfo: extra,
 					})
 				}
 			case 3: // 闪照
