@@ -3,8 +3,15 @@ package entity
 import "fmt"
 
 type (
-	EventState uint32
-	EventType  uint32
+	EventState          uint32
+	EventType           uint32
+	GroupRequestOperate uint8 // 处理加群请求
+)
+
+const (
+	GroupRequestOperateAllow  GroupRequestOperate = 1 // 同意
+	GroupRequestOperateDeny   GroupRequestOperate = 2 // 拒绝
+	GroupRequestOperateIgnore GroupRequestOperate = 3 // 忽略
 )
 
 const (
@@ -22,22 +29,22 @@ const (
 
 const (
 	/*
-		1:	“用户昵称”申请加入“群名称”群。
-		2:	“用户昵称”邀请您加入“群名称”群。
+		1:“用户昵称”申请加入“群名称”群。
+		2:“用户昵称”邀请您加入“群名称”群。
 		3：成为管理员，通知全员。
 		6：UIN被T 出群，通知管理员。
 		7：UIN被T 出群，通知UIN。
-		10:	您的好友“用户昵称”拒绝加入“群名称”群。拒绝理由：XXX
-		11:	“群名称”群管理员“用户昵称”拒绝了您的加群请求。拒绝理由：XXX
-		12:	您的好友“用户昵称”已经同意加入“群名称”群。
+		10:您的好友“用户昵称”拒绝加入“群名称”群。拒绝理由：XXX
+		11:“群名称”群管理员“用户昵称”拒绝了您的加群请求。拒绝理由：XXX
+		12:您的好友“用户昵称”已经同意加入“群名称”群。
 		13：UIN退群，通知管理员。
 		15：管理员身份被取消，通知被取消人。
 		16：管理员身份被取消，通知其他管理员。
 		20(同2，已废弃）:	您的好友“用户昵称”邀请您加入“群名称”群。
 		21（同12，已废弃）:	您的好友“用户昵称”已经同意加入“群名称”群。附加信息：正在等待管理员验证。
-		22:	“用户昵称”申请加入“群名称”群。附加信息：来自群成员XXX的邀请。
+		22:“用户昵称”申请加入“群名称”群。附加信息：来自群成员XXX的邀请。
 		23（同10，已废弃）:	您的好友“用户昵称”拒绝加入“群名称”群。拒绝理由：XXX。
-		35:	群“群名称”管理员已同意您的加群申请
+		35:群“群名称”管理员已同意您的加群申请
 	*/
 	// UserJoinRequest 用户申请加群
 	UserJoinRequest EventType = 1

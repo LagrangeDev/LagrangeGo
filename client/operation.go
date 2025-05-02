@@ -663,8 +663,8 @@ func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUi
 }
 
 // SetGroupRequest 处理加群请求
-func (c *QQClient) SetGroupRequest(isFiltered bool, accept bool, sequence uint64, typ uint32, groupUin uint32, message string) error {
-	pkt, err := oidb2.BuildSetGroupRequestReq(isFiltered, accept, sequence, typ, groupUin, message)
+func (c *QQClient) SetGroupRequest(isFiltered bool, operate entity.GroupRequestOperate, sequence uint64, typ uint32, groupUin uint32, message string) error {
+	pkt, err := oidb2.BuildSetGroupRequestReq(isFiltered, operate, sequence, typ, groupUin, message)
 	if err != nil {
 		return err
 	}
