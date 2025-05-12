@@ -26,7 +26,7 @@ func (tc *teacfg) init(key []byte) {
 }
 
 func (b *Builder) p(f func(*pbuf.UserBuffer[teacfg])) {
-	(*orbyte.Item[pbuf.UserBuffer[teacfg]])(b).P(f)
+	_ = (*orbyte.Item[pbuf.UserBuffer[teacfg]])(b).P(f)
 }
 
 // ToBytes return data with tea encryption if key is set

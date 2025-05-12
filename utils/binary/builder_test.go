@@ -60,8 +60,7 @@ func TestBuilderTEA(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	b := NewBuilder(k...)
-	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+	NewBuilder(k...).p(func(ub *pbuf.UserBuffer[teacfg]) {
 		dat := ub.DAT.key.ToBytes()
 		if !bytes.Equal(dat[:], k) {
 			t.Fatal("exp", hex.EncodeToString(k), "got", hex.EncodeToString(dat[:]))
