@@ -81,13 +81,12 @@ func (r *Reader) ReadAll() []byte {
 
 func (r *Reader) ReadU8() (v uint8) {
 	if r.reader != nil {
-		buf := make([]byte, 1)
-		n, err := r.reader.Read(buf)
+		n, err := r.reader.Read(unsafe.Slice(&v, 1))
 		if err != nil || n < 1 {
 			// 读取失败或读取的数据不足，返回零值
 			return 0
 		}
-		v = buf[0]
+		//v已经被Read调用填充
 		return
 	}
 	// 确保缓冲区有足够的数据
