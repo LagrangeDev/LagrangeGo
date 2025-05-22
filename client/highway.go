@@ -10,29 +10,29 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/RomiChan/protobuf/proto"
 
 	hw "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/RomiChan/protobuf/proto"
 )
 
 func (c *QQClient) ensureHighwayServers() error {
 	if c.highwaySession.SsoAddr == nil || c.highwaySession.SigSession == nil || c.highwaySession.SessionKey == nil {
-		packet, err := highway2.BuildHighWayUrlReq(c.transport.Sig.Tgt)
+		packet, err := highway2.BuildHighWayURLReq(c.transport.Sig.Tgt)
 		if err != nil {
 			return err
 		}
 		payload, err := c.sendUniPacketAndWait("HttpConn.0x6ff_501", packet)
 		if err != nil {
-			return fmt.Errorf("get highway server: %v", err)
+			return fmt.Errorf("get highway server: %w", err)
 		}
-		resp, err := highway2.ParseHighWayUrlReq(payload)
+		resp, err := highway2.ParseHighWayURLReq(payload)
 		if err != nil {
-			return fmt.Errorf("parse highway server: %v", err)
+			return fmt.Errorf("parse highway server: %w", err)
 		}
 		c.highwaySession.SigSession = resp.HttpConn.SigSession
 		c.highwaySession.SessionKey = resp.HttpConn.SessionKey
@@ -52,7 +52,7 @@ func (c *QQClient) ensureHighwayServers() error {
 	return nil
 }
 
-func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
+func (c *QQClient) highwayUpload(commonID int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
 	// 能close的io就close
 	defer utils.CloseIO(r)
 	err := c.ensureHighwayServers()
@@ -60,7 +60,7 @@ func (c *QQClient) highwayUpload(commonId int, r io.Reader, fileSize uint64, md5
 		return err
 	}
 	trans := &hw.Transaction{
-		CommandID: uint32(commonId),
+		CommandID: uint32(commonID),
 		Body:      r,
 		Sum:       md5,
 		Size:      fileSize,
@@ -103,12 +103,12 @@ func (c *QQClient) highwayUploadBlock(trans *hw.Transaction, server string, offs
 		trans.Build(&c.highwaySession, offset, uint32(blksz), blkmd5), blk, server, isEnd,
 	)
 	if err != nil {
-		return fmt.Errorf("send highway packet: %v", err)
+		return fmt.Errorf("send highway packet: %w", err)
 	}
 	defer payload.Close()
 	resphead, respbody, err := parseHighwayPacket(payload)
 	if err != nil {
-		return fmt.Errorf("parse highway packet: %v", err)
+		return fmt.Errorf("parse highway packet: %w", err)
 	}
 	c.debug("Highway Block Result: %d | %d | %x | %v",
 		resphead.ErrorCode, resphead.MsgSegHead.RetCode.Unwrap(), resphead.BytesRspExtendInfo, respbody)

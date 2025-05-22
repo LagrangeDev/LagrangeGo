@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+// see https://github.com/LagrangeDev/Lagrange.Core/blob/47b819d43ad101a1a066a3f8afa094d000fe19f5/Lagrange.Core/Internal/Packets/Service/Oidb/Request/OidbSvcTrpcTcp0xEB7_1.cs
+
+message OidbSvcTrpcTcp0xEB7_1_ReqBody {
+  optional StSignInWriteReq signInWriteReq = 2;
+}
+
+message StSignInWriteReq {
+  string Uin        = 1;
+  string GroupUin   = 2;
+  string AppVersion = 3; // 不确定要不要加，测试过没有这个参数也是可以的
+}
+
+message OidbSvcTrpcTcp0xEB7_1_RspBody {
+  optional StSignInWriteRsp signInWriteRsp = 2;
+}
+
+message StSignInWriteRsp {
+  optional SignInStatusDoneInfo doneInfo = 2;
+}
+
+message SignInStatusDoneInfo {
+  string Title = 1;                // 今日已成功打卡
+  string KeepDayText = 2;          // 已打卡N天
+  repeated string ClockInInfo = 3; // ["群内排名第N位", "[clock in timestamp (second)]"]
+  string DetailUrl = 4;            // https://qun.qq.com/v2/signin/detail?...
+}

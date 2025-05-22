@@ -4,6 +4,7 @@ package highway
 
 import (
 	"crypto/md5"
+	"fmt"
 	"io"
 	"strconv"
 	"sync"
@@ -111,7 +112,7 @@ func (s *Session) uploadSingle(trans *Transaction) ([]byte, error) {
 			return nil, errors.Wrap(err, "highway upload error")
 		}
 		if rspHead.ErrorCode != 0 {
-			return nil, errors.Errorf("upload failed: %d", rspHead.ErrorCode)
+			return nil, fmt.Errorf("upload failed: %d", rspHead.ErrorCode)
 		}
 		if rspHead.BytesRspExtendInfo != nil {
 			rspExt = rspHead.BytesRspExtendInfo
@@ -208,7 +209,7 @@ func (s *Session) Upload(trans *Transaction) ([]byte, error) {
 				return errors.Wrap(err, "highway upload error")
 			}
 			if rspHead.ErrorCode != 0 {
-				return errors.Errorf("upload failed: %d", rspHead.ErrorCode)
+				return fmt.Errorf("upload failed: %d", rspHead.ErrorCode)
 			}
 			if last && rspHead.BytesRspExtendInfo != nil {
 				rspExt = rspHead.BytesRspExtendInfo

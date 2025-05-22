@@ -1,3 +1,4 @@
+//nolint:unused
 package client
 
 // from https://github.com/Mrs4s/MiraiGo/blob/master/client/log.go
@@ -14,13 +15,13 @@ func (c *QQClient) SetLogger(logger log.Logger) {
 
 func (c *QQClient) info(msg string, args ...any) {
 	if c.logger != nil {
-		c.logger.Info(log.Getcaller(msg), args...)
+		c.logger.Info(msg, args...)
 	}
 }
 
 func (c *QQClient) infoln(msgs ...any) {
 	if c.logger != nil {
-		c.logger.Info(log.Getcaller(fmt.Sprint(msgs...)))
+		c.logger.Info(fmt.Sprint(msgs...))
 	}
 }
 

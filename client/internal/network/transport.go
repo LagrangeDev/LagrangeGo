@@ -24,19 +24,19 @@ type Transport struct {
 func (t *Transport) PackPacket(req *Request) []byte {
 	head := proto.DynamicMessage{
 		15: utils.NewTrace(),
-		16: t.Sig.Uid,
+		16: t.Sig.UID,
 	}
 
 	if req.Sign != nil {
 		sign := req.Sign.Value
 		head[24] = proto.DynamicMessage{
-			1: utils.MustParseHexStr(sign.Sign),
-			2: utils.MustParseHexStr(sign.Token),
-			3: utils.MustParseHexStr(sign.Extra),
+			1: []byte(sign.Sign),
+			2: []byte(sign.Token),
+			3: []byte(sign.Extra),
 		}
 	}
 
-	ssoHeader := binary.NewBuilder(nil).
+	ssoHeader := binary.NewBuilder().
 		WriteU32(req.SequenceID).
 		WriteU32(uint32(t.Version.SubAppID)).
 		WriteU32(2052).                                        // locate id
@@ -44,13 +44,13 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WritePacketBytes(t.Sig.Tgt, "u32", true).
 		WritePacketString(req.CommandName, "u32", true).
 		WritePacketBytes(nil, "u32", true).
-		WritePacketBytes(utils.MustParseHexStr(t.Device.Guid), "u32", true).
+		WritePacketBytes(utils.MustParseHexStr(t.Device.GUID), "u32", true).
 		WritePacketBytes(nil, "u32", true).
 		WritePacketString(t.Version.CurrentVersion, "u16", true).
 		WritePacketBytes(head.Encode(), "u32", true).
 		ToBytes()
 
-	ssoPacket := binary.NewBuilder(nil).
+	ssoPacket := binary.NewBuilder().
 		WritePacketBytes(ssoHeader, "u32", true).
 		WritePacketBytes(req.Body, "u32", true).
 		ToBytes()
@@ -64,7 +64,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		_s = 1
 	}
 
-	service := binary.NewBuilder(nil).
+	service := binary.NewBuilder().
 		WriteU32(12).
 		WriteU8(_s).
 		WritePacketBytes(t.Sig.D2, "u32", true).
@@ -73,5 +73,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WriteBytes(encrypted).
 		ToBytes()
 
-	return binary.NewBuilder(nil).WritePacketBytes(service, "u32", true).ToBytes()
+	return binary.NewBuilder().
+		WritePacketBytes(service, "u32", true).
+		ToBytes()
 }

@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+message OidbSvcTrpcTcp0xE07_0 {
+  uint32 Version = 1;
+  uint32 Client = 2;
+  uint32 Entrance = 3;
+  OcrReqBody OcrReqBody = 10;
+}
+
+message OcrReqBody {
+  string ImageUrl = 1;
+  uint32 LanguageType = 2;
+  uint32 Scene = 3;
+  string OriginMd5 = 10;
+  string AfterCompressMd5 = 11;
+  string AfterCompressFileSize = 12;
+  string AfterCompressWeight = 13;
+  string AfterCompressHeight = 14;
+  bool   IsCut = 15;
+}
+
+message OidbSvcTrpcTcp0xE07_0_Response {
+  int32  RetCode = 1;
+  string ErrMsg = 2;
+  string Wording = 3;
+  OcrRspBody OcrRspBody = 10;
+}
+
+message OcrRspBody {
+  repeated TextDetection TextDetections = 1;
+  string Language = 2;
+  string RequestId = 3;
+  repeated string OcrLanguageList = 101;
+  repeated string DstTranslateLanguageList = 102;
+  repeated Language LanguageList = 103;
+  uint32 AfterCompressWeight = 111;
+  uint32 AfterCompressHeight = 112;
+}
+
+message TextDetection {
+  string DetectedText = 1;
+  int32  Confidence = 2;
+  Polygon Polygon = 3;
+  string AdvancedInfo = 4;
+}
+
+message Polygon {
+  repeated Coordinate Coordinates = 1;
+}
+
+message Coordinate {
+  int32 X = 1;
+  int32 Y = 2;
+}
+
+message Language {
+  string LanguageCode = 1;
+  string LanguageDesc = 2;
+}

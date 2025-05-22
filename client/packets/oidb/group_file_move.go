@@ -6,12 +6,12 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupFileMoveReq(groupUin uint32, fileId string, parentFolder string, targetFolderID string) (*OidbPacket, error) {
+func BuildGroupFileMoveReq(groupUin uint32, fileID string, parentFolder string, targetFolderID string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
 		Move: &oidb.OidbSvcTrpcTcp0X6D6Move{
 			GroupUin:        groupUin,
 			BusId:           102,
-			FileId:          fileId,
+			FileId:          fileID,
 			ParentDirectory: parentFolder,
 			TargetDirectory: targetFolderID,
 		},

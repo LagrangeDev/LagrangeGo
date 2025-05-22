@@ -5,7 +5,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildFetchRKeyReq() (*OidbPacket, error) {
+func BuildFetchRKeyReq() (*Packet, error) {
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{

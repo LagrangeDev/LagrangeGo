@@ -5,8 +5,8 @@ import (
 )
 
 type ForwardNode struct {
-	GroupId    uint32
-	SenderId   uint32
+	GroupID    uint32
+	SenderID   uint32
 	SenderName string
 	Time       uint32
 	Message    []IMessageElement
@@ -62,7 +62,7 @@ type (
 		Action     string      `xml:"action,attr"`
 		Brief      string      `xml:"brief,attr"`
 		FileName   string      `xml:"m_fileName,attr"`
-		ResId      string      `xml:"m_resid,attr"`
+		ResID      string      `xml:"m_resid,attr"`
 		Total      int         `xml:"tSum,attr"`
 		Flag       int         `xml:"flag,attr"`
 		Item       MultiItem   `xml:"item"`

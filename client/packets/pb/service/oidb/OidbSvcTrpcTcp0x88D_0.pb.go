@@ -61,11 +61,11 @@ type D88DGroupInfo struct {
 	GroupClassText  proto.Option[string] `protobuf:"bytes,18,opt"`
 	// repeated bool GroupAllianceCode = 19;
 	// optional bool GroupExtraAadmNum = 20;
-	GroupUin proto.Option[bool] `protobuf:"varint,21,opt"`
-	// optional bool GroupCurMsgSeq = 22;
-	// optional bool GroupLastMsgTime = 23;
-	GroupQuestion proto.Option[string] `protobuf:"bytes,24,opt"`
-	GroupAnswer   proto.Option[string] `protobuf:"bytes,25,opt"`
+	GroupUin         proto.Option[bool]   `protobuf:"varint,21,opt"`
+	GroupCurMsgSeq   proto.Option[bool]   `protobuf:"varint,22,opt"`
+	GroupLastMsgTime proto.Option[bool]   `protobuf:"varint,23,opt"`
+	GroupQuestion    proto.Option[string] `protobuf:"bytes,24,opt"`
+	GroupAnswer      proto.Option[string] `protobuf:"bytes,25,opt"`
 	// optional bool GroupVisitorMaxNum = 26;
 	// optional bool GroupVisitorCurNum = 27;
 	// optional bool LevelNameSeq = 28;

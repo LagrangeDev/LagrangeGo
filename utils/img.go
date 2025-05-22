@@ -33,6 +33,7 @@ var formatmap = map[string]ImageFormat{
 }
 
 func (format ImageFormat) String() string {
+	//nolint
 	switch format {
 	case Jpeg:
 		return "jpg"

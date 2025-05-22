@@ -41,5 +41,8 @@ protoFiles:
 fmt:
 	go vet -stdmethods=false ./...
 
+sort:
+	goimports-reviser -imports-order std,blanked,general,company,project -excludes .git/,client/packets/pb/*.go  -recursive ./..
+
 .EXPORT_ALL_VARIABLES:
 GO111MODULE = on

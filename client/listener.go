@@ -2,13 +2,14 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"runtime/debug"
-
-	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 
 	eventConverter "github.com/LagrangeDev/LagrangeGo/client/event"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/system"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	msgConverter "github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -71,12 +72,12 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseMemberIncreaseEvent(&pb)
-		_ = c.PreprocessOther(ev)
-		if ev.MemberUin == c.Uin { // bot 进群
+		_ = c.ResolveUin(ev)
+		if ev.UserUin == c.Uin { // bot 进群
 			_ = c.RefreshAllGroupsInfo()
 			c.GroupJoinEvent.dispatch(c, ev)
 		} else {
-			_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.MemberUin)
+			_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.UserUin)
 			c.GroupMemberJoinEvent.dispatch(c, ev)
 		}
 		return nil, nil
@@ -96,8 +97,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			pb.Operator = utils.S2B(Operator.OperatorField1.OperatorUid)
 		}
 		ev := eventConverter.ParseMemberDecreaseEvent(&pb)
-		_ = c.PreprocessOther(ev)
-		if ev.MemberUin == c.Uin {
+		_ = c.ResolveUin(ev)
+		if ev.UserUin == c.Uin {
 			c.GroupLeaveEvent.dispatch(c, ev)
 		} else {
 			c.GroupMemberLeaveEvent.dispatch(c, ev)
@@ -110,8 +111,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseGroupMemberPermissionChanged(&pb)
-		_ = c.PreprocessOther(ev)
-		_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.TargetUin)
+		_ = c.ResolveUin(ev)
+		_ = c.RefreshGroupMemberCache(ev.GroupUin, ev.UserUin)
 		c.GroupMemberPermissionChangedEvent.dispatch(c, ev)
 	case 84: // group request join notice
 		pb := message.GroupJoin{}
@@ -120,17 +121,17 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, err
 		}
 		ev := eventConverter.ParseRequestJoinNotice(&pb)
-		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUid)
+		_ = c.ResolveUin(ev)
+		user, _ := c.FetchUserInfo(ev.UserUID)
 		if user != nil {
-			ev.TargetUin = user.Uin
+			ev.UserUin = user.Uin
 			ev.TargetNick = user.Nickname
 		}
 		commonRequests, reqErr := c.GetGroupSystemMessages(false, 20, ev.GroupUin)
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.JoinRequests, filteredRequests.JoinRequests...) {
-				if request.TargetUid == ev.TargetUid && !request.Checked() {
+				if request.TargetUID == ev.UserUID && !request.Checked {
 					ev.RequestSeq = request.Sequence
 					ev.Answer = request.Comment
 				}
@@ -148,10 +149,10 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			return nil, nil
 		}
 		ev := eventConverter.ParseRequestInvitationNotice(&pb)
-		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.TargetUid)
+		_ = c.ResolveUin(ev)
+		user, _ := c.FetchUserInfo(ev.UserUID)
 		if user != nil {
-			ev.TargetUin = user.Uin
+			ev.UserUin = user.Uin
 			ev.TargetNick = user.Nickname
 		}
 		c.GroupMemberJoinRequestEvent.dispatch(c, ev)
@@ -167,8 +168,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err == nil {
 			ev.GroupName = group.GroupName
 		}
-		_ = c.PreprocessOther(ev)
-		user, _ := c.FetchUserInfo(ev.InvitorUid)
+		_ = c.ResolveUin(ev)
+		user, _ := c.FetchUserInfo(ev.InvitorUID)
 		if user != nil {
 			ev.InvitorUin = user.Uin
 			ev.InvitorNick = user.Nickname
@@ -177,7 +178,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		filteredRequests, freqErr := c.GetGroupSystemMessages(true, 20, ev.GroupUin)
 		if reqErr == nil && freqErr == nil {
 			for _, request := range append(commonRequests.InvitedRequests, filteredRequests.InvitedRequests...) {
-				if !request.Checked() {
+				if !request.Checked {
 					ev.RequestSeq = request.Sequence
 					break
 				}
@@ -198,7 +199,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				break
 			}
 			ev := eventConverter.ParseFriendRequestNotice(&pb)
-			user, _ := c.FetchUserInfo(ev.SourceUid)
+			user, _ := c.FetchUserInfo(ev.SourceUID)
 			if user != nil {
 				ev.SourceUin = user.Uin
 				ev.SourceNick = user.Nickname
@@ -212,7 +213,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				return nil, err
 			}
 			ev := eventConverter.ParseFriendRecallEvent(&pb)
-			_ = c.PreprocessOther(ev)
+			_ = c.ResolveUin(ev)
 			c.FriendRecallEvent.dispatch(c, ev)
 			return nil, nil
 		case 39: // friend rename
@@ -223,7 +224,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			}
 			if pb.Body.Field2 == 20 { // friend name update
 				ev := eventConverter.ParseFriendRenameEvent(&pb)
-				_ = c.PreprocessOther(ev)
+				_ = c.ResolveUin(ev)
 				c.RenameEvent.dispatch(c, ev)
 			} // 40 grp name
 			return nil, nil
@@ -244,8 +245,18 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if pb.BusiType == 12 {
 				c.FriendNotifyEvent.dispatch(c, eventConverter.ParsePokeEvent(&pb))
 			}
+		case 226: // 好友验证消息，申请，同意都有
+		case 179: // new friend 主动加好友且对方同意
+			pb := message.NewFriend{}
+			err = proto.Unmarshal(pkg.Body.MsgContent, &pb)
+			if err != nil {
+				return nil, err
+			}
+			ev := eventConverter.ParseNewFriendEvent(&pb)
+			_ = c.ResolveUin(ev)
+			c.NewFriendEvent.dispatch(c, ev)
 		default:
-			c.warning("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
+			c.debug("unknown subtype %d of type 0x210, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	case 0x2DC: // grp event, 732
 		subType := pkg.ContentHead.SubType.Unwrap()
@@ -284,7 +295,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				return nil, err
 			}
 			ev := eventConverter.ParseGroupRecallEvent(&pb)
-			_ = c.PreprocessOther(ev)
+			_ = c.ResolveUin(ev)
 			c.GroupRecallEvent.dispatch(c, ev)
 			return nil, nil
 		case 16: // group name update & member special title update & group reaction
@@ -308,7 +319,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				r := binary.NewReader(pb.EventParam)
 				r.SkipBytes(3)
 				ev := eventConverter.ParseGroupNameUpdatedEvent(&pb, string(r.ReadBytesWithLength("u8", false)))
-				_ = c.PreprocessOther(ev)
+				_ = c.ResolveUin(ev)
 				c.GroupNameUpdatedEvent.dispatch(c, ev)
 			case 35: // group reaction
 				r := binary.NewReader(pkg.Body.MsgContent)
@@ -320,7 +331,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 					return nil, err
 				}
 				ev := eventConverter.ParseGroupReactionEvent(&rpb)
-				_ = c.PreprocessOther(ev)
+				_ = c.ResolveUin(ev)
 				c.GroupReactionEvent.dispatch(c, ev)
 			}
 		case 12: // mute
@@ -330,20 +341,28 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 				return nil, err
 			}
 			ev := eventConverter.ParseGroupMuteEvent(&pb)
-			_ = c.PreprocessOther(ev)
+			_ = c.ResolveUin(ev)
 			c.GroupMuteEvent.dispatch(c, ev)
 			return nil, nil
 		default:
-			c.warning("Unsupported group event, subType: %v, proto data: %x", subType, pkg.Body.MsgContent)
+			c.debug("Unsupported group event, subType: %v, proto data: %x", subType, pkg.Body.MsgContent)
 		}
 	default:
-		c.warning("Unsupported message type: %v, proto data: %x", typ, pkg.Body.MsgContent)
+		c.debug("Unsupported message type: %v, proto data: %x", typ, pkg.Body.MsgContent)
 	}
 
 	return nil, nil
 }
 
+// nolint
 func decodeKickNTPacket(c *QQClient, pkt *network.Packet) (any, error) {
+	pb := system.ServiceKickNTResponse{}
+	err := proto.Unmarshal(pkt.Payload, &pb)
+	if err != nil {
+		return nil, err
+	}
+	c.Disconnect()
+	go c.DisconnectedEvent.dispatch(c, &DisconnectedEvent{Message: fmt.Sprintf("%s:%s", pb.Title, pb.Tips)})
 	return nil, nil
 }
 
@@ -351,30 +370,30 @@ func (c *QQClient) PreprocessGroupMessageEvent(msg *msgConverter.GroupMessage) {
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
-			if e.Url != "" {
+			if e.URL != "" {
 				continue
 			}
-			url, _ := c.GetGroupImageUrl(msg.GroupUin, e.MsgInfo.MsgInfoBody[0].Index)
-			e.Url = url
+			url, _ := c.GetGroupImageURL(msg.GroupUin, e.MsgInfo.MsgInfoBody[0].Index)
+			e.URL = url
 		case *msgConverter.VoiceElement:
-			url, _ := c.GetGroupRecordUrl(msg.GroupUin, e.Node)
-			e.Url = url
+			url, _ := c.GetGroupRecordURL(msg.GroupUin, e.Node)
+			e.URL = url
 		case *msgConverter.ShortVideoElement:
-			url, err := c.GetVideoUrl(true, e)
+			url, err := c.GetGroupVideoURL(msg.GroupUin, e.Node)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.FileElement:
-			url, _ := c.GetGroupFileUrl(msg.GroupUin, e.FileId)
-			e.FileUrl = url
+			url, _ := c.GetGroupFileURL(msg.GroupUin, e.FileID)
+			e.FileURL = url
 		case *msgConverter.ForwardMessage:
 			if e.Nodes == nil {
-				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
+				forward, err := c.FetchForwardMsg(e.ResID)
+				if err != nil {
 					continue
-				} else {
-					e.Nodes = forward.Nodes
 				}
+				e.Nodes = forward.Nodes
 			}
 		}
 	}
@@ -387,42 +406,42 @@ func (c *QQClient) PreprocessPrivateMessageEvent(msg *msgConverter.PrivateMessag
 	for _, elem := range msg.Elements {
 		switch e := elem.(type) {
 		case *msgConverter.ImageElement:
-			if e.Url != "" {
+			if e.URL != "" {
 				continue
 			}
-			url, _ := c.GetPrivateImageUrl(e.MsgInfo.MsgInfoBody[0].Index)
-			e.Url = url
+			url, _ := c.GetPrivateImageURL(e.MsgInfo.MsgInfoBody[0].Index)
+			e.URL = url
 		case *msgConverter.VoiceElement:
-			url, err := c.GetPrivateRecordUrl(e.Node)
+			url, err := c.GetPrivateRecordURL(e.Node)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.ShortVideoElement:
-			url, err := c.GetVideoUrl(false, e)
+			url, err := c.GetPrivateVideoURL(e.Node)
 			if err != nil {
 				continue
 			}
-			e.Url = url
+			e.URL = url
 		case *msgConverter.FileElement:
-			url, err := c.GetPrivateFileUrl(e.FileUUID, e.FileHash)
+			url, err := c.GetPrivateFileURL(e.FileUUID, e.FileHash)
 			if err != nil {
 				continue
 			}
-			e.FileUrl = url
+			e.FileURL = url
 		case *msgConverter.ForwardMessage:
 			if e.Nodes == nil {
-				if forward, err := c.FetchForwardMsg(e.ResID); err != nil {
+				forward, err := c.FetchForwardMsg(e.ResID)
+				if err != nil {
 					continue
-				} else {
-					e.Nodes = forward.Nodes
 				}
+				e.Nodes = forward.Nodes
 			}
 		}
 	}
 }
 
-func (c *QQClient) PreprocessOther(g eventConverter.CanPreprocess) error {
+func (c *QQClient) ResolveUin(g eventConverter.Iuid2uin) error {
 	g.ResolveUin(func(uid string, groupUin ...uint32) uint32 {
 		return c.GetUin(uid, groupUin...)
 	})

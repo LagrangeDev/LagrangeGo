@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	tea "github.com/fumiama/gofastTEA"
 	"github.com/pkg/errors"
+
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 type Response struct {
@@ -26,9 +27,10 @@ type Response struct {
 }
 
 var (
-	ErrSessionExpired    = errors.New("session expired")
-	ErrPacketDropped     = errors.New("packet dropped")
-	ErrInvalidPacketType = errors.New("invalid packet type")
+	ErrSessionExpired       = errors.New("session expired")
+	ErrAuthenticationFailed = errors.New("authentication failed")
+	ErrPacketDropped        = errors.New("packet dropped")
+	ErrInvalidPacketType    = errors.New("invalid packet type")
 )
 
 func (t *Transport) ReadResponse(head []byte) (*Response, error) {
@@ -65,15 +67,22 @@ func (t *Transport) readSSOFrame(resp *Response, payload []byte) error {
 
 	head := binary.NewReader(reader.ReadBytes(int(headLen) - 4))
 	resp.SequenceID = head.ReadI32()
-	switch retCode := head.ReadI32(); retCode {
+	retCode := head.ReadI32()
+	resp.Message = head.ReadStringWithLength("u32", true)
+	var err error
+	switch retCode {
 	case 0:
 		// ok
-	case -10001, -10003, -10008: // -10001正常缓存过期，-10003登录失效？
-		return errors.WithStack(ErrSessionExpired)
+	case -10001, -10008: // -10001正常缓存过期，-10003登录失效？
+		err = ErrSessionExpired
+	case -10003:
+		err = ErrAuthenticationFailed
 	default:
-		return errors.Errorf("return code unsuccessful: %d", retCode)
+		err = fmt.Errorf("return code unsuccessful: %d", retCode)
 	}
-	resp.Message = head.ReadStringWithLength("u32", true)
+	if err != nil {
+		return fmt.Errorf("%w: %s", errors.WithStack(err), resp.Message)
+	}
 	resp.CommandName = head.ReadStringWithLength("u32", true)
 	if resp.CommandName == "Heartbeat.Alive" {
 		return nil

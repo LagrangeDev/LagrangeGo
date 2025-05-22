@@ -3,14 +3,15 @@ package message
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/message/message.go
 
 import (
+	"encoding/hex"
 	"encoding/xml"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
-	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
@@ -24,24 +25,25 @@ type IMessage interface {
 }
 
 const (
-	Text     ElementType = iota // 文本
-	Image                       // 图片
-	Face                        // 表情
-	At                          // 艾特
-	Reply                       // 回复
-	Service                     // 服务
-	Forward                     // 转发
-	File                        // 文件
-	Voice                       // 语音
-	Video                       // 视频
-	LightApp                    // 轻应用
-	RedBag                      // 红包
+	Text       ElementType = iota // 文本
+	Image                         // 图片
+	Face                          // 表情
+	At                            // 艾特
+	Reply                         // 回复
+	Service                       // 服务
+	Forward                       // 转发
+	File                          // 文件
+	Voice                         // 语音
+	Video                         // 视频
+	LightApp                      // 轻应用
+	RedBag                        // 红包
+	MarketFace                    // 魔法表情
 )
 
 type (
 	PrivateMessage struct {
-		Id         uint32
-		InternalId uint32
+		ID         uint32
+		InternalID uint32
 		ClientSeq  uint32
 		Self       uint32
 		Target     uint32
@@ -51,7 +53,7 @@ type (
 	}
 
 	TempMessage struct {
-		Id        uint32
+		ID        uint32
 		GroupUin  uint32
 		GroupName string
 		Self      uint32
@@ -60,8 +62,8 @@ type (
 	}
 
 	GroupMessage struct {
-		Id             uint32
-		InternalId     uint32
+		ID             uint32
+		InternalID     uint32
 		GroupUin       uint32
 		GroupName      string
 		Sender         *Sender
@@ -75,17 +77,11 @@ type (
 	}
 
 	Sender struct {
-		Uin           uint32
-		Uid           string
-		Nickname      string
-		CardName      string
-		AnonymousInfo *AnonymousInfo
-		IsFriend      bool
-	}
-
-	AnonymousInfo struct {
-		AnonymousId   string
-		AnonymousNick string
+		Uin      uint32
+		UID      string
+		Nickname string
+		CardName string
+		IsFriend bool
 	}
 
 	IMessageElement interface {
@@ -95,49 +91,45 @@ type (
 	ElementType int
 )
 
-func (s *Sender) IsAnonymous() bool {
-	return s.Uin == 80000000
-}
-
 func ParsePrivateMessage(msg *message.PushMsgBody) *PrivateMessage {
 	prvMsg := &PrivateMessage{
-		Id:         msg.ContentHead.Sequence.Unwrap(),
-		InternalId: msg.ContentHead.MsgId.Unwrap(),
+		ID:         msg.ContentHead.Sequence.Unwrap(),
+		InternalID: msg.ContentHead.MsgId.Unwrap(),
 		Self:       msg.ResponseHead.ToUin,
 		Target:     msg.ResponseHead.FromUin,
 		Sender: &Sender{
 			Uin:      msg.ResponseHead.FromUin,
-			Uid:      msg.ResponseHead.FromUid.Unwrap(),
+			UID:      msg.ResponseHead.FromUid.Unwrap(),
 			IsFriend: true,
 		},
-		Time:     msg.ContentHead.TimeStamp.Unwrap(),
-		Elements: ParseMessageElements(msg.Body.RichText.Elems),
+		Time: msg.ContentHead.TimeStamp.Unwrap(),
 	}
 	if msg.Body != nil {
+		prvMsg.Elements = ParseMessageElements(msg.Body.RichText.Elems)
 		prvMsg.Elements = append(prvMsg.Elements, ParseMessageBody(msg.Body, false)...)
 	}
-
 	return prvMsg
 }
 
 func ParseGroupMessage(msg *message.PushMsgBody) *GroupMessage {
 	grpMsg := &GroupMessage{
-		Id:         msg.ContentHead.Sequence.Unwrap(),
-		InternalId: msg.ContentHead.MsgId.Unwrap(),
+		ID:         msg.ContentHead.Sequence.Unwrap(),
+		InternalID: msg.ContentHead.MsgId.Unwrap(),
 		GroupUin:   msg.ResponseHead.Grp.GroupUin,
 		GroupName:  msg.ResponseHead.Grp.GroupName,
 		Sender: &Sender{
 			Uin:      msg.ResponseHead.FromUin,
-			Uid:      msg.ResponseHead.FromUid.Unwrap(),
+			UID:      msg.ResponseHead.FromUid.Unwrap(),
 			Nickname: msg.ResponseHead.Grp.MemberName,
 			CardName: msg.ResponseHead.Grp.MemberName,
 			IsFriend: false,
 		},
-		Time:           msg.ContentHead.TimeStamp.Unwrap(),
-		Elements:       ParseMessageElements(msg.Body.RichText.Elems),
+		Time: msg.ContentHead.TimeStamp.Unwrap(),
+
 		OriginalObject: msg,
 	}
 	if msg.Body != nil {
+		grpMsg.Elements = ParseMessageElements(msg.Body.RichText.Elems)
 		grpMsg.Elements = append(grpMsg.Elements, ParseMessageBody(msg.Body, true)...)
 	}
 	return grpMsg
@@ -159,26 +151,24 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			continue
 		}
 		if elem.SrcMsg != nil && len(elem.SrcMsg.OrigSeqs) != 0 {
-			r := &ReplyElement{
+			res = append(res, &ReplyElement{
 				ReplySeq:  elem.SrcMsg.OrigSeqs[0],
 				Time:      uint32(elem.SrcMsg.Time.Unwrap()),
 				SenderUin: uint32(elem.SrcMsg.SenderUin),
 				GroupUin:  uint32(elem.SrcMsg.ToUin.Unwrap()),
 				Elements:  ParseMessageElements(elem.SrcMsg.Elems),
-			}
-			res = append(res, r)
+			})
 		}
 
 		if elem.Text != nil {
-			switch {
-			case len(elem.Text.Attr6Buf) > 0:
+			if len(elem.Text.Attr6Buf) > 0 {
 				att6 := binary.NewReader(elem.Text.Attr6Buf)
 				att6.SkipBytes(7)
 				target := att6.ReadU32()
 				at := NewAt(target, elem.Text.Str.Unwrap())
 				at.SubType = AtTypeGroupMember
 				res = append(res, at)
-			default:
+			} else {
 				res = append(res, NewText(func() string {
 					if strings.Contains(elem.Text.Str.Unwrap(), "\r") && !strings.Contains(elem.Text.Str.Unwrap(), "\r\n") {
 						return strings.ReplaceAll(elem.Text.Str.Unwrap(), "\r", "\r\n")
@@ -190,41 +180,48 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 
 		if elem.Face != nil {
 			if len(elem.Face.Old) > 0 {
-				faceId := elem.Face.Index
-				if faceId.IsSome() {
-					res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap())})
+				faceID := elem.Face.Index
+				if faceID.IsSome() {
+					res = append(res, &FaceElement{FaceID: uint32(faceID.Unwrap())})
 				}
-			} else if elem.CommonElem != nil && elem.CommonElem.ServiceType == 37 && elem.CommonElem.PbElem != nil {
-				qFace := message.QFaceExtra{}
-				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
-				if err == nil {
-					faceId := qFace.FaceId
-					if faceId.IsSome() {
-						res = append(res, &FaceElement{FaceID: uint16(faceId.Unwrap()), isLargeFace: true})
+			} else if elem.CommonElem != nil && elem.CommonElem.PbElem != nil {
+				if elem.CommonElem.ServiceType == 37 {
+					qFace := message.QFaceExtra{}
+					if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
+						if qFace.Qsid.IsSome() {
+							res = append(res, &FaceElement{FaceID: uint32(qFace.Qsid.Unwrap()), isLargeFace: true})
+						}
 					}
-				}
-			} else if elem.CommonElem != nil && elem.CommonElem.ServiceType == 33 && elem.CommonElem.PbElem != nil {
-				qFace := message.QSmallFaceExtra{}
-				err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
-				if err == nil {
-					res = append(res, &FaceElement{FaceID: uint16(qFace.FaceId), isLargeFace: false})
+				} else if elem.CommonElem.ServiceType == 33 {
+					qFace := message.QSmallFaceExtra{}
+					err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
+					if err == nil {
+						res = append(res, &FaceElement{FaceID: qFace.FaceId, isLargeFace: false})
+					}
 				}
 			}
 		}
 
 		if elem.VideoFile != nil {
-			return []IMessageElement{
-				&ShortVideoElement{
-					Name: elem.VideoFile.FileName,
-					Uuid: utils.S2B(elem.VideoFile.FileUuid),
-					Size: uint32(elem.VideoFile.FileSize),
-					Md5:  elem.VideoFile.FileMd5,
-					Thumb: &VideoThumb{
-						Size: uint32(elem.VideoFile.ThumbFileSize),
-						Md5:  elem.VideoFile.ThumbFileMd5,
+			video := elem.VideoFile
+			res = append(res, &ShortVideoElement{
+				Name: video.FileName,
+				UUID: video.FileUuid,
+				Size: uint32(video.FileSize),
+				Md5:  video.FileMd5,
+				Node: &oidb2.IndexNode{
+					Info: &oidb2.FileInfo{
+						FileName: video.FileName,
+						FileSize: uint32(video.FileSize),
+						FileHash: hex.EncodeToString(video.FileMd5),
 					},
+					FileUuid: video.FileUuid,
 				},
-			}
+				Thumb: &VideoThumb{
+					Size: uint32(elem.VideoFile.ThumbFileSize),
+					Md5:  elem.VideoFile.ThumbFileMd5,
+				},
+			})
 		}
 
 		if elem.CustomFace != nil {
@@ -239,16 +236,21 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				url = "http://gchat.qpic.cn" + elem.CustomFace.OrigUrl
 			}
 
-			res = append(res, &ImageElement{
-				ImageId: elem.CustomFace.FilePath,
-				Size:    elem.CustomFace.Size,
-				Width:   uint32(elem.CustomFace.Width),
-				Height:  uint32(elem.CustomFace.Height),
-				Url:     url,
-				Md5:     elem.CustomFace.Md5,
-				SubType: elem.CustomFace.PbRes.SubType,
-				Summary: elem.CustomFace.PbRes.Summary,
-			})
+			res = append(res, func() *ImageElement {
+				img := &ImageElement{
+					ImageID: elem.CustomFace.FilePath,
+					Size:    elem.CustomFace.Size,
+					Width:   uint32(elem.CustomFace.Width),
+					Height:  uint32(elem.CustomFace.Height),
+					URL:     url,
+					Md5:     elem.CustomFace.Md5,
+				}
+				if elem.CustomFace.PbRes != nil {
+					img.SubType = elem.CustomFace.PbRes.SubType
+					img.Summary = elem.CustomFace.PbRes.Summary
+				}
+				return img
+			}())
 		}
 
 		if elem.NotOnlineImage != nil {
@@ -263,31 +265,37 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				url = "http://gchat.qpic.cn" + elem.NotOnlineImage.OrigUrl
 			}
 
-			res = append(res, &ImageElement{
-				ImageId: elem.NotOnlineImage.FilePath,
+			img := &ImageElement{
+				ImageID: elem.NotOnlineImage.FilePath,
 				Size:    elem.NotOnlineImage.FileLen,
 				Width:   elem.NotOnlineImage.PicWidth,
 				Height:  elem.NotOnlineImage.PicHeight,
-				Url:     url,
+				URL:     url,
 				Md5:     elem.NotOnlineImage.PicMd5,
-				SubType: elem.NotOnlineImage.PbRes.SubType,
-				Summary: elem.NotOnlineImage.PbRes.Summary,
-			})
+			}
+
+			if elem.NotOnlineImage.PbRes != nil {
+				img.SubType = elem.NotOnlineImage.PbRes.SubType
+				img.Summary = elem.NotOnlineImage.PbRes.Summary
+			}
+
+			res = append(res, img)
 		}
 
 		// new protocol image
 		if elem.CommonElem != nil {
 			switch elem.CommonElem.ServiceType {
 			case 48:
-				if elem.CommonElem.BusinessType == 10 || elem.CommonElem.BusinessType == 20 {
-					extra := &oidb2.MsgInfo{}
-					err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
-					if err != nil {
-						continue
-					}
-					index := extra.MsgInfoBody[0].Index
+				extra := &oidb2.MsgInfo{}
+				err := proto.Unmarshal(elem.CommonElem.PbElem, extra)
+				if err != nil || len(extra.MsgInfoBody) == 0 { // 不合理的合并转发会导致越界
+					continue
+				}
+				index := extra.MsgInfoBody[0].Index
+				switch elem.CommonElem.BusinessType {
+				case 10, 20: // img
 					res = append(res, &ImageElement{
-						ImageId:  index.Info.FileName,
+						ImageID:  index.Info.FileName,
 						FileUUID: index.FileUuid,
 						SubType:  int32(extra.ExtBizInfo.Pic.BizType),
 						Summary:  utils.Ternary(extra.ExtBizInfo.Pic.TextSummary == "", "[图片]", extra.ExtBizInfo.Pic.TextSummary),
@@ -297,6 +305,36 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						Height:   index.Info.Height,
 						Size:     index.Info.FileSize,
 						MsgInfo:  extra,
+					})
+				case 12, 22: // record 22 for Group
+					res = append(res, &VoiceElement{
+						Name:     index.Info.FileName,
+						UUID:     index.FileUuid,
+						Md5:      utils.MustParseHexStr(index.Info.FileHash),
+						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
+						Duration: index.Info.Time,
+						Node:     index,
+						MsgInfo:  extra,
+					})
+				case 11, 21: // video
+					var thumb = new(VideoThumb)
+					if len(extra.MsgInfoBody) > 1 {
+						info := extra.MsgInfoBody[1].Index
+						thumb.Size = info.Info.FileSize
+						thumb.Width = info.Info.Width
+						thumb.Height = info.Info.Height
+						thumb.Md5 = utils.MustParseHexStr(info.Info.FileHash)
+						thumb.Sha1 = utils.MustParseHexStr(info.Info.FileSha1)
+					}
+					res = append(res, &ShortVideoElement{
+						Name:    index.Info.FileName,
+						UUID:    index.FileUuid,
+						Md5:     utils.MustParseHexStr(index.Info.FileHash),
+						Sha1:    utils.MustParseHexStr(index.Info.FileSha1),
+						Size:    index.Info.FileSize,
+						Thumb:   thumb,
+						Node:    index,
+						MsgInfo: extra,
 					})
 				}
 			case 3: // 闪照
@@ -308,7 +346,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					continue
 				}
 				res = append(res, &ImageElement{
-					ImageId: img.FilePath,
+					ImageID: img.FilePath,
 					Md5:     img.PicMd5,
 					Size:    img.FileLen,
 					SubType: img.PbRes.SubType,
@@ -316,8 +354,22 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					Summary: "[闪照]",
 					Width:   img.PicWidth,
 					Height:  img.PicHeight,
-					Url:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
+					URL:     fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", img.PicMd5),
 				})
+				skipNext = true
+			case 33:
+				var newSysFaceMsg message.QSmallFaceExtra
+				_ = proto.Unmarshal(elem.CommonElem.PbElem, &newSysFaceMsg)
+				res = append(res, NewFace(newSysFaceMsg.FaceId))
+			case 37:
+				var faceExtra message.QFaceExtra
+				_ = proto.Unmarshal(elem.CommonElem.PbElem, &faceExtra)
+				result, _ := strconv.ParseInt(faceExtra.ResultId.Unwrap(), 10, 32)
+				res = append(res, &FaceElement{
+					FaceID:      uint32(faceExtra.Qsid.Unwrap()),
+					ResultID:    uint32(result),
+					isLargeFace: true,
+				}) // sticker 永远为单独消息
 				skipNext = true
 			}
 		}
@@ -333,9 +385,24 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 			res = append(res, &FileElement{
 				FileSize: extra.Inner.Info.FileSize,
 				FileMd5:  []byte(extra.Inner.Info.FileMd5),
-				FileId:   extra.Inner.Info.FileId,
+				FileID:   extra.Inner.Info.FileId,
 				FileName: extra.Inner.Info.FileName,
 			})
+		}
+
+		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 {
+			if elem.RichMsg.Template1 != nil {
+				xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
+				multimsg := MultiMessage{}
+				if err := xml.Unmarshal(xmlData, &multimsg); err == nil {
+					res = append(res, NewForwardWithResID(multimsg.ResID))
+				} else {
+					res = append(res, &XMLElement{
+						ServiceID: 35,
+						Content:   utils.B2S(xmlData),
+					})
+				}
+			}
 		}
 
 		if elem.LightAppElem != nil && len(elem.LightAppElem.Data) > 1 {
@@ -350,11 +417,19 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				res = append(res, NewLightApp(utils.B2S(content)))
 			}
 		}
-		if elem.RichMsg != nil && elem.RichMsg.ServiceId.Unwrap() == 35 && elem.RichMsg.Template1 != nil {
-			xmlData := binary.ZlibUncompress(elem.RichMsg.Template1[1:])
-			multimsg := MultiMessage{}
-			_ = xml.Unmarshal(xmlData, &multimsg)
-			res = append(res, NewForwardWithResID(multimsg.ResId))
+
+		if elem.MarketFace != nil {
+			res = append(res, &MarketFaceElement{
+				Summary:    elem.MarketFace.FaceName.Unwrap(),
+				ItemType:   elem.MarketFace.ItemType.Unwrap(),
+				FaceInfo:   elem.MarketFace.FaceInfo.Unwrap(),
+				FaceID:     elem.MarketFace.FaceId,
+				TabID:      elem.MarketFace.TabId.Unwrap(),
+				SubType:    elem.MarketFace.SubType.Unwrap(),
+				EncryptKey: elem.MarketFace.Key,
+				MediaType:  elem.MarketFace.MediaType.Unwrap(),
+				MagicValue: utils.B2S(elem.MarketFace.MobileParam),
+			})
 		}
 	}
 
@@ -366,18 +441,20 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 	if body != nil {
 		if body.RichText != nil && body.RichText.Ptt != nil {
 			ptt := body.RichText.Ptt
-			switch {
-			case isGroup && ptt.FileId != 0:
+			if isGroup && ptt.FileId != 0 {
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
+					UUID: ptt.FileUuid,
 					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.GroupFileKey,
 					},
 				})
-			case !isGroup:
+			} else if !isGroup {
 				res = append(res, &VoiceElement{
 					Name: ptt.FileName,
+					UUID: ptt.FileUuid,
+					Md5:  ptt.FileMd5,
 					Node: &oidb2.IndexNode{
 						FileUuid: ptt.FileUuid,
 					},
@@ -411,7 +488,7 @@ func (msg *GroupMessage) ToString() string {
 	//		strBuilder.WriteString(e.Content)
 	//	case *ImageElement:
 	//		strBuilder.WriteString("[Image: ")
-	//		strBuilder.WriteString(e.ImageId)
+	//		strBuilder.WriteString(e.ImageID)
 	//		strBuilder.WriteString("]")
 	//	case *AtElement:
 	//		strBuilder.WriteString(e.Display)
@@ -441,11 +518,11 @@ func (msg *GroupMessage) GetElements() []IMessageElement {
 }
 
 func (msg *GroupMessage) Chat() int64 {
-	return int64(msg.Id)
+	return int64(msg.ID)
 }
 
 func (msg *GroupMessage) Texts() []string {
-	var texts []string
+	texts := make([]string, 0, len(msg.Elements))
 	for _, elem := range msg.Elements {
 		texts = append(texts, ToReadableStringEle(elem))
 	}
@@ -461,11 +538,11 @@ func (msg *PrivateMessage) GetElements() []IMessageElement {
 }
 
 func (msg *PrivateMessage) Chat() int64 {
-	return int64(msg.Id)
+	return int64(msg.ID)
 }
 
 func (msg *PrivateMessage) Texts() []string {
-	var texts []string
+	texts := make([]string, 0, len(msg.Elements))
 	for _, elem := range msg.Elements {
 		texts = append(texts, ToReadableStringEle(elem))
 	}
@@ -481,11 +558,11 @@ func (msg *TempMessage) GetElements() []IMessageElement {
 }
 
 func (msg *TempMessage) Chat() int64 {
-	return int64(msg.Id)
+	return int64(msg.ID)
 }
 
 func (msg *TempMessage) Texts() []string {
-	var texts []string
+	texts := make([]string, 0, len(msg.Elements))
 	for _, elem := range msg.Elements {
 		texts = append(texts, ToReadableStringEle(elem))
 	}
@@ -520,6 +597,8 @@ func ToReadableStringEle(elem IMessageElement) string {
 		return "[卡片消息]"
 	case *ForwardMessage:
 		return "[转发消息]"
+	case *MarketFaceElement:
+		return "[魔法表情]"
 	default:
 		return "[暂不支持该消息类型]"
 	}
@@ -565,11 +644,9 @@ func PackElementsToBody(msgElems []IMessageElement) (msgBody *message.MessageBod
 		RichText: &message.RichText{Elems: PackElements(msgElems)},
 	}
 	for _, elem := range msgElems {
-		bd, ok := elem.(MsgContentBuilder)
-		if !ok {
-			continue
+		if bd, ok := elem.(MsgContentBuilder); ok {
+			msgBody.MsgContent = bd.BuildContent()
 		}
-		msgBody.MsgContent = bd.BuildContent()
 	}
 	return
 }
@@ -580,11 +657,9 @@ func PackElements(msgElems []IMessageElement) []*message.Elem {
 	}
 	elems := make([]*message.Elem, 0, len(msgElems))
 	for _, elem := range msgElems {
-		bd, ok := elem.(ElementBuilder)
-		if !ok {
-			continue
+		if bd, ok := elem.(ElementBuilder); ok {
+			elems = append(elems, bd.BuildElement()...)
 		}
-		elems = append(elems, bd.BuildElement()...)
 	}
 	return elems
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // BuildFetchFriendsReq OidbSvcTrpcTcp.0xfd4_1
-func BuildFetchFriendsReq(token uint32) (*OidbPacket, error) {
+func BuildFetchFriendsReq(token uint32) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0XFD4_1{
 		Field2: 300,
 		Field4: 0,
@@ -34,7 +34,7 @@ func BuildFetchFriendsReq(token uint32) (*OidbPacket, error) {
 	return BuildOidbPacket(0xFD4, 1, &body, false, false)
 }
 
-func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, uint32, error) {
+func ParseFetchFriendsResp(data []byte) ([]*entity.User, uint32, error) {
 	var resp oidb.OidbSvcTrpcTcp0XFD4_1Response
 	var next uint32
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
@@ -45,18 +45,18 @@ func ParseFetchFriendsResp(data []byte) ([]*entity.Friend, uint32, error) {
 	} else {
 		next = resp.Next.Uin
 	}
-	friends := make([]*entity.Friend, len(resp.Friends))
+	friends := make([]*entity.User, len(resp.Friends))
 	interner := utils.NewStringInterner()
 	for i, raw := range resp.Friends {
 		additional := getFirstFriendAdditionalTypeEqualTo1(raw.Additional)
 		properties := parseFriendProperty(additional.Layer1.Properties)
-		friends[i] = &entity.Friend{
+		friends[i] = &entity.User{
 			Uin:          raw.Uin,
-			Uid:          interner.Intern(raw.Uid),
+			UID:          interner.Intern(raw.Uid),
 			Nickname:     interner.Intern(properties[20002]),
 			Remarks:      interner.Intern(properties[103]),
 			PersonalSign: interner.Intern(properties[102]),
-			Avatar:       interner.Intern(entity.FriendAvatar(raw.Uin)),
+			Avatar:       interner.Intern(entity.UserAvatar(raw.Uin)),
 		}
 	}
 	return friends, next, nil

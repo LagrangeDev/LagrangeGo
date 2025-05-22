@@ -5,11 +5,11 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 )
 
-func BuildFriendLikeReq(uid string, count uint32) (*OidbPacket, error) {
+func BuildFriendLikeReq(uid string, count uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X7E5_104{
 		TargetUid: proto.Some(uid),
-		Field2:    71,
-		Field3:    count,
+		Source:    71,
+		Count:     count,
 	}
 	return BuildOidbPacket(0x7E5, 104, body, false, false)
 }

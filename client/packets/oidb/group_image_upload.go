@@ -5,13 +5,12 @@ import (
 	"errors"
 	"math/rand"
 
-	"github.com/LagrangeDev/LagrangeGo/message"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*OidbPacket, error) {
+func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Packet, error) {
 	// OidbSvcTrpcTcp.0x11c4_100
 	if image.Stream == nil {
 		return nil, errors.New("image data is null")
@@ -22,12 +21,6 @@ func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Oi
 		return nil, err
 	}
 	imageExt := format.String()
-
-	hexString := "0800180020004a00500062009201009a0100aa010c080012001800200028003a00"
-	bytesPbReserveTroop, err := hex.DecodeString(hexString)
-	if err != nil {
-		return nil, err
-	}
 
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
@@ -75,8 +68,12 @@ func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Oi
 			CompatQMsgSceneType:    2,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
-					BytesPbReserveTroop: bytesPbReserveTroop,
-					TextSummary:         image.Summary,
+					BizType:     uint32(image.SubType),
+					TextSummary: image.Summary,
+					ExtData: &oidb.PicExtData{
+						SubType:     uint32(image.SubType),
+						TextSummary: image.Summary,
+					},
 				},
 				Video: &oidb.VideoExtBizInfo{
 					BytesPbReserve: []byte{},

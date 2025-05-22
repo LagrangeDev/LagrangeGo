@@ -2,7 +2,7 @@ package oidb
 
 import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
-func BuildGroupFileCountReq(groupUin uint32) (*OidbPacket, error) {
+func BuildGroupFileCountReq(groupUin uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D8{
 		Count: &oidb.OidbSvcTrpcTcp0X6D8Count{
 			GroupUin: groupUin,
@@ -13,7 +13,7 @@ func BuildGroupFileCountReq(groupUin uint32) (*OidbPacket, error) {
 	return BuildOidbPacket(0x6D8, 2, body, false, true)
 }
 
-func ParseGroupFileCountResp(data []byte) (fileCount uint32, limitCount uint32, error error) {
+func ParseGroupFileCountResp(data []byte) (uint32, uint32, error) {
 	var resp oidb.OidbSvcTrpcTcp0X6D8_1Response
 	if _, err := ParseOidbPacket(data, &resp); err != nil {
 		return 0, 0, err

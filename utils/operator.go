@@ -9,12 +9,11 @@ import (
 	"strings"
 )
 
-func ReadLine(s string) string {
+func ReadLine() string {
 	inputReader := bufio.NewReader(os.Stdin)
-	fmt.Print(s)
 	rs, err := inputReader.ReadString('\n')
 	if err != nil {
-		panic(err)
+		return ""
 	}
 	return strings.TrimSpace(rs)
 }

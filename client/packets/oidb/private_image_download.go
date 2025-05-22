@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildPrivateImageDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPacket, error) {
+func BuildPrivateImageDownloadReq(selfUID string, node *oidb.IndexNode) (*Packet, error) {
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
 			Common: &oidb.CommonHead{
@@ -19,7 +19,7 @@ func BuildPrivateImageDownloadReq(selfUid string, node *oidb.IndexNode) (*OidbPa
 				SceneType:    1,
 				C2C: &oidb.C2CUserInfo{
 					AccountType: 2,
-					TargetUid:   selfUid,
+					TargetUid:   selfUID,
 				},
 			},
 			Client: &oidb.ClientMeta{AgentType: 2},

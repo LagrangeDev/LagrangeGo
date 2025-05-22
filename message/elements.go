@@ -4,26 +4,25 @@ package message
 
 import (
 	"bytes"
-	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/audio"
+	_ "embed"
 
 	"github.com/tidwall/gjson"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/audio"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-var DefaultThumb, _ = base64.StdEncoding.DecodeString("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")
+//go:embed default_thumb.jpg
+var DefaultThumb []byte
 
 type (
 	TextElement struct {
@@ -32,20 +31,21 @@ type (
 
 	AtElement struct {
 		TargetUin uint32
-		TargetUid string
+		TargetUID string
 		Display   string
 		SubType   AtType
 	}
 
 	FaceElement struct {
-		FaceID      uint16
+		FaceID      uint32
+		ResultID    uint32 // 猜拳和骰子的值
 		isLargeFace bool
 	}
 
 	ReplyElement struct {
 		ReplySeq  uint32
 		SenderUin uint32
-		SenderUid string
+		SenderUID string
 		GroupUin  uint32 // 私聊回复群聊时
 		Time      uint32
 		Elements  []IMessageElement
@@ -53,8 +53,9 @@ type (
 
 	VoiceElement struct {
 		Name string
+		UUID string
 		Size uint32
-		Url  string
+		URL  string
 		Md5  []byte
 		Sha1 []byte
 		Node *oidb.IndexNode
@@ -68,12 +69,12 @@ type (
 	}
 
 	ImageElement struct {
-		ImageId  string
+		ImageID  string
 		FileUUID string // only in new protocol photo
 		Size     uint32
 		Width    uint32
 		Height   uint32
-		Url      string
+		URL      string
 		SubType  int32
 
 		// EffectID show pic effect id.
@@ -83,6 +84,7 @@ type (
 		// send & receive
 		Summary string
 		Md5     []byte // only in old protocol photo
+		IsGroup bool
 
 		Sha1        []byte
 		MsgInfo     *oidb.MsgInfo
@@ -95,8 +97,8 @@ type (
 		FileSize uint64
 		FileName string
 		FileMd5  []byte
-		FileUrl  string
-		FileId   string // group
+		FileURL  string
+		FileID   string // group
 		FileUUID string // private
 		FileHash string
 
@@ -107,10 +109,11 @@ type (
 
 	ShortVideoElement struct {
 		Name     string
-		Uuid     []byte
+		UUID     string
 		Size     uint32
-		Url      string
+		URL      string
 		Duration uint32
+		Node     *oidb.IndexNode
 
 		// send
 		Thumb   *VideoThumb
@@ -136,19 +139,34 @@ type (
 		Content string
 	}
 
+	XMLElement struct {
+		ServiceID int
+		Content   string
+	}
+
 	ForwardMessage struct {
 		IsGroup bool
-		SelfId  uint32
+		SelfID  uint32
 		ResID   string
 		Nodes   []*ForwardNode
+	}
+
+	MarketFaceElement struct {
+		Summary    string
+		ItemType   uint32
+		FaceInfo   uint32
+		FaceID     []byte // decoded = mediaType == 2 ? string(FaceId) : hex.EncodeToString(FaceId).toLower().trimSpace(); download url param?
+		TabID      uint32
+		SubType    uint32 // image type, 0 -> None 1 -> Magic Face 2 -> GIF 3 -> PNG
+		EncryptKey []byte // tea + xor, see EMosmUtils.class::a maybe useful?
+		MediaType  uint32 // 1 -> Voice Face 2 -> dynamic face
+		MagicValue string
 	}
 
 	AtType int
 )
 
-const (
-	AtTypeGroupMember = 0 // At群成员
-)
+const AtTypeGroupMember = 0 // At群成员
 
 func NewText(s string) *TextElement {
 	return &TextElement{Content: s}
@@ -170,115 +188,112 @@ func NewAt(target uint32, display ...string) *AtElement {
 
 func NewGroupReply(m *GroupMessage) *ReplyElement {
 	return &ReplyElement{
-		ReplySeq:  uint32(m.Id),
+		ReplySeq:  m.ID,
 		SenderUin: m.Sender.Uin,
-		Time:      uint32(m.Time),
+		Time:      m.Time,
 		Elements:  m.Elements,
 	}
 }
 
 func NewPrivateReply(m *PrivateMessage) *ReplyElement {
 	return &ReplyElement{
-		ReplySeq:  uint32(m.Id),
+		ReplySeq:  m.ID,
 		SenderUin: m.Sender.Uin,
-		Time:      uint32(m.Time),
+		Time:      m.Time,
 		Elements:  m.Elements,
 	}
 }
 
-func NewRecord(data []byte, Summary ...string) *VoiceElement {
-	return NewStreamRecord(bytes.NewReader(data), Summary...)
+func NewRecord(data []byte, summary ...string) *VoiceElement {
+	return NewStreamRecord(bytes.NewReader(data), summary...)
 }
 
-func NewStreamRecord(r io.ReadSeeker, Summary ...string) *VoiceElement {
-	var summary string
-	if len(Summary) != 0 {
-		summary = Summary[0]
-	}
+func NewStreamRecord(r io.ReadSeeker, summary ...string) *VoiceElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
-	info, err := audio.Decode(r)
-	if err != nil {
-		return &VoiceElement{
-			Size:     uint32(length),
-			Summary:  summary,
-			Stream:   r,
-			Md5:      md5,
-			Sha1:     sha1,
-			Duration: uint32(length),
-		}
-	}
 	return &VoiceElement{
-		Size:     uint32(length),
-		Summary:  summary,
-		Stream:   r,
-		Md5:      md5,
-		Sha1:     sha1,
-		Duration: uint32(info.Time),
+		Size: uint32(length),
+		Summary: func() string {
+			if len(summary) != 0 {
+				return summary[0]
+			}
+			return ""
+		}(),
+		Stream: r,
+		Md5:    md5,
+		Sha1:   sha1,
+		Duration: func() uint32 {
+			if info, err := audio.Decode(r); err == nil {
+				return uint32(info.Time)
+			}
+			return uint32(length)
+		}(),
 	}
 }
 
-func NewFileRecord(path string, Summary ...string) (*VoiceElement, error) {
+func NewFileRecord(path string, summary ...string) (*VoiceElement, error) {
 	voice, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamRecord(voice, Summary...), nil
+	return NewStreamRecord(voice, summary...), nil
 }
 
-func NewImage(data []byte, Summary ...string) *ImageElement {
-	return NewStreamImage(bytes.NewReader(data), Summary...)
+func NewImage(data []byte, summary ...string) *ImageElement {
+	return NewStreamImage(bytes.NewReader(data), summary...)
 }
 
-func NewStreamImage(r io.ReadSeeker, Summary ...string) *ImageElement {
-	var summary string
-	if len(Summary) != 0 {
-		summary = Summary[0]
-	}
+func NewStreamImage(r io.ReadSeeker, summary ...string) *ImageElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &ImageElement{
-		Size:    uint32(length),
-		Summary: summary,
-		Stream:  r,
-		Md5:     md5,
-		Sha1:    sha1,
+		Size: uint32(length),
+		Summary: func() string {
+			if len(summary) != 0 {
+				return summary[0]
+			}
+			return ""
+		}(),
+		Stream: r,
+		Md5:    md5,
+		Sha1:   sha1,
 	}
 }
 
-func NewFileImage(path string, Summary ...string) (*ImageElement, error) {
+func NewFileImage(path string, summary ...string) (*ImageElement, error) {
 	img, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamImage(img, Summary...), nil
+	return NewStreamImage(img, summary...), nil
 }
 
-func NewVideo(data, thumb []byte, Summary ...string) *ShortVideoElement {
-	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), Summary...)
+func NewVideo(data, thumb []byte, summary ...string) *ShortVideoElement {
+	return NewStreamVideo(bytes.NewReader(data), bytes.NewReader(thumb), summary...)
 }
 
-func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, Summary ...string) *ShortVideoElement {
-	var summary string
-	if len(Summary) != 0 {
-		summary = Summary[0]
-	}
+func NewStreamVideo(r io.ReadSeeker, thumb io.ReadSeeker, summary ...string) *ShortVideoElement {
 	md5, sha1, length := crypto.ComputeMd5AndSha1AndLength(r)
 	return &ShortVideoElement{
-		Size:    uint32(length),
-		Thumb:   NewVideoThumb(thumb),
-		Summary: summary,
-		Md5:     md5,
-		Sha1:    sha1,
-		Stream:  r,
-		Compat:  &message.VideoFile{},
+		Size:  uint32(length),
+		Thumb: NewVideoThumb(thumb),
+		Summary: func() string {
+			if len(summary) != 0 {
+				return summary[0]
+			}
+			return ""
+		}(),
+		Md5:    md5,
+		Sha1:   sha1,
+		Stream: r,
+		Compat: &message.VideoFile{},
 	}
 }
 
-func NewFileVideo(path string, thumb []byte, Summary ...string) (*ShortVideoElement, error) {
+func NewFileVideo(path string, thumb []byte, summary ...string) (*ShortVideoElement, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamVideo(file, bytes.NewReader(thumb), Summary...), nil
+	return NewStreamVideo(file, bytes.NewReader(thumb), summary...), nil
 }
 
 func NewVideoThumb(r io.ReadSeeker) *VideoThumb {
@@ -334,6 +349,20 @@ func NewLightApp(content string) *LightAppElement {
 	}
 }
 
+func NewXML(content string) *XMLElement {
+	return &XMLElement{
+		ServiceID: 35,
+		Content:   content,
+	}
+}
+
+func NewXMLWithID(id int, content string) *XMLElement {
+	return &XMLElement{
+		ServiceID: id,
+		Content:   content,
+	}
+}
+
 func NewForward(resid string, nodes []*ForwardNode) *ForwardMessage {
 	return &ForwardMessage{
 		ResID: resid,
@@ -350,6 +379,72 @@ func NewForwardWithResID(resid string) *ForwardMessage {
 func NewForwardWithNodes(nodes []*ForwardNode) *ForwardMessage {
 	return &ForwardMessage{
 		Nodes: nodes,
+	}
+}
+
+func NewFace(id uint32) *FaceElement {
+	return &FaceElement{FaceID: id}
+}
+
+// NewMarketFace
+//
+// key: FetchMarketFaceKey(emojiID) 获取的值
+func NewMarketFace(emojiPackID uint32, emojiID []byte, key, summary, value string) *MarketFaceElement {
+	return &MarketFaceElement{
+		Summary:    summary,
+		ItemType:   6,
+		FaceID:     emojiID,
+		TabID:      emojiPackID,
+		SubType:    3,
+		EncryptKey: utils.S2B(key),
+		MediaType:  0,
+		MagicValue: value,
+	}
+}
+
+func (e *MarketFaceElement) FaceIDString() string {
+	if e.MediaType == 2 {
+		return utils.B2S(e.FaceID)
+	}
+	return fmt.Sprintf("%x", e.FaceID)
+}
+
+func NewDice(value uint32) *FaceElement {
+	if value > 6 {
+		value = crypto.RandU32()%3 + 1
+	}
+	return &FaceElement{
+		FaceID:      358,
+		ResultID:    value,
+		isLargeFace: true,
+	}
+}
+
+type FingerGuessingType uint32
+
+const (
+	FingerGuessingRock     FingerGuessingType = 3 // 石头
+	FingerGuessingScissors FingerGuessingType = 2 // 剪刀
+	FingerGuessingPaper    FingerGuessingType = 1 // 布
+)
+
+func (m FingerGuessingType) String() string {
+	switch m {
+	case FingerGuessingRock:
+		return "石头"
+	case FingerGuessingScissors:
+		return "剪刀"
+	case FingerGuessingPaper:
+		return "布"
+	}
+	return fmt.Sprint(int(m))
+}
+
+func NewFingerGuessing(value FingerGuessingType) *FaceElement {
+	return &FaceElement{
+		FaceID:      359,
+		ResultID:    uint32(value),
+		isLargeFace: true,
 	}
 }
 
@@ -387,6 +482,12 @@ func (e *LightAppElement) Type() ElementType {
 	return LightApp
 }
 
+func (e *XMLElement) Type() ElementType {
+	return Service
+}
+
 func (e *ForwardMessage) Type() ElementType {
 	return Forward
 }
+
+func (e *MarketFaceElement) Type() ElementType { return MarketFace }

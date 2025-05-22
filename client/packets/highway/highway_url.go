@@ -3,12 +3,11 @@ package highway
 import (
 	"encoding/hex"
 
-	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 )
 
-func BuildHighWayUrlReq(tgt []byte) ([]byte, error) {
+func BuildHighWayURLReq(tgt []byte) ([]byte, error) {
 	return proto.Marshal(&action.HttpConn0X6Ff_501{
 		HttpConn: &action.HttpConn{
 			Field1:       0,
@@ -26,7 +25,7 @@ func BuildHighWayUrlReq(tgt []byte) ([]byte, error) {
 	})
 }
 
-func ParseHighWayUrlReq(data []byte) (req action.HttpConn0X6Ff_501Response, err error) {
+func ParseHighWayURLReq(data []byte) (req action.HttpConn0X6Ff_501Response, err error) {
 	err = proto.Unmarshal(data, &req)
 	return
 }

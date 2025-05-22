@@ -1,14 +1,9 @@
 package crypto
 
-import (
-	_ "unsafe" // required by go:linkname
-)
+import "crypto/rand"
 
-// randuint32 returns a lock free uint32 value.
-//
-//go:linkname randuint32 runtime.fastrand
-func randuint32() uint32
-
-func RandU32() uint32 {
-	return randuint32()
+func RandomBytes(size int) []byte {
+	b := make([]byte, size)
+	_, _ = rand.Read(b)
+	return b
 }

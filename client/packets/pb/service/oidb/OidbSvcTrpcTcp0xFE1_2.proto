@@ -35,3 +35,33 @@ message OidbSvcTrpcTcp0xFE1_2ResponseProperty {
   repeated OidbTwoNumber NumberProperties = 1;
   repeated OidbFriendProperty StringProperties = 2;
 }
+
+message CustomStatus {
+  uint32 FaceId = 1;
+  optional string Msg = 2;
+}
+
+message Avatar {
+  optional string URL = 5;
+}
+
+message Business {
+  optional BusinessBody Body = 3;
+}
+
+message BusinessBody {
+  optional string Msg = 1;
+  repeated BusinessList Lists = 3;
+}
+
+message BusinessList {
+  uint32 Type = 1;
+  uint32 Field2 = 2;
+  bool IsYear = 3; // 是否年费
+  uint32 Level = 4;
+  bool IsPro = 5; // 是否超级
+  oneof Icon {
+    string Icon1 = 6;
+    string Icon2 = 7;
+  }
+}

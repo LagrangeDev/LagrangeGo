@@ -136,7 +136,24 @@ type MsgInfoBody struct {
 	Video     *VideoInfo   `protobuf:"bytes,3,opt"`
 	Audio     *AudioInfo   `protobuf:"bytes,4,opt"`
 	FileExist bool         `protobuf:"varint,5,opt"`
-	HashSum   []byte       `protobuf:"bytes,6,opt"`
+	HashSum   *HashSum     `protobuf:"bytes,6,opt"`
+	_         [0]func()
+}
+
+type HashSum struct {
+	BytesPbReserveC2C *C2CSource   `protobuf:"bytes,201,opt"`
+	TroopSource       *TroopSource `protobuf:"bytes,202,opt"`
+	_                 [0]func()
+}
+
+type C2CSource struct {
+	FriendUid string `protobuf:"bytes,2,opt"`
+	_         [0]func()
+}
+
+type TroopSource struct {
+	GroupUin uint32 `protobuf:"varint,1,opt"`
+	_        [0]func()
 }
 
 type VideoInfo struct {
@@ -181,13 +198,19 @@ type VideoExtBizInfo struct {
 }
 
 type PicExtBizInfo struct {
-	BizType             uint32 `protobuf:"varint,1,opt"`
-	TextSummary         string `protobuf:"bytes,2,opt"`
-	BytesPbReserveC2C   []byte `protobuf:"bytes,11,opt"`
-	BytesPbReserveTroop []byte `protobuf:"bytes,12,opt"`
-	FromScene           uint32 `protobuf:"varint,1001,opt"`
-	ToScene             uint32 `protobuf:"varint,1002,opt"`
-	OldFileId           uint32 `protobuf:"varint,1003,opt"`
+	BizType           uint32      `protobuf:"varint,1,opt"`
+	TextSummary       string      `protobuf:"bytes,2,opt"`
+	BytesPbReserveC2C []byte      `protobuf:"bytes,11,opt"`
+	ExtData           *PicExtData `protobuf:"bytes,12,opt"`
+	FromScene         uint32      `protobuf:"varint,1001,opt"`
+	ToScene           uint32      `protobuf:"varint,1002,opt"`
+	OldFileId         uint32      `protobuf:"varint,1003,opt"`
+}
+
+type PicExtData struct {
+	SubType     uint32 `protobuf:"varint,1,opt"`
+	TextSummary string `protobuf:"bytes,9,opt"`
+	_           [0]func()
 }
 
 type DownloadSafeReq struct {

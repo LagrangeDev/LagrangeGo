@@ -5,13 +5,12 @@ import (
 	"errors"
 	"math/rand"
 
-	"github.com/LagrangeDev/LagrangeGo/message"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
+	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildPrivateImageUploadReq(targetUid string, image *message.ImageElement) (*OidbPacket, error) {
+func BuildPrivateImageUploadReq(targetUID string, image *message.ImageElement) (*Packet, error) {
 	// OidbSvcTrpcTcp.0x11c5_100
 	if image.Stream == nil {
 		return nil, errors.New("image data is null")
@@ -22,12 +21,6 @@ func BuildPrivateImageUploadReq(targetUid string, image *message.ImageElement) (
 		return nil, err
 	}
 	imageExt := format.String()
-
-	hexString := "0800180020004200500062009201009a0100a2010c080012001800200028003a00"
-	bytesPbReserveC2c, err := hex.DecodeString(hexString)
-	if err != nil {
-		return nil, err
-	}
 
 	body := &oidb.NTV2RichMediaReq{
 		ReqHead: &oidb.MultiMediaReqHead{
@@ -41,7 +34,7 @@ func BuildPrivateImageUploadReq(targetUid string, image *message.ImageElement) (
 				SceneType:    1,
 				C2C: &oidb.C2CUserInfo{
 					AccountType: 2,
-					TargetUid:   targetUid,
+					TargetUid:   targetUID,
 				},
 			},
 			Client: &oidb.ClientMeta{
@@ -76,8 +69,12 @@ func BuildPrivateImageUploadReq(targetUid string, image *message.ImageElement) (
 			CompatQMsgSceneType:    1,
 			ExtBizInfo: &oidb.ExtBizInfo{
 				Pic: &oidb.PicExtBizInfo{
-					BytesPbReserveC2C: bytesPbReserveC2c,
-					TextSummary:       image.Summary,
+					BizType:     uint32(image.SubType),
+					TextSummary: image.Summary,
+					ExtData: &oidb.PicExtData{
+						SubType:     uint32(image.SubType),
+						TextSummary: image.Summary,
+					},
 				},
 				Video: &oidb.VideoExtBizInfo{
 					BytesPbReserve: []byte{},

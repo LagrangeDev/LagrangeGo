@@ -8,8 +8,7 @@ import (
 )
 
 type LongMsgResult struct {
-	Action *LongMsgAction `protobuf:"bytes,2,opt"`
-	_      [0]func()
+	Action []*LongMsgAction `protobuf:"bytes,2,rep"`
 }
 
 type LongMsgAction struct {
@@ -135,4 +134,23 @@ type SsoGetC2CMsg struct {
 type SsoGetC2CMsgResponse struct {
 	FriendUid string         `protobuf:"bytes,4,opt"`
 	Messages  []*PushMsgBody `protobuf:"bytes,7,rep"`
+}
+
+type MarketFaceKeyReq struct {
+	Field1 uint32                `protobuf:"varint,1,opt"`
+	Info   *MarketFaceKeyReqInfo `protobuf:"bytes,5,opt"`
+	_      [0]func()
+}
+
+type MarketFaceKeyReqInfo struct {
+	FaceIds []string `protobuf:"bytes,3,rep"`
+}
+
+type MarketFaceKeyRsp struct {
+	Info *MarketFaceKeyRspInfo `protobuf:"bytes,5,opt"`
+	_    [0]func()
+}
+
+type MarketFaceKeyRspInfo struct {
+	Keys []string `protobuf:"bytes,1,rep"`
 }

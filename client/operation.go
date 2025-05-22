@@ -2,9 +2,8 @@ package client
 
 import (
 	"bytes"
-	"context"
+	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -14,32 +13,28 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
-
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
-
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 	"golang.org/x/net/html"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	messagePkt "github.com/LagrangeDev/LagrangeGo/client/packets/message"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-	"github.com/tidwall/gjson"
 )
 
-func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
-	pkt, _ := proto.Marshal(&action.SetStatus{
-		Status:        status,
-		ExtStatus:     ext,
-		BatteryStatus: battery,
-	})
+// SetOnlineStatus 设置在线状态
+func (c *QQClient) SetOnlineStatus(status action.SetStatus) error {
+	pkt, _ := proto.Marshal(&status)
 	resp, err := c.sendUniPacketAndWait("trpc.qq_new_tech.status_svc.StatusService.SetStatus", pkt)
 	if err != nil {
 		return err
@@ -56,7 +51,7 @@ func (c *QQClient) SetOnlineStatus(status, ext, battery uint32) error {
 }
 
 // FetchFriends 获取好友列表信息，使用token可以获取下一页的群成员信息
-func (c *QQClient) FetchFriends(token uint32) ([]*entity.Friend, uint32, error) {
+func (c *QQClient) FetchFriends(token uint32) ([]*entity.User, uint32, error) {
 	pkt, err := oidb2.BuildFetchFriendsReq(token)
 	if err != nil {
 		return nil, 0, err
@@ -91,7 +86,7 @@ func (c *QQClient) FetchGroups() ([]*entity.Group, error) {
 
 // FetchGroupMember 获取对应群的群成员信息
 func (c *QQClient) FetchGroupMember(groupUin, memberUin uint32) (*entity.GroupMember, error) {
-	pkt, err := oidb2.BuildFetchMemberReq(groupUin, c.GetUid(memberUin, groupUin))
+	pkt, err := oidb2.BuildFetchMemberReq(groupUin, c.GetUID(memberUin, groupUin))
 	if err != nil {
 		return nil, err
 	}
@@ -123,9 +118,9 @@ func (c *QQClient) FetchGroupMembers(groupUin uint32, token string) ([]*entity.G
 	return members, newToken, nil
 }
 
-// GroupRemark 设置群聊备注
-func (c *QQClient) GroupRemark(groupUin uint32, remark string) error {
-	pkt, err := oidb2.BuildGroupRemarkReq(groupUin, remark)
+// SetGroupRemark 设置群聊备注
+func (c *QQClient) SetGroupRemark(groupUin uint32, remark string) error {
+	pkt, err := oidb2.BuildSetGroupRemarkReq(groupUin, remark)
 	if err != nil {
 		return err
 	}
@@ -133,12 +128,12 @@ func (c *QQClient) GroupRemark(groupUin uint32, remark string) error {
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupRemarkResp(resp)
+	return oidb2.ParseSetGroupRemarkResp(resp)
 }
 
-// GroupRename 设置群聊名称
-func (c *QQClient) GroupRename(groupUin uint32, name string) error {
-	pkt, err := oidb2.BuildGroupRenameReq(groupUin, name)
+// SetGroupName 设置群聊名称
+func (c *QQClient) SetGroupName(groupUin uint32, name string) error {
+	pkt, err := oidb2.BuildSetGroupNameReq(groupUin, name)
 	if err != nil {
 		return err
 	}
@@ -146,12 +141,12 @@ func (c *QQClient) GroupRename(groupUin uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupRenameResp(resp)
+	return oidb2.ParseSetGroupNameResp(resp)
 }
 
-// GroupMuteGlobal 群全员禁言
-func (c *QQClient) GroupMuteGlobal(groupUin uint32, isMute bool) error {
-	pkt, err := oidb2.BuildGroupMuteGlobalReq(groupUin, isMute)
+// SetGroupGlobalMute 群全员禁言
+func (c *QQClient) SetGroupGlobalMute(groupUin uint32, isMute bool) error {
+	pkt, err := oidb2.BuildSetGroupGlobalMuteReq(groupUin, isMute)
 	if err != nil {
 		return err
 	}
@@ -159,16 +154,16 @@ func (c *QQClient) GroupMuteGlobal(groupUin uint32, isMute bool) error {
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupMuteGlobalResp(resp)
+	return oidb2.ParseSetGroupGlobalMuteResp(resp)
 }
 
-// GroupMuteMember 禁言群成员
-func (c *QQClient) GroupMuteMember(groupUin, uin, duration uint32) error {
-	uid := c.GetUid(uin, groupUin)
+// SetGroupMemberMute 禁言群成员
+func (c *QQClient) SetGroupMemberMute(groupUin, uin, duration uint32) error {
+	uid := c.GetUID(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupMuteMemberReq(groupUin, duration, uid)
+	pkt, err := oidb2.BuildSetGroupMemberMuteReq(groupUin, duration, uid)
 	if err != nil {
 		return err
 	}
@@ -176,12 +171,12 @@ func (c *QQClient) GroupMuteMember(groupUin, uin, duration uint32) error {
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupMuteMemberResp(resp)
+	return oidb2.ParseSetGroupMemberMuteResp(resp)
 }
 
-// GroupLeave 退出群聊
-func (c *QQClient) GroupLeave(groupUin uint32) error {
-	pkt, err := oidb2.BuildGroupLeaveReq(groupUin)
+// SetGroupLeave 退出群聊
+func (c *QQClient) SetGroupLeave(groupUin uint32) error {
+	pkt, err := oidb2.BuildSetGroupLeaveReq(groupUin)
 	if err != nil {
 		return err
 	}
@@ -189,16 +184,16 @@ func (c *QQClient) GroupLeave(groupUin uint32) error {
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupLeaveResp(resp)
+	return oidb2.ParseSetGroupLeaveResp(resp)
 }
 
-// GroupSetAdmin 设置群管理员
-func (c *QQClient) GroupSetAdmin(groupUin, uin uint32, isAdmin bool) error {
-	uid := c.GetUid(uin, groupUin)
+// SetGroupAdmin 设置群管理员
+func (c *QQClient) SetGroupAdmin(groupUin, uin uint32, isAdmin bool) error {
+	uid := c.GetUID(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupSetAdminReq(groupUin, uid, isAdmin)
+	pkt, err := oidb2.BuildSetGroupAdminReq(groupUin, uid, isAdmin)
 	if err != nil {
 		return err
 	}
@@ -206,7 +201,7 @@ func (c *QQClient) GroupSetAdmin(groupUin, uin uint32, isAdmin bool) error {
 	if err != nil {
 		return err
 	}
-	err = oidb2.ParseGroupSetAdminResp(resp)
+	err = oidb2.ParseSetGroupAdminResp(resp)
 	if err != nil {
 		return err
 	}
@@ -214,17 +209,16 @@ func (c *QQClient) GroupSetAdmin(groupUin, uin uint32, isAdmin bool) error {
 		m.Permission = entity.Admin
 		c.cache.RefreshGroupMember(groupUin, m)
 	}
-
 	return nil
 }
 
-// GroupRenameMember 设置群成员昵称
-func (c *QQClient) GroupRenameMember(groupUin, uin uint32, name string) error {
-	uid := c.GetUid(uin, groupUin)
+// SetGroupMemberName 设置群成员昵称
+func (c *QQClient) SetGroupMemberName(groupUin, uin uint32, name string) error {
+	uid := c.GetUID(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupRenameMemberReq(groupUin, uid, name)
+	pkt, err := oidb2.BuildSetGroupMemberNameReq(groupUin, uid, name)
 	if err != nil {
 		return err
 	}
@@ -232,7 +226,7 @@ func (c *QQClient) GroupRenameMember(groupUin, uin uint32, name string) error {
 	if err != nil {
 		return err
 	}
-	err = oidb2.ParseGroupRenameMemberResp(resp)
+	err = oidb2.ParseSetGroupMemberNameResp(resp)
 	if err != nil {
 		return err
 	}
@@ -240,17 +234,16 @@ func (c *QQClient) GroupRenameMember(groupUin, uin uint32, name string) error {
 		m.MemberCard = name
 		c.cache.RefreshGroupMember(groupUin, m)
 	}
-
 	return nil
 }
 
-// GroupKickMember 踢出群成员，可选是否拒绝加群请求
-func (c *QQClient) GroupKickMember(groupUin, uin uint32, rejectAddRequest bool) error {
-	uid := c.GetUid(uin, groupUin)
+// KickGroupMember 踢出群成员，可选是否拒绝加群请求
+func (c *QQClient) KickGroupMember(groupUin, uin uint32, rejectAddRequest bool) error {
+	uid := c.GetUID(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupKickMemberReq(groupUin, uid, rejectAddRequest)
+	pkt, err := oidb2.BuildKickGroupMemberReq(groupUin, uid, rejectAddRequest)
 	if err != nil {
 		return err
 	}
@@ -258,16 +251,16 @@ func (c *QQClient) GroupKickMember(groupUin, uin uint32, rejectAddRequest bool) 
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupKickMemberResp(resp)
+	return oidb2.ParseKickGroupMemberResp(resp)
 }
 
-// GroupSetSpecialTitle 设置群成员专属头衔
-func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) error {
-	uid := c.GetUid(uin, groupUin)
+// SetGroupMemberSpecialTitle 设置群成员专属头衔
+func (c *QQClient) SetGroupMemberSpecialTitle(groupUin, uin uint32, title string) error {
+	uid := c.GetUID(uin, groupUin)
 	if uid == "" {
 		return errors.New("uid not found")
 	}
-	pkt, err := oidb2.BuildGroupSetSpecialTitleReq(groupUin, uid, title)
+	pkt, err := oidb2.BuildSetGroupMemberSpecialTitleReq(groupUin, uid, title)
 	if err != nil {
 		return err
 	}
@@ -275,11 +268,12 @@ func (c *QQClient) GroupSetSpecialTitle(groupUin, uin uint32, title string) erro
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupSetSpecialTitleResp(resp)
+	return oidb2.ParseSetGroupMemberSpecialTitleResp(resp)
 }
 
-func (c *QQClient) GroupSetReaction(groupUin, sequence uint32, code string, isAdd bool) error {
-	pkt, err := oidb2.BuildGroupSetReactionReq(groupUin, sequence, code, isAdd)
+// SetGroupReaction 设置群消息表态
+func (c *QQClient) SetGroupReaction(groupUin, sequence uint32, code string, isAdd bool) error {
+	pkt, err := oidb2.BuildSetGroupReactionReq(groupUin, sequence, code, isAdd)
 	if err != nil {
 		return err
 	}
@@ -287,7 +281,7 @@ func (c *QQClient) GroupSetReaction(groupUin, sequence uint32, code string, isAd
 	if err != nil {
 		return err
 	}
-	return oidb2.ParseGroupSetReactionResp(resp)
+	return oidb2.ParseSetGroupReactionResp(resp)
 }
 
 // GroupPoke 戳一戳群友
@@ -316,10 +310,25 @@ func (c *QQClient) FriendPoke(uin uint32) error {
 	return oidb2.ParsePokeResp(resp)
 }
 
+// DeleteFriend 删除好友
+func (c *QQClient) DeleteFriend(uin uint32, block bool) error {
+	uid := c.GetUID(uin)
+	pkt, err := oidb2.BuildDeleteFriendReq(uid, block)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseDeleteFriendResp(resp)
+}
+
+// RecallFriendMessage 撤回私聊消息
 func (c *QQClient) RecallFriendMessage(uin, seq, random, clientSeq, timestamp uint32) error {
 	packet := message.C2CRecallMsg{
 		Type:      1,
-		TargetUid: c.GetUid(uin),
+		TargetUid: c.GetUID(uin),
 		Info: &message.C2CRecallMsgInfo{
 			ClientSequence:  clientSeq,
 			Random:          random,
@@ -346,10 +355,10 @@ func (c *QQClient) RecallFriendMessage(uin, seq, random, clientSeq, timestamp ui
 }
 
 // RecallGroupMessage 撤回群聊消息
-func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
+func (c *QQClient) RecallGroupMessage(groupUin, seq uint32) error {
 	packet := message.GroupRecallMsg{
 		Type:     1,
-		GroupUin: GrpUin,
+		GroupUin: groupUin,
 		Field3: &message.GroupRecallMsgField3{
 			Sequence: seq,
 			Field3:   0,
@@ -370,9 +379,55 @@ func (c *QQClient) RecallGroupMessage(GrpUin, seq uint32) error {
 	return nil
 }
 
-// GetPrivateImageUrl 获取私聊图片下载url
-func (c *QQClient) GetPrivateImageUrl(node *oidb.IndexNode) (string, error) {
-	pkt, err := oidb2.BuildPrivateImageDownloadReq(c.GetUid(c.Uin), node)
+// MarkPrivateMessageReaded 标记私聊消息已读
+func (c *QQClient) MarkPrivateMessageReaded(uin, timestamp, startSeq uint32) error {
+	uid := c.GetUID(uin)
+	pakcet := message.SsoReadedReport{
+		C2C: &message.SsoReadedReportC2C{
+			TargetUid:     proto.Some(uid),
+			Time:          timestamp,
+			StartSequence: startSeq,
+		},
+	}
+	pktData, err := proto.Marshal(&pakcet)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoReadedReport", pktData)
+	if err != nil {
+		return err
+	}
+	if len(resp) == 0 {
+		return errors.New("empty response data")
+	}
+	return nil
+}
+
+// MarkGroupMessageReaded 标记群消息已读
+func (c *QQClient) MarkGroupMessageReaded(groupUin, startSeq uint32) error {
+	pakcet := message.SsoReadedReport{
+		Group: &message.SsoReadedReportGroup{
+			GroupUin:      groupUin,
+			StartSequence: startSeq,
+		},
+	}
+	pktData, err := proto.Marshal(&pakcet)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.msg_svc.MsgService.SsoReadedReport", pktData)
+	if err != nil {
+		return err
+	}
+	if len(resp) == 0 {
+		return errors.New("empty response data")
+	}
+	return nil
+}
+
+// GetPrivateImageURL 获取私聊图片下载url
+func (c *QQClient) GetPrivateImageURL(node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildPrivateImageDownloadReq(c.GetUID(c.Uin), node)
 	if err != nil {
 		return "", err
 	}
@@ -383,8 +438,8 @@ func (c *QQClient) GetPrivateImageUrl(node *oidb.IndexNode) (string, error) {
 	return oidb2.ParsePrivateImageDownloadResp(resp)
 }
 
-// GetGroupImageUrl 获取群聊图片下载url
-func (c *QQClient) GetGroupImageUrl(groupUin uint32, node *oidb.IndexNode) (string, error) {
+// GetGroupImageURL 获取群聊图片下载url
+func (c *QQClient) GetGroupImageURL(groupUin uint32, node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildGroupImageDownloadReq(groupUin, node)
 	if err != nil {
 		return "", err
@@ -396,9 +451,9 @@ func (c *QQClient) GetGroupImageUrl(groupUin uint32, node *oidb.IndexNode) (stri
 	return oidb2.ParseGroupImageDownloadResp(resp)
 }
 
-// GetPrivateRecordUrl 获取私聊语音下载url
-func (c *QQClient) GetPrivateRecordUrl(node *oidb.IndexNode) (string, error) {
-	pkt, err := oidb2.BuildPrivateRecordDownloadReq(c.GetUid(c.Uin), node)
+// GetPrivateRecordURL 获取私聊语音下载url
+func (c *QQClient) GetPrivateRecordURL(node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildPrivateRecordDownloadReq(c.GetUID(c.Uin), node)
 	if err != nil {
 		return "", err
 	}
@@ -409,8 +464,8 @@ func (c *QQClient) GetPrivateRecordUrl(node *oidb.IndexNode) (string, error) {
 	return oidb2.ParsePrivateRecordDownloadResp(resp)
 }
 
-// GetGroupRecordUrl 获取群聊语音下载url
-func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (string, error) {
+// GetGroupRecordURL 获取群聊语音下载url
+func (c *QQClient) GetGroupRecordURL(groupUin uint32, node *oidb.IndexNode) (string, error) {
 	pkt, err := oidb2.BuildGroupRecordDownloadReq(groupUin, node)
 	if err != nil {
 		return "", err
@@ -422,8 +477,22 @@ func (c *QQClient) GetGroupRecordUrl(groupUin uint32, node *oidb.IndexNode) (str
 	return oidb2.ParseGroupRecordDownloadResp(resp)
 }
 
-func (c *QQClient) GetVideoUrl(isGroup bool, video *message2.ShortVideoElement) (string, error) {
-	pkt, err := oidb2.BuildVideoDownloadReq(c.Sig().Uid, string(video.Uuid), video.Name, isGroup, video.Md5, video.Sha1)
+func (c *QQClient) GenFileNode(name, md5, sha1, uuid string, size uint32, isnt bool) *oidb.IndexNode {
+	return &oidb.IndexNode{
+		Info: &oidb.FileInfo{
+			FileName: name,
+			FileSize: size,
+			FileSha1: sha1,
+			FileHash: md5,
+		},
+		FileUuid: uuid,
+		StoreId:  utils.Ternary[uint32](isnt, 1, 0), // 0旧服务器 1为nt服务器
+	}
+}
+
+// GetPrivateVideoURL 获取私聊视频下载链接
+func (c *QQClient) GetPrivateVideoURL(node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildPrivateVideoDownloadReq(c.Sig().UID, node)
 	if err != nil {
 		return "", err
 	}
@@ -434,7 +503,21 @@ func (c *QQClient) GetVideoUrl(isGroup bool, video *message2.ShortVideoElement) 
 	return oidb2.ParseVideoDownloadResp(resp)
 }
 
-func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, error) {
+// GetGroupVideoURL 获取群聊视频下载链接
+func (c *QQClient) GetGroupVideoURL(groupUin uint32, node *oidb.IndexNode) (string, error) {
+	pkt, err := oidb2.BuildGroupVideoDownloadReq(groupUin, node)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return "", err
+	}
+	return oidb2.ParseVideoDownloadResp(resp)
+}
+
+// GetGroupFileURL 获取群文件下载链接
+func (c *QQClient) GetGroupFileURL(groupUin uint32, fileID string) (string, error) {
 	pkt, err := oidb2.BuildGroupFSDownloadReq(groupUin, fileID)
 	if err != nil {
 		return "", err
@@ -446,8 +529,9 @@ func (c *QQClient) GetGroupFileUrl(groupUin uint32, fileID string) (string, erro
 	return oidb2.ParseGroupFSDownloadResp(resp)
 }
 
-func (c *QQClient) GetPrivateFileUrl(fileUUID string, fileHash string) (string, error) {
-	pkt, err := oidb2.BuildPrivateFileDownloadReq(c.GetUid(c.Uin), fileUUID, fileHash)
+// GetPrivateFileURL 获取私聊文件下载链接
+func (c *QQClient) GetPrivateFileURL(fileUUID string, fileHash string) (string, error) {
+	pkt, err := oidb2.BuildPrivateFileDownloadReq(c.GetUID(c.Uin), fileUUID, fileHash)
 	if err != nil {
 		return "", err
 	}
@@ -458,61 +542,42 @@ func (c *QQClient) GetPrivateFileUrl(fileUUID string, fileHash string) (string, 
 	return oidb2.ParsePrivateFileDownloadResp(resp)
 }
 
-func (c *QQClient) queryImage(url string, method string) (*message2.ImageElement, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			return
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("file not found")
-	}
-	return &message2.ImageElement{
-		Url:  url,
-		Size: uint32(resp.ContentLength),
-	}, nil
-}
-
+// QueryGroupImage 获取群图片
 func (c *QQClient) QueryGroupImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
-	var url string
-	if fileUUID != "" {
+	switch {
+	case fileUUID != "":
 		rkeyInfo := c.GetCachedRkeyInfo(entity.GroupRKey)
-		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1407&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
-		return c.queryImage(url, http.MethodGet)
-	} else if len(md5) == 16 {
-		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
-		return c.queryImage(url, http.MethodHead)
-	} else {
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1407&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey),
+		}, nil
+	case len(md5) == 16:
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5),
+		}, nil
+	default:
 		return nil, errors.New("invalid parameters")
 	}
 }
 
+// QueryFriendImage 获取私聊图片
 func (c *QQClient) QueryFriendImage(md5 []byte, fileUUID string) (*message2.ImageElement, error) {
-	var url string
-	if fileUUID != "" {
+	switch {
+	case fileUUID != "":
 		rkeyInfo := c.GetCachedRkeyInfo(entity.FriendRKey)
-		url = fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1406&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey)
-		return c.queryImage(url, http.MethodGet)
-	} else if len(md5) == 16 {
-		url = fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5)
-		return c.queryImage(url, http.MethodHead)
-	} else {
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("https://multimedia.nt.qq.com.cn/download?appid=1406&fileid=%s&rkey=%s", fileUUID, rkeyInfo.RKey),
+		}, nil
+	case len(md5) == 16:
+		return &message2.ImageElement{
+			URL: fmt.Sprintf("http://gchat.qpic.cn/gchatpic_new/0/0-0-%X/0", md5),
+		}, nil
+	default:
 		return nil, errors.New("invalid parameters")
 	}
 }
 
 // FetchUserInfo 获取用户信息
-func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
+func (c *QQClient) FetchUserInfo(uid string) (*entity.User, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uid)
 	if err != nil {
 		return nil, err
@@ -525,7 +590,7 @@ func (c *QQClient) FetchUserInfo(uid string) (*entity.Friend, error) {
 }
 
 // FetchUserInfoUin 通过uin获取用户信息
-func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
+func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.User, error) {
 	pkt, err := oidb2.BuildFetchUserInfoReq(uin)
 	if err != nil {
 		return nil, err
@@ -537,7 +602,7 @@ func (c *QQClient) FetchUserInfoUin(uin uint32) (*entity.Friend, error) {
 	return oidb2.ParseFetchUserInfoResp(resp)
 }
 
-// FetchGroupInfo 获取群信息
+// FetchGroupInfo 获取群信息 isStrange是否陌生群聊
 func (c *QQClient) FetchGroupInfo(groupUin uint32, isStrange bool) (*entity.Group, error) {
 	pkt, err := oidb2.BuildFetchGroupReq(groupUin, isStrange)
 	if err != nil {
@@ -560,6 +625,7 @@ func (c *QQClient) FetchGroupInfo(groupUin uint32, isStrange bool) (*entity.Grou
 		GroupLevel:      groupResp.GroupLevel,
 		MemberCount:     groupResp.GroupMemberNum,
 		MaxMember:       groupResp.GroupMemberMaxNum,
+		LastMsgSeq:      groupResp.GroupCurMsgSeq,
 	}, nil
 }
 
@@ -573,12 +639,32 @@ func (c *QQClient) GetGroupSystemMessages(isFiltered bool, count uint32, groupUi
 	if err != nil {
 		return nil, err
 	}
-	return oidb2.ParseFetchGroupSystemMessagesReq(isFiltered, resp, groupUin...)
+	msgs, err := oidb2.ParseFetchGroupSystemMessagesReq(isFiltered, resp, groupUin...)
+	if err != nil {
+		return nil, err
+	}
+	for _, req := range msgs.InvitedRequests {
+		if g, err := c.FetchGroupInfo(req.GroupUin, true); err == nil {
+			req.GroupName = g.GroupName
+		}
+		if u, err := c.FetchUserInfoUin(req.InvitorUin); err == nil {
+			req.InvitorNick = u.Nickname
+		}
+	}
+	for _, req := range msgs.JoinRequests {
+		if g, err := c.FetchGroupInfo(req.GroupUin, false); err == nil {
+			req.GroupName = g.GroupName
+		}
+		if u, err := c.FetchUserInfoUin(req.TargetUin); err == nil {
+			req.TargetNick = u.Nickname
+		}
+	}
+	return msgs, nil
 }
 
 // SetGroupRequest 处理加群请求
-func (c *QQClient) SetGroupRequest(isFiltered bool, accept bool, sequence uint64, typ uint32, groupUin uint32, message string) error {
-	pkt, err := oidb2.BuildSetGroupRequestReq(isFiltered, accept, sequence, typ, groupUin, message)
+func (c *QQClient) SetGroupRequest(isFiltered bool, operate entity.GroupRequestOperate, sequence uint64, typ uint32, groupUin uint32, message string) error {
+	pkt, err := oidb2.BuildSetGroupRequestReq(isFiltered, operate, sequence, typ, groupUin, message)
 	if err != nil {
 		return err
 	}
@@ -590,8 +676,8 @@ func (c *QQClient) SetGroupRequest(isFiltered bool, accept bool, sequence uint64
 }
 
 // SetFriendRequest 处理好友请求
-func (c *QQClient) SetFriendRequest(accept bool, targetUid string) error {
-	pkt, err := oidb2.BuildSetFriendRequest(accept, targetUid)
+func (c *QQClient) SetFriendRequest(accept bool, targetUID string) error {
+	pkt, err := oidb2.BuildSetFriendRequest(accept, targetUID)
 	if err != nil {
 		return err
 	}
@@ -641,20 +727,20 @@ func (c *QQClient) FetchCookies(domains []string) ([]string, error) {
 	return oidb2.ParseFetchCookieResp(resp)
 }
 
-// UploadPrivateFile 上传私聊文件
-func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath, filename string) error {
+// SendPrivateFile 发送私聊文件
+func (c *QQClient) SendPrivateFile(targetUin uint32, localFilePath, filename string) error {
 	fileElement, err := message2.NewLocalFile(localFilePath, filename)
 	if err != nil {
 		return err
 	}
-	uploadedFileElement, err := c.FileUploadPrivate(c.GetUid(targetUin), fileElement)
+	uploadedFileElement, err := c.UploadPrivateFile(c.GetUID(targetUin), fileElement)
 	if err != nil {
 		return err
 	}
 	route := &message.RoutingHead{
 		Trans0X211: &message.Trans0X211{
 			CcCmd: proto.Uint32(4),
-			Uid:   proto.String(c.GetUid(targetUin)),
+			Uid:   proto.String(c.GetUID(targetUin)),
 		},
 	}
 	body := message2.PackElementsToBody([]message2.IMessageElement{uploadedFileElement})
@@ -666,13 +752,13 @@ func (c *QQClient) UploadPrivateFile(targetUin uint32, localFilePath, filename s
 	return nil
 }
 
-// UploadGroupFile 上传群文件
-func (c *QQClient) UploadGroupFile(groupUin uint32, localFilePath, filename, targetDirectory string) error {
+// SendGroupFile 发送群文件
+func (c *QQClient) SendGroupFile(groupUin uint32, localFilePath, filename, targetDirectory string) error {
 	fileElement, err := message2.NewLocalFile(localFilePath, filename)
 	if err != nil {
 		return err
 	}
-	if _, err = c.FileUploadGroup(groupUin, fileElement, targetDirectory); err != nil {
+	if _, err = c.UploadGroupFile(groupUin, fileElement, targetDirectory); err != nil {
 		return err
 	}
 	return nil
@@ -715,7 +801,7 @@ func (c *QQClient) GetGroupFileSystemInfo(groupUin uint32) (*entity.GroupFileSys
 
 // ListGroupFilesByFolder 获取群目录指定文件夹列表
 func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory string) ([]*entity.GroupFile, []*entity.GroupFolder, error) {
-	var startIndex uint32 = 0
+	var startIndex uint32
 	var fileCount uint32 = 20
 	var files []*entity.GroupFile
 	var folders []*entity.GroupFolder
@@ -732,16 +818,13 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 		if err != nil {
 			return files, folders, err
 		}
-		if res.List.IsEnd {
-			break
-		}
 		for _, fe := range res.List.Items {
 			if fe.FileInfo != nil {
 				files = append(files, &entity.GroupFile{
 					GroupUin:      groupUin,
-					FileId:        fe.FileInfo.FileId,
+					FileID:        fe.FileInfo.FileId,
 					FileName:      fe.FileInfo.FileName,
-					BusId:         fe.FileInfo.BusId,
+					BusID:         fe.FileInfo.BusId,
 					FileSize:      fe.FileInfo.FileSize,
 					UploadTime:    fe.FileInfo.UploadedTime,
 					DeadTime:      fe.FileInfo.ExpireTime,
@@ -754,7 +837,7 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 			if fe.FolderInfo != nil {
 				folders = append(folders, &entity.GroupFolder{
 					GroupUin:       groupUin,
-					FolderId:       fe.FolderInfo.FolderId,
+					FolderID:       fe.FolderInfo.FolderId,
 					FolderName:     fe.FolderInfo.FolderName,
 					CreateTime:     fe.FolderInfo.CreateTime,
 					Creator:        fe.FolderInfo.CreatorUin,
@@ -764,6 +847,9 @@ func (c *QQClient) ListGroupFilesByFolder(groupUin uint32, targetDirectory strin
 			}
 		}
 		startIndex += fileCount
+		if res.List.IsEnd {
+			break
+		}
 	}
 	return files, folders, nil
 }
@@ -852,49 +938,53 @@ func (c *QQClient) DeleteGroupFolder(groupUin uint32, folderID string) error {
 }
 
 // FetchForwardMsg 获取合并转发消息
-func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, err error) {
-	if resId == "" {
-		return msg, errors.New("empty resId")
+func (c *QQClient) FetchForwardMsg(resID string) (msg *message2.ForwardMessage, err error) {
+	if resID == "" {
+		return msg, errors.New("empty resID")
 	}
-	forwardMsg := &message2.ForwardMessage{ResID: resId}
-	pkt, err := messagePkt.BuildMultiMsgDownloadReq(c.GetUid(c.Uin), resId)
+	pkt, err := messagePkt.BuildMultiMsgDownloadReq(c.GetUID(c.Uin), resID)
 	if err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
 	resp, err := c.sendUniPacketAndWait("trpc.group.long_msg_interface.MsgService.SsoRecvLongMsg", pkt)
 	if err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
 	pasted, err := messagePkt.ParseMultiMsgDownloadResp(resp)
 	if err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
 	if pasted.Result == nil || pasted.Result.Payload == nil {
-		return forwardMsg, errors.New("empty response data")
+		return nil, errors.New("empty response data")
 	}
 	data := binary.GZipUncompress(pasted.Result.Payload)
 	result := &message.LongMsgResult{}
 	if err = proto.Unmarshal(data, result); err != nil {
-		return forwardMsg, err
+		return nil, err
 	}
-	forwardMsg.Nodes = make([]*message2.ForwardNode, len(result.Action.ActionData.MsgBody))
-	for idx, b := range result.Action.ActionData.MsgBody {
-		isGroupMsg := b.ResponseHead.Grp != nil
-		forwardMsg.Nodes[idx] = &message2.ForwardNode{
-			SenderId:   b.ResponseHead.FromUin,
-			SenderName: b.ResponseHead.Forward.FriendName.Unwrap(),
-			Time:       b.ContentHead.TimeStamp.Unwrap(),
-		}
-		if isGroupMsg {
-			forwardMsg.Nodes[idx].GroupId = b.ResponseHead.Grp.GroupUin
-			forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Grp.MemberName
-			grpMsg := message2.ParseGroupMessage(b)
-			c.PreprocessGroupMessageEvent(grpMsg)
-			forwardMsg.Nodes[idx].Message = grpMsg.Elements
-		} else {
-			prvMsg := message2.ParsePrivateMessage(b)
-			c.PreprocessPrivateMessageEvent(prvMsg)
-			forwardMsg.Nodes[idx].Message = prvMsg.Elements
+
+	forwardMsg := &message2.ForwardMessage{ResID: resID}
+	for _, action := range result.Action {
+		if action.ActionCommand == "MultiMsg" {
+			forwardMsg.Nodes = make([]*message2.ForwardNode, len(action.ActionData.MsgBody))
+			for idx, b := range action.ActionData.MsgBody {
+				forwardMsg.Nodes[idx] = &message2.ForwardNode{
+					SenderID: b.ResponseHead.FromUin,
+					Time:     b.ContentHead.TimeStamp.Unwrap(),
+				}
+				if forwardMsg.IsGroup = b.ResponseHead.Grp != nil; forwardMsg.IsGroup {
+					forwardMsg.Nodes[idx].GroupID = b.ResponseHead.Grp.GroupUin
+					forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Grp.MemberName
+					grpMsg := message2.ParseGroupMessage(b)
+					c.PreprocessGroupMessageEvent(grpMsg)
+					forwardMsg.Nodes[idx].Message = grpMsg.Elements
+				} else {
+					forwardMsg.Nodes[idx].SenderName = b.ResponseHead.Forward.FriendName.Unwrap()
+					prvMsg := message2.ParsePrivateMessage(b)
+					c.PreprocessPrivateMessageEvent(prvMsg)
+					forwardMsg.Nodes[idx].Message = prvMsg.Elements
+				}
+			}
 		}
 	}
 	return forwardMsg, nil
@@ -904,7 +994,7 @@ func (c *QQClient) FetchForwardMsg(resId string) (msg *message2.ForwardMessage, 
 // groupUin should be the group number where the uploader is located or 0 (c2c)
 func (c *QQClient) UploadForwardMsg(forward *message2.ForwardMessage, groupUin uint32) (*message2.ForwardMessage, error) {
 	msgBody := c.BuildFakeMessage(forward.Nodes)
-	pkt, err := messagePkt.BuildMultiMsgUploadReq(c.GetUid(c.Uin), groupUin, msgBody)
+	pkt, err := messagePkt.BuildMultiMsgUploadReq(c.GetUID(c.Uin), groupUin, msgBody)
 	if err != nil {
 		return nil, err
 	}
@@ -933,8 +1023,8 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 	}
 	grpInfo := c.GetCachedGroupInfo(groupUin)
 	for {
-		reqUrl := fmt.Sprintf("https://qun.qq.com/cgi-bin/group_digest/digest_list?random=7800&X-CROSS-ORIGIN=fetch&group_code=%d&page_start=%d&page_limit=20&bkn=%d", groupUin, page, bkn)
-		req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
+		reqURL := fmt.Sprintf("https://qun.qq.com/cgi-bin/group_digest/digest_list?random=7800&X-CROSS-ORIGIN=fetch&group_code=%d&page_start=%d&page_limit=20&bkn=%d", groupUin, page, bkn)
+		req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 		if err != nil {
 			return essenceMsg, err
 		}
@@ -950,24 +1040,24 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 		if resp.StatusCode != http.StatusOK {
 			return essenceMsg, fmt.Errorf("error resp code %d", resp.StatusCode)
 		}
-		respJson := gjson.ParseBytes(respData)
-		if respJson.Get("retcode").Int() != 0 {
-			return essenceMsg, fmt.Errorf("error code %d, %s", respJson.Get("retcode").Int(), respJson.Get("retmsg").String())
+		respJSON := gjson.ParseBytes(respData)
+		if respJSON.Get("retcode").Int() != 0 {
+			return essenceMsg, fmt.Errorf("error code %d, %s", respJSON.Get("retcode").Int(), respJSON.Get("retmsg").String())
 		}
-		for _, v := range respJson.Get("data").Get("msg_list").Array() {
+		for _, v := range respJSON.Get("data").Get("msg_list").Array() {
 			var elements []message2.IMessageElement
 			for _, e := range v.Get("msg_content").Array() {
 				switch e.Get("msg_type").Int() {
 				case 1:
 					elements = append(elements, &message2.TextElement{Content: e.Get("text").String()})
 				case 2:
-					elements = append(elements, &message2.FaceElement{FaceID: uint16(e.Get("face_index").Int())})
+					elements = append(elements, &message2.FaceElement{FaceID: uint32(e.Get("face_index").Int())})
 				case 3:
-					elements = append(elements, &message2.ImageElement{Url: e.Get("image_url").String()})
+					elements = append(elements, &message2.ImageElement{URL: e.Get("image_url").String()})
 				case 4:
 					elements = append(elements, &message2.FileElement{
-						FileId:  e.Get("file_id").String(),
-						FileUrl: e.Get("file_thumbnail_url").String(),
+						FileID:  e.Get("file_id").String(),
+						FileURL: e.Get("file_thumbnail_url").String(),
 					})
 				}
 			}
@@ -975,18 +1065,18 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 			senderInfo := c.GetCachedMemberInfo(senderUin, groupUin)
 			essenceMsg = append(essenceMsg, &message2.GroupEssenceMessage{
 				OperatorUin:  uint32(v.Get("add_digest_uin").Int()),
-				OperatorUid:  c.GetUid(uint32(v.Get("add_digest_uin").Int())),
+				OperatorUID:  c.GetUID(uint32(v.Get("add_digest_uin").Int())),
 				OperatorTime: uint64(v.Get("add_digest_time").Int()),
 				CanRemove:    v.Get("can_be_removed").Bool(),
 				Message: &message2.GroupMessage{
-					Id:         uint32(v.Get("msg_seq").Int()),
-					InternalId: uint32(v.Get("msg_random").Int()),
+					ID:         uint32(v.Get("msg_seq").Int()),
+					InternalID: uint32(v.Get("msg_random").Int()),
 					GroupUin:   grpInfo.GroupUin,
 					GroupName:  grpInfo.GroupName,
 					Sender: &message2.Sender{
 						Uin:      senderUin,
-						Uid:      c.GetUid(senderUin, groupUin),
-						Nickname: senderInfo.MemberName,
+						UID:      c.GetUID(senderUin, groupUin),
+						Nickname: senderInfo.Nickname,
 						CardName: senderInfo.MemberCard,
 					},
 					Time:     uint32(v.Get("sender_time").Int()),
@@ -994,7 +1084,7 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 				},
 			})
 		}
-		if respJson.Get("data").Get("is_end").Bool() {
+		if respJSON.Get("data").Get("is_end").Bool() {
 			break
 		}
 	}
@@ -1006,8 +1096,8 @@ func (c *QQClient) FetchEssenceMessage(groupUin uint32) ([]*message2.GroupEssenc
 func (c *QQClient) GetGroupHonorInfo(groupUin uint32, honorType entity.HonorType) (*entity.GroupHonorInfo, error) {
 	ret := &entity.GroupHonorInfo{}
 	honorRe := regexp.MustCompile(`window\.__INITIAL_STATE__\s*?=\s*?(\{.*})`)
-	reqUrl := fmt.Sprintf("https://qun.qq.com/interactive/honorlist?gc=%d&type=%d", groupUin, honorType)
-	req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
+	reqURL := fmt.Sprintf("https://qun.qq.com/interactive/honorlist?gc=%d&type=%d", groupUin, honorType)
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
 		return ret, err
 	}
@@ -1109,7 +1199,7 @@ func (c *QQClient) uploadGroupNoticePic(bkn int, img []byte) (*entity.NoticeImag
 }
 
 // AddGroupNoticeSimple 发群公告
-func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeId string, err error) {
+func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeID string, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return "", err
@@ -1129,11 +1219,11 @@ func (c *QQClient) AddGroupNoticeSimple(groupUin uint32, text string) (noticeId 
 		return "", err
 	}
 	_ = resp.Body.Close()
-	return res.NoticeId, nil
+	return res.NoticeID, nil
 }
 
 // AddGroupNoticeWithPic 发群公告带图片
-func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byte) (noticeId string, err error) {
+func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byte) (noticeID string, err error) {
 	bkn, err := c.GetCsrfToken()
 	if err != nil {
 		return "", err
@@ -1157,7 +1247,7 @@ func (c *QQClient) AddGroupNoticeWithPic(groupUin uint32, text string, pic []byt
 		return "", err
 	}
 	_ = resp.Body.Close()
-	return res.NoticeId, nil
+	return res.NoticeID, nil
 }
 
 // DelGroupNotice 删除群公告
@@ -1171,10 +1261,11 @@ func (c *QQClient) DelGroupNotice(groupUin uint32, fid string) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.SendRequestWithCookie(req)
+	resp, err := c.SendRequestWithCookie(req)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	return nil
 }
 
@@ -1187,6 +1278,7 @@ func (c *QQClient) SetAvatar(avatar io.ReadSeeker) error {
 	return c.highwayUpload(90, avatar, uint64(size), md5, nil)
 }
 
+// SetGroupAvatar 设置群头像
 func (c *QQClient) SetGroupAvatar(groupUin uint32, avatar io.ReadSeeker) error {
 	if avatar == nil {
 		return errors.New("avatar is nil")
@@ -1206,6 +1298,7 @@ func (c *QQClient) SetGroupAvatar(groupUin uint32, avatar io.ReadSeeker) error {
 	return c.highwayUpload(3000, avatar, uint64(size), md5, extStream)
 }
 
+// SetEssenceMessage 设置群聊精华消息
 func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) error {
 	pkt, err := oidb2.BuildSetEssenceMessageReq(groupUin, seq, random, isSet)
 	if err != nil {
@@ -1216,4 +1309,267 @@ func (c *QQClient) SetEssenceMessage(groupUin, seq, random uint32, isSet bool) e
 		return err
 	}
 	return oidb2.ParseSetEssenceMessageResp(resp)
+}
+
+// SendFriendLike 给好友点赞
+func (c *QQClient) SendFriendLike(uin uint32, count uint32) error {
+	if count > 20 {
+		count = 20
+	} else if count < 1 {
+		count = 1
+	}
+	pkt, err := oidb2.BuildFriendLikeReq(c.GetUID(uin), count)
+	if err != nil {
+		return err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return err
+	}
+	return oidb2.ParseFriendLikeResp(resp)
+}
+
+func (c *QQClient) GetPrivateMessages(uin, timestamp, count uint32) ([]*message2.PrivateMessage, error) {
+	uid := c.GetUID(uin)
+	pkt, err := proto.Marshal(&message.SsoGetRoamMsg{
+		FriendUid: proto.Some(uid),
+		Time:      timestamp,
+		Random:    0,
+		Count:     count,
+		Direction: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.register_proxy.RegisterProxy.SsoGetRoamMsg", pkt)
+	if err != nil {
+		return nil, err
+	}
+	roamMsg := message.SsoGetRoamMsgResponse{}
+	err = proto.Unmarshal(resp, &roamMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]*message2.PrivateMessage, 0, len(roamMsg.Messages))
+	for _, msg := range roamMsg.Messages {
+		m := message2.ParsePrivateMessage(msg)
+		c.PreprocessPrivateMessageEvent(m)
+		ret = append(ret, m)
+	}
+	return ret, nil
+}
+
+// GetGroupMessages 获取群聊历史消息
+func (c *QQClient) GetGroupMessages(groupUin, startSeq, endSeq uint32) ([]*message2.GroupMessage, error) {
+	pkt, err := proto.Marshal(&message.SsoGetGroupMsg{
+		Info: &message.SsoGetGroupMsgInfo{
+			GroupUin:      groupUin,
+			StartSequence: startSeq,
+			EndSequence:   endSeq,
+		},
+		Direction: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendUniPacketAndWait("trpc.msg.register_proxy.RegisterProxy.SsoGetGroupMsg", pkt)
+	if err != nil {
+		return nil, err
+	}
+
+	var groupMsg message.SsoGetGroupMsgResponse
+	err = proto.Unmarshal(resp, &groupMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]*message2.GroupMessage, 0, len(groupMsg.Body.Messages))
+	for _, msg := range groupMsg.Body.Messages {
+		m := message2.ParseGroupMessage(msg)
+		c.PreprocessGroupMessageEvent(m)
+		ret = append(ret, m)
+	}
+
+	return ret, nil
+}
+
+// ImageOcr 图片识别 有些域名的图可能无法识别，需要重新上传到tx服务器并获取图片下载链接
+func (c *QQClient) ImageOcr(url string) (*oidb2.OcrResponse, error) {
+	if url != "" {
+		pkt, err := oidb2.BuildImageOcrRequestPacket(url)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.sendOidbPacketAndWait(pkt)
+		if err != nil {
+			return nil, err
+		}
+		return oidb2.ParseImageOcrResp(resp)
+	}
+	return nil, errors.New("image error")
+}
+
+// SendGroupSign 发送群聊打卡消息
+func (c *QQClient) SendGroupSign(groupUin uint32) (*oidb2.BotGroupClockInResult, error) {
+	pkt, err := oidb2.BuildGroupSignPacket(c.Uin, groupUin, c.Version().CurrentVersion)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseGroupSignResp(resp)
+}
+
+// GetUnidirectionalFriendList 获取单向好友列表
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L23
+func (c *QQClient) GetUnidirectionalFriendList() ([]*entity.User, error) {
+	webRsp := &struct {
+		BlockList []struct {
+			Uin         uint32 `json:"uint64_uin"`
+			NickBytes   string `json:"bytes_nick"`
+			Age         uint32 `json:"uint32_age"`
+			Sex         uint32 `json:"uint32_sex"`
+			SourceBytes string `json:"bytes_source"`
+			UID         string `json:"str_uid"`
+		} `json:"rpt_block_list"`
+		ErrorCode int32 `json:"ErrorCode"`
+	}{}
+	rsp, err := c.webSsoRequest("ti.qq.com", "OidbSvc.0xe17_0", fmt.Sprintf(`{"uint64_uin":%v,"uint64_top":0,"uint32_req_num":99,"bytes_cookies":""}`, c.Uin))
+	if err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(utils.S2B(rsp), webRsp); err != nil {
+		return nil, errors.Wrap(err, "unmarshal json error")
+	}
+	if webRsp.ErrorCode != 0 {
+		return nil, fmt.Errorf("web sso request error: %v", webRsp.ErrorCode)
+	}
+	ret := make([]*entity.User, 0, len(webRsp.BlockList))
+	for _, block := range webRsp.BlockList {
+		decodeBase64String := func(str string) string {
+			b, err := base64.StdEncoding.DecodeString(str)
+			if err != nil {
+				return ""
+			}
+			return utils.B2S(b)
+		}
+		ret = append(ret, &entity.User{
+			Uin:      block.Uin,
+			UID:      block.UID,
+			Nickname: decodeBase64String(block.NickBytes),
+			Age:      block.Age,
+			Source:   decodeBase64String(block.SourceBytes),
+		})
+	}
+	return ret, err
+}
+
+// DeleteUnidirectionalFriend 删除单向好友
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/web.go#L62
+func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
+	webRsp := &struct {
+		ErrorCode int32 `json:"ErrorCode"`
+	}{}
+	rsp, err := c.webSsoRequest("ti.qq.com", "OidbSvc.0x5d4_0", fmt.Sprintf(`{"uin_list":[%v]}`, uin))
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(utils.S2B(rsp), webRsp); err != nil {
+		return errors.Wrap(err, "unmarshal json error")
+	}
+	if webRsp.ErrorCode != 0 {
+		return fmt.Errorf("web sso request error: %v", webRsp.ErrorCode)
+	}
+	return nil
+}
+
+// CheckURLSafely 通过TX服务器检查URL安全性
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/security.go#L24
+func (c *QQClient) CheckURLSafely(url string) (oidb2.URLSecurityLevel, error) {
+	pkt, err := oidb2.BuildURLCheckRequest(c.Uin, url)
+	if err != nil {
+		return oidb2.URLSecurityLevelUnknown, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return oidb2.URLSecurityLevelUnknown, err
+	}
+	return oidb2.ParseURLCheckResponse(resp)
+}
+
+// GetAtAllRemain 获取剩余@全员次数
+// ref https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/group_msg.go#L68
+func (c *QQClient) GetAtAllRemain(uin, groupUin uint32) (*oidb2.AtAllRemainInfo, error) {
+	pkt, err := oidb2.BuildGetAtAllRemainRequest(uin, groupUin)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseGetAtAllRemainResponse(resp)
+}
+
+// GetAiCharacters 获取AI语音角色列表
+func (c *QQClient) GetAiCharacters(groupUin uint32, chatType entity.ChatType) (*entity.AiCharacterList, error) {
+	if groupUin == 0 {
+		groupUin = 42
+	}
+	pkt, err := oidb2.BuildAiCharacterListService(groupUin, chatType)
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	result, err := oidb2.ParseAiCharacterListService(rsp)
+	if err != nil {
+		return nil, err
+	}
+	result.Type = chatType
+	return result, nil
+}
+
+// SendGroupAiRecord 发送群AI语音
+func (c *QQClient) SendGroupAiRecord(groupUin uint32, chatType entity.ChatType, voiceID, text string) (*message2.VoiceElement, error) {
+	pkt, err := oidb2.BuildGroupAiRecordService(groupUin, voiceID, text, chatType, crypto.RandU32())
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := c.sendOidbPacketAndWait(pkt)
+	if err != nil {
+		return nil, err
+	}
+	return oidb2.ParseGroupAiRecordService(rsp)
+}
+
+// FetchMarketFaceKey 获取魔法表情key
+func (c *QQClient) FetchMarketFaceKey(faceIDs ...string) ([]string, error) {
+	for i, v := range faceIDs {
+		faceIDs[i] = strings.ToLower(v)
+	}
+	pkt, err := proto.Marshal(&message.MarketFaceKeyReq{
+		Field1: 3,
+		Info:   &message.MarketFaceKeyReqInfo{FaceIds: faceIDs},
+	})
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := c.sendUniPacketAndWait("BQMallSvc.TabOpReq", pkt)
+	if err != nil {
+		return nil, err
+	}
+	var info message.MarketFaceKeyRsp
+	if err = proto.Unmarshal(rsp, &info); err != nil {
+		return nil, err
+	}
+	if info.Info == nil {
+		return nil, errors.New("valid ids")
+	}
+	return info.Info.Keys, nil
 }

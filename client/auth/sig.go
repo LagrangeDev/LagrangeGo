@@ -14,13 +14,15 @@ var (
 )
 
 type SigInfo struct {
-	Uin         uint32
-	Sequence    uint32
-	Uid         string
-	Tgtgt       []byte
-	Tgt         []byte
-	D2          []byte
-	D2Key       []byte
+	Uin      uint32
+	Sequence uint32
+	UID      string
+
+	Tgtgt []byte
+	Tgt   []byte
+	D2    []byte
+	D2Key []byte
+
 	Qrsig       []byte
 	ExchangeKey []byte
 	KeySig      []byte
@@ -28,6 +30,8 @@ type SigInfo struct {
 	UnusualSig  []byte
 	TempPwd     []byte
 	CaptchaInfo [3]string
+
+	NewDeviceVerifyURL string
 
 	Nickname string
 	Age      uint8
@@ -39,17 +43,23 @@ func init() {
 	gob.Register(SigInfo{})
 }
 
+func (sig *SigInfo) ClearSession() {
+	sig.D2 = make([]byte, 0)
+	sig.Tgt = make([]byte, 0)
+	sig.D2Key = make([]byte, 16)
+}
+
 func (sig *SigInfo) Marshal() ([]byte, error) {
-	buffer := new(bytes.Buffer)
+	buffer := binary.NewBuilder()
 	err := gob.NewEncoder(buffer).Encode(sig)
 	if err != nil {
 		return nil, err
 	}
-	dataHash := crypto.MD5Digest(buffer.Bytes())
-
-	return binary.NewBuilder(nil).
+	data := buffer.ToBytes()
+	dataHash := crypto.MD5Digest(data)
+	return binary.NewBuilder().
 		WriteLenBytes(dataHash).
-		WriteLenBytes(buffer.Bytes()).
+		WriteLenBytes(data).
 		ToBytes(), nil
 }
 

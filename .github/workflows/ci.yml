@@ -1,0 +1,55 @@
+on:
+  push:
+    branches:
+      - 'master'
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - '**.yml'
+
+name: ci
+
+env:
+  GO111MODULE: on
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ^1.23
+          cache: false
+
+      - name: Sort Imports
+        run: |
+          export PATH="$PATH:$GOPATH/bin"
+          go install -v github.com/incu6us/goimports-reviser/v3@latest
+          make sort
+
+      - name: GolangCI-Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: 'v1.61.0'
+          args: '--timeout 9999s'
+          only-new-issues: true
+          skip-save-cache: true
+
+      - name: commit back
+        if: github.repository_owner == 'LagrangeDev'
+        continue-on-error: true
+        run: |
+          git config --local user.name 'github-actions[bot]'
+          git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "ci(chore): Fix stylings"
+          git push

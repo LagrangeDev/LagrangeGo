@@ -6,18 +6,18 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildGroupSetReactionReq(groupUin, sequence uint32, code string, isAdd bool) (*OidbPacket, error) {
+func BuildSetGroupReactionReq(groupUin, sequence uint32, code string, isAdd bool) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X9082{
 		GroupUin: groupUin,
 		Sequence: sequence,
 		Code:     proto.Some(code),
-		Field5:   true,
+		Type:     utils.Ternary[uint32](len(code) > 3, 2, 1),
 		Field6:   false,
 		Field7:   false,
 	}
 	return BuildOidbPacket(0x9082, utils.Ternary[uint32](isAdd, 1, 2), body, false, true)
 }
 
-func ParseGroupSetReactionResp(data []byte) error {
+func ParseSetGroupReactionResp(data []byte) error {
 	return CheckError(data)
 }

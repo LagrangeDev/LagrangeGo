@@ -1,11 +1,12 @@
 package oidb
 
 import (
-	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/RomiChan/protobuf/proto"
+
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupPokeReq(groupUin, uin uint32) (*OidbPacket, error) {
+func BuildGroupPokeReq(groupUin, uin uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XED3_1{
 		Uin:      uin,
 		GroupUin: groupUin,
@@ -14,7 +15,7 @@ func BuildGroupPokeReq(groupUin, uin uint32) (*OidbPacket, error) {
 	return BuildOidbPacket(0xED3, 1, body, false, false)
 }
 
-func BuildFriendPokeReq(uin uint32) (*OidbPacket, error) {
+func BuildFriendPokeReq(uin uint32) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XED3_1{
 		Uin:       uin,
 		FriendUin: uin,

@@ -2,7 +2,7 @@ package oidb
 
 import "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 
-func BuildFetchCookieReq(domains []string) (*OidbPacket, error) {
+func BuildFetchCookieReq(domains []string) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0X102A_0{Domain: domains}
 	return BuildOidbPacket(0x102A, 0, &body, false, false)
 }

@@ -2,64 +2,59 @@ package sign
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
-
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
+	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
 type (
-	Status uint32
-
 	Client struct {
 		lock         sync.RWMutex
 		signCount    atomic.Uint32
-		instances    []*Instance
+		instances    []*remote
 		app          *auth.AppInfo
 		httpClient   *http.Client
 		extraHeaders http.Header
-		log          func(string)
+		log          func(string, ...any)
 		lastTestTime time.Time
 	}
 
-	Instance struct {
+	remote struct {
 		server  string
 		latency atomic.Uint32
-		status  atomic.Uint32
 	}
 )
 
 const (
-	OK Status = iota
-	Down
+	serverLatencyDown = math.MaxUint32
 )
 
-var VersionMismatchError = errors.New("sign version mismatch")
+var ErrVersionMismatch = errors.New("sign version mismatch")
 
-func NewSignClient(appinfo *auth.AppInfo, log func(string), signServers ...string) *Client {
+func NewSigner(log func(string, ...any), signServers ...string) *Client {
 	client := &Client{
-		instances: utils.Map[string, *Instance](signServers, func(s string) *Instance {
-			return &Instance{server: s}
+		instances: utils.Map(signServers, func(s string) *remote {
+			return &remote{server: s}
 		}),
-		app:        appinfo,
-		httpClient: &http.Client{},
-		extraHeaders: http.Header{
-			"User-Agent": []string{"qq/" + appinfo.CurrentVersion},
-		},
-		log: log,
+		httpClient:   &http.Client{},
+		extraHeaders: http.Header{},
+		log:          log,
 	}
 	go client.test()
 	return client
 }
+
+func (c *Client) Release() {}
 
 func (c *Client) AddRequestHeader(header map[string]string) {
 	c.lock.Lock()
@@ -72,24 +67,31 @@ func (c *Client) AddRequestHeader(header map[string]string) {
 func (c *Client) AddSignServer(signServers ...string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.instances = append(c.instances, utils.Map[string, *Instance](signServers, func(s string) *Instance {
-		return &Instance{server: s}
+	c.instances = append(c.instances, utils.Map[string, *remote](signServers, func(s string) *remote {
+		return &remote{server: s}
 	})...)
 }
 
 func (c *Client) GetSignServer() []string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	return utils.Map[*Instance, string](c.instances, func(sign *Instance) string {
+	return utils.Map(c.instances, func(sign *remote) string {
 		return sign.server
 	})
 }
 
-func (c *Client) getAvailableSign() *Instance {
+func (c *Client) SetAppInfo(app *auth.AppInfo) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.app = app
+	c.extraHeaders.Set("User-Agent", "qq/"+app.CurrentVersion)
+}
+
+func (c *Client) getAvailableSign() *remote {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	for _, i := range c.instances {
-		if Status(i.status.Load()) == OK {
+		if i.latency.Load() < serverLatencyDown {
 			return i
 		}
 	}
@@ -105,7 +107,7 @@ func (c *Client) sortByLatency() {
 }
 
 func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
-	if !containSignPKG(cmd) {
+	if !ContainSignPKG(cmd) {
 		return nil, nil
 	}
 	if time.Now().After(c.lastTestTime.Add(30 * time.Minute)) {
@@ -116,18 +118,17 @@ func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
 		if sign := c.getAvailableSign(); sign != nil {
 			resp, err := sign.sign(cmd, seq, data, c.extraHeaders)
 			if err != nil {
-				sign.status.Store(uint32(Down))
+				sign.latency.Store(serverLatencyDown)
 				continue
-			} else if resp.Version != c.app.CurrentVersion && resp.Value.Extra != c.app.SignExtraHexLower && resp.Value.Extra != c.app.SignExtraHexUpper {
-				return nil, VersionMismatchError
+			} else if resp.Version != c.app.CurrentVersion {
+				return nil, ErrVersionMismatch
 			}
 			c.log(fmt.Sprintf("signed for [%s:%d](%dms)",
 				cmd, seq, time.Now().UnixMilli()-startTime))
 			c.signCount.Add(1)
 			return resp, nil
-		} else {
-			break
 		}
+		break
 	}
 	// 全寄了，重新再测下
 	go c.test()
@@ -137,6 +138,7 @@ func (c *Client) Sign(cmd string, seq uint32, data []byte) (*Response, error) {
 func (c *Client) test() {
 	c.lock.Lock()
 	if time.Now().Before(c.lastTestTime.Add(10 * time.Minute)) {
+		c.lock.Unlock()
 		return
 	}
 	c.lastTestTime = time.Now()
@@ -147,22 +149,26 @@ func (c *Client) test() {
 	c.sortByLatency()
 }
 
-func (i *Instance) sign(cmd string, seq uint32, buf []byte, header http.Header) (*Response, error) {
-	if !containSignPKG(cmd) {
+func (i *remote) sign(cmd string, seq uint32, buf []byte, header http.Header) (*Response, error) {
+	if !ContainSignPKG(cmd) {
 		return nil, nil
 	}
-	resp := Response{}
-	sb := strings.Builder{}
-	sb.WriteString(`{"cmd":"` + cmd + `",`)
-	sb.WriteString(`"seq":` + strconv.Itoa(int(seq)) + `,`)
-	sb.WriteString(`"src":"` + fmt.Sprintf("%x", buf) + `"}`)
-	err := httpPost(i.server, bytes.NewReader(utils.S2B(sb.String())), 8*time.Second, &resp, header)
-	if err != nil || resp.Value.Sign == "" {
-		err := httpGet(i.server, map[string]string{
+	req := Request{
+		Cmd: cmd,
+		Seq: int(seq),
+		Src: buf,
+	}
+	data, err := json.Marshal(&req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := httpPost[Response](i.server, bytes.NewReader(data), 8*time.Second, header)
+	if err != nil || len(resp.Value.Sign) == 0 {
+		resp, err = httpGet[Response](i.server, map[string]string{
 			"cmd": cmd,
 			"seq": strconv.Itoa(int(seq)),
 			"src": fmt.Sprintf("%x", buf),
-		}, 8*time.Second, &resp, header)
+		}, 8*time.Second, header)
 		if err != nil {
 			return nil, err
 		}
@@ -170,19 +176,17 @@ func (i *Instance) sign(cmd string, seq uint32, buf []byte, header http.Header) 
 	return &resp, nil
 }
 
-func (i *Instance) test() {
+func (i *remote) test() {
 	startTime := time.Now().UnixMilli()
 	resp, err := i.sign("wtlogin.login", 1, []byte{11, 45, 14}, nil)
-	if err != nil || resp.Value.Sign == "" {
-		i.status.Store(uint32(Down))
-		i.latency.Store(99999)
+	if err != nil || len(resp.Value.Sign) == 0 {
+		i.latency.Store(serverLatencyDown)
 		return
 	}
 	// 有长连接的情况，取两次平均值
 	resp, err = i.sign("wtlogin.login", 1, []byte{11, 45, 14}, nil)
-	if err != nil || resp.Value.Sign == "" {
-		i.status.Store(uint32(Down))
-		i.latency.Store(99999)
+	if err != nil || len(resp.Value.Sign) == 0 {
+		i.latency.Store(serverLatencyDown)
 		return
 	}
 	// 粗略计算，应该足够了

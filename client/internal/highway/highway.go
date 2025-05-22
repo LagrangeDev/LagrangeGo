@@ -19,6 +19,7 @@ import (
 )
 
 // see com/tencent/mobileqq/highway/utils/BaseConstants.java#L120-L121
+// nolint
 const (
 	_REQ_CMD_DATA        = "PicUp.DataUp"
 	_REQ_CMD_HEART_BREAK = "PicUp.Echo"
@@ -121,7 +122,7 @@ func readResponse(r *binary.NetworkReader) (*highway.RespDataHighwayHead, error)
 	hl, _ := r.ReadInt32()
 	a2, _ := r.ReadInt32()
 	if hl > highwayMaxResponseSize || a2 > highwayMaxResponseSize {
-		return nil, errors.Errorf("highway response invild. head size: %v body size: %v", hl, a2)
+		return nil, fmt.Errorf("highway response invild. head size: %v body size: %v", hl, a2)
 	}
 	head, _ := r.ReadBytes(int(hl))
 	_, _ = r.ReadBytes(int(a2)) // skip payload

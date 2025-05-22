@@ -6,9 +6,10 @@ import (
 	"crypto/rand"
 	goBinary "encoding/binary"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	tea "github.com/fumiama/gofastTEA"
 	"github.com/pkg/errors"
+
+	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 )
 
 type Codec struct {
@@ -30,6 +31,7 @@ func NewCodec(uin int64) *Codec {
 
 type EncryptionMethod byte
 
+// nolint
 const (
 	EM_ECDH EncryptionMethod = iota
 	EM_ST
@@ -43,8 +45,7 @@ type Message struct {
 }
 
 func (c *Codec) Marshal(m *Message) []byte {
-	w := binary.SelectBuilder(nil)
-	defer binary.PutBuilder(w)
+	w := binary.NewBuilder()
 
 	w.WriteU8(0x02)
 	w.WriteU16(0)    // len 占位
@@ -86,10 +87,8 @@ func (c *Codec) Marshal(m *Message) []byte {
 	w.WriteU8(0x03)
 
 	data := w.ToBytes()
-	buf := make([]byte, len(data))
-	copy(buf, data)
-	goBinary.BigEndian.PutUint16(buf[1:3], uint16(len(buf)))
-	return buf
+	goBinary.BigEndian.PutUint16(data[1:3], uint16(len(data)))
+	return data
 }
 
 var (
@@ -135,8 +134,7 @@ type TLV struct {
 }
 
 func (t *TLV) Marshal() []byte {
-	w := binary.SelectBuilder(nil)
-	defer binary.PutBuilder(w)
+	w := binary.NewBuilder()
 
 	w.WriteU16(t.Command)
 	w.WriteU16(uint16(len(t.List)))
@@ -144,7 +142,7 @@ func (t *TLV) Marshal() []byte {
 		w.WriteBytes(elem)
 	}
 
-	return append([]byte(nil), w.ToBytes()...)
+	return w.ToBytes()
 }
 
 func (t *TLV) Append(b ...[]byte) {

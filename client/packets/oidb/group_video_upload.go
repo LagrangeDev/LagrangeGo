@@ -4,14 +4,12 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
-
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-
 	"github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 )
 
-func BuildGroupVideoUploadReq(groupUin uint32, video *message.ShortVideoElement) (*OidbPacket, error) {
+func BuildGroupVideoUploadReq(groupUin uint32, video *message.ShortVideoElement) (*Packet, error) {
 	if video.Stream == nil {
 		return nil, errors.New("video data is nil")
 	}

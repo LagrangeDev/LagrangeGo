@@ -6,12 +6,12 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildPrivateFileDownloadReq(selfUid string, fileUUID string, fileHash string) (*OidbPacket, error) {
+func BuildPrivateFileDownloadReq(selfUID string, fileUUID string, fileHash string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0XE37_1200{
 		SubCommand: 1200,
 		Field2:     1,
 		Body: &oidb.OidbSvcTrpcTcp0XE37_1200Body{
-			ReceiverUid: selfUid,
+			ReceiverUid: selfUID,
 			FileUuid:    fileUUID,
 			Type:        2,
 			FileHash:    fileHash,

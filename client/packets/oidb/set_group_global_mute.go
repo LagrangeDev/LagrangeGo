@@ -6,8 +6,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 )
 
-func BuildGroupMuteGlobalReq(groupUin uint32, isMute bool) (*OidbPacket, error) {
-	var s uint32 = 0
+func BuildSetGroupGlobalMuteReq(groupUin uint32, isMute bool) (*Packet, error) {
+	var s uint32
 	if isMute {
 		s = math.MaxUint32
 	}
@@ -18,6 +18,6 @@ func BuildGroupMuteGlobalReq(groupUin uint32, isMute bool) (*OidbPacket, error) 
 	return BuildOidbPacket(0x89A, 0, body, false, false)
 }
 
-func ParseGroupMuteGlobalResp(data []byte) error {
+func ParseSetGroupGlobalMuteResp(data []byte) error {
 	return CheckError(data)
 }

@@ -1,10 +1,7 @@
 package auth
 
 import (
-	"encoding/hex"
-	"strings"
-
-	"github.com/LagrangeDev/LagrangeGo/internal/proto"
+	"encoding/json"
 )
 
 var AppList = map[string]map[string]*AppInfo{
@@ -72,6 +69,29 @@ var AppList = map[string]map[string]*AppInfo{
 			SubAppID:         537243600,
 			AppIDQrcode:      13697054,
 			AppClientVersion: 13172,
+
+			MainSigmap:  169742560,
+			SubSigmap:   0,
+			NTLoginType: 1,
+		},
+
+		"3.2.15-30366": {
+			OS:       "Linux",
+			Kernel:   "Linux",
+			VendorOS: "linux",
+
+			CurrentVersion:   "3.2.15-30366",
+			BuildVersion:     30366,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      19,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_LNX_NQ_3.2.15_30366_GW_B",
+			AppID:            1600001615,
+			SubAppID:         537258424,
+			AppIDQrcode:      13697054,
+			AppClientVersion: 30366,
 
 			MainSigmap:  169742560,
 			SubSigmap:   0,
@@ -218,16 +238,17 @@ type AppInfo struct {
 	MainSigmap       int    `json:"main_sigmap"`
 	SubSigmap        int    `json:"sub_sigmap"`
 	NTLoginType      int    `json:"nt_login_type"`
-
-	SignExtraHexLower string `json:"sign_extra_hex_lower"`
-	SignExtraHexUpper string `json:"sign_extra_hex_upper"`
 }
 
-func init() {
-	for _, appOs := range AppList {
-		for _, app := range appOs {
-			app.SignExtraHexLower = hex.EncodeToString(proto.DynamicMessage{2: app.PackageSign}.Encode())
-			app.SignExtraHexUpper = strings.ToUpper(app.SignExtraHexLower)
-		}
+func (app *AppInfo) Marshal() ([]byte, error) {
+	return json.Marshal(app)
+}
+
+func UnmarshalAppInfo(data []byte) (*AppInfo, error) {
+	app := &AppInfo{}
+	err := json.Unmarshal(data, app)
+	if err != nil {
+		return nil, err
 	}
+	return app, nil
 }

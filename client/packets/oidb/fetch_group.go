@@ -8,7 +8,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*OidbPacket, error) {
+func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0X88D{
 		AppID: 537099973,
 		Config2: &oidb.OidbSvcTrpcTcp0X88D_Config2{
@@ -31,6 +31,8 @@ func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*OidbPacket, error) {
 				GroupFingerMemo:       proto.Some(""),
 				GroupClassText:        proto.Some(""),
 				GroupUin:              proto.Some(true),
+				GroupCurMsgSeq:        proto.Some(true),
+				GroupLastMsgTime:      proto.Some(true),
 				GroupQuestion:         proto.Some(""),
 				GroupAnswer:           proto.Some(""),
 				GroupGrade:            proto.Some(true),

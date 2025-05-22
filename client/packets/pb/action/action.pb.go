@@ -4,8 +4,9 @@
 package action
 
 import (
-	message "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	proto "github.com/RomiChan/protobuf/proto"
+
+	message "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 )
 
 type FaceRoamRequest struct {

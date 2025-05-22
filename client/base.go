@@ -3,19 +3,18 @@ package client
 // 部分借鉴 https://github.com/Mrs4s/MiraiGo/blob/master/client/client.go
 
 import (
-	"errors"
+	"crypto/md5"
 	"net/http"
 	"net/http/cookiejar"
 	"net/netip"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"golang.org/x/net/publicsuffix"
-
-	"github.com/LagrangeDev/LagrangeGo/utils/log"
-
 	"github.com/RomiChan/syncx"
+	"github.com/pkg/errors"
+	"golang.org/x/net/publicsuffix"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/event"
@@ -24,32 +23,35 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/oidb"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/client/sign"
+	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	"github.com/LagrangeDev/LagrangeGo/message"
+	"github.com/LagrangeDev/LagrangeGo/utils/log"
 )
 
 // NewClient 创建一个新的 QQ Client
-func NewClient(uin uint32, appInfo *auth.AppInfo, signUrl ...string) *QQClient {
+func NewClient(uin uint32, password string) *QQClient {
+	return NewClientMD5(uin, md5.Sum([]byte(password)))
+}
+
+func NewClientEmpty() *QQClient {
+	return NewClientMD5(0, [16]byte{})
+}
+
+func NewClientMD5(uin uint32, passwordMD5 [16]byte) *QQClient {
 	cookieContainer, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	client := &QQClient{
-		Uin:  uin,
-		oicq: oicq.NewCodec(int64(uin)),
-		highwaySession: highway.Session{
-			AppID:    uint32(appInfo.AppID),
-			SubAppID: uint32(appInfo.SubAppID),
-		},
+		Uin:         uin,
+		oicq:        oicq.NewCodec(int64(uin)),
+		PasswordMD5: passwordMD5,
 		ticket: &TicketService{
 			client: &http.Client{Jar: cookieContainer},
 			sKey:   &keyInfo{},
 		},
 		alive: true,
-		UA:    "LagrangeGo qq/" + appInfo.PackageSign,
 	}
-	client.signProvider = sign.NewSignClient(appInfo, func(s string) {
-		client.debug(s)
-	}, signUrl...)
-	client.transport.Version = appInfo
 	client.transport.Sig.D2Key = make([]byte, 0, 16)
 	client.highwaySession.Uin = &client.transport.Sig.Uin
 	client.Online.Store(false)
@@ -67,8 +69,9 @@ type QQClient struct {
 
 	Online atomic.Bool
 
-	t106 []byte
-	t16a []byte
+	t106        []byte
+	t16a        []byte
+	PasswordMD5 [16]byte
 
 	UA string
 
@@ -114,6 +117,7 @@ type QQClient struct {
 	GroupNameUpdatedEvent             EventHandle[*event.GroupNameUpdated]
 	GroupReactionEvent                EventHandle[*event.GroupReactionEvent]
 	MemberSpecialTitleUpdatedEvent    EventHandle[*event.MemberSpecialTitleUpdated]
+	NewFriendEvent                    EventHandle[*event.NewFriend]
 	NewFriendRequestEvent             EventHandle[*event.NewFriendRequest] // 好友申请
 	FriendRecallEvent                 EventHandle[*event.FriendRecall]
 	RenameEvent                       EventHandle[*event.Rename]
@@ -122,10 +126,44 @@ type QQClient struct {
 
 	// client event handles
 	eventHandlers     eventHandlers
-	DisconnectedEvent EventHandle[*ClientDisconnectedEvent]
+	DisconnectedEvent EventHandle[*DisconnectedEvent]
 }
 
-func (c *QQClient) version() *auth.AppInfo {
+// AddSignServer 设置签名服务器url
+func (c *QQClient) AddSignServer(signServers ...string) {
+	if c.signProvider == nil {
+		c.UseSignProvider(sign.NewSigner(c.debug))
+	}
+	c.signProvider.AddSignServer(signServers...)
+}
+
+// AddSignHeader 设置签名服务器签名时的额外http header
+func (c *QQClient) AddSignHeader(header map[string]string) {
+	if c.signProvider == nil {
+		c.UseSignProvider(sign.NewSigner(c.debug))
+	}
+	c.signProvider.AddRequestHeader(header)
+}
+
+func (c *QQClient) UseVersion(app *auth.AppInfo) {
+	c.transport.Version = app
+	c.highwaySession.AppID = uint32(app.AppID)
+	c.highwaySession.SubAppID = uint32(app.SubAppID)
+	c.UA = "LagrangeGo qq/" + app.PackageSign
+	if c.signProvider == nil {
+		c.signProvider = sign.NewSigner(c.debug)
+	}
+	c.signProvider.SetAppInfo(app)
+}
+
+func (c *QQClient) UseSignProvider(p sign.Provider) {
+	c.signProvider = p
+	if c.Version() != nil {
+		c.signProvider.SetAppInfo(c.Version())
+	}
+}
+
+func (c *QQClient) Version() *auth.AppInfo {
 	return c.transport.Version
 }
 
@@ -145,7 +183,12 @@ func (c *QQClient) Sig() *auth.SigInfo {
 	return &c.transport.Sig
 }
 
+func (c *QQClient) SetCustomServer(servers []netip.AddrPort) {
+	c.servers = append(servers, c.servers...)
+}
+
 func (c *QQClient) Release() {
+	c.signProvider.Release()
 	if c.Online.Load() {
 		c.Disconnect()
 	}
@@ -156,7 +199,7 @@ func (c *QQClient) NickName() string {
 	return c.transport.Sig.Nickname
 }
 
-func (c *QQClient) sendOidbPacketAndWait(pkt *oidb.OidbPacket) ([]byte, error) {
+func (c *QQClient) sendOidbPacketAndWait(pkt *oidb.Packet) ([]byte, error) {
 	return c.sendUniPacketAndWait(pkt.Cmd, pkt.Data)
 }
 
@@ -174,6 +217,31 @@ func (c *QQClient) sendUniPacketAndWait(cmd string, buf []byte) ([]byte, error) 
 		return nil, errors.New("cannot parse response to bytes")
 	}
 	return rsp, nil
+}
+
+func (c *QQClient) webSsoRequest(host, webCmd, data string) (string, error) {
+	s := strings.Split(host, `.`)
+	sub := ""
+	for i := len(s) - 1; i >= 0; i-- {
+		sub += s[i]
+		if i != 0 {
+			sub += "_"
+		}
+	}
+	cmd := "MQUpdateSvc_" + sub + ".web." + webCmd
+	req, _ := proto.Marshal(&service.WebSsoRequestBody{
+		Type: proto.Uint32(0),
+		Data: proto.Some(data),
+	})
+	rspData, err := c.sendUniPacketAndWait(cmd, req)
+	if err != nil {
+		return "", errors.Wrap(err, "send web sso request error")
+	}
+	rsp := &service.WebSsoResponseBody{}
+	if err = proto.Unmarshal(rspData, rsp); err != nil {
+		return "", errors.Wrap(err, "unmarshal response error")
+	}
+	return rsp.Data.Unwrap(), nil
 }
 
 func (c *QQClient) doHeartbeat() {

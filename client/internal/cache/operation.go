@@ -2,10 +2,14 @@ package cache
 
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
-	"math"
 )
 
-func (c *Cache) RefreshAll(friendCache map[uint32]*entity.Friend, groupCache map[uint32]*entity.Group, groupMemberCache map[uint32]map[uint32]*entity.GroupMember, rkeyCache entity.RKeyMap) {
+func (c *Cache) RefreshAll(
+	friendCache map[uint32]*entity.User,
+	groupCache map[uint32]*entity.Group,
+	groupMemberCache map[uint32]map[uint32]*entity.GroupMember,
+	rkeyCache entity.RKeyMap,
+) {
 	c.RefreshAllFriend(friendCache)
 	c.RefreshAllGroup(groupCache)
 	c.RefreshAllGroupMembers(groupMemberCache)
@@ -13,12 +17,12 @@ func (c *Cache) RefreshAll(friendCache map[uint32]*entity.Friend, groupCache map
 }
 
 // RefreshFriend 刷新一个好友的缓存
-func (c *Cache) RefreshFriend(friend *entity.Friend) {
+func (c *Cache) RefreshFriend(friend *entity.User) {
 	setCacheOf(c, friend.Uin, friend)
 }
 
 // RefreshAllFriend 刷新所有好友缓存
-func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.Friend) {
+func (c *Cache) RefreshAllFriend(friendCache map[uint32]*entity.User) {
 	refreshAllCacheOf(c, friendCache)
 }
 
@@ -35,9 +39,7 @@ func (c *Cache) RefreshGroupMember(groupUin uint32, groupMember *entity.GroupMem
 // RefreshGroupMembers 刷新一个群内的所有群成员缓存
 func (c *Cache) RefreshGroupMembers(groupUin uint32, groupMembers map[uint32]*entity.GroupMember) {
 	newc := &Cache{}
-	for k, v := range groupMembers {
-		setCacheOf(newc, k, v)
-	}
+	refreshAllCacheOf(newc, groupMembers)
 	setCacheOf(c, groupUin, newc)
 }
 
@@ -64,10 +66,5 @@ func (c *Cache) RefreshAllGroup(groupCache map[uint32]*entity.Group) {
 
 // RefreshAllRKeyInfo 刷新所有RKey缓存
 func (c *Cache) RefreshAllRKeyInfo(rkeyCache entity.RKeyMap) {
-	var expTime int64 = math.MaxInt64
-	for _, ext := range rkeyCache {
-		expTime = int64(ext.ExpireTime)
-		break
-	}
-	refreshAllExpiredCacheOf(c, rkeyCache, expTime)
+	refreshAllCacheOf(c, rkeyCache)
 }

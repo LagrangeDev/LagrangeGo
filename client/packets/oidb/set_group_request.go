@@ -1,14 +1,16 @@
 package oidb
 
 import (
+	"github.com/RomiChan/protobuf/proto"
+
+	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/utils"
-	"github.com/RomiChan/protobuf/proto"
 )
 
-func BuildSetGroupRequestReq(isFiltered bool, accept bool, sequence uint64, typ uint32, groupUin uint32, message string) (*OidbPacket, error) {
+func BuildSetGroupRequestReq(isFiltered bool, operate entity.GroupRequestOperate, sequence uint64, typ uint32, groupUin uint32, message string) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0X10C8{
-		Accept: uint32(utils.Bool2Int(!accept) + 1),
+		Accept: uint32(operate),
 		Body: &oidb.OidbSvcTrpcTcp0X10C8Body{
 			Sequence:  sequence,
 			EventType: typ,

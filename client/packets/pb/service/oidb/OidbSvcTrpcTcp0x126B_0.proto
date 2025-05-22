@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+message OidbSvcTrpcTcp0x126B_0 {
+  OidbSvcTrpcTcp0x126B_0_Field1 Field1 = 1;
+}
+
+message OidbSvcTrpcTcp0x126B_0_Field1 {
+  string TargetUid = 1;
+  OidbSvcTrpcTcp0x126B_0_Field1_2 Field2 = 2;
+  bool block = 3;
+  bool Field4 = 4; // true
+}
+
+message OidbSvcTrpcTcp0x126B_0_Field1_2 {
+  uint32 Field1 = 1; // 130
+  uint32 Field2 = 2; // 109
+  OidbSvcTrpcTcp0x126B_0_Field1_2_3 Field3 = 3;
+}
+
+message OidbSvcTrpcTcp0x126B_0_Field1_2_3 {
+  uint32 Field1 = 1; // 8
+  uint32 Field2 = 2; // 8
+  uint32 Field3 = 3; // 50
+}

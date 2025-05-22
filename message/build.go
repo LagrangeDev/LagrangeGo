@@ -20,17 +20,12 @@ func (e *TextElement) BuildElement() []*message.Elem {
 }
 
 func (e *AtElement) BuildElement() []*message.Elem {
-	var atAll int32 = 2
-	if e.TargetUin == 0 {
-		atAll = 1
-	}
-	reserve := message.MentionExtra{
-		Type:   proto.Some(atAll),
+	reserveData, _ := proto.Marshal(&message.MentionExtra{
+		Type:   proto.Some(utils.Ternary[int32](e.TargetUin == 0, 1, 2)), // atAll
 		Uin:    proto.Some(uint32(0)),
 		Field5: proto.Some(int32(0)),
-		Uid:    proto.Some(e.TargetUid),
-	}
-	reserveData, _ := proto.Marshal(&reserve)
+		Uid:    proto.Some(e.TargetUID),
+	})
 	return []*message.Elem{{Text: &message.Text{
 		Str:       proto.Some(e.Display),
 		PbReserve: reserveData,
@@ -38,19 +33,25 @@ func (e *AtElement) BuildElement() []*message.Elem {
 }
 
 func (e *FaceElement) BuildElement() []*message.Elem {
-	faceId := int32(e.FaceID)
 	if e.isLargeFace {
-		qFace := message.QFaceExtra{
-			Field1:  proto.Some("1"),
-			Field2:  proto.Some("8"),
-			FaceId:  proto.Some(faceId),
-			Field4:  proto.Some(int32(1)),
-			Field5:  proto.Some(int32(1)),
-			Field6:  proto.Some(""),
-			Preview: proto.Some(""),
-			Field9:  proto.Some(int32(1)),
+		name, business, resultid := "", int32(1), ""
+		if e.FaceID == 358 {
+			name, business = "/骰子", 2
+			resultid = fmt.Sprint(e.ResultID)
+		} else if e.FaceID == 359 {
+			name, business = "/包剪锤", 2
+			resultid = fmt.Sprint(e.ResultID)
 		}
-		qFaceData, _ := proto.Marshal(&qFace)
+		qFaceData, _ := proto.Marshal(&message.QFaceExtra{
+			PackId:      proto.Some("1"),
+			StickerId:   proto.Some("8"),
+			Qsid:        proto.Some(int32(e.FaceID)),
+			SourceType:  proto.Some(int32(1)),
+			StickerType: proto.Some(business),
+			ResultId:    proto.Some(resultid),
+			Text:        proto.Some(name),
+			RandomType:  proto.Some(int32(1)),
+		})
 		return []*message.Elem{{
 			CommonElem: &message.CommonElem{
 				ServiceType:  37,
@@ -58,11 +59,10 @@ func (e *FaceElement) BuildElement() []*message.Elem {
 				BusinessType: 1,
 			},
 		}}
-	} else {
-		return []*message.Elem{{
-			Face: &message.Face{Index: proto.Some(faceId)},
-		}}
 	}
+	return []*message.Elem{{
+		Face: &message.Face{Index: proto.Some(int32(e.FaceID))},
+	}}
 }
 
 func (e *ImageElement) BuildElement() []*message.Elem {
@@ -70,11 +70,12 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 	if err != nil {
 		return nil
 	}
+
 	msg := []*message.Elem{{}, {
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
-			BusinessType: 10,
+			BusinessType: utils.Ternary[uint32](e.IsGroup, 20, 10),
 		},
 	}}
 	if e.CompatFace != nil {
@@ -89,7 +90,7 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 func (e *ReplyElement) BuildElement() []*message.Elem {
 	forwardReserve := message.Preserve{
 		MessageId:   uint64(e.ReplySeq),
-		ReceiverUid: e.SenderUid,
+		ReceiverUid: e.SenderUID,
 	}
 	forwardReserveData, err := proto.Marshal(&forwardReserve)
 	if err != nil {
@@ -143,10 +144,19 @@ func (e *LightAppElement) BuildElement() []*message.Elem {
 	}}
 }
 
+func (e *XMLElement) BuildElement() []*message.Elem {
+	return []*message.Elem{{
+		RichMsg: &message.RichMsg{
+			ServiceId: proto.Some(int32(e.ServiceID)),
+			Template1: append([]byte{0x01}, binary.ZlibCompress([]byte(e.Content))...),
+		},
+	}}
+}
+
 func (e *ForwardMessage) BuildElement() []*message.Elem {
-	fileId := utils.NewUUID()
+	fileID := utils.NewUUID()
 	extra := MultiMsgLightAppExtra{
-		FileName: fileId,
+		FileName: fileID,
 		Sum:      len(e.Nodes),
 	}
 	extraData, err := json.Marshal(&extra)
@@ -164,13 +174,13 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 		news = []News{{Text: "转发消息"}}
 	}
 
-	var metaSource string = ""
+	var metaSource string
 	if len(e.Nodes) > 0 {
-		isSenderNameExist := make(map[string]bool, 0)
+		isSenderNameExist := make(map[string]bool)
 		isContainSelf := false
 		isCount := 0
 		for _, v := range e.Nodes {
-			if v.SenderId == e.SelfId && e.SelfId > 0 {
+			if v.SenderID == e.SelfID && e.SelfID > 0 {
 				isContainSelf = true
 			}
 			if _, ok := isSenderNameExist[v.SenderName]; !ok {
@@ -209,7 +219,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 				Resid:   e.ResID,
 				Source:  metaSource,
 				Summary: fmt.Sprintf("查看%d条转发消息", len(e.Nodes)),
-				UniSeq:  fileId,
+				UniSeq:  fileID,
 			},
 		},
 		Prompt: "[聊天记录]",
@@ -229,19 +239,41 @@ type MsgContentBuilder interface {
 }
 
 func (e *FileElement) BuildContent() []byte {
-	content, _ := proto.Marshal(
-		&message.FileExtra{
-			File: &message.NotOnlineFile{
-				FileSize:   proto.Int64(int64(e.FileSize)),
-				FileType:   proto.Int32(0),
-				FileUuid:   proto.String(e.FileUUID),
-				FileMd5:    e.FileMd5,
-				FileName:   proto.String(e.FileName),
-				Subcmd:     proto.Int32(1),
-				DangerEvel: proto.Int32(0),
-				ExpireTime: proto.Int32(int32(time.Now().Add(7 * 24 * time.Hour).Unix())),
-				FileHash:   proto.String(e.FileHash),
-			},
-		})
+	content, _ := proto.Marshal(&message.FileExtra{
+		File: &message.NotOnlineFile{
+			FileSize:   proto.Int64(int64(e.FileSize)),
+			FileType:   proto.Int32(0),
+			FileUuid:   proto.String(e.FileUUID),
+			FileMd5:    e.FileMd5,
+			FileName:   proto.String(e.FileName),
+			Subcmd:     proto.Int32(1),
+			DangerEvel: proto.Int32(0),
+			ExpireTime: proto.Int32(int32(time.Now().Add(7 * 24 * time.Hour).Unix())),
+			FileHash:   proto.String(e.FileHash),
+		},
+	})
 	return content
+}
+
+func (e *MarketFaceElement) BuildElement() []*message.Elem {
+	mFace := &message.MarketFace{
+		FaceName:    proto.String(e.Summary),
+		ItemType:    proto.Uint32(e.ItemType),
+		FaceInfo:    proto.Uint32(1),
+		FaceId:      e.FaceID,
+		TabId:       proto.Uint32(e.TabID),
+		SubType:     proto.Uint32(e.SubType),
+		Key:         e.EncryptKey,
+		MediaType:   proto.Uint32(e.MediaType),
+		ImageWidth:  proto.Uint32(300),
+		ImageHeight: proto.Uint32(300),
+		MobileParam: utils.S2B(e.MagicValue),
+	}
+	mFace.PbReserve, _ = proto.Marshal(&message.MarketFacePbReserve{Field8: 1})
+
+	return []*message.Elem{{
+		MarketFace: mFace,
+	}, {
+		Text: &message.Text{Str: proto.Some(e.Summary)},
+	}}
 }

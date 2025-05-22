@@ -5,7 +5,7 @@ option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/message
 import "pb/message/message.proto";
 
 message LongMsgResult {
-  LongMsgAction Action = 2;
+  repeated LongMsgAction Action = 2;
 }
 
 message LongMsgAction {
@@ -117,4 +117,23 @@ message SsoGetC2cMsg {
 message SsoGetC2cMsgResponse {
   string FriendUid = 4;
   repeated PushMsgBody Messages = 7;
+}
+
+// 魔法表情 key
+
+message MarketFaceKeyReq {
+  uint32 Field1 = 1;
+  MarketFaceKeyReqInfo Info = 5;
+}
+
+message MarketFaceKeyReqInfo {
+  repeated string FaceIds = 3;
+}
+
+message MarketFaceKeyRsp {
+  MarketFaceKeyRspInfo Info = 5;
+}
+
+message MarketFaceKeyRspInfo {
+  repeated string Keys = 1;
 }

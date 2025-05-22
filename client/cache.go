@@ -1,11 +1,16 @@
 package client
 
 import (
+	"time"
+
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 )
 
-// GetUid 获取缓存中对应uin的uid
-func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
+// GetUID 获取缓存中对应uin的uid
+func (c *QQClient) GetUID(uin uint32, groupUin ...uint32) string {
+	if uin == 0 {
+		return ""
+	}
 	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return ""
@@ -15,11 +20,22 @@ func (c *QQClient) GetUid(uin uint32, groupUin ...uint32) string {
 			return ""
 		}
 	}
-	return c.cache.GetUid(uin, groupUin...)
+	if uid := c.cache.GetUID(uin, groupUin...); uid != "" {
+		return uid
+	}
+	if len(groupUin) == 0 {
+		_ = c.RefreshFriendCache()
+	} else {
+		_ = c.RefreshGroupMembersCache(groupUin[0])
+	}
+	return c.cache.GetUID(uin, groupUin...)
 }
 
 // GetUin 获取缓存中对应的uin
 func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
+	if uid == "" {
+		return 0
+	}
 	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return 0
@@ -30,21 +46,33 @@ func (c *QQClient) GetUin(uid string, groupUin ...uint32) uint32 {
 			return 0
 		}
 	}
+	if uin := c.cache.GetUin(uid, groupUin...); uin != 0 {
+		return uin
+	}
+	if len(groupUin) == 0 {
+		_ = c.RefreshFriendCache()
+	} else {
+		_ = c.RefreshGroupMembersCache(groupUin[0])
+	}
 	return c.cache.GetUin(uid, groupUin...)
 }
 
 // GetCachedFriendInfo 获取好友信息(缓存)
-func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.Friend {
+func (c *QQClient) GetCachedFriendInfo(uin uint32) *entity.User {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return nil
 		}
 	}
+	if friend := c.cache.GetFriend(uin); friend != nil {
+		return friend
+	}
+	_ = c.RefreshFriendCache()
 	return c.cache.GetFriend(uin)
 }
 
 // GetCachedAllFriendsInfo 获取所有好友信息(缓存)
-func (c *QQClient) GetCachedAllFriendsInfo() map[uint32]*entity.Friend {
+func (c *QQClient) GetCachedAllFriendsInfo() map[uint32]*entity.User {
 	if c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
 			return nil
@@ -60,6 +88,10 @@ func (c *QQClient) GetCachedGroupInfo(groupUin uint32) *entity.Group {
 			return nil
 		}
 	}
+	if g := c.cache.GetGroupInfo(groupUin); g != nil {
+		return g
+	}
+	_ = c.RefreshAllGroupsInfo()
 	return c.cache.GetGroupInfo(groupUin)
 }
 
@@ -80,6 +112,10 @@ func (c *QQClient) GetCachedMemberInfo(uin, groupUin uint32) *entity.GroupMember
 			return nil
 		}
 	}
+	if m := c.cache.GetGroupMember(uin, groupUin); m != nil {
+		return m
+	}
+	_ = c.RefreshGroupMemberCache(uin, groupUin)
 	return c.cache.GetGroupMember(uin, groupUin)
 }
 
@@ -90,36 +126,69 @@ func (c *QQClient) GetCachedMembersInfo(groupUin uint32) map[uint32]*entity.Grou
 			return nil
 		}
 	}
+	if gm := c.cache.GetGroupMembers(groupUin); gm != nil {
+		return gm
+	}
+	_ = c.RefreshGroupMembersCache(groupUin)
 	return c.cache.GetGroupMembers(groupUin)
 }
 
 // GetCachedRkeyInfo 获取指定类型的RKey信息(缓存)
 func (c *QQClient) GetCachedRkeyInfo(rkeyType entity.RKeyType) *entity.RKeyInfo {
-	if c.cache.RkeyInfoCacheIsEmpty() || c.cache.RkeyInfoCacheIsExpired() {
-		if err := c.RefreshAllRkeyInfoCache(); err != nil {
-			return nil
+	refresh := c.cache.RkeyInfoCacheIsEmpty()
+	for {
+		if refresh {
+			if err := c.RefreshAllRkeyInfoCache(); err != nil {
+				return nil
+			}
 		}
+		inf := c.cache.GetRKeyInfo(rkeyType)
+		if inf.ExpireTime <= uint64(time.Now().Unix()) {
+			refresh = true
+			continue
+		}
+		return inf
 	}
-	return c.cache.GetRKeyInfo(rkeyType)
 }
 
 // GetCachedRkeyInfos 获取所有RKey信息(缓存)
 func (c *QQClient) GetCachedRkeyInfos() map[entity.RKeyType]*entity.RKeyInfo {
-	if c.cache.RkeyInfoCacheIsEmpty() || c.cache.RkeyInfoCacheIsExpired() {
-		if err := c.RefreshAllRkeyInfoCache(); err != nil {
-			return nil
+	refresh := c.cache.RkeyInfoCacheIsEmpty()
+	for {
+		if refresh {
+			if err := c.RefreshAllRkeyInfoCache(); err != nil {
+				return nil
+			}
+			refresh = false
 		}
+		inf := c.cache.GetAllRkeyInfo()
+		for _, v := range inf {
+			if v.ExpireTime <= uint64(time.Now().Unix()) {
+				refresh = true
+				break
+			}
+		}
+		if refresh {
+			continue
+		}
+		return inf
 	}
-	return c.cache.GetAllRkeyInfo()
 }
 
 // RefreshFriendCache 刷新好友缓存
 func (c *QQClient) RefreshFriendCache() error {
-	friendsData, err := c.GetFriendsData()
+	friends, err := c.GetFriendsData()
 	if err != nil {
 		return err
 	}
-	c.cache.RefreshAllFriend(friendsData)
+	c.cache.RefreshAllFriend(friends)
+	unidirectionalFriends, err := c.GetUnidirectionalFriendList()
+	if err != nil {
+		return err
+	}
+	for _, f := range unidirectionalFriends {
+		c.cache.RefreshFriend(f)
+	}
 	return nil
 }
 
@@ -174,8 +243,8 @@ func (c *QQClient) RefreshAllRkeyInfoCache() error {
 }
 
 // GetFriendsData 获取好友列表数据
-func (c *QQClient) GetFriendsData() (map[uint32]*entity.Friend, error) {
-	friendsData := make(map[uint32]*entity.Friend)
+func (c *QQClient) GetFriendsData() (map[uint32]*entity.User, error) {
+	friendsData := make(map[uint32]*entity.User)
 	friends, token, err := c.FetchFriends(0)
 	if err != nil {
 		return friendsData, err

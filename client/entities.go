@@ -10,11 +10,12 @@ import (
 
 var (
 	ErrAlreadyOnline  = errors.New("already online")
+	ErrNotOnline      = errors.New("not online")
 	ErrMemberNotFound = errors.New("member not found")
 	ErrNotExists      = errors.New("not exists")
 )
 
-type ClientDisconnectedEvent struct {
+type DisconnectedEvent struct {
 	Message string
 }
 

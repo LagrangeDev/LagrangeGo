@@ -5,10 +5,10 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/utils"
 )
 
-func BuildSetFriendRequest(accept bool, targetUid string) (*OidbPacket, error) {
+func BuildSetFriendRequest(accept bool, targetUID string) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0XB5D_44{
 		Accept:    utils.Ternary[uint32](accept, 3, 5),
-		TargetUid: targetUid,
+		TargetUid: targetUID,
 	}
 	return BuildOidbPacket(0xb5d, 44, &body, false, false)
 }

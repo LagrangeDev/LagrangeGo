@@ -7,7 +7,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/message"
 )
 
-func BuildGroupFileUploadReq(groupUin uint32, file *message.FileElement, targetDirectory string) (*OidbPacket, error) {
+func BuildGroupFileUploadReq(groupUin uint32, file *message.FileElement, targetDirectory string) (*Packet, error) {
 	body := &oidb.OidbSvcTrpcTcp0X6D6{
 		File: &oidb.OidbSvcTrpcTcp0X6D6Upload{
 			GroupUin:        groupUin,

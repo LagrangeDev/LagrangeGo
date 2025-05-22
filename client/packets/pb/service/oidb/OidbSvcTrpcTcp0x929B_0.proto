@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb";
+
+import "pb/service/oidb/NTV2RichMediaReq.proto";
+
+message OidbSvcTrpcTcp0x929B_0_Req {
+	uint32        groupUin      = 1;
+	string        voiceId       = 2;
+	string        text          = 3;
+	uint32        chatType      = 4; // 1 voice,2 song
+	ClientMsgInfo clientMsgInfo = 5;
+	message ClientMsgInfo {
+		uint32 msgRandom = 1;
+	}
+}
+
+message OidbSvcTrpcTcp0x929B_0_Rsp {
+	uint32  field1  = 1; // 1 complete, 2 wait
+	uint32  field2  = 2; // 319
+	uint32  field3  = 3; // 20
+	MsgInfo msgInfo = 4;
+}
