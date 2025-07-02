@@ -81,7 +81,7 @@ func (r *Reader) ReadAll() []byte {
 
 func (r *Reader) ReadU8() (v uint8) {
 	if r.reader != nil {
-		_, err := r.reader.Read(unsafe.Slice(&v, 1))
+		_, err := r.reader.Read([]byte{v})
 		if err != nil {
 			return 0
 		}
