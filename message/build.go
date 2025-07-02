@@ -7,8 +7,8 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type ElementBuilder interface {
@@ -21,7 +21,7 @@ func (e *TextElement) BuildElement() []*message.Elem {
 
 func (e *AtElement) BuildElement() []*message.Elem {
 	reserveData, _ := proto.Marshal(&message.MentionExtra{
-		Type:   proto.Some(utils.Ternary[int32](e.TargetUin == 0, 1, 2)), // atAll
+		Type:   proto.Some(io.Ternary[int32](e.TargetUin == 0, 1, 2)), // atAll
 		Uin:    proto.Some(uint32(0)),
 		Field5: proto.Some(int32(0)),
 		Uid:    proto.Some(e.TargetUID),
@@ -75,7 +75,7 @@ func (e *ImageElement) BuildElement() []*message.Elem {
 		CommonElem: &message.CommonElem{
 			ServiceType:  48,
 			PbElem:       common,
-			BusinessType: utils.Ternary[uint32](e.IsGroup, 20, 10),
+			BusinessType: io.Ternary[uint32](e.IsGroup, 20, 10),
 		},
 	}}
 	if e.CompatFace != nil {
@@ -154,7 +154,7 @@ func (e *XMLElement) BuildElement() []*message.Elem {
 }
 
 func (e *ForwardMessage) BuildElement() []*message.Elem {
-	fileID := utils.NewUUID()
+	fileID := io.NewUUID()
 	extra := MultiMsgLightAppExtra{
 		FileName: fileID,
 		Sum:      len(e.Nodes),
@@ -212,7 +212,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 			Width:    300,
 		},
 		Desc:  "[聊天记录]",
-		Extra: utils.B2S(extraData),
+		Extra: io.B2S(extraData),
 		Meta: Meta{
 			Detail: Detail{
 				News:    news,
@@ -231,7 +231,7 @@ func (e *ForwardMessage) BuildElement() []*message.Elem {
 	if err != nil {
 		return nil
 	}
-	return NewLightApp(utils.B2S(contentData)).BuildElement()
+	return NewLightApp(io.B2S(contentData)).BuildElement()
 }
 
 type MsgContentBuilder interface {
@@ -267,7 +267,7 @@ func (e *MarketFaceElement) BuildElement() []*message.Elem {
 		MediaType:   proto.Uint32(e.MediaType),
 		ImageWidth:  proto.Uint32(300),
 		ImageHeight: proto.Uint32(300),
-		MobileParam: utils.S2B(e.MagicValue),
+		MobileParam: io.S2B(e.MagicValue),
 	}
 	mFace.PbReserve, _ = proto.Marshal(&message.MarketFacePbReserve{Field8: 1})
 

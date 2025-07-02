@@ -7,7 +7,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/img"
 )
 
 func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Packet, error) {
@@ -16,7 +16,7 @@ func BuildGroupImageUploadReq(groupUin uint32, image *message.ImageElement) (*Pa
 		return nil, errors.New("image data is null")
 	}
 
-	format, size, err := utils.ImageResolve(image.Stream)
+	format, size, err := img.ImageResolve(image.Stream)
 	if err != nil {
 		return nil, err
 	}

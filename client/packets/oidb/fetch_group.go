@@ -5,7 +5,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*Packet, error) {
@@ -57,7 +57,7 @@ func BuildFetchGroupReq(groupUin uint32, isStrange bool) (*Packet, error) {
 			},
 		},
 	}
-	return BuildOidbPacket(0x88D, utils.Ternary[uint32](!isStrange, 0, 14), &body, false, false)
+	return BuildOidbPacket(0x88D, io.Ternary[uint32](!isStrange, 0, 14), &body, false, false)
 }
 
 func ParseFetchGroupResp(data []byte) (*oidb.D88DGroupInfoResp, error) {

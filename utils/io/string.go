@@ -1,4 +1,4 @@
-package utils
+package io
 
 // from https://github.com/Mrs4s/MiraiGo/blob/master/utils/string.go
 

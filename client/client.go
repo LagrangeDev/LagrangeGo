@@ -15,8 +15,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/tlv"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodestate"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func (c *QQClient) TokenLogin() (*LoginResponse, error) {
@@ -80,10 +80,10 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		WriteU8(0).
 		WriteTLV(
 			tlv.T16(c.Version().AppID, c.Version().AppIDQrcode,
-				utils.MustParseHexStr(c.Device().GUID), c.Version().PTVersion, c.Version().PackageName),
+				lgrio.MustParseHexStr(c.Device().GUID), c.Version().PTVersion, c.Version().PackageName),
 			tlv.T1b(0, 0, size, margin, 72, ecLevel, 2),
 			tlv.T1d(c.Version().MiscBitmap),
-			tlv.T33(utils.MustParseHexStr(c.Device().GUID)),
+			tlv.T33(lgrio.MustParseHexStr(c.Device().GUID)),
 			tlv.T35(c.Version().PTOSVersion),
 			tlv.T66(c.Version().PTOSVersion),
 			tlv.Td1(c.Version().OS, c.Device().DeviceName),
@@ -106,7 +106,7 @@ func (c *QQClient) FetchQRCode(size, margin, ecLevel uint32) ([]byte, string, er
 		// 这样是不对的，调试后发现应该丢一个字节，然后读下一个字节才是数据的大小
 		// string(binary.NewReader(tlvs[209]).ReadBytesWithLength("u16", true))
 		urlreader.ReadU8()
-		return tlvs[0x17], utils.B2S(urlreader.ReadBytesWithLength("u8", false)), nil
+		return tlvs[0x17], lgrio.B2S(urlreader.ReadBytesWithLength("u8", false)), nil
 	}
 
 	return nil, "", fmt.Errorf("err qr retcode %d", retCode)
@@ -285,7 +285,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 	query := func() []byte {
 		data, _ := json.Marshal(&NTNewDeviceQrCodeQuery{
 			Uint32Flag: 0,
-			Token:      base64.StdEncoding.EncodeToString(utils.S2B(original)),
+			Token:      base64.StdEncoding.EncodeToString(lgrio.S2B(original)),
 		})
 		return data
 	}()
@@ -310,7 +310,7 @@ func (c *QQClient) NewDeviceVerify(verifyURL string) error {
 			continue
 		}
 		if resp.StrNtSuccToken != "" {
-			c.transport.Sig.TempPwd = utils.S2B(resp.StrNtSuccToken)
+			c.transport.Sig.TempPwd = lgrio.S2B(resp.StrNtSuccToken)
 			data, err := buildNtloginRequest(c.Uin, c.Version(), c.Device(), &c.transport.Sig, c.transport.Sig.TempPwd)
 			if err != nil {
 				return err
@@ -349,7 +349,7 @@ func (c *QQClient) QRCodeLogin() (*LoginResponse, error) {
 				tlv.T144(c.transport.Sig.Tgtgt, app, device),
 				tlv.T116(app.SubSigmap),
 				tlv.T142(app.PackageName, 0),
-				tlv.T145(utils.MustParseHexStr(device.GUID)),
+				tlv.T145(lgrio.MustParseHexStr(device.GUID)),
 				tlv.T18(0, app.AppClientVersion, int(c.Uin), 0, 5, 0),
 				tlv.T141([]byte("Unknown"), nil),
 				tlv.T177(app.WTLoginSDK, 0),

@@ -5,8 +5,8 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildMultiMsgUploadReq(selfUID string, groupUin uint32, msg []*message.PushMsgBody) ([]byte, error) {
@@ -22,9 +22,9 @@ func BuildMultiMsgUploadReq(selfUID string, groupUin uint32, msg []*message.Push
 	payload := binary.GZipCompress(longMsgResultData)
 	req := &message.SendLongMsgReq{
 		Info: &message.SendLongMsgInfo{
-			Type: utils.Ternary[uint32](groupUin == 0, 1, 3),
+			Type: io.Ternary[uint32](groupUin == 0, 1, 3),
 			Uid: &message.LongMsgUid{
-				Uid: proto.String(utils.Ternary(groupUin == 0, selfUID, strconv.Itoa(int(groupUin)))),
+				Uid: proto.String(io.Ternary(groupUin == 0, selfUID, strconv.Itoa(int(groupUin)))),
 			},
 			GroupUin: proto.Uint32(groupUin),
 			Payload:  payload,

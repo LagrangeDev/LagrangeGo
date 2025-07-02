@@ -6,10 +6,10 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
-// var oidbLogger = utils.GetLogger("oidb")
+// var oidbLogger = io.GetLogger("oidb")
 
 type Packet struct {
 	Cmd       string
@@ -26,7 +26,7 @@ func BuildOidbPacket(cmd, subCmd uint32, body any, isLafter, isUID bool) (*Packe
 		Command:    cmd,
 		SubCommand: subCmd,
 		Body:       bodyData,
-		Reserved:   int32(utils.Bool2Int(isUID)),
+		Reserved:   int32(io.Bool2Int(isUID)),
 	}
 	if isLafter {
 		oidbPkt.Lafter = &oidb.OidbLafter{}

@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 	"github.com/LagrangeDev/LagrangeGo/utils/platform"
 )
 
@@ -20,8 +20,8 @@ type DeviceInfo struct {
 
 func NewDeviceInfo(uin int) *DeviceInfo {
 	return &DeviceInfo{
-		GUID:          fmt.Sprintf("%X", crypto.MD5Digest(utils.S2B(strconv.Itoa(uin)))),
-		DeviceName:    fmt.Sprintf("Lagrange-%X", crypto.MD5Digest(utils.S2B(strconv.Itoa(uin)))[0:4]),
+		GUID:          fmt.Sprintf("%X", crypto.MD5Digest(io.S2B(strconv.Itoa(uin)))),
+		DeviceName:    fmt.Sprintf("Lagrange-%X", crypto.MD5Digest(io.S2B(strconv.Itoa(uin)))[0:4]),
 		SystemKernel:  fmt.Sprintf("%s %s", platform.System(), platform.Version()),
 		KernelVersion: platform.Version(),
 	}

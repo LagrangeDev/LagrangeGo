@@ -11,8 +11,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/system"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	msgConverter "github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 // decoders https://github.com/Mrs4s/MiraiGo/blob/54bdd873e3fed9fe1c944918924674dacec5ac76/client/client.go#L150
@@ -94,7 +94,7 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			pb.Operator = utils.S2B(Operator.OperatorField1.OperatorUid)
+			pb.Operator = io.S2B(Operator.OperatorField1.OperatorUid)
 		}
 		ev := eventConverter.ParseMemberDecreaseEvent(&pb)
 		_ = c.ResolveUin(ev)

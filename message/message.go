@@ -13,8 +13,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	oidb2 "github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type IMessage interface {
@@ -298,9 +298,9 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						ImageID:  index.Info.FileName,
 						FileUUID: index.FileUuid,
 						SubType:  int32(extra.ExtBizInfo.Pic.BizType),
-						Summary:  utils.Ternary(extra.ExtBizInfo.Pic.TextSummary == "", "[图片]", extra.ExtBizInfo.Pic.TextSummary),
-						Md5:      utils.MustParseHexStr(index.Info.FileHash),
-						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
+						Summary:  io.Ternary(extra.ExtBizInfo.Pic.TextSummary == "", "[图片]", extra.ExtBizInfo.Pic.TextSummary),
+						Md5:      io.MustParseHexStr(index.Info.FileHash),
+						Sha1:     io.MustParseHexStr(index.Info.FileSha1),
 						Width:    index.Info.Width,
 						Height:   index.Info.Height,
 						Size:     index.Info.FileSize,
@@ -310,8 +310,8 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					res = append(res, &VoiceElement{
 						Name:     index.Info.FileName,
 						UUID:     index.FileUuid,
-						Md5:      utils.MustParseHexStr(index.Info.FileHash),
-						Sha1:     utils.MustParseHexStr(index.Info.FileSha1),
+						Md5:      io.MustParseHexStr(index.Info.FileHash),
+						Sha1:     io.MustParseHexStr(index.Info.FileSha1),
 						Duration: index.Info.Time,
 						Node:     index,
 						MsgInfo:  extra,
@@ -323,14 +323,14 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 						thumb.Size = info.Info.FileSize
 						thumb.Width = info.Info.Width
 						thumb.Height = info.Info.Height
-						thumb.Md5 = utils.MustParseHexStr(info.Info.FileHash)
-						thumb.Sha1 = utils.MustParseHexStr(info.Info.FileSha1)
+						thumb.Md5 = io.MustParseHexStr(info.Info.FileHash)
+						thumb.Sha1 = io.MustParseHexStr(info.Info.FileSha1)
 					}
 					res = append(res, &ShortVideoElement{
 						Name:    index.Info.FileName,
 						UUID:    index.FileUuid,
-						Md5:     utils.MustParseHexStr(index.Info.FileHash),
-						Sha1:    utils.MustParseHexStr(index.Info.FileSha1),
+						Md5:     io.MustParseHexStr(index.Info.FileHash),
+						Sha1:    io.MustParseHexStr(index.Info.FileSha1),
 						Size:    index.Info.FileSize,
 						Thumb:   thumb,
 						Node:    index,
@@ -399,7 +399,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				} else {
 					res = append(res, &XMLElement{
 						ServiceID: 35,
-						Content:   utils.B2S(xmlData),
+						Content:   io.B2S(xmlData),
 					})
 				}
 			}
@@ -414,7 +414,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				content = binary.ZlibUncompress(elem.LightAppElem.Data[1:])
 			}
 			if len(content) > 0 && len(content) < 1024*1024*1024 { // 解析出错 or 非法内容
-				res = append(res, NewLightApp(utils.B2S(content)))
+				res = append(res, NewLightApp(io.B2S(content)))
 			}
 		}
 
@@ -428,7 +428,7 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 				SubType:    elem.MarketFace.SubType.Unwrap(),
 				EncryptKey: elem.MarketFace.Key,
 				MediaType:  elem.MarketFace.MediaType.Unwrap(),
-				MagicValue: utils.B2S(elem.MarketFace.MobileParam),
+				MagicValue: io.B2S(elem.MarketFace.MobileParam),
 			})
 		}
 	}

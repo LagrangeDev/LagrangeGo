@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type (
@@ -234,7 +234,7 @@ func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
 			GroupUin: event.GroupUin,
 			UserUID:  event.MemberUid,
 		},
-		InvitorUID: utils.B2S(event.Operator),
+		InvitorUID: io.B2S(event.Operator),
 		JoinType:   event.IncreaseType,
 	}
 }
@@ -250,7 +250,7 @@ func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
 			GroupUin: event.GroupUin,
 			UserUID:  event.MemberUid,
 		},
-		OperatorUID: utils.B2S(event.Operator),
+		OperatorUID: io.B2S(event.Operator),
 		ExitType:    event.DecreaseType,
 	}
 }

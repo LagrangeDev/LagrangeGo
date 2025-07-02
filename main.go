@@ -17,7 +17,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 var (
@@ -95,9 +95,9 @@ func main() {
 					logger.Warnln(ret.VerifyURL)
 					aid := strings.Split(strings.Split(ret.VerifyURL, "sid=")[1], "&")[0]
 					logger.Warnln("ticket?->")
-					ticket := utils.ReadLine()
+					ticket := io.ReadLine()
 					logger.Warnln("rand_str?->")
-					randStr := utils.ReadLine()
+					randStr := io.ReadLine()
 					ret, err = c.SubmitCaptcha(ticket, randStr, aid)
 					continue
 				case client.UnsafeDeviceError:
@@ -252,6 +252,6 @@ func (f *ColoredFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		levelColor = colorWhite
 	}
 
-	return utils.S2B(fmt.Sprintf("[%s] [%s%s%s]: %s\n",
+	return io.S2B(fmt.Sprintf("[%s] [%s%s%s]: %s\n",
 		timestamp, levelColor, strings.ToUpper(entry.Level.String()), colorReset, entry.Message)), nil
 }

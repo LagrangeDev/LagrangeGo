@@ -6,7 +6,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/album"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildGetMediaListReq(selfUin uint32, groupUin uint32, albumID string, pageInfo string) ([]byte, error) {
@@ -21,7 +21,7 @@ func BuildGetMediaListReq(selfUin uint32, groupUin uint32, albumID string, pageI
 			Field4:   "",
 			PageInfo: pageInfo,
 		},
-		UinTimeStamp: utils.UinTimestamp(selfUin),
+		UinTimeStamp: io.UinTimestamp(selfUin),
 		Field10: &album.QzoneGetMediaList_F10{
 			AppIdFlag:  "fc-appid",
 			AppIdValue: "100",

@@ -27,9 +27,9 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 // SetOnlineStatus 设置在线状态
@@ -486,7 +486,7 @@ func (c *QQClient) GenFileNode(name, md5, sha1, uuid string, size uint32, isnt b
 			FileHash: md5,
 		},
 		FileUuid: uuid,
-		StoreId:  utils.Ternary[uint32](isnt, 1, 0), // 0旧服务器 1为nt服务器
+		StoreId:  lgrio.Ternary[uint32](isnt, 1, 0), // 0旧服务器 1为nt服务器
 	}
 }
 
@@ -1441,7 +1441,7 @@ func (c *QQClient) GetUnidirectionalFriendList() ([]*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(utils.S2B(rsp), webRsp); err != nil {
+	if err = json.Unmarshal(lgrio.S2B(rsp), webRsp); err != nil {
 		return nil, errors.Wrap(err, "unmarshal json error")
 	}
 	if webRsp.ErrorCode != 0 {
@@ -1454,7 +1454,7 @@ func (c *QQClient) GetUnidirectionalFriendList() ([]*entity.User, error) {
 			if err != nil {
 				return ""
 			}
-			return utils.B2S(b)
+			return lgrio.B2S(b)
 		}
 		ret = append(ret, &entity.User{
 			Uin:      block.Uin,
@@ -1477,7 +1477,7 @@ func (c *QQClient) DeleteUnidirectionalFriend(uin uint32) error {
 	if err != nil {
 		return err
 	}
-	if err = json.Unmarshal(utils.S2B(rsp), webRsp); err != nil {
+	if err = json.Unmarshal(lgrio.S2B(rsp), webRsp); err != nil {
 		return errors.Wrap(err, "unmarshal json error")
 	}
 	if webRsp.ErrorCode != 0 {

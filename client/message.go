@@ -8,8 +8,8 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/action"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	message2 "github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.MessageBody, random uint32) (*action.SendMessageResponse, uint32, error) {
@@ -27,7 +27,7 @@ func (c *QQClient) SendRawMessage(route *message.RoutingHead, body *message.Mess
 	}
 	// grp_id not null
 	if (route.Grp != nil && route.Grp.GroupCode.IsSome()) || (route.GrpTmp != nil && route.GrpTmp.GroupUin.IsSome()) {
-		msg.Ctrl = &message.MessageControl{MsgFlag: int32(utils.TimeStamp())}
+		msg.Ctrl = &message.MessageControl{MsgFlag: int32(io.TimeStamp())}
 	}
 
 	data, err := proto.Marshal(msg)
@@ -156,17 +156,17 @@ func (c *QQClient) BuildFakeMessage(msgElems []*message2.ForwardNode) []*message
 				FromUin: elem.SenderID,
 			},
 			ContentHead: &message.ContentHead{
-				Type:      utils.Ternary[uint32](elem.GroupID != 0, 82, 9),
+				Type:      io.Ternary[uint32](elem.GroupID != 0, 82, 9),
 				MsgId:     proto.Uint32(crypto.RandU32()),
 				Sequence:  proto.Uint32(crypto.RandU32()),
-				TimeStamp: proto.Uint32(uint32(utils.TimeStamp())),
+				TimeStamp: proto.Uint32(uint32(io.TimeStamp())),
 				Field7:    proto.Uint64(1),
 				Field8:    proto.Uint32(0),
 				Field9:    proto.Uint32(0),
 				Foward: &message.ForwardHead{
 					Field1:        proto.Uint32(0),
 					Field2:        proto.Uint32(0),
-					Field3:        proto.Uint32(utils.Ternary[uint32](elem.GroupID != 0, 0, 2)),
+					Field3:        proto.Uint32(io.Ternary[uint32](elem.GroupID != 0, 0, 2)),
 					UnknownBase64: proto.String(avatar),
 					Avatar:        proto.String(avatar),
 				},

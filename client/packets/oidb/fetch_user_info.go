@@ -6,7 +6,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildFetchUserInfoReq[T ~string | ~uint32](value T) (*Packet, error) {
@@ -79,10 +79,10 @@ func ParseFetchUserInfoResp(data []byte) (*entity.User, error) {
 	}()
 
 	var business oidb.Business
-	_ = proto.Unmarshal(utils.S2B(stringProperties[107]), &business)
+	_ = proto.Unmarshal(io.S2B(stringProperties[107]), &business)
 
 	var avatar oidb.Avatar
-	_ = proto.Unmarshal(utils.S2B(stringProperties[101]), &avatar)
+	_ = proto.Unmarshal(io.S2B(stringProperties[101]), &avatar)
 
 	return &entity.User{
 		Uin: resp.Body.Uin,

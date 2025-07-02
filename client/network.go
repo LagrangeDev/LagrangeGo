@@ -14,7 +14,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/internal/network"
 	"github.com/LagrangeDev/LagrangeGo/client/internal/oicq"
 	"github.com/LagrangeDev/LagrangeGo/message"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	nwutils "github.com/LagrangeDev/LagrangeGo/utils/network"
 )
 
 // ConnectionQualityInfo 客户端连接质量测试结果
@@ -59,10 +59,10 @@ func (c *QQClient) ConnectionQualityTest() *ConnectionQualityInfo {
 	}()
 	go func() {
 		defer wg.Done()
-		res := utils.RunTCPPingLoop(currentServerAddr, 10)
+		res := nwutils.RunTCPPingLoop(currentServerAddr, 10)
 		r.ChatServerPacketLoss = res.PacketsLoss
 		if c.highwaySession.AddrLength() > 0 {
-			res = utils.RunTCPPingLoop(c.highwaySession.SsoAddr[0].String(), 10)
+			res = nwutils.RunTCPPingLoop(c.highwaySession.SsoAddr[0].String(), 10)
 			r.SrvServerPacketLoss = res.PacketsLoss
 		}
 	}()

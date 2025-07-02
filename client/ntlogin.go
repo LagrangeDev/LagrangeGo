@@ -11,9 +11,9 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/loginstate"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func buildPasswordLoginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo, sig *auth.SigInfo, passwordMD5 [16]byte) ([]byte, error) {
@@ -32,14 +32,14 @@ func buildPasswordLoginRequest(uin uint32, app *auth.AppInfo, device *auth.Devic
 		WriteU32(8001).
 		WriteU32(0).
 		WriteU32(uin).
-		WriteU32(uint32(utils.TimeStamp())).
+		WriteU32(uint32(io.TimeStamp())).
 		WriteU32(0).
 		WriteU8(1).
 		WriteBytes(passwordMD5[:]).
 		WriteBytes(crypto.RandomBytes(16)).
 		WriteU32(0).
 		WriteU8(1).
-		WriteBytes(utils.MustParseHexStr(device.GUID)).
+		WriteBytes(io.MustParseHexStr(device.GUID)).
 		WriteU32(1).
 		WriteU32(1).
 		WritePacketString(strconv.Itoa(int(uin)), "u16", false).
@@ -61,7 +61,7 @@ func buildNtloginRequest(uin uint32, app *auth.AppInfo, device *auth.DeviceInfo,
 				OS:         proto.Some(app.OS),
 				DeviceName: proto.Some(device.DeviceName),
 				Type:       int32(app.NTLoginType),
-				Guid:       utils.MustParseHexStr(device.GUID),
+				Guid:       io.MustParseHexStr(device.GUID),
 			},
 			Version: &login.SsoNTLoginVersion{
 				KernelVersion: proto.Some(device.KernelVersion),

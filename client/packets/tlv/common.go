@@ -6,9 +6,9 @@ import (
 	ftea "github.com/fumiama/gofastTEA"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 // T18 默认参数 pingVersion, unknown = 0, ssoVersion = 5
@@ -51,14 +51,14 @@ func T106(appID, appClientVersion, uin int, guid string, passwordMd5, tgtgtKey, 
 			uint32(appID),
 			uint32(appClientVersion),
 			uint64(uin)).
-		WriteU32(uint32(utils.TimeStamp())).
+		WriteU32(uint32(io.TimeStamp())).
 		WriteBytes(ip).
 		WriteBool(savePassword).
 		WriteBytes(passwordMd5).
 		WriteBytes(tgtgtKey).
 		WriteU32(0).
 		WriteBool(true).
-		WriteBytes(utils.MustParseHexStr(guid)).
+		WriteBytes(io.MustParseHexStr(guid)).
 		WriteU32(0).
 		WriteU32(1).
 		WritePacketString(strconv.Itoa(uin), "u16", false).
@@ -130,7 +130,7 @@ func T144(tgtgtKey []byte, appInfo *auth.AppInfo, device *auth.DeviceInfo) []byt
 		WriteTLV(
 			T16e(device.DeviceName),
 			T147(appInfo.AppID, appInfo.PTVersion, appInfo.PackageName),
-			T128(appInfo.OS, utils.MustParseHexStr(device.GUID)),
+			T128(appInfo.OS, io.MustParseHexStr(device.GUID)),
 			T124(),
 		).Pack(0x144)
 }
@@ -163,7 +163,7 @@ func T16a(noPicSig []byte) []byte {
 
 func T16e(deviceName string) []byte {
 	return binary.NewBuilder().
-		WriteBytes(utils.S2B(deviceName)).
+		WriteBytes(io.S2B(deviceName)).
 		Pack(0x16e)
 }
 

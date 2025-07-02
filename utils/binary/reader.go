@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type Reader struct {
@@ -52,7 +52,7 @@ func (r *Reader) String() string {
 		if err != nil {
 			return err.Error()
 		}
-		return utils.B2S(data)
+		return lgrio.B2S(data)
 	}
 	s := string(r.buffer[r.pos:])
 	r.pos = 0
@@ -173,7 +173,7 @@ func (r *Reader) ReadBytes(length int) (v []byte) {
 }
 
 func (r *Reader) ReadString(length int) string {
-	return utils.B2S(r.ReadBytes(length))
+	return lgrio.B2S(r.ReadBytes(length))
 }
 
 func (r *Reader) SkipBytesWithLength(prefix string, withPerfix bool) {
@@ -225,7 +225,7 @@ func (r *Reader) ReadBytesWithLength(prefix string, withPerfix bool) []byte {
 }
 
 func (r *Reader) ReadStringWithLength(prefix string, withPerfix bool) string {
-	return utils.B2S(r.ReadBytesWithLength(prefix, withPerfix))
+	return lgrio.B2S(r.ReadBytesWithLength(prefix, withPerfix))
 }
 
 func (r *Reader) ReadTlv() (result map[uint16][]byte) {

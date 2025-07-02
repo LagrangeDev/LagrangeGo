@@ -12,7 +12,7 @@ import (
 	"github.com/fumiama/orbyte"
 	"github.com/fumiama/orbyte/pbuf"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type teacfg struct {
@@ -104,7 +104,7 @@ func (b *Builder) WritePacketBytes(v []byte, prefix string, withPrefix bool) *Bu
 }
 
 func (b *Builder) WritePacketString(s, prefix string, withPrefix bool) *Builder {
-	return b.WritePacketBytes(utils.S2B(s), prefix, withPrefix)
+	return b.WritePacketBytes(lgrio.S2B(s), prefix, withPrefix)
 }
 
 // Write for impl. io.Writer
@@ -140,7 +140,7 @@ func (b *Builder) WriteBytes(v []byte) *Builder {
 }
 
 func (b *Builder) WriteLenString(v string) *Builder {
-	return b.WriteLenBytes(utils.S2B(v))
+	return b.WriteLenBytes(lgrio.S2B(v))
 }
 
 func (b *Builder) WriteStruct(data ...any) *Builder {

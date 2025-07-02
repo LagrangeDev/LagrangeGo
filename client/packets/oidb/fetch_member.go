@@ -3,7 +3,7 @@ package oidb
 import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildFetchMemberReq(groupUin uint32, memberUID string) (*Packet, error) {
@@ -32,7 +32,7 @@ func ParseFetchMemberResp(data []byte) (*entity.GroupMember, error) {
 	if err != nil {
 		return nil, err
 	}
-	interner := utils.NewStringInterner()
+	interner := io.NewStringInterner()
 	member := resp.Member
 	m := &entity.GroupMember{
 		User: entity.User{

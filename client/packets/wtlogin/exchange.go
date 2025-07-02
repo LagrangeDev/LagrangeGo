@@ -8,10 +8,10 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/login"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto/ecdh"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 var encKey, _ = hex.DecodeString("e2733bf403149913cbf80c7a95168bd4ca6935ee53cd39764beebe2e007e3aee")
@@ -19,7 +19,7 @@ var encKey, _ = hex.DecodeString("e2733bf403149913cbf80c7a95168bd4ca6935ee53cd39
 func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 	plain1, err := proto.Marshal(&login.SsoKeyExchangePlain{
 		Uin:  proto.Some(strconv.Itoa(int(uin))),
-		Guid: utils.MustParseHexStr(guid),
+		Guid: io.MustParseHexStr(guid),
 	})
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func BuildKexExchangeRequest(uin uint32, guid string) ([]byte, error) {
 			WriteU32(1).
 			WriteBytes(encl).
 			WriteU32(0).
-			WriteU32(uint32(utils.TimeStamp())).
+			WriteU32(uint32(io.TimeStamp())).
 			ToBytes(),
 	)
 	encP2Hash, err := crypto.AESGCMEncrypt(p2Hash, encKey)

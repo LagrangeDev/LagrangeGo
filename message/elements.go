@@ -16,9 +16,10 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/message"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/audio"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	"github.com/LagrangeDev/LagrangeGo/utils/img"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 //go:embed default_thumb.jpg
@@ -158,7 +159,7 @@ type (
 		FaceID     []byte // decoded = mediaType == 2 ? string(FaceId) : hex.EncodeToString(FaceId).toLower().trimSpace(); download url param?
 		TabID      uint32
 		SubType    uint32 // image type, 0 -> None 1 -> Magic Face 2 -> GIF 3 -> PNG
-		EncryptKey []byte // tea + xor, see EMosmUtils.class::a maybe useful?
+		EncryptKey []byte // tea + xor, see EMosmio.class::a maybe useful?
 		MediaType  uint32 // 1 -> Voice Face 2 -> dynamic face
 		MagicValue string
 	}
@@ -300,7 +301,7 @@ func NewVideoThumb(r io.ReadSeeker) *VideoThumb {
 	width := uint32(1920)
 	height := uint32(1080)
 	md5, sha1, size := crypto.ComputeMd5AndSha1AndLength(r)
-	_, imgSize, err := utils.ImageResolve(r)
+	_, imgSize, err := img.ImageResolve(r)
 	if err == nil {
 		width = uint32(imgSize.Width)
 		height = uint32(imgSize.Height)
@@ -335,7 +336,7 @@ func NewLocalFile(path string, name ...string) (*FileElement, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewStreamFile(file, utils.LazyTernary(len(name) == 0, func() string {
+	return NewStreamFile(file, lgrio.LazyTernary(len(name) == 0, func() string {
 		return filepath.Base(file.Name())
 	}, func() string {
 		return name[0]
@@ -396,7 +397,7 @@ func NewMarketFace(emojiPackID uint32, emojiID []byte, key, summary, value strin
 		FaceID:     emojiID,
 		TabID:      emojiPackID,
 		SubType:    3,
-		EncryptKey: utils.S2B(key),
+		EncryptKey: lgrio.S2B(key),
 		MediaType:  0,
 		MagicValue: value,
 	}
@@ -404,7 +405,7 @@ func NewMarketFace(emojiPackID uint32, emojiID []byte, key, summary, value strin
 
 func (e *MarketFaceElement) FaceIDString() string {
 	if e.MediaType == 2 {
-		return utils.B2S(e.FaceID)
+		return lgrio.B2S(e.FaceID)
 	}
 	return fmt.Sprintf("%x", e.FaceID)
 }

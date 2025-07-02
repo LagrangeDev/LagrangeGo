@@ -15,9 +15,9 @@ import (
 	hw "github.com/LagrangeDev/LagrangeGo/client/internal/highway"
 	highway2 "github.com/LagrangeDev/LagrangeGo/client/packets/highway"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/highway"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func (c *QQClient) ensureHighwayServers() error {
@@ -54,7 +54,7 @@ func (c *QQClient) ensureHighwayServers() error {
 
 func (c *QQClient) highwayUpload(commonID int, r io.Reader, fileSize uint64, md5 []byte, extendInfo []byte) error {
 	// 能close的io就close
-	defer utils.CloseIO(r)
+	defer lgrio.CloseIO(r)
 	err := c.ensureHighwayServers()
 	if err != nil {
 		return err

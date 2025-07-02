@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type (
@@ -43,7 +43,7 @@ var ErrVersionMismatch = errors.New("sign version mismatch")
 
 func NewSigner(log func(string, ...any), signServers ...string) *Client {
 	client := &Client{
-		instances: utils.Map(signServers, func(s string) *remote {
+		instances: io.Map(signServers, func(s string) *remote {
 			return &remote{server: s}
 		}),
 		httpClient:   &http.Client{},
@@ -67,7 +67,7 @@ func (c *Client) AddRequestHeader(header map[string]string) {
 func (c *Client) AddSignServer(signServers ...string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.instances = append(c.instances, utils.Map[string, *remote](signServers, func(s string) *remote {
+	c.instances = append(c.instances, io.Map[string, *remote](signServers, func(s string) *remote {
 		return &remote{server: s}
 	})...)
 }
@@ -75,7 +75,7 @@ func (c *Client) AddSignServer(signServers ...string) {
 func (c *Client) GetSignServer() []string {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	return utils.Map(c.instances, func(sign *remote) string {
+	return io.Map(c.instances, func(sign *remote) string {
 		return sign.server
 	})
 }

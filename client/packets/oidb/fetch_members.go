@@ -4,7 +4,7 @@ import (
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildFetchMembersReq(groupUin uint32, token string) (*Packet, error) {
@@ -33,7 +33,7 @@ func ParseFetchMembersResp(data []byte) ([]*entity.GroupMember, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	interner := utils.NewStringInterner()
+	interner := io.NewStringInterner()
 	members := make([]*entity.GroupMember, len(resp.Members))
 	for i, member := range resp.Members {
 		// 由于protobuf的优化策略，默认值不会被编码进实际的二进制流中

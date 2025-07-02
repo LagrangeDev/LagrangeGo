@@ -15,8 +15,8 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/LagrangeDev/LagrangeGo/client/packets/album"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/crypto"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 const TimeLayout = "2006-01-02 15:04:05"
@@ -265,7 +265,7 @@ func (c *QQClient) getGroupAlbumUploadSession(param *uploadSessionParam) (*uploa
 }
 
 func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, seq, offset, chunkSize, totalSize, gtk int, chunk []byte, latest bool) (rsp *uploadBlockRsp, err error) {
-	uploadURLCmd := utils.Ternary[string](typ.ResourceType == ResourceTypeVideo, "FileUploadVideo", "FileUpload")
+	uploadURLCmd := lgrio.Ternary[string](typ.ResourceType == ResourceTypeVideo, "FileUploadVideo", "FileUpload")
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	_ = writer.WriteField("uin", strconv.Itoa(int(c.Uin)))
@@ -326,7 +326,7 @@ func (c *QQClient) uploadGroupAlbumBlock(typ uploadTypeParam, session string, se
 }
 
 func (c *QQClient) doUploadGroupAlbumBlock(uos *uploadOptions, usp *uploadSessionParam, file io.ReadSeeker) (rsp *uploadBlockRsp, err error) {
-	defer utils.CloseIO(file)
+	defer lgrio.CloseIO(file)
 	offset, seq, latest := 0, 0, false
 	chunk := make([]byte, uos.BlockSize)
 	for {

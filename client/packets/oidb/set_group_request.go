@@ -5,7 +5,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 	"github.com/LagrangeDev/LagrangeGo/client/packets/pb/service/oidb"
-	"github.com/LagrangeDev/LagrangeGo/utils"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 func BuildSetGroupRequestReq(isFiltered bool, operate entity.GroupRequestOperate, sequence uint64, typ uint32, groupUin uint32, message string) (*Packet, error) {
@@ -18,7 +18,7 @@ func BuildSetGroupRequestReq(isFiltered bool, operate entity.GroupRequestOperate
 			Message:   proto.Some(message),
 		},
 	}
-	return BuildOidbPacket(0x10C8, utils.Ternary[uint32](isFiltered, 2, 1), &body, false, false)
+	return BuildOidbPacket(0x10C8, io.Ternary[uint32](isFiltered, 2, 1), &body, false, false)
 }
 
 func ParseSetGroupRequestResp(data []byte) error {

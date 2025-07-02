@@ -9,8 +9,8 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
 	"github.com/LagrangeDev/LagrangeGo/internal/proto"
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 // Transport is a network transport.
@@ -23,7 +23,7 @@ type Transport struct {
 // PackPacket packs a packet.
 func (t *Transport) PackPacket(req *Request) []byte {
 	head := proto.DynamicMessage{
-		15: utils.NewTrace(),
+		15: io.NewTrace(),
 		16: t.Sig.UID,
 	}
 
@@ -44,7 +44,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WritePacketBytes(t.Sig.Tgt, "u32", true).
 		WritePacketString(req.CommandName, "u32", true).
 		WritePacketBytes(nil, "u32", true).
-		WritePacketBytes(utils.MustParseHexStr(t.Device.GUID), "u32", true).
+		WritePacketBytes(io.MustParseHexStr(t.Device.GUID), "u32", true).
 		WritePacketBytes(nil, "u32", true).
 		WritePacketString(t.Version.CurrentVersion, "u16", true).
 		WritePacketBytes(head.Encode(), "u32", true).

@@ -9,8 +9,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/LagrangeDev/LagrangeGo/utils"
 	"github.com/LagrangeDev/LagrangeGo/utils/binary"
+	lgrio "github.com/LagrangeDev/LagrangeGo/utils/io"
 )
 
 type Info struct {
@@ -21,7 +21,7 @@ type Info struct {
 func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 	reader := binary.ParseReader(r)
 	buf := reader.ReadBytes(1)
-	if utils.B2S(buf) != utils.B2S([]byte{0x23}) {
+	if len(buf) != 1 || buf[0] != 0x23 {
 		if !_f {
 			return decode(r, true)
 		}
@@ -38,7 +38,7 @@ func decode(r io.ReadSeeker, _f bool) (*Info, error) {
 	case string(buf) == "#!SILK":
 		ver := reader.ReadBytes(3)
 		if string(ver) != "_V3" {
-			return nil, fmt.Errorf("unsupported silk version: %s", utils.B2S(ver))
+			return nil, fmt.Errorf("unsupported silk version: %s", lgrio.B2S(ver))
 		}
 		data := reader.ReadAll()
 		size := len(data)
