@@ -63,9 +63,6 @@ run:
 
 # output configuration options
 output:
-  formats:
-    - format: "colored-line-number"
-      path: stdout
   print-issued-lines: true
   print-linter-name: true
   uniq-by-line: true
