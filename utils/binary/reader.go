@@ -81,8 +81,14 @@ func (r *Reader) ReadAll() []byte {
 
 func (r *Reader) ReadU8() (v uint8) {
 	if r.reader != nil {
-		_, _ = r.reader.Read(unsafe.Slice(&v, 1))
+		_, err := r.reader.Read(unsafe.Slice(&v, 1))
+		if err != nil {
+			return 0
+		}
 		return
+	}
+	if r.pos >= len(r.buffer) {
+		return 0
 	}
 	v = r.buffer[r.pos]
 	r.pos++
@@ -93,8 +99,16 @@ func readint[T ~uint16 | ~uint32 | ~uint64](r *Reader) (v T) {
 	sz := unsafe.Sizeof(v)
 	buf := make([]byte, 8)
 	if r.reader != nil {
-		_, _ = r.reader.Read(buf[8-sz:])
+		n, err := r.reader.Read(buf[8-sz:])
+		if err != nil || n < int(sz) {
+			// 读取失败或读取的数据不足，返回零值
+			return 0
+		}
 	} else {
+		// 确保缓冲区有足够的数据
+		if r.pos+int(sz) > len(r.buffer) {
+			return 0
+		}
 		copy(buf[8-sz:], r.buffer[r.pos:r.pos+int(sz)])
 		r.pos += int(sz)
 	}
@@ -129,6 +143,10 @@ func (r *Reader) ReadBytesNoCopy(length int) (v []byte) {
 	if r.reader != nil {
 		return r.ReadBytes(length)
 	}
+	// 确保缓冲区有足够的数据
+	if r.pos+length > len(r.buffer) {
+		return make([]byte, 0)
+	}
 	v = r.buffer[r.pos : r.pos+length]
 	r.pos += length
 	return
@@ -138,8 +156,16 @@ func (r *Reader) ReadBytes(length int) (v []byte) {
 	// 返回一个全新的数组罢
 	v = make([]byte, length)
 	if r.reader != nil {
-		_, _ = r.reader.Read(v)
+		n, err := io.ReadFull(r.reader, v)
+		if err != nil || n < length {
+			// 读取失败或读取的数据不足，返回空数组
+			return make([]byte, 0)
+		}
 	} else {
+		// 确保缓冲区有足够的数据
+		if r.pos+length > len(r.buffer) {
+			return make([]byte, 0)
+		}
 		copy(v, r.buffer[r.pos:r.pos+length])
 		r.pos += length
 	}
