@@ -7,13 +7,13 @@ on:
       - 'go.mod'
       - '**.yml'
 
-name: ci
+name: commitback
 
 env:
   GO111MODULE: on
 
 jobs:
-  ci:
+  commitback:
     runs-on: ubuntu-latest
 
     concurrency:
@@ -27,7 +27,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.23
+          go-version: 1.23
           cache: false
 
       - name: Sort Imports
