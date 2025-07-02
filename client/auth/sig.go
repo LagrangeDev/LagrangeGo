@@ -44,8 +44,8 @@ func init() {
 }
 
 func (sig *SigInfo) ClearSession() {
-	sig.D2 = make([]byte, 0)
-	sig.Tgt = make([]byte, 0)
+	sig.D2 = nil
+	sig.Tgt = nil
 	sig.D2Key = make([]byte, 16)
 }
 

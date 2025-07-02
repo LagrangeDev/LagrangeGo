@@ -145,7 +145,7 @@ func (r *Reader) ReadBytesNoCopy(length int) (v []byte) {
 	}
 	// 确保缓冲区有足够的数据
 	if r.pos+length > len(r.buffer) {
-		return make([]byte, 0)
+		return nil
 	}
 	v = r.buffer[r.pos : r.pos+length]
 	r.pos += length
@@ -159,12 +159,12 @@ func (r *Reader) ReadBytes(length int) (v []byte) {
 		n, err := io.ReadFull(r.reader, v)
 		if err != nil || n < length {
 			// 读取失败或读取的数据不足，返回空数组
-			return make([]byte, 0)
+			return nil
 		}
 	} else {
 		// 确保缓冲区有足够的数据
 		if r.pos+length > len(r.buffer) {
-			return make([]byte, 0)
+			return nil
 		}
 		copy(v, r.buffer[r.pos:r.pos+length])
 		r.pos += length

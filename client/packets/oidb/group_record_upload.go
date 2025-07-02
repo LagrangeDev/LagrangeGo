@@ -64,10 +64,10 @@ func BuildGroupRecordUploadReq(groupUin uint32, record *message.VoiceElement) (*
 					TextSummary: record.Summary,
 				},
 				Video: &oidb.VideoExtBizInfo{
-					BytesPbReserve: make([]byte, 0),
+					BytesPbReserve: nil,
 				},
 				Ptt: &oidb.PttExtBizInfo{
-					BytesReserve:      make([]byte, 0),
+					BytesReserve:      nil,
 					BytesPbReserve:    []byte{0x08, 0x00, 0x38, 0x00},
 					BytesGeneralFlags: []byte{0x9a, 0x01, 0x07, 0xaa, 0x03, 0x04, 0x08, 0x08, 0x12, 0x00},
 				},
