@@ -6,10 +6,10 @@ import (
 )
 
 type Logger interface {
-	Info(format string, args ...any)
-	Warning(format string, args ...any)
-	Error(format string, args ...any)
-	Debug(format string, args ...any)
+	Infof(format string, args ...any)
+	Warningf(format string, args ...any)
+	Errorf(format string, args ...any)
+	Debugf(format string, args ...any)
 	Dump(dumped []byte, format string, args ...any)
 }
 

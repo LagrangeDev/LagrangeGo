@@ -183,19 +183,19 @@ type protocolLogger struct{}
 
 const fromProtocol = "Lgr -> "
 
-func (p protocolLogger) Info(format string, arg ...any) {
+func (p protocolLogger) Infof(format string, arg ...any) {
 	logger.Infof(fromProtocol+format, arg...)
 }
 
-func (p protocolLogger) Warning(format string, arg ...any) {
+func (p protocolLogger) Warningf(format string, arg ...any) {
 	logger.Warnf(fromProtocol+format, arg...)
 }
 
-func (p protocolLogger) Debug(format string, arg ...any) {
+func (p protocolLogger) Debugf(format string, arg ...any) {
 	logger.Debugf(fromProtocol+format, arg...)
 }
 
-func (p protocolLogger) Error(format string, arg ...any) {
+func (p protocolLogger) Errorf(format string, arg ...any) {
 	logger.Errorf(fromProtocol+format, arg...)
 }
 
