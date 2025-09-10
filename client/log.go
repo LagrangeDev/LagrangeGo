@@ -15,49 +15,49 @@ func (c *QQClient) SetLogger(logger log.Logger) {
 
 func (c *QQClient) info(msg string, args ...any) {
 	if c.logger != nil {
-		c.logger.Info(msg, args...)
+		c.logger.Infof(msg, args...)
 	}
 }
 
 func (c *QQClient) infoln(msgs ...any) {
 	if c.logger != nil {
-		c.logger.Info(fmt.Sprint(msgs...))
+		c.logger.Infof(fmt.Sprint(msgs...))
 	}
 }
 
 func (c *QQClient) warning(msg string, args ...any) {
 	if c.logger != nil {
-		c.logger.Warning(log.Getcaller(msg), args...)
+		c.logger.Warningf(log.Getcaller(msg), args...)
 	}
 }
 
 func (c *QQClient) warningln(msgs ...any) {
 	if c.logger != nil {
-		c.logger.Warning(log.Getcaller(fmt.Sprint(msgs...)))
+		c.logger.Warningf(log.Getcaller(fmt.Sprint(msgs...)))
 	}
 }
 
 func (c *QQClient) error(msg string, args ...any) {
 	if c.logger != nil {
-		c.logger.Error(log.Getcaller(msg), args...)
+		c.logger.Errorf(log.Getcaller(msg), args...)
 	}
 }
 
 func (c *QQClient) errorln(msgs ...any) {
 	if c.logger != nil {
-		c.logger.Error(log.Getcaller(fmt.Sprint(msgs...)))
+		c.logger.Errorf(log.Getcaller(fmt.Sprint(msgs...)))
 	}
 }
 
 func (c *QQClient) debug(msg string, args ...any) {
 	if c.logger != nil {
-		c.logger.Debug(log.Getcaller(msg), args...)
+		c.logger.Debugf(log.Getcaller(msg), args...)
 	}
 }
 
 func (c *QQClient) debugln(msgs ...any) {
 	if c.logger != nil {
-		c.logger.Debug(log.Getcaller(fmt.Sprint(msgs...)))
+		c.logger.Debugf(log.Getcaller(fmt.Sprint(msgs...)))
 	}
 }
 
