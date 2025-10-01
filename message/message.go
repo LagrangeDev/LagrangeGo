@@ -137,6 +137,13 @@ func ParseGroupMessage(msg *message.PushMsgBody) *GroupMessage {
 
 func ParseTempMessage(msg *message.PushMsgBody) *TempMessage {
 	return &TempMessage{
+		ID:   msg.ContentHead.Sequence.Unwrap(),
+		Self: msg.ResponseHead.ToUin,
+		Sender: &Sender{
+			Uin:      msg.ResponseHead.FromUin,
+			UID:      msg.ResponseHead.FromUid.Unwrap(),
+			IsFriend: false,
+		},
 		Elements: ParseMessageElements(msg.Body.RichText.Elems),
 	}
 }
