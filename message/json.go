@@ -146,6 +146,121 @@ func (g *GroupMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (g PrivateMessage) MarshalJSON() ([]byte, error) {
+	type Temp PrivateMessage
+	temp := struct {
+		*Temp
+		Elements []elementJSON
+	}{
+		Temp:     (*Temp)(&g),
+		Elements: make([]elementJSON, 0, len(g.Elements)),
+	}
+
+	for _, elem := range g.Elements {
+		if elem == nil {
+			continue
+		}
+		elemData, err := json.Marshal(elem)
+		if err != nil {
+			return nil, fmt.Errorf("序列化元素失败: %w", err)
+		}
+		temp.Elements = append(temp.Elements, elementJSON{
+			Type: elem.Type(),
+			Data: elemData,
+		})
+	}
+
+	return json.Marshal(temp)
+}
+
+func (g *PrivateMessage) UnmarshalJSON(data []byte) error {
+	type Temp PrivateMessage
+	var temp struct {
+		*Temp
+		Elements []elementJSON
+	}
+	temp.Temp = (*Temp)(g)
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return fmt.Errorf("解析GroupMessage失败: %w", err)
+	}
+
+	g.Elements = make([]IMessageElement, 0, len(temp.Elements))
+	for _, elemJSON := range temp.Elements {
+		elem, err := parseJSONMessageElement(elemJSON)
+		if err != nil {
+			return err
+		}
+		g.Elements = append(g.Elements, elem)
+	}
+
+	g.ID = temp.ID
+	g.InternalID = temp.InternalID
+	g.ClientSeq = temp.ClientSeq
+	g.Target = temp.Target
+	g.Time = temp.Time
+	g.Sender = temp.Sender
+
+	return nil
+}
+
+func (g TempMessage) MarshalJSON() ([]byte, error) {
+	type Temp TempMessage
+	temp := struct {
+		*Temp
+		Elements []elementJSON
+	}{
+		Temp:     (*Temp)(&g),
+		Elements: make([]elementJSON, 0, len(g.Elements)),
+	}
+
+	for _, elem := range g.Elements {
+		if elem == nil {
+			continue
+		}
+		elemData, err := json.Marshal(elem)
+		if err != nil {
+			return nil, fmt.Errorf("序列化元素失败: %w", err)
+		}
+		temp.Elements = append(temp.Elements, elementJSON{
+			Type: elem.Type(),
+			Data: elemData,
+		})
+	}
+
+	return json.Marshal(temp)
+}
+
+func (g *TempMessage) UnmarshalJSON(data []byte) error {
+	type Temp TempMessage
+	var temp struct {
+		*Temp
+		Elements []elementJSON
+	}
+	temp.Temp = (*Temp)(g)
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return fmt.Errorf("解析GroupMessage失败: %w", err)
+	}
+
+	g.Elements = make([]IMessageElement, 0, len(temp.Elements))
+	for _, elemJSON := range temp.Elements {
+		elem, err := parseJSONMessageElement(elemJSON)
+		if err != nil {
+			return err
+		}
+		g.Elements = append(g.Elements, elem)
+	}
+
+	g.ID = temp.ID
+	g.GroupUin = temp.GroupUin
+	g.GroupName = temp.GroupName
+	g.Self = temp.Self
+	g.Sender = temp.Sender
+
+	return nil
+}
+
 func (r ReplyElement) MarshalJSON() ([]byte, error) {
 	type Temp ReplyElement
 	temp := struct {
