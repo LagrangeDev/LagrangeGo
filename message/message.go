@@ -590,20 +590,24 @@ func ToReadableStringEle(elem IMessageElement) string {
 		return e.Content
 	case *ImageElement:
 		return "[图片]"
+	case *FaceElement:
+		return "[表情]"
 	case *AtElement:
 		return e.Display
 	case *ReplyElement:
 		return "[回复]" // [Optional] + ToReadableString(e.Elements), 这里不破坏原义不添加
-	case *FaceElement:
-		return "[表情]"
+	case *XMLElement:
+		return "[服务消息]"
+	case *ForwardMessage:
+		return "[转发消息]"
+	case *FileElement:
+		return "[文件]"
 	case *VoiceElement:
 		return "[语音]"
 	case *ShortVideoElement:
 		return "[视频]"
 	case *LightAppElement:
 		return "[卡片消息]"
-	case *ForwardMessage:
-		return "[转发消息]"
 	case *MarketFaceElement:
 		return "[魔法表情]"
 	default:
