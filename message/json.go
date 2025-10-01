@@ -25,6 +25,12 @@ func parseJSONMessageElement(elemJSON elementJSON) (IMessageElement, error) {
 			return elem, fmt.Errorf("解析ImageElement失败: %w", err)
 		}
 		elem = imgElem
+	case Face:
+		var faceElem *FaceElement
+		if err := json.Unmarshal(elemJSON.Data, &faceElem); err != nil {
+			return elem, fmt.Errorf("解析FaceElement失败: %w", err)
+		}
+		elem = faceElem
 	case At:
 		var atElem *AtElement
 		if err := json.Unmarshal(elemJSON.Data, &atElem); err != nil {
