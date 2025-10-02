@@ -64,19 +64,19 @@ func parseJSONMessageElement(elemJSON elementJSON) (IMessageElement, error) {
 	case Voice:
 		var voiceElem *VoiceElement
 		if err := json.Unmarshal(elemJSON.Data, &voiceElem); err != nil {
-			return elem, fmt.Errorf("解析FileElement失败: %w", err)
+			return elem, fmt.Errorf("解析VoiceElement失败: %w", err)
 		}
 		elem = voiceElem
 	case Video:
 		var videoElem *ShortVideoElement
 		if err := json.Unmarshal(elemJSON.Data, &videoElem); err != nil {
-			return elem, fmt.Errorf("解析FileElement失败: %w", err)
+			return elem, fmt.Errorf("解析ShortVideoElement失败: %w", err)
 		}
 		elem = videoElem
 	case LightApp:
 		var lightAppElem *LightAppElement
 		if err := json.Unmarshal(elemJSON.Data, &lightAppElem); err != nil {
-			return elem, fmt.Errorf("解析FileElement失败: %w", err)
+			return elem, fmt.Errorf("解析LightAppElementElement失败: %w", err)
 		}
 		elem = lightAppElem
 	case RedBag:
@@ -84,7 +84,7 @@ func parseJSONMessageElement(elemJSON elementJSON) (IMessageElement, error) {
 	case MarketFace:
 		var marketFaceElem *MarketFaceElement
 		if err := json.Unmarshal(elemJSON.Data, &marketFaceElem); err != nil {
-			return elem, fmt.Errorf("解析FileElement失败: %w", err)
+			return elem, fmt.Errorf("解析MarketFaceElement失败: %w", err)
 		}
 		elem = marketFaceElem
 	default:
