@@ -11,10 +11,8 @@ func BuildFetchFriendsReq(token uint32) (*Packet, error) {
 	body := oidb.OidbSvcTrpcTcp0XFD4_1{
 		Field2: 300,
 		Field4: 0,
-		NextUin: &oidb.OidbSvcTrpcTcp0XFD4_1Uin{
-			Uin: token,
-		},
 		Field6: 1,
+		Field7: 2147483647,
 		Body: []*oidb.OidbSvcTrpcTcp0XFD4_1Body{{
 			Type:   1,
 			Number: &oidb.OidbNumber{Numbers: []uint32{103, 102, 20002, 27394}},
@@ -24,6 +22,11 @@ func BuildFetchFriendsReq(token uint32) (*Packet, error) {
 		}},
 		Field10002: []uint32{13578, 13579, 13573, 13572, 13568},
 		Field10003: 4051,
+	}
+	if token != 0 {
+		body.NextUin = &oidb.OidbSvcTrpcTcp0XFD4_1Uin{
+			Uin: token,
+		}
 	}
 	/*
 	 * OidbNumber里面的东西代表你想要拿到的Property，这些Property将会在返回的数据里面的Preserve的Field，
