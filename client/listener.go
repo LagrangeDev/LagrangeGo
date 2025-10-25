@@ -87,8 +87,8 @@ func decodeOlPushServicePacket(c *QQClient, pkt *network.Packet) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		// 3 是bot自身被踢出，Operator字段会是一个protobuf
-		if pb.DecreaseType == 3 && pb.Operator != nil {
+		// 3 是bot自身被踢出，131 是群成员被踢出，Operator字段会是一个protobuf
+		if (pb.DecreaseType == 3 || pb.DecreaseType == 131) && pb.Operator != nil {
 			Operator := message.OperatorInfo{}
 			err = proto.Unmarshal(pb.Operator, &Operator)
 			if err != nil {
