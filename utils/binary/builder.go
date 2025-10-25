@@ -1,6 +1,7 @@
 package binary
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 	"math"
@@ -43,6 +44,17 @@ func (b *Builder) ToBytes() (data []byte) {
 		copy(data, ub.Bytes())
 	})
 	return
+}
+
+func (b *Builder) Buffer() (buffer *bytes.Buffer) {
+	b.p(func(ub *pbuf.UserBuffer[teacfg]) {
+		buffer = &ub.Buffer
+	})
+	return
+}
+
+func (b *Builder) ManualDestroy() {
+	(*orbyte.Item[pbuf.UserBuffer[teacfg]])(b).ManualDestroy()
 }
 
 // Pack TLV with tea encryption if key is set
