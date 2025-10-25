@@ -25,6 +25,11 @@ func NewBuilder(key ...byte) *Builder {
 	return (*Builder)(b)
 }
 
+// PutBuilder
+func PutBuilder(b *Builder) {
+	b.ManualDestroy()
+}
+
 var gzipPool = sync.Pool{
 	New: func() any {
 		buf := new(bytes.Buffer)
