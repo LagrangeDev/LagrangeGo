@@ -137,6 +137,11 @@ func (c *QQClient) AddSignServer(signServers ...string) {
 	c.signProvider.AddSignServer(signServers...)
 }
 
+// GetSignServer 获得所有签名服务器
+func (c *QQClient) GetSignServer() []string {
+	return c.signProvider.GetSignServer()
+}
+
 // AddSignHeader 设置签名服务器签名时的额外http header
 func (c *QQClient) AddSignHeader(header map[string]string) {
 	if c.signProvider == nil {

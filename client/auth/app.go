@@ -97,6 +97,27 @@ var AppList = map[string]map[string]*AppInfo{
 			SubSigmap:   0,
 			NTLoginType: 1,
 		},
+
+		"3.2.19-39038": {
+			OS:       "Linux",
+			Kernel:   "Linux",
+			VendorOS: "linux",
+
+			CurrentVersion:   "3.2.19-39038",
+			BuildVersion:     39038,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      19,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			AppID:            1600001615,
+			SubAppID:         537313942,
+			AppIDQrcode:      537313942,
+			AppClientVersion: 39038,
+			MainSigmap:       169742560,
+			SubSigmap:        0,
+			NTLoginType:      1,
+		},
 	},
 
 	"macos": {

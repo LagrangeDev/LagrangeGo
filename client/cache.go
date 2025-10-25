@@ -1,15 +1,24 @@
 package client
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/LagrangeDev/LagrangeGo/client/entity"
 )
 
+var selfUin string
+
 // GetUID 获取缓存中对应uin的uid
 func (c *QQClient) GetUID(uin uint32, groupUin ...uint32) string {
 	if uin == 0 {
 		return ""
+	}
+	if uin == c.Uin {
+		if selfUin == "" {
+			selfUin = strconv.FormatUint(uint64(uin), 10)
+		}
+		return selfUin
 	}
 	if len(groupUin) == 0 && c.cache.FriendCacheIsEmpty() {
 		if err := c.RefreshFriendCache(); err != nil {
