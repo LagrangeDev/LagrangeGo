@@ -9,7 +9,7 @@ message OidbSvcTrpcTcp0x89A_0 {
 }
 
 message OidbSvcTrpcTcp0x89A_0State {
-  uint32 S = 17;
+  optional uint32 S = 17;
 }
 
 message OidbSvcTrpcTcp0x89A_0Response {
