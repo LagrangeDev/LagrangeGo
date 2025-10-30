@@ -15,7 +15,7 @@ type OidbSvcTrpcTcp0X89A_0 struct {
 }
 
 type OidbSvcTrpcTcp0X89A_0State struct {
-	S uint32 `protobuf:"varint,17,opt"`
+	S proto.Option[uint32] `protobuf:"varint,17,opt"`
 	_ [0]func()
 }
 

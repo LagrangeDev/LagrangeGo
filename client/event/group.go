@@ -240,8 +240,10 @@ func ParseMemberIncreaseEvent(event *message.GroupChange) *GroupMemberIncrease {
 }
 
 func (g *GroupMemberDecrease) ResolveUin(f func(uid string, groupUin ...uint32) uint32) {
-	g.OperatorUin = f(g.OperatorUID, g.GroupUin)
 	g.UserUin = f(g.UserUID, g.GroupUin)
+	if g.IsKicked() {
+		g.OperatorUin = f(g.OperatorUID, g.GroupUin)
+	}
 }
 
 func ParseMemberDecreaseEvent(event *message.GroupChange) *GroupMemberDecrease {
