@@ -129,25 +129,11 @@ type QQClient struct {
 	DisconnectedEvent EventHandle[*DisconnectedEvent]
 }
 
-// AddSignServer 设置签名服务器url
-func (c *QQClient) AddSignServer(signServers ...string) {
-	if c.signProvider == nil {
-		c.UseSignProvider(sign.NewSigner(c.debug))
-	}
-	c.signProvider.AddSignServer(signServers...)
-}
-
-// GetSignServer 获得所有签名服务器
-func (c *QQClient) GetSignServer() []string {
-	return c.signProvider.GetSignServer()
-}
-
 // AddSignHeader 设置签名服务器签名时的额外http header
 func (c *QQClient) AddSignHeader(header map[string]string) {
-	if c.signProvider == nil {
-		c.UseSignProvider(sign.NewSigner(c.debug))
+	if c.signProvider != nil {
+		c.signProvider.AddRequestHeader(header)
 	}
-	c.signProvider.AddRequestHeader(header)
 }
 
 func (c *QQClient) UseVersion(app *auth.AppInfo) {
@@ -155,10 +141,9 @@ func (c *QQClient) UseVersion(app *auth.AppInfo) {
 	c.highwaySession.AppID = uint32(app.AppID)
 	c.highwaySession.SubAppID = uint32(app.SubAppID)
 	c.UA = "LagrangeGo qq/" + app.PackageSign
-	if c.signProvider == nil {
-		c.signProvider = sign.NewSigner(c.debug)
+	if c.signProvider != nil {
+		c.signProvider.SetAppInfo(app)
 	}
-	c.signProvider.SetAppInfo(app)
 }
 
 func (c *QQClient) UseSignProvider(p sign.Provider) {

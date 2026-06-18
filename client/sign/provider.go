@@ -11,18 +11,21 @@ type (
 	HexData []byte
 
 	Request struct {
-		Cmd string  `json:"cmd"`
-		Seq int     `json:"seq"`
-		Src HexData `json:"src"`
+		Command string  `json:"command"`
+		Seq     int     `json:"seq"`
+		Body    HexData `json:"body"`
+		Uin     uint32  `json:"uin"`
+		GUID    string  `json:"guid"`
+		Qua     string  `json:"qua"`
 	}
 
 	Response struct {
-		Platform string `json:"platform"`
-		Version  string `json:"version"`
-		Value    struct {
-			Sign  HexData `json:"sign"`
-			Extra HexData `json:"extra"`
-			Token HexData `json:"token"`
+		Code    uint32 `json:"code"`
+		Message string `json:"message"`
+		Value   struct {
+			SecSign  HexData `json:"sec_sign"`
+			SecToken HexData `json:"sec_token"`
+			SecExtra HexData `json:"sec_extra"`
 		} `json:"value"`
 	}
 )
@@ -45,10 +48,8 @@ func (h *HexData) UnmarshalJSON(data []byte) error {
 }
 
 type Provider interface {
-	Sign(cmd string, seq uint32, data []byte) (*Response, error)
+	Sign(cmd string, seq uint32, data []byte, uin uint32, guid, qua string) (*Response, error)
 	AddRequestHeader(header map[string]string)
-	AddSignServer(signServers ...string)
-	GetSignServer() []string
 	SetAppInfo(app *auth.AppInfo)
 	Release()
 }
