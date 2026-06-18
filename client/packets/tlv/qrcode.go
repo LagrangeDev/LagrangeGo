@@ -11,11 +11,11 @@ func T11(unusualSign []byte) []byte {
 		Pack(0x11)
 }
 
-func T16(appid, appidQrcode int, guid []byte, ptVersion, packageName string) []byte {
+func T16(appid, subappid int, guid []byte, ptVersion, packageName string) []byte {
 	return binary.NewBuilder().
 		WriteU32(0).
 		WriteU32(uint32(appid)).
-		WriteU32(uint32(appidQrcode)).
+		WriteU32(uint32(subappid)).
 		WriteBytes(guid).
 		WritePacketString(packageName, "u16", false).
 		WritePacketString(ptVersion, "u16", false).
