@@ -16,6 +16,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
+	"github.com/LagrangeDev/LagrangeGo/client/sign"
 	"github.com/LagrangeDev/LagrangeGo/message"
 	"github.com/LagrangeDev/LagrangeGo/utils/io"
 )
@@ -36,7 +37,7 @@ func main() {
 	qqclient := client.NewClient(0, "")
 	qqclient.SetLogger(protocolLogger{})
 	qqclient.UseVersion(appInfo)
-	qqclient.AddSignServer("https://sign.lagrangecore.org/api/sign/39038")
+	qqclient.UseSignProvider(sign.NewSigner(logger.Debugf, "eb505682-95b1-4ae5-86aa-be4db1ee82e0", "https://sign.lagrangecore.org/api/sign/sec-sign"))
 	qqclient.UseDevice(deviceInfo)
 	data, err := os.ReadFile("sig.bin")
 	if err != nil {

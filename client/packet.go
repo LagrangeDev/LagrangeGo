@@ -8,7 +8,7 @@ import (
 
 func (c *QQClient) uniPacket(command string, body []byte) (uint32, []byte, error) {
 	seq := c.getAndIncreaseSequence()
-	sign, err := c.signProvider.Sign(command, seq, body)
+	sign, err := c.signProvider.Sign(command, seq, body, c.Uin, c.Device().GUID, c.Version().PackageSign)
 	if err != nil {
 		return 0, nil, err
 	}

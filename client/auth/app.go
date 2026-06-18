@@ -21,7 +21,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_LNX_NQ_3.1.2-13107_RDM_B",
 			AppID:            1600001615,
 			SubAppID:         537146866,
-			AppIDQrcode:      13697054,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -44,7 +43,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_LNX_NQ_3.2.10_25765_GW_B",
 			AppID:            1600001615,
 			SubAppID:         537234773,
-			AppIDQrcode:      13697054,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -67,7 +65,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_LNX_NQ_3.2.12_27597_GW_B",
 			AppID:            1600001615,
 			SubAppID:         537243600,
-			AppIDQrcode:      13697054,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -90,7 +87,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_LNX_NQ_3.2.15_30366_GW_B",
 			AppID:            1600001615,
 			SubAppID:         537258424,
-			AppIDQrcode:      13697054,
 			AppClientVersion: 30366,
 
 			MainSigmap:  169742560,
@@ -110,10 +106,31 @@ var AppList = map[string]map[string]*AppInfo{
 			PTOSVersion:      19,
 			PackageName:      "com.tencent.qq",
 			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_LNX_NQ_3.2.19-39038_GW_B",
 			AppID:            1600001615,
 			SubAppID:         537313942,
-			AppIDQrcode:      537313942,
 			AppClientVersion: 39038,
+			MainSigmap:       169742560,
+			SubSigmap:        0,
+			NTLoginType:      1,
+		},
+
+		"3.2.26-46494": {
+			OS:       "Linux",
+			Kernel:   "Linux",
+			VendorOS: "linux",
+
+			CurrentVersion:   "3.2.26-46494",
+			BuildVersion:     46494,
+			MiscBitmap:       32764,
+			PTVersion:        "2.0.0",
+			PTOSVersion:      19,
+			PackageName:      "com.tencent.qq",
+			WTLoginSDK:       "nt.wtlogin.0.0.1",
+			PackageSign:      "V1_LNX_NQ_3.2.26-46494_GW_B",
+			AppID:            1600001615,
+			SubAppID:         537345891,
+			AppClientVersion: 46494,
 			MainSigmap:       169742560,
 			SubSigmap:        0,
 			NTLoginType:      1,
@@ -136,7 +153,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_MAC_NQ_6.9.20-17153_RDM_B",
 			AppID:            1600001602,
 			SubAppID:         537162356,
-			AppIDQrcode:      537162356,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -160,7 +176,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_WIN_NQ_9.9.12-25493_GW_B",
 			AppID:            1600001604,
 			SubAppID:         537231759,
-			AppIDQrcode:      537138217,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -183,7 +198,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_WIN_NQ_9.9.12-25765_GW_B",
 			AppID:            1600001604,
 			SubAppID:         537234702,
-			AppIDQrcode:      537138217,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -206,7 +220,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_WIN_NQ_9.9.15-27597_GW_B",
 			AppID:            1600001604,
 			SubAppID:         537243441,
-			AppIDQrcode:      537138217,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -229,7 +242,6 @@ var AppList = map[string]map[string]*AppInfo{
 			PackageSign:      "V1_WIN_NQ_9.9.15-28060_GW_B",
 			AppID:            1600001604,
 			SubAppID:         537246092,
-			AppIDQrcode:      537138217,
 			AppClientVersion: 13172,
 
 			MainSigmap:  169742560,
@@ -254,7 +266,6 @@ type AppInfo struct {
 	PackageSign      string `json:"package_sign"`
 	AppID            int    `json:"app_id"`
 	SubAppID         int    `json:"sub_app_id"`
-	AppIDQrcode      int    `json:"app_id_qrcode"`
 	AppClientVersion int    `json:"app_client_version"`
 	MainSigmap       int    `json:"main_sigmap"`
 	SubSigmap        int    `json:"sub_sigmap"`
