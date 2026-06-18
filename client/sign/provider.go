@@ -15,7 +15,7 @@ type (
 		Seq     int     `json:"seq"`
 		Body    HexData `json:"body"`
 		Uin     uint32  `json:"uin"`
-		Guid    string  `json:"guid"`
+		GUID    string  `json:"guid"`
 		Qua     string  `json:"qua"`
 	}
 

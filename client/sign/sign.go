@@ -88,7 +88,7 @@ func sign(server, cmd string, seq uint32, buf []byte, uin uint32, guid, qua stri
 		Seq:     int(seq),
 		Body:    buf,
 		Uin:     uin,
-		Guid:    guid,
+		GUID:    guid,
 		Qua:     qua,
 	}
 	data, err := json.Marshal(&req)
