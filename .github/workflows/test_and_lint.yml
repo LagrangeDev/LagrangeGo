@@ -18,11 +18,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go-version: [ '1.23', '1.24' ]
-
     steps:
       - name: Code
         uses: actions/checkout@v4
@@ -30,18 +25,13 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.26
           cache: false
       - run: go get
       - run: go test -v -race ./...
 
   lint:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go-version: [ '1.23', '1.24' ]
-
     steps:
       - name: Code
         uses: actions/checkout@v4
@@ -49,7 +39,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.26
           cache: false
 
       - run: go get
