@@ -39,7 +39,7 @@ jobs:
       - name: GolangCI-Lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.2.1
+          version: v2.12.2
           args: '--timeout 9999s'
           only-new-issues: true
           skip-save-cache: true
