@@ -152,7 +152,6 @@ func (c *QQClient) decodeLoginResponse(buf []byte, sig *auth.SigInfo) (LoginResp
 		title = errBuf.ReadString(int(errBuf.ReadU16()))
 		content = errBuf.ReadString(int(errBuf.ReadU16()))
 		loginErr = OtherLoginError
-
 	} else if t149, ok := tlv[0x149]; ok {
 		errBuf := binary.NewReader(t149)
 		errBuf.SkipBytes(2)

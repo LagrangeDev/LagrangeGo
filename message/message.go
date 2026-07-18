@@ -192,14 +192,15 @@ func ParseMessageElements(msg []*message.Elem) []IMessageElement {
 					res = append(res, &FaceElement{FaceID: uint32(faceID.Unwrap())})
 				}
 			} else if elem.CommonElem != nil && elem.CommonElem.PbElem != nil {
-				if elem.CommonElem.ServiceType == 37 {
+				switch elem.CommonElem.ServiceType {
+				case 37:
 					qFace := message.QFaceExtra{}
 					if err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace); err == nil {
 						if qFace.Qsid.IsSome() {
 							res = append(res, &FaceElement{FaceID: uint32(qFace.Qsid.Unwrap()), isLargeFace: true})
 						}
 					}
-				} else if elem.CommonElem.ServiceType == 33 {
+				case 33:
 					qFace := message.QSmallFaceExtra{}
 					err := proto.Unmarshal(elem.CommonElem.PbElem, &qFace)
 					if err == nil {
@@ -488,8 +489,8 @@ func ParseMessageBody(body *message.MessageBody, isGroup bool) []IMessageElement
 }
 
 func (msg *GroupMessage) ToString() string {
-	//var strBuilder strings.Builder
-	//for _, elem := range msg.Elements {
+	// var strBuilder strings.Builder
+	// for _, elem := range msg.Elements {
 	//	switch e := elem.(type) {
 	//	case *TextElement:
 	//		strBuilder.WriteString(e.Content)
@@ -626,7 +627,7 @@ func (msg *SendingMessage) GetElems() []IMessageElement {
 // Append 要传入msg的引用
 func (msg *SendingMessage) Append(e IMessageElement) *SendingMessage {
 	v := reflect.ValueOf(e)
-	if v.Kind() == reflect.Ptr && !v.IsNil() {
+	if v.Kind() == reflect.Pointer && !v.IsNil() {
 		msg.Elements = append(msg.Elements, e)
 	}
 	return msg

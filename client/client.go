@@ -130,7 +130,7 @@ func (c *QQClient) GetQRCodeResult() (qrcodestate.State, error) {
 	}
 
 	reader := binary.NewReader(response)
-	//length := reader.ReadU32()
+	// length := reader.ReadU32()
 	reader.SkipBytes(8) // 4 + 4
 	reader.ReadU16()    // cmd, 0x12
 	reader.SkipBytes(40)
@@ -391,7 +391,6 @@ func (c *QQClient) FastLogin() error {
 	err = c.register()
 	if err != nil {
 		return fmt.Errorf("failed to register session: %w", err)
-
 	}
 	return nil
 }

@@ -27,7 +27,7 @@ func init() {
 		"MessageSvc.PbSendMsg",
 		"wtlogin.trans_emp",
 		"wtlogin.login",
-		//"trpc.login.ecdh.EcdhService.SsoKeyExchange",
+		// "trpc.login.ecdh.EcdhService.SsoKeyExchange",
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLogin",
 		"trpc.login.ecdh.EcdhService.SsoNTLoginEasyLogin",
 		"trpc.login.ecdh.EcdhService.SsoNTLoginPasswordLoginNewDevice",
@@ -94,7 +94,6 @@ func httpPost[T any](rawURL string, body io.Reader, timeout time.Duration, heade
 	return doHTTP[T](ctx, req)
 }
 
-//nolint:bodyclose
 func doHTTP[T any](ctx context.Context, req *http.Request) (target T, err error) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

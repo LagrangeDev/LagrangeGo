@@ -35,10 +35,11 @@ func (e *AtElement) BuildElement() []*message.Elem {
 func (e *FaceElement) BuildElement() []*message.Elem {
 	if e.isLargeFace {
 		name, business, resultid := "", int32(1), ""
-		if e.FaceID == 358 {
+		switch e.FaceID {
+		case 358:
 			name, business = "/骰子", 2
 			resultid = fmt.Sprint(e.ResultID)
-		} else if e.FaceID == 359 {
+		case 359:
 			name, business = "/包剪锤", 2
 			resultid = fmt.Sprint(e.ResultID)
 		}

@@ -7,7 +7,7 @@ const (
 	UnusualVerify    State = 140022011
 	LoginFailure     State = 140022013
 	UserTokenExpired State = 140022016
-	ServerFailure    State = 140022002 //unknown reason
+	ServerFailure    State = 140022002 // unknown reason
 	WrongCaptcha     State = 140022007
 	WrongArgument    State = 140022001
 	NewDeviceVerify  State = 140022010

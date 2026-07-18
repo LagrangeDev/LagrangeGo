@@ -227,7 +227,7 @@ var AppList = map[string]map[string]*AppInfo{
 			NTLoginType: 5,
 		},
 
-		"9.9.15-28060": { //此版本在某种意义上跨度较大
+		"9.9.15-28060": { // 此版本在某种意义上跨度较大
 			OS:       "Windows",
 			Kernel:   "Windows_NT",
 			VendorOS: "win32",

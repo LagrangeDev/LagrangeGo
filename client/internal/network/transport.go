@@ -40,7 +40,7 @@ func (t *Transport) PackPacket(req *Request) []byte {
 		WriteU32(req.SequenceID).
 		WriteU32(uint32(t.Version.SubAppID)).
 		WriteU32(2052).                                        // locate id
-		WriteBytes(append([]byte{0x02}, make([]byte, 11)...)). //020000000000000000000000
+		WriteBytes(append([]byte{0x02}, make([]byte, 11)...)). // 020000000000000000000000
 		WritePacketBytes(t.Sig.Tgt, "u32", true).
 		WritePacketString(req.CommandName, "u32", true).
 		WritePacketBytes(nil, "u32", true).

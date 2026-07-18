@@ -32,9 +32,9 @@ func BuildRegisterRequest(app *auth.AppInfo, device *auth.DeviceInfo) []byte {
 
 // BuildSSOHeartbeatRequest trpc.qq_new_tech.status_svc.StatusService.SsoHeartBeat
 func BuildSSOHeartbeatRequest() []byte {
-	//return proto.DynamicMessage{
+	// return proto.DynamicMessage{
 	//	1: 1,
-	//}.Encode()
+	// }.Encode()
 	// 直接硬编码罢
 	return []byte{0x08, 0x01}
 }

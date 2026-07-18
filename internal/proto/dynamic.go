@@ -37,7 +37,6 @@ func (msg DynamicMessage) Encode() []byte {
 		return all[i].key < all[j].key
 	})
 
-	//nolint:staticcheck
 	for _, item := range all {
 		key := item.key << 3
 		switch v := item.value.(type) {

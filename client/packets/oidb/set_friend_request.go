@@ -14,6 +14,5 @@ func BuildSetFriendRequest(accept bool, targetUID string) (*Packet, error) {
 }
 
 func ParseSetFriendRequestResp(data []byte) error {
-
 	return CheckError(data)
 }

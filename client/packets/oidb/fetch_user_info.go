@@ -10,7 +10,7 @@ import (
 )
 
 func BuildFetchUserInfoReq[T ~string | ~uint32](value T) (*Packet, error) {
-	keys := []uint32{101, //头像
+	keys := []uint32{101, // 头像
 		102, // 简介/签名
 		103, // 备注
 		104,
